@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.thresha</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.thresha</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cappdata%5Croaming%5Cpython%5Cpython36%5Csite-packages%5Cmpyc-0.28.0-py3.6.egg%5Cmpyc%5Cthresha.py">c:\users\berry\appdata\roaming\python\python36\site-packages\mpyc-0.28.0-py3.6.egg\mpyc\thresha.py</a></font></td></tr></table>
+    <p><tt>Module&nbsp;for&nbsp;information-theoretic&nbsp;and&nbsp;pseudorandom&nbsp;threshold&nbsp;secret&nbsp;sharing.<br>
+&nbsp;<br>
+Threshold&nbsp;secret&nbsp;sharing&nbsp;assumes&nbsp;secure&nbsp;channels&nbsp;for&nbsp;communication.&nbsp;<br>
+Pseudorandom&nbsp;secret&nbsp;sharing&nbsp;(PRSS)&nbsp;allows&nbsp;one&nbsp;to&nbsp;share&nbsp;pseudorandom&nbsp;<br>
+secrets&nbsp;without&nbsp;any&nbsp;communication,&nbsp;as&nbsp;long&nbsp;as&nbsp;the&nbsp;parties&nbsp;<br>
+agree&nbsp;on&nbsp;a&nbsp;(unique)&nbsp;common&nbsp;public&nbsp;input&nbsp;for&nbsp;each&nbsp;secret.<br>
+&nbsp;<br>
+PRSS&nbsp;relies&nbsp;on&nbsp;parties&nbsp;having&nbsp;agreed&nbsp;upon&nbsp;the&nbsp;keys&nbsp;for&nbsp;a&nbsp;pseudorandom&nbsp;<br>
+function&nbsp;(<a href="#PRF">PRF</a>).</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="secrets.html">secrets</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.thresha.html#PRF">PRF</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PRF">class <strong>PRF</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;pseudorandom&nbsp;function&nbsp;(<a href="#PRF">PRF</a>)&nbsp;with&nbsp;128-bit&nbsp;keys.<br>
+&nbsp;<br>
+A&nbsp;<a href="#PRF">PRF</a>&nbsp;is&nbsp;determined&nbsp;by&nbsp;a&nbsp;secret&nbsp;key&nbsp;and&nbsp;a&nbsp;public&nbsp;maximum.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PRF-__call__"><strong>__call__</strong></a>(self, s)</dt><dd><tt>Return&nbsp;a&nbsp;number&nbsp;in&nbsp;range(max)&nbsp;for&nbsp;input&nbsp;string&nbsp;s.</tt></dd></dl>
+
+<dl><dt><a name="PRF-__init__"><strong>__init__</strong></a>(self, key, max)</dt><dd><tt>Create&nbsp;a&nbsp;<a href="#PRF">PRF</a>&nbsp;determined&nbsp;by&nbsp;the&nbsp;given&nbsp;key&nbsp;and&nbsp;upper&nbsp;bound&nbsp;max.<br>
+&nbsp;<br>
+The&nbsp;key&nbsp;is&nbsp;a&nbsp;hex&nbsp;string,&nbsp;whereas&nbsp;max&nbsp;is&nbsp;a&nbsp;number.<br>
+Output&nbsp;values&nbsp;will&nbsp;be&nbsp;in&nbsp;range(max).</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-pseudorandom_share"><strong>pseudorandom_share</strong></a>(field, n, j, prfs, uci, m)</dt><dd><tt>Return&nbsp;pseudorandom&nbsp;Shamir&nbsp;shares&nbsp;for&nbsp;party&nbsp;j&nbsp;for&nbsp;m&nbsp;random&nbsp;numbers.<br>
+&nbsp;<br>
+The&nbsp;shares&nbsp;are&nbsp;based&nbsp;on&nbsp;the&nbsp;pseudorandom&nbsp;functions&nbsp;given&nbsp;in&nbsp;prfs,&nbsp;<br>
+which&nbsp;maps&nbsp;subsets&nbsp;of&nbsp;parties&nbsp;to&nbsp;<a href="#PRF">PRF</a>&nbsp;instances.&nbsp;<br>
+Input&nbsp;uci&nbsp;is&nbsp;used&nbsp;to&nbsp;evaluate&nbsp;the&nbsp;PRFs&nbsp;on&nbsp;a&nbsp;unique&nbsp;common&nbsp;input.</tt></dd></dl>
+ <dl><dt><a name="-random_split"><strong>random_split</strong></a>(s, d, n)</dt><dd><tt>Split&nbsp;each&nbsp;secret&nbsp;given&nbsp;in&nbsp;s&nbsp;into&nbsp;n&nbsp;random&nbsp;Shamir&nbsp;shares.<br>
+&nbsp;<br>
+The&nbsp;(maximum)&nbsp;degree&nbsp;for&nbsp;the&nbsp;Shamir&nbsp;polynomials&nbsp;is&nbsp;d,&nbsp;0&nbsp;&lt;=&nbsp;d&nbsp;&lt;&nbsp;n.<br>
+Return&nbsp;matrix&nbsp;of&nbsp;shares,&nbsp;one&nbsp;row&nbsp;per&nbsp;party.</tt></dd></dl>
+ <dl><dt><a name="-recombine"><strong>recombine</strong></a>(field, points, x_rs=0)</dt><dd><tt>Recombine&nbsp;shares&nbsp;given&nbsp;by&nbsp;points&nbsp;into&nbsp;secrets.<br>
+&nbsp;<br>
+Recombination&nbsp;is&nbsp;done&nbsp;for&nbsp;x-coordinates&nbsp;x_rs.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ['random_split', 'recombine', 'pseudorandom_share', 'PRF']</td></tr></table>
+</body></html>
