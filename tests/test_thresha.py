@@ -1,6 +1,5 @@
 import unittest
-from mpyc import pfield
-from mpyc import thresha
+from mpyc import pfield, thresha
 
 class Arithmetic(unittest.TestCase):
 
