@@ -49,3 +49,7 @@ class Arithmetic(unittest.TestCase):
         shares = thresha.pseudorandom_share(field, n, id, prfs, uci, m)
         b = thresha.recombine(field, [(1, shares)])
         self.assertEqual(a, b)
+        a = [0] * m
+        shares = thresha.pseudorandom_share_zero(field, n, id, prfs, uci, m)
+        b = thresha.recombine(field, [(1, shares)])
+        self.assertEqual(a, b)
