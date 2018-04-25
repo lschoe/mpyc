@@ -1,5 +1,6 @@
 import unittest
-from mpyc import pfield, thresha
+from mpyc import pfield
+from mpyc import thresha
 
 class Arithmetic(unittest.TestCase):
 
@@ -24,9 +25,9 @@ class Arithmetic(unittest.TestCase):
                 shares = thresha.random_split(a, t, n)
                 b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
                 self.assertEqual(a, b)
-                
+
     def test_prf(self):
-        key = b'00112233445566778899aabbccddeeff' 
+        key = b'00112233445566778899aabbccddeeff'
         max = 100
         F = thresha.PRF(key, max)
         x = ''
@@ -34,10 +35,10 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(0 <= y < max)
         y2 = F(x)
         self.assertEqual(y, y2)
-        
+
     def test_prss(self):
         field = self.f19
-        key = b'00112233445566778899aabbccddeeff' 
+        key = b'00112233445566778899aabbccddeeff'
         max = field.modulus
         F = thresha.PRF(key, max)
         n = 1
