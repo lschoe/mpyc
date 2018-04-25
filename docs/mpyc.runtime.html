@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.runtime</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.runtime</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbschoe%5Cappdata%5Clocal%5Cprograms%5Cpython%5Cpython36%5Clib%5Csite-packages%5Cmpyc-0.28.0-py3.6.egg%5Cmpyc%5Cruntime.py">c:\users\bschoe\appdata\local\programs\python\python36\lib\site-packages\mpyc-0.28.0-py3.6.egg\mpyc\runtime.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
+&nbsp;<br>
+Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
+Shamir's&nbsp;threshold&nbsp;secret&nbsp;sharing&nbsp;scheme&nbsp;is&nbsp;used&nbsp;for&nbsp;fields&nbsp;of&nbsp;prime&nbsp;order.<br>
+MPyC&nbsp;provides&nbsp;secure&nbsp;number&nbsp;types&nbsp;and&nbsp;operations,&nbsp;many&nbsp;of&nbsp;which&nbsp;are<br>
+available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&nbsp;operator&nbsp;overloading.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="argparse.html">argparse</a><br>
+<a href="asyncio.html">asyncio</a><br>
+<a href="mpyc.asyncoro.html">mpyc.asyncoro</a><br>
+<a href="configparser.html">configparser</a><br>
+</td><td width="25%" valign=top><a href="itertools.html">itertools</a><br>
+<a href="logging.html">logging</a><br>
+<a href="math.html">math</a><br>
+<a href="operator.html">operator</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="secrets.html">secrets</a><br>
+<a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="mpyc.thresha.html">mpyc.thresha</a><br>
+<a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.runtime.html#Runtime">Runtime</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Runtime">class <strong>Runtime</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>MPyC&nbsp;runtime&nbsp;secure&nbsp;against&nbsp;passive&nbsp;attacks.<br>
+&nbsp;<br>
+The&nbsp;runtime&nbsp;maintains&nbsp;basic&nbsp;information&nbsp;such&nbsp;as&nbsp;a&nbsp;program&nbsp;counter,<br>
+the&nbsp;list&nbsp;of&nbsp;parties,&nbsp;etc.,&nbsp;and&nbsp;handles&nbsp;secret-shared&nbsp;values&nbsp;of&nbsp;type&nbsp;Share.<br>
+&nbsp;<br>
+1-party&nbsp;case&nbsp;is&nbsp;supported&nbsp;(with&nbsp;option&nbsp;to&nbsp;disable&nbsp;asynchronous&nbsp;evaluation).<br>
+Threshold&nbsp;0&nbsp;(no&nbsp;corrupted&nbsp;parties)&nbsp;is&nbsp;supported&nbsp;for&nbsp;n-party&nbsp;case&nbsp;as&nbsp;well<br>
+to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;sharing).<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Runtime-__init__"><strong>__init__</strong></a>(self, id, parties, options)</dt><dd><tt>Initialize&nbsp;runtime.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-add"><strong>add</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-add_bits"><strong>add_bits</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;binary&nbsp;addition&nbsp;of&nbsp;bit&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-and_"><strong>and_</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;logical&nbsp;and&nbsp;of&nbsp;bits&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-barrier"><strong>barrier</strong></a>(self)</dt><dd><tt>Barrier&nbsp;for&nbsp;runtime.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-div"><strong>div</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;division&nbsp;of&nbsp;a&nbsp;by&nbsp;b,&nbsp;for&nbsp;non-zero&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-eq"><strong>eq</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-eq_public"><strong>eq_public</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;public&nbsp;equality&nbsp;test&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-gauss"><strong>gauss</strong></a>(self, A, d, b, c)</dt><dd><tt>Secure&nbsp;Gaussian&nbsp;elimination&nbsp;A&nbsp;d&nbsp;-&nbsp;b&nbsp;c.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-ge"><strong>ge</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;&gt;=&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-in_prod"><strong>in_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;dot&nbsp;product&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;(one&nbsp;resharing).</tt></dd></dl>
+
+<dl><dt><a name="Runtime-input"><strong>input</strong></a>(self, a, senders=None)</dt><dd><tt>Input&nbsp;a&nbsp;to&nbsp;the&nbsp;computation.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-invert"><strong>invert</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;logical&nbsp;inverse&nbsp;(not)&nbsp;of&nbsp;bit&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-is_zero"><strong>is_zero</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;zero&nbsp;test&nbsp;a&nbsp;==&nbsp;0.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-is_zero_public"><strong>is_zero_public</strong></a>(self, a) -&gt; _asyncio.Future</dt><dd><tt>Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-lin_comb"><strong>lin_comb</strong></a>(self, a, x)</dt><dd><tt>Secure&nbsp;linear&nbsp;combination:&nbsp;dot&nbsp;product&nbsp;of&nbsp;public&nbsp;a&nbsp;and&nbsp;secret&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-lsb"><strong>lsb</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;least&nbsp;significant&nbsp;bit&nbsp;of&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-matrix_add"><strong>matrix_add</strong></a>(self, A, B)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;B.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-matrix_prod"><strong>matrix_prod</strong></a>(self, A, B, tr=False)</dt><dd><tt>Secure&nbsp;matrix&nbsp;product&nbsp;of&nbsp;A&nbsp;with&nbsp;(transposed)&nbsp;B.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-matrix_sub"><strong>matrix_sub</strong></a>(self, A, B)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;B.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-max"><strong>max</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-min"><strong>min</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-mul"><strong>mul</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;multiplication&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-neg"><strong>neg</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;negation&nbsp;(additive&nbsp;inverse)&nbsp;of&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-or_"><strong>or_</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;logical&nbsp;or&nbsp;of&nbsp;bits&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, a, receivers=None, threshold=None)</dt><dd><tt>Output&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-pow"><strong>pow</strong></a>(self, a, n)</dt><dd><tt>Secure&nbsp;exponentation&nbsp;of&nbsp;a&nbsp;to&nbsp;public&nbsp;power&nbsp;n.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-prod"><strong>prod</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;product&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x&nbsp;(in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</tt></dd></dl>
+
+<dl><dt><a name="Runtime-random"><strong>random</strong></a>(self, sftype, max=None)</dt><dd><tt>Secure&nbsp;random&nbsp;value&nbsp;of&nbsp;the&nbsp;given&nbsp;type&nbsp;in&nbsp;the&nbsp;given&nbsp;range.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-random_bit"><strong>random_bit</strong></a>(self, sftype)</dt><dd><tt>Secure&nbsp;random&nbsp;bit&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-random_bits"><strong>random_bits</strong></a>(self, sftype, m)</dt><dd><tt>m&nbsp;secure&nbsp;random&nbsp;bits&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-randoms"><strong>randoms</strong></a>(self, sftype, m, max=None)</dt><dd><tt>m&nbsp;secure&nbsp;random&nbsp;values&nbsp;of&nbsp;the&nbsp;given&nbsp;type&nbsp;in&nbsp;the&nbsp;given&nbsp;range.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-reciprocal"><strong>reciprocal</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;reciprocal&nbsp;(multiplicative&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;non-zero&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-run"><strong>run</strong></a>(self, f)</dt><dd><tt>Run&nbsp;the&nbsp;given&nbsp;(MPC)&nbsp;coroutine&nbsp;or&nbsp;future&nbsp;until&nbsp;it&nbsp;is&nbsp;done.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-scalar_mul"><strong>scalar_mul</strong></a>(self, a, x)</dt><dd><tt>Secure&nbsp;scalar&nbsp;multiplication&nbsp;of&nbsp;scalar&nbsp;a&nbsp;with&nbsp;vector&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-schur_prod"><strong>schur_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;entrywise&nbsp;multiplication&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, EQ=False, GE=False)</dt><dd><tt>Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPC&nbsp;runtime.<br>
+&nbsp;<br>
+Close&nbsp;all&nbsp;connections.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-start"><strong>start</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;MPC&nbsp;runtime.<br>
+&nbsp;<br>
+Open&nbsp;connections&nbsp;with&nbsp;other&nbsp;parties,&nbsp;if&nbsp;any.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-sub"><strong>sub</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-sum"><strong>sum</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;sum&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-to_bits"><strong>to_bits</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;bits&nbsp;of&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-trunc"><strong>trunc</strong></a>(self, a, f=None)</dt><dd><tt>Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.<br>
+&nbsp;<br>
+Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-vector_add"><strong>vector_add</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-vector_sub"><strong>vector_sub</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-xor"><strong>xor</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;logical&nbsp;xor&nbsp;of&nbsp;bits&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="Runtime-SecFld"><strong>SecFld</strong></a>(p=None, l=None)</dt><dd><tt>Secure&nbsp;prime&nbsp;field&nbsp;of&nbsp;l-bit&nbsp;order&nbsp;p.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-SecFxp"><strong>SecFxp</strong></a>(l=None, f=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;fixed-point&nbsp;numbers&nbsp;with&nbsp;f-bit&nbsp;fractional&nbsp;part.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-SecInt"><strong>SecInt</strong></a>(l=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;integers.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-coroutine"><strong>coroutine</strong></a> = mpc_coro(f)</dt><dd><tt>Decorator&nbsp;turning&nbsp;coroutine&nbsp;f&nbsp;into&nbsp;an&nbsp;MPC&nbsp;coroutine.<br>
+&nbsp;<br>
+An&nbsp;MPC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asychronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
+The&nbsp;type&nbsp;of&nbsp;the&nbsp;placeholders&nbsp;is&nbsp;defined&nbsp;either&nbsp;by&nbsp;a&nbsp;return&nbsp;annotation<br>
+of&nbsp;the&nbsp;form&nbsp;“-&gt;&nbsp;expression”&nbsp;or&nbsp;by&nbsp;the&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;f.<br>
+Return&nbsp;annotations&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;static&nbsp;types.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-gather"><strong>gather</strong></a> = gather_shares(*obj)</dt><dd><tt>Return&nbsp;all&nbsp;the&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shared&nbsp;values).</tt></dd></dl>
+
+<dl><dt><a name="Runtime-returnType"><strong>returnType</strong></a>(rettype=None, *args)</dt><dd><tt>Define&nbsp;return&nbsp;type&nbsp;for&nbsp;MPC&nbsp;coroutines.<br>
+&nbsp;<br>
+Used&nbsp;in&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;an&nbsp;MPC&nbsp;coroutine.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-generate_configs"><strong>generate_configs</strong></a>(n, t, addresses)</dt><dd><tt>Generate&nbsp;party&nbsp;configurations.<br>
+&nbsp;<br>
+Generates&nbsp;n&nbsp;party&nbsp;configurations&nbsp;with&nbsp;threshold&nbsp;t,&nbsp;where<br>
+addresses&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;'(host,&nbsp;port)'&nbsp;pairs,&nbsp;specifying&nbsp;the<br>
+hostnames&nbsp;and&nbsp;port&nbsp;numbers&nbsp;for&nbsp;each&nbsp;party.&nbsp;Moreover,&nbsp;the&nbsp;keys<br>
+used&nbsp;in&nbsp;pseudorandom&nbsp;secret&nbsp;sharing&nbsp;(PRSS)&nbsp;are&nbsp;generated.<br>
+&nbsp;<br>
+The&nbsp;n&nbsp;party&nbsp;configurations&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;ConfigParser<br>
+instances,&nbsp;which&nbsp;be&nbsp;saved&nbsp;in&nbsp;n&nbsp;separate&nbsp;INI-files.</tt></dd></dl>
+ <dl><dt><a name="-setup"><strong>setup</strong></a>()</dt><dd><tt>Setup&nbsp;a&nbsp;runtime.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>mpc</strong> = &lt;mpyc.runtime.Runtime object&gt;</td></tr></table>
+</body></html>

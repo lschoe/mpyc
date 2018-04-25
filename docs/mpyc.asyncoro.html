@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.asyncoro</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.asyncoro</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbschoe%5Cappdata%5Clocal%5Cprograms%5Cpython%5Cpython36%5Clib%5Csite-packages%5Cmpyc-0.28.0-py3.6.egg%5Cmpyc%5Casyncoro.py">c:\users\bschoe\appdata\local\programs\python\python36\lib\site-packages\mpyc-0.28.0-py3.6.egg\mpyc\asyncoro.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;provides&nbsp;the&nbsp;basic&nbsp;support&nbsp;for&nbsp;asynchronous&nbsp;communication&nbsp;and<br>
+computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="asyncio.html">asyncio</a><br>
+<a href="functools.html">functools</a><br>
+</td><td width="25%" valign=top><a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
+<a href="struct.html">struct</a><br>
+</td><td width="25%" valign=top><a href="typing.html">typing</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a>(<a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.asyncoro.html#SharesExchanger">SharesExchanger</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SharesExchanger">class <strong>SharesExchanger</strong></a>(<a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Send&nbsp;and&nbsp;receive&nbsp;shares.<br>
+&nbsp;<br>
+Bidirectional&nbsp;connection&nbsp;with&nbsp;one&nbsp;of&nbsp;the&nbsp;other&nbsp;parties&nbsp;(peers).<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.asyncoro.html#SharesExchanger">SharesExchanger</a></dd>
+<dd><a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a></dd>
+<dd><a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SharesExchanger-__init__"><strong>__init__</strong></a>(self, runtime)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="SharesExchanger-close_connection"><strong>close_connection</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SharesExchanger-connection_lost"><strong>connection_lost</strong></a>(self, exc)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;connection&nbsp;is&nbsp;lost&nbsp;or&nbsp;closed.<br>
+&nbsp;<br>
+The&nbsp;argument&nbsp;is&nbsp;an&nbsp;exception&nbsp;object&nbsp;or&nbsp;None&nbsp;(the&nbsp;latter<br>
+meaning&nbsp;a&nbsp;regular&nbsp;EOF&nbsp;is&nbsp;received&nbsp;or&nbsp;the&nbsp;connection&nbsp;was<br>
+aborted&nbsp;or&nbsp;closed).</tt></dd></dl>
+
+<dl><dt><a name="SharesExchanger-connection_made"><strong>connection_made</strong></a>(self, transport)</dt><dd><tt>Called&nbsp;when&nbsp;a&nbsp;connection&nbsp;is&nbsp;made.<br>
+&nbsp;<br>
+The&nbsp;argument&nbsp;is&nbsp;the&nbsp;transport&nbsp;representing&nbsp;the&nbsp;pipe&nbsp;connection.<br>
+To&nbsp;receive&nbsp;data,&nbsp;wait&nbsp;for&nbsp;<a href="#SharesExchanger-data_received">data_received</a>()&nbsp;calls.<br>
+When&nbsp;the&nbsp;connection&nbsp;is&nbsp;closed,&nbsp;<a href="#SharesExchanger-connection_lost">connection_lost</a>()&nbsp;is&nbsp;called.</tt></dd></dl>
+
+<dl><dt><a name="SharesExchanger-data_received"><strong>data_received</strong></a>(self, bytes_received)</dt><dd><tt>Called&nbsp;when&nbsp;data&nbsp;is&nbsp;received&nbsp;from&nbsp;the&nbsp;peer.<br>
+&nbsp;<br>
+Received&nbsp;bytes&nbsp;are&nbsp;unpacked&nbsp;as&nbsp;the&nbsp;program&nbsp;counter&nbsp;and&nbsp;a&nbsp;data&nbsp;part.<br>
+The&nbsp;data&nbsp;is&nbsp;passed&nbsp;to&nbsp;the&nbsp;appropriate&nbsp;Future,&nbsp;if&nbsp;any.</tt></dd></dl>
+
+<dl><dt><a name="SharesExchanger-send_data"><strong>send_data</strong></a>(self, pc, data)</dt><dd><tt>Send&nbsp;data&nbsp;labeled&nbsp;with&nbsp;pc&nbsp;to&nbsp;peer.<br>
+&nbsp;<br>
+Message&nbsp;format&nbsp;consists&nbsp;of&nbsp;4&nbsp;parts:<br>
+&nbsp;1.&nbsp;pc_size&nbsp;(2&nbsp;bytes)<br>
+&nbsp;2.&nbsp;data_size&nbsp;(4&nbsp;bytes)<br>
+&nbsp;3.&nbsp;pc&nbsp;(pc_size&nbsp;4-byte&nbsp;ints)<br>
+&nbsp;4.&nbsp;data&nbsp;(length-data_size&nbsp;byte&nbsp;string).</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a>:<br>
+<dl><dt><a name="SharesExchanger-eof_received"><strong>eof_received</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;other&nbsp;end&nbsp;calls&nbsp;write_eof()&nbsp;or&nbsp;equivalent.<br>
+&nbsp;<br>
+If&nbsp;this&nbsp;returns&nbsp;a&nbsp;false&nbsp;value&nbsp;(including&nbsp;None),&nbsp;the&nbsp;transport<br>
+will&nbsp;close&nbsp;itself.&nbsp;&nbsp;If&nbsp;it&nbsp;returns&nbsp;a&nbsp;true&nbsp;value,&nbsp;closing&nbsp;the<br>
+transport&nbsp;is&nbsp;up&nbsp;to&nbsp;the&nbsp;protocol.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a>:<br>
+<dl><dt><a name="SharesExchanger-pause_writing"><strong>pause_writing</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;transport's&nbsp;buffer&nbsp;goes&nbsp;over&nbsp;the&nbsp;high-water&nbsp;mark.<br>
+&nbsp;<br>
+Pause&nbsp;and&nbsp;resume&nbsp;calls&nbsp;are&nbsp;paired&nbsp;--&nbsp;<a href="#SharesExchanger-pause_writing">pause_writing</a>()&nbsp;is&nbsp;called<br>
+once&nbsp;when&nbsp;the&nbsp;buffer&nbsp;goes&nbsp;strictly&nbsp;over&nbsp;the&nbsp;high-water&nbsp;mark<br>
+(even&nbsp;if&nbsp;subsequent&nbsp;writes&nbsp;increases&nbsp;the&nbsp;buffer&nbsp;size&nbsp;even<br>
+more),&nbsp;and&nbsp;eventually&nbsp;<a href="#SharesExchanger-resume_writing">resume_writing</a>()&nbsp;is&nbsp;called&nbsp;once&nbsp;when&nbsp;the<br>
+buffer&nbsp;size&nbsp;reaches&nbsp;the&nbsp;low-water&nbsp;mark.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;if&nbsp;the&nbsp;buffer&nbsp;size&nbsp;equals&nbsp;the&nbsp;high-water&nbsp;mark,<br>
+<a href="#SharesExchanger-pause_writing">pause_writing</a>()&nbsp;is&nbsp;not&nbsp;called&nbsp;--&nbsp;it&nbsp;must&nbsp;go&nbsp;strictly&nbsp;over.<br>
+Conversely,&nbsp;<a href="#SharesExchanger-resume_writing">resume_writing</a>()&nbsp;is&nbsp;called&nbsp;when&nbsp;the&nbsp;buffer&nbsp;size&nbsp;is<br>
+equal&nbsp;or&nbsp;lower&nbsp;than&nbsp;the&nbsp;low-water&nbsp;mark.&nbsp;&nbsp;These&nbsp;end&nbsp;conditions<br>
+are&nbsp;important&nbsp;to&nbsp;ensure&nbsp;that&nbsp;things&nbsp;go&nbsp;as&nbsp;expected&nbsp;when&nbsp;either<br>
+mark&nbsp;is&nbsp;zero.<br>
+&nbsp;<br>
+NOTE:&nbsp;This&nbsp;is&nbsp;the&nbsp;only&nbsp;<a href="asyncio.protocols.html#Protocol">Protocol</a>&nbsp;callback&nbsp;that&nbsp;is&nbsp;not&nbsp;called<br>
+through&nbsp;EventLoop.call_soon()&nbsp;--&nbsp;if&nbsp;it&nbsp;were,&nbsp;it&nbsp;would&nbsp;have&nbsp;no<br>
+effect&nbsp;when&nbsp;it's&nbsp;most&nbsp;needed&nbsp;(when&nbsp;the&nbsp;app&nbsp;keeps&nbsp;writing<br>
+without&nbsp;yielding&nbsp;until&nbsp;<a href="#SharesExchanger-pause_writing">pause_writing</a>()&nbsp;is&nbsp;called).</tt></dd></dl>
+
+<dl><dt><a name="SharesExchanger-resume_writing"><strong>resume_writing</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;transport's&nbsp;buffer&nbsp;drains&nbsp;below&nbsp;the&nbsp;low-water&nbsp;mark.<br>
+&nbsp;<br>
+See&nbsp;<a href="#SharesExchanger-pause_writing">pause_writing</a>()&nbsp;for&nbsp;details.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-gather_shares"><strong>gather_shares</strong></a>(*obj)</dt><dd><tt>Return&nbsp;all&nbsp;the&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shared&nbsp;values).</tt></dd></dl>
+ <dl><dt><a name="-mpc_coro"><strong>mpc_coro</strong></a>(f)</dt><dd><tt>Decorator&nbsp;turning&nbsp;coroutine&nbsp;f&nbsp;into&nbsp;an&nbsp;MPC&nbsp;coroutine.<br>
+&nbsp;<br>
+An&nbsp;MPC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asychronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
+The&nbsp;type&nbsp;of&nbsp;the&nbsp;placeholders&nbsp;is&nbsp;defined&nbsp;either&nbsp;by&nbsp;a&nbsp;return&nbsp;annotation<br>
+of&nbsp;the&nbsp;form&nbsp;“-&gt;&nbsp;expression”&nbsp;or&nbsp;by&nbsp;the&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;f.<br>
+Return&nbsp;annotations&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;static&nbsp;types.</tt></dd></dl>
+ <dl><dt><a name="-returnType"><strong>returnType</strong></a>(rettype=None, *args)</dt><dd><tt>Define&nbsp;return&nbsp;type&nbsp;for&nbsp;MPC&nbsp;coroutines.<br>
+&nbsp;<br>
+Used&nbsp;in&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;an&nbsp;MPC&nbsp;coroutine.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>pc_level</strong> = 0</td></tr></table>
+</body></html>

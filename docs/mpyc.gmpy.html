@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.gmpy</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.gmpy</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbschoe%5Cappdata%5Clocal%5Cprograms%5Cpython%5Cpython36%5Clib%5Csite-packages%5Cmpyc-0.28.0-py3.6.egg%5Cmpyc%5Cgmpy.py">c:\users\bschoe\appdata\local\programs\python\python36\lib\site-packages\mpyc-0.28.0-py3.6.egg\mpyc\gmpy.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;collects&nbsp;all&nbsp;gmpy2&nbsp;functions&nbsp;used&nbsp;by&nbsp;MPyC.<br>
+&nbsp;<br>
+Stubs&nbsp;of&nbsp;limited&nbsp;functionality&nbsp;and&nbsp;efficiency&nbsp;are&nbsp;provided<br>
+in&nbsp;case&nbsp;the&nbsp;gmpy2&nbsp;package&nbsp;is&nbsp;not&nbsp;available.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-invert"><strong>invert</strong></a>(...)</dt><dd><tt><a href="#-invert">invert</a>(x,&nbsp;m)&nbsp;-&gt;&nbsp;mpz<br>
+&nbsp;<br>
+Return&nbsp;y&nbsp;such&nbsp;that&nbsp;x*y&nbsp;==&nbsp;1&nbsp;(mod&nbsp;m).&nbsp;Raises&nbsp;ZeroDivisionError&nbsp;if&nbsp;no<br>
+inverse&nbsp;exists.</tt></dd></dl>
+ <dl><dt><a name="-is_prime"><strong>is_prime</strong></a>(...)</dt><dd><tt><a href="#-is_prime">is_prime</a>(x[,&nbsp;n=25])&nbsp;-&gt;&nbsp;bool<br>
+&nbsp;<br>
+Return&nbsp;True&nbsp;if&nbsp;x&nbsp;is&nbsp;_probably_&nbsp;prime,&nbsp;else&nbsp;False&nbsp;if&nbsp;x&nbsp;is<br>
+definitely&nbsp;composite.&nbsp;x&nbsp;is&nbsp;checked&nbsp;for&nbsp;small&nbsp;divisors&nbsp;and&nbsp;up<br>
+to&nbsp;n&nbsp;Miller-Rabin&nbsp;tests&nbsp;are&nbsp;performed.</tt></dd></dl>
+ <dl><dt><a name="-legendre"><strong>legendre</strong></a>(...)</dt><dd><tt><a href="#-legendre">legendre</a>(x,&nbsp;y)&nbsp;-&gt;&nbsp;mpz<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;Legendre&nbsp;symbol&nbsp;(x|y).&nbsp;y&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;an&nbsp;odd&nbsp;prime.</tt></dd></dl>
+ <dl><dt><a name="-next_prime"><strong>next_prime</strong></a>(...)</dt><dd><tt><a href="#-next_prime">next_prime</a>(x)&nbsp;-&gt;&nbsp;mpz<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;next&nbsp;_probable_&nbsp;prime&nbsp;number&nbsp;&gt;&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-powmod"><strong>powmod</strong></a>(...)</dt><dd><tt><a href="#-powmod">powmod</a>(x,y,m)&nbsp;-&gt;&nbsp;mpz<br>
+&nbsp;<br>
+Return&nbsp;(x**y)&nbsp;mod&nbsp;m.&nbsp;Same&nbsp;as&nbsp;the&nbsp;three&nbsp;argument&nbsp;version&nbsp;of&nbsp;Python's<br>
+built-in&nbsp;pow(),&nbsp;but&nbsp;converts&nbsp;all&nbsp;three&nbsp;arguments&nbsp;to&nbsp;mpz.</tt></dd></dl>
+</td></tr></table>
+</body></html>
