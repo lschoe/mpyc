@@ -96,6 +96,17 @@ class Runtime:
     def run(self, f):
         """Run the given (MPC) coroutine or future until it is done."""
         return self._loop.run_until_complete(f)
+        
+    def log(self, enable=None):
+        """Toggle/enable/disable logging."""
+        if enable is None:
+            self.logging_enabled = not self.logging_enabled
+        else:
+            self.logging_enabled = enable
+        if self.logging_enabled:
+            logging.disable(logging.NOTSET)
+        else:
+            logging.disable(logging.INFO)
 
     def start(self):
         """Start the MPC runtime.
@@ -1013,7 +1024,8 @@ def setup():
                         default=False, help='Disable asynchronous evaluation.')
     parser.set_defaults(bit_length=32, security_parameter=30)
     options, _args = parser.parse_known_args()
-    if options.no_log:
+    logging_enabled = not options.no_log
+    if not logging_enabled:
         logging.basicConfig(level=logging.WARNING)
     else:
         logging.basicConfig(stream=sys.stdout,
@@ -1037,6 +1049,7 @@ def setup():
     runtime = Runtime(id, parties, options)
     runtime.options = options
     runtime.args = _args
+    runtime.logging_enabled = logging_enabled
     runtime._loop = asyncio.get_event_loop()
     Share.runtime = runtime
     import mpyc.asyncoro
