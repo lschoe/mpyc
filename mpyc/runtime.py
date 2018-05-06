@@ -885,31 +885,33 @@ class Runtime:
             r_modl += r_bits[i].value
         r_divl = self.random(Zp, 1<<k)
         a = await gather_shares(a)
-        c = await self.output(a + (1<<l) + (1<<l) - r_modl + (1<<l)*r_divl)
+        c = await self.output(a + (1<<l) - r_modl + (1<<l)*r_divl)
         c = c.value % (1<<l)
         r_bits = [stype(r.value) for r in r_bits]
         c_bits = [stype((c >> i) & 1) for i in range(l)]
         return self.add_bits(r_bits, c_bits)
 
-    def _norm(self, a): # signed normalization factor, fix case a<0
+    def _norm(self, a): # signed normalization factor
         stype = type(a)
         l = stype.bit_length
         f = stype.field.frac_length
         x = self.to_bits(a) # low to high bits
+        s = x[-1] # sign bit
         def __norm(x):
             n = len(x)
             if n == 1:
-                return 2 - x[0], x[0]
+                t = self.xor(s, x[0])
+                return 2 - t, t
             i0, nz0 = __norm(x[:n//2]) # low bits
             i1, nz1 = __norm(x[n//2:]) # high bits
             i0 *= (1 << ((n + 1) // 2))
             return nz1 * (i1 - i0) + i0, self.or_(nz0, nz1)
-        return (1 - 2 * x[-1]) * __norm(x[:-1])[0] * (2 ** (f - (l - 1))) # note f <= l
+        return (1 - 2 * s) * __norm(x[:-1])[0] * (2 ** (f - (l - 1))) # note f <= l
 
     def _rec(self, a): # enhance performance by reducing no. of truncs
         f = type(a).field.frac_length
         v = self._norm(a)
-        b = a * v
+        b = a * v # 1/2 <= b <= 1
         theta = int(math.ceil(math.log((2 * f + 1) / 3.5, 2)))
         c = 2.9142 - 2 * b
         for _ in range(theta):

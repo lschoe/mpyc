@@ -84,9 +84,23 @@ class PrimeFieldElement():
         self.value = value % type(self).modulus
 
     def __int__(self):
-        """Extract signed integer value from the field element."""
+        """Extract (signed) integer value from the field element."""
         if self.is_signed:
-            return self.signed()
+            return round(self.signed())
+        else:
+            return round(self.unsigned())
+
+    def __float__(self):
+        """Extract (signed) float value from the field element."""
+        if self.is_signed:
+            return float(self.signed())
+        else:
+            return float(self.unsigned())
+
+    def __abs__(self):
+        """Absolute value of (signed) value."""
+        if self.is_signed:
+            return abs(self.signed())
         else:
             return self.unsigned()
 
@@ -288,7 +302,7 @@ class PrimeFieldElement():
         if self.frac_length == 0:
             return '%d' % self.__int__()
         else:
-            return '%f' % self.__int__()
+            return '%f' % self.__float__()
 
     def __eq__(self, other):
         """Equality test."""

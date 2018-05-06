@@ -120,21 +120,25 @@ class Arithmetic(unittest.TestCase):
         ss2 = [round(v * (1 << f)) for v in s2]
         self.assertEqual(mpc.run(mpc.output([x < 1, 10 * y < 5, 10 * x == 5])), ss2)
 
-        s2 = s[3]/s[2] + s[0]
-        ss2 = round(s2 * (1 << f))
-        self.assertAlmostEqual((mpc.run(mpc.output(w / z + x))).value, ss2, delta=1)
-        s2 = ((s[0]+s[1])**2 + 3*s[2])/s[2]
-        ss2 = round(s2 * (1 << f))
-        self.assertAlmostEqual((mpc.run(mpc.output(((x + y)**2 + 3 * z) / z))).value, ss2, delta=300)
-        s2 = s[2]/-s[3]
-        ss2 = round(s2 * (1 << f))
-        self.assertAlmostEqual((mpc.run(mpc.output(z / -w))).value, ss2, delta=1)
-        s2 = -s[3]/s[2]
-        ss2 = round(s2 * (1 << f))
-        self.assertAlmostEqual((mpc.run(mpc.output(-w / z))).value, ss2, delta=10)
-        s2 = s[2]/s[3] * s[1]
-        ss2 = round(s2 * (1 << f))
-        self.assertAlmostEqual((mpc.run(mpc.output((w / z) * y))).value, ss2, delta=10)
+        s[3] = -0.120
+        w = secfxp(s[3])
+        for _ in range(3):
+            s2 = s[3]/s[2] + s[ 0]
+            self.assertAlmostEqual(mpc.run(mpc.output(w / z + x)).signed(), s2, delta=1)
+            ss2 = round(s2 * (1 << f))
+            self.assertAlmostEqual(mpc.run(mpc.output(w / z + x)), ss2, delta=1)
+            s2 = ((s[0]+s[1])**2 + 3*s[2])/s[2]
+            self.assertAlmostEqual(mpc.run(mpc.output(((x + y)**2 + 3 * z) / z)).signed(), s2, delta=2)
+            s2 = 1/s[3]
+            self.assertAlmostEqual((mpc.run(mpc.output(1 / w))).signed(), s2, delta=1)
+            s2 = s[2]/s[3]
+            self.assertAlmostEqual(mpc.run(mpc.output(z / w)).signed(), s2, delta=1)
+            s2 = -s[3]/s[2]
+            ss2 = round(s2 * (1 << f))
+            self.assertAlmostEqual(mpc.run(mpc.output(-w / z)), ss2, delta=1)
+            s2 = s[2]/s[3]
+            ss2 = round(s2 * (1 << f))
+            self.assertAlmostEqual(mpc.run(mpc.output(w / z)), ss2, delta=1)
 
         a = mpc._norm(w)
 
