@@ -1024,6 +1024,8 @@ def setup():
                         default=False, help='Disable logging.')
     parser.add_argument('--no-async', action='store_true',
                         default=False, help='Disable asynchronous evaluation.')
+    parser.add_argument('-f', type=str, 
+                        default='', help='Accept IPythjon string.')
     parser.set_defaults(bit_length=32, security_parameter=30)
     options, _args = parser.parse_known_args()
     logging_enabled = not options.no_log
