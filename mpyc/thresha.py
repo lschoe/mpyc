@@ -35,8 +35,8 @@ def random_split(s, d, n):
             shares[i][h] = (y + s[h].value) % p
     return shares
 
-#Cache recombination vectors, which depend on the x-coordinates of the shares
-#and the recombination point.
+#Cache recombination vectors, which depend on the field and 
+#the x-coordinates of the shares and the recombination point.
 _recombination_vectors = {}
 
 def recombine(field, points, x_rs=0):
@@ -50,7 +50,7 @@ def recombine(field, points, x_rs=0):
     vector = [None] * len(x_rs)
     for r, x_r in enumerate(x_rs):
         try:
-            vector[r] = _recombination_vectors[(xs, x_r)] #field ?
+            vector[r] = _recombination_vectors[(field, xs, x_r)]
         except KeyError:
             vector[r] = []
             x_r = field(x_r)
@@ -62,7 +62,7 @@ def recombine(field, points, x_rs=0):
                     if i != j:
                         coefficient *= (x_r - x_j) / (x_i - x_j)
                 vector[r].append(coefficient.value)
-            _recombination_vectors[(xs, x_r.value)] = vector[r]
+            _recombination_vectors[(field, xs, x_r.value)] = vector[r]
     m = len(shares[0])
     sums = [[0] * m for _ in range(len(x_rs))]
     for i in range(len(shares)):
