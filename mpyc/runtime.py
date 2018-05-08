@@ -197,36 +197,6 @@ class Runtime:
         shares = [field(field.from_bytes(r)[0]) for r in shares]
         return shares
 
-    @mpc_coro
-    async def _distribute_new(self, a, senders=None):
-        """Distribute shares for each secret a provided by a sender."""
-        if not isinstance(a, list):
-            a = tuple([a])
-        stype = type(a[0])  # all elts assumed of same type
-        value0 = a[0].df if not isinstance(a[0].df, Future) else None
-        if senders is None:
-            senders = list(range(len(self.parties)))
-        assert value0 is None or self.id in senders
-        stype = type(a)
-        await returnType(stype, len(senders))
-
-        field = stype.field
-        shares = [None] * len(senders)
-        for i, peer_id in enumerate(senders):
-            if peer_id == self.id:
-                in_shares = thresha.random_split([value], self.threshold, len(self.parties))
-                for other_id, data in enumerate(in_shares):
-                    data = field.to_bytes(data)
-                    if other_id == self.id:
-                        shares[i] = data
-                    else:
-                        self._send_share(other_id, data)
-            else:
-                shares[i] = self._expect_share(peer_id)
-        shares = await gather_shares(shares)
-        shares = [field(field.from_bytes(r)[0]) for r in shares]
-        return shares
-
     def output(self, a, receivers=None, threshold=None):
         """Output the value of a to the receivers specified."""
         if isinstance(receivers, int):
