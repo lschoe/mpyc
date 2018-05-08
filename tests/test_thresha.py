@@ -25,6 +25,13 @@ class Arithmetic(unittest.TestCase):
                 shares = thresha.random_split(a, t, n)
                 b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
                 self.assertEqual(a, b)
+        n = 17
+        for t in range((n + 1) // 2):
+            for i in range(t):
+                a = [field(i), field(-i), field(i**2), field(-i**2)]
+                shares = thresha.random_split(a, t, n)
+                b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
+                self.assertEqual(a, b)
 
     def test_prf(self):
         key = b'00112233445566778899aabbccddeeff'

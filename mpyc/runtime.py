@@ -919,10 +919,10 @@ class _Party:
         else:
             return '<_Party %d: %s:%d>' % (self.id, self.host, self.port)
 
-def generate_configs(n, t, addresses):
+def generate_configs(n, addresses):
     """Generate party configurations.
 
-    Generates n party configurations with threshold t, where
+    Generates n party configurations with thresholds 0 up to (n-1)//2.
     addresses is a list of '(host, port)' pairs, specifying the
     hostnames and port numbers for each party. Moreover, the keys
     used in pseudorandom secret sharing (PRSS) are generated.
@@ -941,15 +941,16 @@ def generate_configs(n, t, addresses):
             config.set("Party " + str(p), 'host', host)
             config.set("Party " + str(p), 'port', port)
 
-    for subset in itertools.combinations(parties, n - t):
-        key = hex(secrets.randbits(128)) # 128-bit key
-        subset_str = " ".join(map(str, subset))
-        for p in subset:
-            configs[p].set("Party " + str(p), subset_str, key)
+    for t in range((n + 1) // 2):
+        for subset in itertools.combinations(parties, n - t):
+            key = hex(secrets.randbits(128)) # 128-bit key
+            subset_str = " ".join(map(str, subset))
+            for p in subset:
+                configs[p].set("Party " + str(p), subset_str, key)
     return configs
 
-def _load_config(filename):
-    """Load a party configuration file.
+def _load_config(filename, t=None):
+    """Load n-party configuration file using threshold t (default (n-1) // 2).
 
     Configuration files are simple INI-files containing information
     (hostname and port number) about the other parties in the protocol.
@@ -961,7 +962,10 @@ def _load_config(filename):
     """
     config = configparser.ConfigParser()
     config.read_file(open(filename, 'r'))
-    parties = [None] * len(config.sections())
+    n = len(config.sections())
+    if t is None:
+        t = (n - 1) // 2
+    parties = [None] * n
     for party in config.sections():
         id = int(party[6:]) # strip 'Party ' prefix
         host = config.get(party, 'host')
@@ -973,7 +977,8 @@ def _load_config(filename):
             for option in config.options(party):
                 if not option in ['host', 'port']:
                     subset = frozenset(map(int, option.split()))
-                    keys[subset] = config.get(party, option)
+                    if len(subset) == n - t:
+                        keys[subset] = config.get(party, option)
             parties[my_id] = _Party(my_id, host, port, keys)
         else:
             parties[id] = _Party(id, host, port)
@@ -995,7 +1000,7 @@ def setup():
     parser.add_argument('--no-async', action='store_true',
                         default=False, help='Disable asynchronous evaluation.')
     parser.add_argument('-f', type=str, 
-                        default='', help='Accept IPythjon string.')
+                        default='', help='Consume IPython string.')
     parser.set_defaults(bit_length=32, security_parameter=30)
     options, _args = parser.parse_known_args()
     logging_enabled = not options.no_log
@@ -1012,13 +1017,10 @@ def setup():
         parties = [_Party(id, keys={frozenset([id]): hex(secrets.randbits(128))})]
     else:
         options.config = os.path.join('.config', options.config)
-        id, parties = _load_config(options.config)
+        id, parties = _load_config(options.config, options.threshold)
     if options.threshold is None:
         options.threshold = (len(parties) - 1) // 2
     assert 2 * options.threshold < len(parties)
-    if options.config:
-        assert options.threshold >= len(parties) - len(list(parties[id].keys.keys())[0]), \
-                        "Threshold PRSS functions too high."
 
     runtime = Runtime(id, parties, options)
     runtime.options = options
@@ -1031,8 +1033,4 @@ def setup():
     global mpc
     mpc = runtime
 
-try:
-    setup()
-except:
-    #fix: generalize support Jupyter, check _loop
-    pass
+setup()

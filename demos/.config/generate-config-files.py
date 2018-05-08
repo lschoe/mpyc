@@ -24,8 +24,6 @@ parser.add_argument('-p', '--prefix',
                   help='output filename prefix')
 parser.add_argument('-n', '--parties', dest='n', type=int,
                   help='number of parties')
-parser.add_argument('-t', '--threshold', dest='t', type=int,
-                  help='threshold (t < n/2 required)')
 parser.add_argument('args', nargs='*')                  
 
 parser.set_defaults(n=3, prefix='party')
@@ -36,11 +34,8 @@ args = options.args
 if len(args) != options.n:
     parser.error('A hostname:port argument required for each party.')
 
-if not options.t:
-    options.t = (options.n - 1) // 2
-
 addresses = [arg.split(':', 1) for arg in args]
-configs = generate_configs(options.n, options.t, addresses)
+configs = generate_configs(options.n, addresses)
 
 for party, config in enumerate(configs):
     filename  = '%s%d_%d.ini' % (options.prefix, options.n, party)
