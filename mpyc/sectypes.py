@@ -250,7 +250,8 @@ def SecFxp(l=None, f=None, n=2):
                     value <<= SecureFxp.field.frac_length
                 elif isinstance(value, float):
                     value = round(value * (1 << SecureFxp.field.frac_length))
-                # else: value of type field, assumed non-integral
+                else: 
+                    self.integral = integral
             else:
                 self.integral = integral
             super(_sectypes[(l, f, n)], self).__init__(value)

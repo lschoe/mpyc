@@ -1,0 +1,13 @@
+#x1 = chairs per day
+#x2 = tables per day
+#maximize 35x1 + 60x2
+#subject to
+#8x1 + 12x2 <= 120
+#15x2 <= 60
+#3x1 + 6x2 <= 48
+
+8,12,120
+0,15,60 
+3,6,48
+
+-35,-60

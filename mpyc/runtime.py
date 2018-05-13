@@ -602,8 +602,11 @@ class Runtime:
     async def in_prod(self, x, y):
         """Secure dot product of x and y (one resharing)."""
         stype = type(x[0])
-        await returnType(stype)
-
+        if stype.field.frac_length == 0:
+            await returnType(stype)
+        else:
+            s_integral = x[0].integral and y[0].integral
+            await returnType((stype, s_integral))
         if x is y:
             x = y = await gather_shares(x)
         else:
@@ -612,7 +615,7 @@ class Runtime:
         for i in range(len(x)):
             s += x[i].value * y[i].value
         s = self._reshare(stype.field(s))
-        if stype.field.frac_length > 0:
+        if stype.field.frac_length > 0 and not s_integral:
             s = self.trunc(stype(s.df))
         return s
 
