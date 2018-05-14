@@ -366,10 +366,9 @@ class Runtime:
         if stype.field.frac_length == 0:
             await returnType(stype)
         else:
-            b_integral = isinstance(b, int) or (isinstance(b, Share) and b.integral)
-            await returnType((stype, a.integral and b_integral))
-        if stype.field.frac_length > 0:
             a_integral = a.integral
+            b_integral = isinstance(b, int) or (isinstance(b, Share) and b.integral)
+            await returnType((stype, a_integral and b_integral))
         if not isinstance(b, Share):
             a = await gather_shares(a)
             return a * b
@@ -511,7 +510,7 @@ class Runtime:
         c = c.value % (1<<l)
 
         if not EQ: # a la Toft
-            s_bit = await gather_shares(self.random_bit(stype))
+            s_bit = (await gather_shares(self.random_bits(Zp, 1)))[0]
             s_sign = (1 - 2 * s_bit).value
 
             e = [None] * (l+1)
@@ -605,8 +604,8 @@ class Runtime:
         if stype.field.frac_length == 0:
             await returnType(stype)
         else:
-            s_integral = x[0].integral and y[0].integral
-            await returnType((stype, s_integral))
+            x_integral = x[0].integral
+            await returnType((stype, x_integral and y[0].integral))
         if x is y:
             x = y = await gather_shares(x)
         else:
@@ -614,8 +613,11 @@ class Runtime:
         s = 0
         for i in range(len(x)):
             s += x[i].value * y[i].value
+        if stype.field.frac_length > 0 and x_integral:
+            f1 = 1 / stype.field(1<<stype.field.frac_length) # expensive 
+            s = s * f1.value
         s = self._reshare(stype.field(s))
-        if stype.field.frac_length > 0 and not s_integral:
+        if stype.field.frac_length > 0 and not x_integral:
             s = self.trunc(stype(s.df))
         return s
 
@@ -640,7 +642,11 @@ class Runtime:
     @mpc_coro
     async def vector_add(self, x, y):
         """Secure addition of vectors x and y."""
-        await returnType(type(x[0]), len(x))
+        stype = type(x[0])
+        if stype.field.frac_length == 0:
+            await returnType(stype, len(x))
+        else:
+            await returnType((stype, x[0].integral and y[0].integral), len(x))
         x, y = await gather_shares(x, y)
         for i in range(len(x)):
             x[i] = x[i] + y[i]
@@ -649,7 +655,11 @@ class Runtime:
     @mpc_coro
     async def vector_sub(self, x, y):
         """Secure subtraction of vectors x and y."""
-        await returnType(type(x[0]), len(x))
+        stype = type(x[0])
+        if stype.field.frac_length == 0:
+            await returnType(stype, len(x))
+        else:
+            await returnType((stype, x[0].integral and y[0].integral), len(x))
         x, y = await gather_shares(x, y)
         for i in range(len(x)):
             x[i] = x[i] - y[i]
@@ -679,13 +689,19 @@ class Runtime:
     async def scalar_mul(self, a, x):
         """Secure scalar multiplication of scalar a with vector x."""
         stype = type(a)
-        await returnType(stype, len(x))
+        if stype.field.frac_length == 0:
+            await returnType(stype, len(x))
+        else:
+            a_integral = a.integral
+            await returnType((stype, a_integral and x[0].integral), len(x))
         a, x = await gather_shares(a, x)
+        if stype.field.frac_length > 0 and a_integral:
+            a = a / (1<<stype.field.frac_length) # expensive # a /= inplace issue
         for i in range(len(x)):
             x[i] = x[i] * a
         x = self._reshare(x)
         x = await gather_shares(x)
-        if stype.field.frac_length > 0:
+        if stype.field.frac_length > 0 and not a_integral:
             x = [self.trunc(stype(xi)) for xi in x]
         return x
 
@@ -788,11 +804,13 @@ class Runtime:
     async def random_bits(self, sftype, m):
         """m secure random bits of the given type."""
         prss0 = False
+        f1 = 1
         if issubclass(sftype, Share):
             await returnType((sftype, True), m)
             field = sftype.field
             if sftype.__name__.startswith('SecFld'):
                 prss0 = True
+            f1 = 1<<sftype.field.frac_length
         else:
             await returnType(Share)
             field = sftype
@@ -814,7 +832,7 @@ class Runtime:
             for r, r2 in zip(rs, r2s):
                 if r2.value != 0:
                     h -= 1
-                    bits[h] = field(((r.value * r2.sqrt(INV=True).value + 1) % p) * q)
+                    bits[h] = field(f1 * ((r.value * r2.sqrt(INV=True).value + 1) % p) * q)
         return bits
 
     def add_bits(self, x, y):

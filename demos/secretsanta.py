@@ -2,7 +2,7 @@ from mpyc.runtime import mpc
 
 @mpc.coroutine
 async def random_unit_vector(n, sectype):
-    await mpc.returnType(sectype, n)
+    await mpc.returnType((sectype, True), n)
     if n == 1:
         return [sectype(1)]
     b = mpc.random_bit(sectype)
@@ -29,7 +29,7 @@ def random_permutation(n, sectype):
 
 @mpc.coroutine
 async def random_derangement(n, sectype):
-    await mpc.returnType(sectype, n)
+    await mpc.returnType((sectype, True), n)
     a = random_permutation(n, sectype)
     t = mpc.prod([a[i] - i for i in range(n)])
     if await mpc.is_zero_public(t):
@@ -60,11 +60,6 @@ def main():
     print('Using secure fixed-point numbers:', secfxp)
     for n in range(2, m + 1):
         print(n, mpc.run(mpc.output(random_derangement(n, secfxp))))
-
-    secfxp64 = mpc.SecFxp(64)
-    print('Using secure high-precision fixed-point numbers:', secfxp64)
-    for n in range(2, m + 1):
-        print(n, mpc.run(mpc.output(random_derangement(n, secfxp64))))
 
     mpc.shutdown()
 
