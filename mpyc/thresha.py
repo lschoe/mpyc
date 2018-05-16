@@ -35,7 +35,7 @@ def random_split(s, d, n):
             shares[i][h] = (y + s[h].value) % p
     return shares
 
-#Cache recombination vectors, which depend on the field and 
+#Cache recombination vectors, which depend on the field and
 #the x-coordinates of the shares and the recombination point.
 _recombination_vectors = {}
 
@@ -102,8 +102,9 @@ def pseudorandom_share(field, n, i, prfs, uci, m):
             points = [(0, [1])] + [(x + 1, [0]) for x in complement]
             f_in_i = recombine(field, points, i + 1)[0].value
             _f_in_i_cache[(field, i, subset)] = f_in_i
+        prl = prf(s, m)
         for h in range(m):
-            sums[h] += prf(s + str(h)) * f_in_i
+            sums[h] += prl[h] * f_in_i
     for h in range(m):
         sums[h] = field(sums[h])
     return sums
@@ -127,10 +128,11 @@ def pseudorandom_share_zero(field, n, i, prfs, uci, m):
             f_in_i = recombine(field, points, i + 1)[0].value
             _f_in_i_cache[(field, i, subset)] = f_in_i
         d = n - len(subset)
+        prl = prf(s, m * d)
         for h in range(m):
             y = 0
             for k in range(d):
-                y += prf(s + str((h, k)))
+                y += prl[h * d + k]
                 y *= i + 1
             sums[h] += y * f_in_i
     for h in range(m):
@@ -153,7 +155,10 @@ class PRF:
         self.max = bound
         self.byte_length = len(self.key) + ((bound-1).bit_length() + 7) // 8
 
-    def __call__(self, s):
-        """Return a number in range(self.max) for input string s."""
-        dk = hashlib.pbkdf2_hmac('sha1', self.key, s.encode(), 1, self.byte_length)
-        return int.from_bytes(dk, byteorder='little') % self.max
+    def __call__(self, s, m=None):
+        """Return a number or list of numbers in range(self.max) for input string s."""
+        n = m if m else 1
+        l = self.byte_length
+        dk = hashlib.pbkdf2_hmac('sha1', self.key, s.encode(), 1, n * l)
+        x = [int.from_bytes(dk[i * l: (i+1) * l], byteorder='little') % self.max for i in range(n)]
+        return x if m else x[0]
