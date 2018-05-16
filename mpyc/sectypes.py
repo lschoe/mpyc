@@ -28,6 +28,10 @@ class Share:
         else:
             self.df = asyncio.Future()
 
+    def __bool__(self):
+        """Use of secret-shared values in Boolean expressions makes no sense."""
+        raise TypeError('cannot use secure type in Boolean expressions')
+
     def __neg__(self):
         """Negation."""
         return self.runtime.neg(self)
@@ -250,7 +254,7 @@ def SecFxp(l=None, f=None, n=2):
                     value <<= SecureFxp.field.frac_length
                 elif isinstance(value, float):
                     value = round(value * (1 << SecureFxp.field.frac_length))
-                else: 
+                else:
                     self.integral = integral
             else:
                 self.integral = integral

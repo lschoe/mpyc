@@ -109,11 +109,11 @@ class Arithmetic(unittest.TestCase):
         ss2 = [int(s[i] < s[i+1]) * (1 << f) for i in range(len(s)-1)]
         self.assertEqual(mpc.run(mpc.output([x < y, y < z, z < w])), ss2)
         ss2 = int(s[0] < s[1] and s[1] < s[2]) * (1 << f)
-        self.assertEqual(mpc.run(mpc.output(x < y & y < z)), ss2)
+        self.assertEqual(mpc.run(mpc.output((x < y) & (y < z))), ss2)
         ss2 = int(s[0] < s[1] or s[1] < s[2]) * (1 << f)
-        self.assertEqual(mpc.run(mpc.output(x < y | y < z)), ss2)
+        self.assertEqual(mpc.run(mpc.output((x < y) | (y < z))), ss2)
         ss2 = (int(s[0] < s[1]) ^ int(s[1] < s[2])) * (1 << f)
-        self.assertEqual(mpc.run(mpc.output(x < y ^ y < z)), ss2)
+        self.assertEqual(mpc.run(mpc.output((x < y) ^ (y < z))), ss2)
         ss2 = (int(not s[0] < s[1]) ^ int(s[1] < s[2])) * (1 << f)
         self.assertEqual(mpc.run(mpc.output(~(x < y) ^ y < z)), ss2)
         s2 = [s[0] < 1, 10*s[1] < 5, 10*s[0] == 5]
