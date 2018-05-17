@@ -1054,4 +1054,7 @@ def setup():
     global mpc
     mpc = runtime
 
-setup()
+try: # ignore exceptions for pydoc etc.
+    setup()
+except:
+    pass
