@@ -2,7 +2,7 @@ Usage examples (Windows command prompt).
 
 First argument (absolute value) sets number of parties (output to .log files if negative).
 
-...
+```
 python secretsanta.py
 
 run 1 secretsanta.py
@@ -34,4 +34,4 @@ python cnnmnist.py 3
 run 1 cnnmnist.py 1.5 0
 
 run 3 cnnminst.py 1 0
-...
+```
