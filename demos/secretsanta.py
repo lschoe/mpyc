@@ -14,28 +14,28 @@ async def random_unit_vector(n, sectype):
         return random_unit_vector(n, sectype)
     else:
         y = mpc.scalar_mul(b, x[1:])
-        return y + mpc.vector_sub(x[1:], y) + x[:1]
+        return x[:1] + y + mpc.vector_sub(x[1:], y)
 
 def random_permutation(n, sectype):
-    a = [sectype(i) for i in range(n)]
+    p = [sectype(i) for i in range(n)]
     for i in range(n - 1):
-        x = random_unit_vector(n - i, sectype)
-        a_x = mpc.in_prod(a[i - n:], x)
-        d = mpc.scalar_mul(a[i] - a_x, x)
-        a[i] = a_x
+        x_r = random_unit_vector(n - i, sectype)
+        p_r = mpc.in_prod(p[i - n:], x_r)
+        d_r = mpc.scalar_mul(p[i] - p_r, x_r)
+        p[i] = p_r
         for j in range(n - i):
-            a[i + j] += d[j]
-    return a
+            p[i + j] += d_r[j]
+    return p
 
 @mpc.coroutine
 async def random_derangement(n, sectype):
     await mpc.returnType((sectype, True), n)
-    a = random_permutation(n, sectype)
-    t = mpc.prod([a[i] - i for i in range(n)])
+    p = random_permutation(n, sectype)
+    t = mpc.prod([p[i] - i for i in range(n)])
     if await mpc.is_zero_public(t):
         return random_derangement(n, sectype)
     else:
-        return a
+        return p
 
 def main():
     if not mpc.args:
