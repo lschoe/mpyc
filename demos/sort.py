@@ -19,8 +19,7 @@ def bsort(x):
             bitonic_merge(lo + m, n - m, up)
 
     def bitonic_compare(i, j, up):
-        up = secnum(bool(up))
-        b = (x[i] > x[j]) ^ ~up
+        b = (x[i] > x[j]) ^ ~secnum(up)
         d = b * (x[j] - x[i])
         x[i], x[j] = x[i] + d, x[j] - d
 
