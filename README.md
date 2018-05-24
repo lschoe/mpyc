@@ -23,7 +23,7 @@ See `demos` for usage examples.
 On Linux, 'pip install gmpy2' should do the job, but on Windows, this may fail with compiler errors.
 Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christoph Gohlke's excellent
 [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/) webpage.
-Use, for example, `pip install gmpy2-2.0.8-cp35-cp35m-win_amd64.whl` to finish installation.
+Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish installation.
 
 3. A few simple Windows batch files are provided in the `demos` directory. Linux equivalents will follow soon.
 
