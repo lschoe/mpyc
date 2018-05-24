@@ -1,3 +1,15 @@
+"""Demo decision tree learning using ID3 algorithm.
+
+ID3 is a recursive algorithm for generating decision trees from a database
+of transactions. The last attribute of each transaction is assumed to be
+the class attribute, according to which the transactions are classified.
+Gini impurity is used to determine the best split.
+
+The transactions are assumed to be secret, but the resulting decision tree
+is supposed to be public. All calculations are implemented using secure 
+integer arithmetic only.
+"""
+
 import os
 import logging
 import argparse
@@ -10,22 +22,23 @@ def load(filename):
     transactions = []
     comment_sign = '#'
     sep = ','
-    for line in open(os.path.join('data', 'id3', filename), 'r'):
-        # strip comments and whitespace and skip empty lines
-        line = line.split(comment_sign)[0].strip()
-        if line:
-            if not attr_ranges:
-                attr_ranges = list(map(int, line.split(sep)))
-            elif not attr_names:
-                attr_names = line.split(sep)
-            else:
-                transactions.append(list(map(int, line.split(sep))))
+    with open(os.path.join('data', 'id3', filename), 'r') as f:
+        for line in f:
+            # strip comments and whitespace and skip empty lines
+            line = line.split(comment_sign)[0].strip()
+            if line:
+                if not attr_ranges:
+                    attr_ranges = list(map(int, line.split(sep)))
+                elif not attr_names:
+                    attr_names = line.split(sep)
+                else:
+                    transactions.append(list(map(int, line.split(sep))))
     return attr_ranges, attr_names, transactions
 
 def argmax(xs, arg_ge):
     n = len(xs)
     if n == 1:
-        return secint(0), xs[0] #ToDo: get rid of Zp here
+        return secint(0), xs[0]
     i0, max0 = argmax(xs[:n//2], arg_ge)
     i1, max1 = argmax(xs[n//2:], arg_ge)
     b, mx = arg_ge(max0, max1)
@@ -63,7 +76,7 @@ async def id3(T, R) -> asyncio.Future:
         k = (await mpc.output(max_rat(gains))).value
         T_Rk = T_R[k]; T_R = gains = None # release memory
         A = list(R)[k]
-        logging.info('Attribute node %d' % A)
+        logging.info('Attribute node %s' % attr_names[A])
 #        trees = await mpc.gather([id3(t, R.difference([A])) for t in T_Rk])
         trees = [await id3(t, R.difference([A])) for t in T_Rk]
         return attr_names[A], trees

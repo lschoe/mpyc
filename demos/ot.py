@@ -1,3 +1,4 @@
+"""Demo oblivious transfer (OT)."""
 import random
 import sys
 from mpyc.runtime import mpc

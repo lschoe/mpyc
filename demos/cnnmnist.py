@@ -1,3 +1,16 @@
+""" Demo Convolutional Neural Network (CNN) MNIST classifier.
+
+The MNIST dataset of handwritten digits consists of a training set of 
+60,000 images of a test set of 10,000 images. The training images have been 
+used in the clear to obtain a highly reliable CNN classifier. The demo
+feeds the classifier with random test images keeping both the CNN parameters
+(neuron weights and bias for all layers) and the test image secret. 
+
+The secure CNN classifier is run either with scaled secure integers or 
+with secure fixed-point numbers. Barriers are used to throttle the MPyC
+secure computation (reduces memory usage).
+"""
+
 import os
 import logging
 import random

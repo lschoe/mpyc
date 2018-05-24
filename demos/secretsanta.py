@@ -1,7 +1,16 @@
+"""Demo solution to the Secret Santa problem.
+
+The Secret Santa problem is about generating secret random permutations
+without fixed points. A fixed point of a permuation p is a point i for
+which p(i)=i, hence the point is mapped to itself. Permutations without
+fixed points are also called 'derangements'.
+"""
+
 from mpyc.runtime import mpc
 
 @mpc.coroutine
 async def random_unit_vector(n, sectype):
+    """Random permutation of [sectype(1)] + [sectype(0) for i in range(n-1)]."""
     await mpc.returnType((sectype, True), n)
     if n == 1:
         return [sectype(1)]
@@ -17,6 +26,7 @@ async def random_unit_vector(n, sectype):
         return x[:1] + y + mpc.vector_sub(x[1:], y)
 
 def random_permutation(n, sectype):
+    """Random permutation of [sectype(i) for i in range(n)]. """
     p = [sectype(i) for i in range(n)]
     for i in range(n - 1):
         x_r = random_unit_vector(n - i, sectype)
@@ -29,13 +39,13 @@ def random_permutation(n, sectype):
 
 @mpc.coroutine
 async def random_derangement(n, sectype):
+    """Random permutation of [sectype(i) for i in range(n)] without fixed point."""
     await mpc.returnType((sectype, True), n)
     p = random_permutation(n, sectype)
     t = mpc.prod([p[i] - i for i in range(n)])
     if await mpc.is_zero_public(t):
-        return random_derangement(n, sectype)
-    else:
-        return p
+        p = random_derangement(n, sectype)
+    return p
 
 def main():
     if not mpc.args:

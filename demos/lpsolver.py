@@ -1,3 +1,22 @@
+"""Demo Linear Programming (LP) solver.
+
+The LP solver returns a solution to the following problem.
+
+Given m x n matrix A, length-m vector b >=0, and length-n vector c.
+Find a length-n vector x minimizing c.x subject to A x <= b and x >= 0.
+
+The small (or, condensed) tableau variant of the Simplex algorithm is used.
+The entries of A, b, and c are all assumed to be integral. Since b >= 0,
+the all-zero vector x=0 is a feasible solution. It is also assumed that
+a solution exists (hence that the problem is not unbounded).
+
+The solution x is in general not integral. As a certificate of optimality,
+a solution y to the dual problem is computed as well, that is, y is a
+length-m vector maximizing b.y subject to y A >= c and y >= 0. The solutions
+are represented by integer vectors, and one additional number, which is the
+common denominator of all entries of the solution vectors.
+"""
+
 import os
 import logging
 import argparse
@@ -7,11 +26,12 @@ def load_tableau(filename):
     T = []
     comment_sign = '#'
     sep = ','
-    for line in open(os.path.join('data', 'lp', filename + '.csv'), 'r'):
-        # strip comments and whitespace and skip empty lines
-        line = line.split(comment_sign)[0].strip()
-        if line:
-            T.append(list(map(int, line.split(sep))))
+    with open(os.path.join('data', 'lp', filename + '.csv'), 'r') as f:
+        for line in f:
+            # strip comments and whitespace and skip empty lines
+            line = line.split(comment_sign)[0].strip()
+            if line:
+                T.append(list(map(int, line.split(sep))))
     T[-1].append(0)
     return T
 
@@ -176,7 +196,7 @@ def main():
         f.write('# bit-length = \n' + str(mpc.options.bit_length) + '\n')
         f.write('# security parameter = \n' + str(mpc.options.security_parameter) + '\n')
         f.write('# threshold = \n' + str(mpc.threshold) + '\n')
-        f.write('# common divisor = \n' + str(cd.value) + '\n')
+        f.write('# common denominator = \n' + str(cd.value) + '\n')
         f.write('# solution = \n')
         f.write('\t'.join(str(x.value) for x in solution) + '\n')
         f.write('# dual solution = \n')
