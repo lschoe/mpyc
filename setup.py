@@ -1,4 +1,4 @@
-# This is the MPyC setup script.
+# MPyC setup script.
 #
 # Options:                python setup.py --help
 # Install by admin/root:  python setup.py install
@@ -8,29 +8,17 @@
 import setuptools
 import mpyc
 
-long_description=\
-"""
-MPyC is a framework for secure multi-party computation (MPC). 
-
-Features include:
-
-* secret sharing based on Shamir and pseudo-random secret sharing (PRSS).
-
-* secure arithmetic and comparisons with shares from a prime field.
-
-* computations with any number of parties assuming an honest majority.
-
-All operations are automatically scheduled to run in parallel meaning
-that an operation starts as soon as the operands are ready.
-"""
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
 setuptools.setup(name='mpyc',
     version=mpyc.__version__,
     author='Berry Schoenmakers',
     author_email='berry@win.tue.nl',
-    description='A framework for secure multi-party computation.',
+    description='A framework for secure multiparty computation.',
     long_description=long_description,
-    keywords=['crypto', 'cryptography', 'multi-party computation', 'MPC',
+    long_description_content_type='text/markdown',
+    keywords=['crypto', 'cryptography', 'multiparty computation', 'MPC',
             'secret sharing', 'Shamir threshold scheme', 
             'pseudorandom secret sharing', 'PRSS'
             ],
