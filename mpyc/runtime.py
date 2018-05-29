@@ -18,7 +18,7 @@ import argparse
 import asyncio
 from mpyc import thresha
 from mpyc import sectypes
-from mpyc import asyncoro 
+from mpyc import asyncoro
 
 Future = asyncio.Future
 Share = sectypes.Share
@@ -96,7 +96,7 @@ class Runtime:
     def run(self, f):
         """Run the given (MPC) coroutine or future until it is done."""
         return self._loop.run_until_complete(f)
-        
+
     def log(self, enable=None):
         """Toggle/enable/disable logging."""
         if enable is None:
@@ -202,7 +202,7 @@ class Runtime:
         if isinstance(receivers, int):
             receivers = [receivers]
         return gather_shares(self._recombine(a, receivers, threshold))
-#fix: use await on gather_shares to force cast to lists
+#fix: use await on gather_shares to force cast to lists?
 
     @mpc_coro
     async def _recombine(self, a, receivers=None, threshold=None):
@@ -227,7 +227,6 @@ class Runtime:
                 await returnType((sftype, a[0].integral))
             a = await gather_shares(a)
             field = type(a[0])
-#            field = sftype.field
         else:
             await returnType(Share)
             field = sftype
@@ -249,7 +248,8 @@ class Runtime:
                 return b[0]
             else:
                 return b
-        #else: None will returned as opened value
+        else:
+            return
 
     @mpc_coro
     async def _reshare(self, a):
@@ -257,7 +257,11 @@ class Runtime:
             a = tuple([a])
         sftype = type(a[0]) # all elts assumed of same type
         if issubclass(sftype, Share):
-            await returnType(sftype, len(a))
+            if  sftype.field.frac_length == 0:
+                await returnType(sftype, len(a))
+            else:
+                await returnType((sftype, a[0].integral), len(a))
+            a = await mpc.gather(a)
             field = sftype.field
         else:
             await returnType(Share)
@@ -296,7 +300,7 @@ class Runtime:
             r_modf += r_bits[i].value
         r_divf = self.random(Zp, 1<<(k + l - f))
         a = await gather_shares(a)
-        c = await self.output(a + (1<<l) + r_modf + (1<<f)*r_divf) # 1<<l --> 1<<(l+f)
+        c = await self.output(a + (1<<l) + r_modf + (1<<f)*r_divf)
         c = c.value % (1<<f)
         return (a - c + r_modf) / (1<<f)
 
@@ -418,7 +422,7 @@ class Runtime:
         b = a
         c = 1
         for i in range(n.bit_length() - 1):
-            # b = a ** (1 << i)
+            # b = a ** (1 << i) holds
             if n & (1 << i):
                 c = c * b
             b = b * b
@@ -483,9 +487,6 @@ class Runtime:
                 c[i] = Zp(1)
             else:
                 c[i] = 1 - z[i] if c[i].is_sqr() else z[i]
-
-        c[0] = stype(c[0])
-
         e = self.prod(c)
         return e * (1<<stype.field.frac_length)
 
@@ -512,7 +513,6 @@ class Runtime:
         if not EQ: # a la Toft
             s_bit = (await gather_shares(self.random_bits(Zp, 1)))[0]
             s_sign = (1 - 2 * s_bit).value
-
             e = [None] * (l+1)
             sumXors = 0
             for i in range(l-1, -1, -1):
@@ -520,12 +520,10 @@ class Runtime:
                 e[i] = Zp(s_sign + r_bits[i].value - c_i + 3*sumXors)
                 sumXors += 1 - r_bits[i].value if c_i else r_bits[i].value
             e[l] = Zp(s_sign - 1 + 3*sumXors)
-
-#            e[0] = stype(e[0]) # check this for SecFxp, see also eq test
-
             f = await self.is_zero_public(self.prod(e))
             UF = s_bit if f == 1 else 1 - s_bit
             z = (a_rmodl - (c + UF * (1<<l))) / (1<<l)
+
         if not GE:
             h = self.prod([r_bits[i] if (c >> i) & 1 else 1 - r_bits[i] for i in range(l)])
             h = await gather_shares(h)
@@ -535,6 +533,7 @@ class Runtime:
                 z = (1 - h) * (2 * z - 1)
                 z = self._reshare(z)
                 z = await gather_shares(z)
+
         return z * (1<<stype.field.frac_length)
 
     def min(self, *x):
@@ -614,7 +613,7 @@ class Runtime:
         for i in range(len(x)):
             s += x[i].value * y[i].value
         if stype.field.frac_length > 0 and x_integral:
-            f1 = 1 / stype.field(1<<stype.field.frac_length) # expensive 
+            f1 = 1 / stype.field(1<<stype.field.frac_length) # expensive
             s = s * f1.value
         s = self._reshare(stype.field(s))
         if stype.field.frac_length > 0 and not x_integral:
@@ -628,7 +627,7 @@ class Runtime:
             await returnType(type(x[0]))
             x = await gather_shares(x)
         else:
-            Share.field = type(x[0])    # check this case, also for SecFxp
+            Share.field = type(x[0])  # avoid hack? see prod in sgn, _is_zero
             await returnType(Share)
 
         while len(x) > 1:
@@ -1020,7 +1019,7 @@ def setup():
                         default=False, help='Disable logging.')
     parser.add_argument('--no-async', action='store_true',
                         default=False, help='Disable asynchronous evaluation.')
-    parser.add_argument('-f', type=str, 
+    parser.add_argument('-f', type=str,
                         default='', help='Consume IPython string.')
     parser.set_defaults(bit_length=32, security_parameter=30)
     options, _args = parser.parse_known_args()
