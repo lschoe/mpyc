@@ -7,6 +7,8 @@ fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
 combined with asynchronous evaluation of the associated protocols.
 
+See [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background.
+
 ## Example installs:
 
 `python setup.py install`
