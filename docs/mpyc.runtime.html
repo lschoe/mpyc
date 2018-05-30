@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.runtime</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbschoe%5Cappdata%5Clocal%5Cprograms%5Cpython%5Cpython36%5Clib%5Csite-packages%5Cmpyc-0.28.0-py3.6.egg%5Cmpyc%5Cruntime.py">c:\users\bschoe\appdata\local\programs\python\python36\lib\site-packages\mpyc-0.28.0-py3.6.egg\mpyc\runtime.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cappdata%5Croaming%5Cpython%5Cpython36%5Csite-packages%5Cmpyc-0.3-py3.6.egg%5Cmpyc%5Cruntime.py">c:\users\berry\appdata\roaming\python\python36\site-packages\mpyc-0.3-py3.6.egg\mpyc\runtime.py</a></font></td></tr></table>
     <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
 &nbsp;<br>
 Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
@@ -99,6 +99,8 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 <dl><dt><a name="Runtime-is_zero_public"><strong>is_zero_public</strong></a>(self, a) -&gt; _asyncio.Future</dt><dd><tt>Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-lin_comb"><strong>lin_comb</strong></a>(self, a, x)</dt><dd><tt>Secure&nbsp;linear&nbsp;combination:&nbsp;dot&nbsp;product&nbsp;of&nbsp;public&nbsp;a&nbsp;and&nbsp;secret&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-log"><strong>log</strong></a>(self, enable=None)</dt><dd><tt>Toggle/enable/disable&nbsp;logging.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-lsb"><strong>lsb</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;least&nbsp;significant&nbsp;bit&nbsp;of&nbsp;a.</tt></dd></dl>
 
@@ -202,9 +204,9 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-generate_configs"><strong>generate_configs</strong></a>(n, t, addresses)</dt><dd><tt>Generate&nbsp;party&nbsp;configurations.<br>
+<td width="100%"><dl><dt><a name="-generate_configs"><strong>generate_configs</strong></a>(n, addresses)</dt><dd><tt>Generate&nbsp;party&nbsp;configurations.<br>
 &nbsp;<br>
-Generates&nbsp;n&nbsp;party&nbsp;configurations&nbsp;with&nbsp;threshold&nbsp;t,&nbsp;where<br>
+Generates&nbsp;n&nbsp;party&nbsp;configurations&nbsp;with&nbsp;thresholds&nbsp;0&nbsp;up&nbsp;to&nbsp;(n-1)//2.<br>
 addresses&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;'(host,&nbsp;port)'&nbsp;pairs,&nbsp;specifying&nbsp;the<br>
 hostnames&nbsp;and&nbsp;port&nbsp;numbers&nbsp;for&nbsp;each&nbsp;party.&nbsp;Moreover,&nbsp;the&nbsp;keys<br>
 used&nbsp;in&nbsp;pseudorandom&nbsp;secret&nbsp;sharing&nbsp;(PRSS)&nbsp;are&nbsp;generated.<br>
