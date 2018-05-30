@@ -27,8 +27,11 @@ Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish i
 
 3. A few simple Windows batch files are provided in the `demos` directory.
 
-4. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, you need to have Jupyter installed, e.g., using `pip install jupyter`. 
+4. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, 
+you need to have Jupyter installed, e.g., using `pip install jupyter`. 
  
 5. Latest versions of Jupyter use Tornado 5.0, which will not work with MPyC, see
 [Jupyter notebook issue #3397](https://github.com/jupyter/notebook/issues/3397).
 Downgrade Tornado by running `pip install tornado==4.5.3`.
+
+Copyright &copy; 2018, Berry Schoenmakers

@@ -248,10 +248,9 @@ def mpc_coro(f):
         coro = f(*args, **kwargs)
         if rettype:
             ret = returnType(rettype)
-            ret.set_result(None)
         else:
             ret = coro.send(None)
-            ret.set_result(None)
+        ret.set_result(None)
         pc_level += 1
         if runtime.options.no_async:
             val = None
