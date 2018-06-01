@@ -198,7 +198,10 @@ class Runtime:
         return shares
 
     def output(self, a, receivers=None, threshold=None):
-        """Output the value of a to the receivers specified."""
+        """Output the value of a to the receivers specified.
+        
+        `a` should be a secure number, or a list of secure numbers.
+        """
         if isinstance(receivers, int):
             receivers = [receivers]
         return gather_shares(self._recombine(a, receivers, threshold))

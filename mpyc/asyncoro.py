@@ -83,7 +83,7 @@ async def gather_shares(*obj):
         obj = obj[0]
     if isinstance(obj, Future):
         return await obj
-    if isinstance(obj, sectypes.Share):
+    elif isinstance(obj, sectypes.Share):
         if isinstance(obj.df, Future):
             if runtime.options.no_async:
                 obj.df = obj.df.result()
@@ -101,6 +101,7 @@ async def gather_shares(*obj):
         return _get_results(obj)
 
 def _count_shares(obj):
+    # Count the number of Share/Future objects in a nested structure of lists
     if isinstance(obj, sectypes.Share):
         if isinstance(obj.df, Future):
             return 1
