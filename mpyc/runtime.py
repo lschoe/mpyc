@@ -200,7 +200,7 @@ class Runtime:
     def output(self, a, receivers=None, threshold=None):
         """Output the value of a to the receivers specified.
         
-        VAlue a is a secure number, or a list of secure numbers.
+        Value a is a secure number, or a list of secure numbers.
         """
         if isinstance(receivers, int):
             receivers = [receivers]
