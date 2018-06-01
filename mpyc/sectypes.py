@@ -238,7 +238,10 @@ def SecInt(l=None, n=2):
     return _sectypes[(l, 0, n)]
 
 def SecFxp(l=None, f=None, n=2):
-    """Secure l-bit fixed-point numbers with f-bit fractional part."""
+    """Secure l-bit fixed-point numbers with f-bit fractional part.
+    
+    NB: if dividing secure fixed-point numbers, make sure that l =~ 2f.
+    """
     if l is None:
         l = Share.runtime.options.bit_length
     if f is None:
