@@ -158,3 +158,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.max(x, 0))), ss2)
         ss2 = round(max(0, s[1]) * (1 << f))
         self.assertEqual(mpc.run(mpc.output(mpc.max(0, y))), ss2)
+
+        self.assertEqual(mpc.run(mpc.output(mpc.lsb(secfxp(1)))), 0*(2**f))
+        self.assertEqual(mpc.run(mpc.output(mpc.lsb(secfxp(1/2**f)))), 1*(2**f))
+        self.assertEqual(mpc.run(mpc.output(mpc.lsb(secfxp(2/2**f)))), 0*(2**f))

@@ -1,4 +1,4 @@
-"""Demo Linear Programming (LP) solver.
+"""Demo Linear Programming (LP) solver, using exact integer arithmetic.
 
 The LP solver returns a solution to the following problem.
 
@@ -158,8 +158,6 @@ def main():
         logging.info('%d Termination?...', iteration)
         p_col_index, minimum = argmin_int(T[-1][:-1])
 
-        mpc.run(mpc.barrier())
-
     logging.info('Termination...')
     mx = mpc.run(mpc.output(T[-1][-1]))
     cd = mpc.run(mpc.output(prev_pivot))
@@ -192,7 +190,6 @@ def main():
     logging.info('Writing output to %s.', certificate_filename)
     with open(os.path.join('data', 'lp', certificate_filename), 'w') as f:
         f.write('# tableau = \n' + args.data + '\n')
-        f.write('# modulus = \n' + str(p) + '\n')
         f.write('# bit-length = \n' + str(mpc.options.bit_length) + '\n')
         f.write('# security parameter = \n' + str(mpc.options.security_parameter) + '\n')
         f.write('# threshold = \n' + str(mpc.threshold) + '\n')

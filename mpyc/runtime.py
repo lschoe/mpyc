@@ -199,7 +199,7 @@ class Runtime:
 
     def output(self, a, receivers=None, threshold=None):
         """Output the value of a to the receivers specified.
-        
+
         Value a is a secure number, or a list of secure numbers.
         """
         if isinstance(receivers, int):
@@ -572,6 +572,7 @@ class Runtime:
         k = self.options.security_parameter
         b = self.random_bit(stype)
         a, b = await gather_shares(a, b)
+        b = b / (1<<stype.field.frac_length)
         r = self.random(stype.field, 1 << (l + k))
         c = await self.output(a + (1<<l) + b + (r.value << 1))
         x = 1 - b if c.value & 1 else b #xor
@@ -1053,6 +1054,8 @@ def setup():
     Share.runtime = runtime
     import mpyc.asyncoro
     mpyc.asyncoro.runtime = runtime
+#    import mpyc
+    runtime.version = mpyc.__version__
     global mpc
     mpc = runtime
 
