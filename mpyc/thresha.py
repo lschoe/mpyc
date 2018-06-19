@@ -26,7 +26,7 @@ def random_split(s, d, n):
     shares = [[None] * m for _ in range(n)]
     for h in range(m):
         c = [secrets.randbelow(p) for _ in range(d)]
-        # polynomial f(x) = s[h] + c[0] x + c[1] x^2 + ... + c[d-1] x^d
+        # polynomial f(x) = s[h] + c[d-1] x + c[d-2] x^2 + ... + c[0] x^d
         for i in range(n):
             y = 0
             for c_k in c:
