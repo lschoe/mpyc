@@ -490,7 +490,7 @@ class Runtime:
                 c[i] = Zp(1)
             else:
                 c[i] = 1 - z[i] if c[i].is_sqr() else z[i]
-        e = self.prod(c)
+        e = await gather_shares(self.prod(c))
         return e * (1<<stype.field.frac_length)
 
     @mpc_coro
