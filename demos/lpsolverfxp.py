@@ -65,6 +65,7 @@ def argmin_rat(xs):
 @mpc.coroutine
 async def index_matrix_prod(x, A, tr=False):
     """Secure index-matrix product of unit vector x with (transposed) A."""
+    x, A = x[:], [r[:] for r in A]
     stype = type(x[0])
     m = len(A) if tr else len(A[0])
     n = len(A) if not tr else len(A[0])
@@ -138,12 +139,9 @@ def main():
         constraints = [(T[i][-1] + (p_col[i] <= 0), p_col[i]) for i in range(m)]
         p_row_index, _ = argmin_rat(constraints)
         pivot = mpc.in_prod(p_row_index, p_col)
-        pivot1 = 1 / pivot
-
-        mpc.run(mpc.barrier())
 
         logging.info('%d Updating tableau...', iteration)
-        h = mpc.scalar_mul(pivot1, [(p_row_index[i] if i < m else 0) - p_col[i] for i in range(m + 1)])
+        h = mpc.scalar_mul(1 / pivot, [(p_row_index[i] if i < m else 0) - p_col[i] for i in range(m + 1)])
         p_row = index_matrix_prod(p_row_index, T[:-1])
         v = mpc.vector_add(p_row, p_col_index + [0])
         for i in range(m + 1):
