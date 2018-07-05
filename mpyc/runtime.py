@@ -202,6 +202,8 @@ class Runtime:
 
         Value a is a secure number, or a list of secure numbers.
         """
+        if isinstance(a, list):
+            a = a[:]
         if isinstance(receivers, int):
             receivers = [receivers]
         return gather_shares(self._recombine(a, receivers, threshold))
@@ -581,6 +583,7 @@ class Runtime:
     @mpc_coro
     async def sum(self, x):
         """Secure sum of all elements in x."""
+        x = x[:]
         field = x[0].field
         await returnType(type(x[0]))
         x = await gather_shares(x)
@@ -592,6 +595,7 @@ class Runtime:
     @mpc_coro
     async def lin_comb(self, a, x):
         """Secure linear combination: dot product of public a and secret x."""
+        x = x[:]
         field = x[0].field
         await returnType(type(x[0]))
         x = await gather_shares(x)
@@ -603,6 +607,11 @@ class Runtime:
     @mpc_coro
     async def in_prod(self, x, y):
         """Secure dot product of x and y (one resharing)."""
+        if x is y:
+            x = x[:]
+            y = x
+        else:
+            x, y = x[:], y[:]
         stype = type(x[0])
         if stype.field.frac_length == 0:
             await returnType(stype)
@@ -627,6 +636,7 @@ class Runtime:
     @mpc_coro
     async def prod(self, x):
         """Secure product of all elements in x (in log_2 len(x) rounds)."""
+        x = x[:]
         if isinstance(x[0], Share):
             await returnType(type(x[0]))
             x = await gather_shares(x)
@@ -645,6 +655,7 @@ class Runtime:
     @mpc_coro
     async def vector_add(self, x, y):
         """Secure addition of vectors x and y."""
+        x, y = x[:], y[:]
         stype = type(x[0])
         if stype.field.frac_length == 0:
             await returnType(stype, len(x))
@@ -658,6 +669,7 @@ class Runtime:
     @mpc_coro
     async def vector_sub(self, x, y):
         """Secure subtraction of vectors x and y."""
+        x, y = x[:], y[:]
         stype = type(x[0])
         if stype.field.frac_length == 0:
             await returnType(stype, len(x))
@@ -671,6 +683,7 @@ class Runtime:
     @mpc_coro
     async def matrix_add(self, A, B):
         """Secure addition of matrices A and B."""
+        A, B = [r[:] for r in A], [r[:] for r in B]
         await returnType(type(A[0][0]), len(A), len(A[0]))
         A, B = await gather_shares(A, B)
         for i in range(len(A)):
@@ -681,6 +694,7 @@ class Runtime:
     @mpc_coro
     async def matrix_sub(self, A, B):
         """Secure subtraction of matrices A and B."""
+        A, B = [r[:] for r in A], [r[:] for r in B]
         await returnType(type(A[0][0]), len(A), len(A[0]))
         A, B = await gather_shares(A, B)
         for i in range(len(A)):
@@ -691,6 +705,7 @@ class Runtime:
     @mpc_coro
     async def scalar_mul(self, a, x):
         """Secure scalar multiplication of scalar a with vector x."""
+        x = x[:]
         stype = type(a)
         if stype.field.frac_length == 0:
             await returnType(stype, len(x))
@@ -711,6 +726,11 @@ class Runtime:
     @mpc_coro
     async def schur_prod(self, x, y):
         """Secure entrywise multiplication of vectors x and y."""
+        if x is y:
+            x = x[:]
+            y = x
+        else:
+            x, y = x[:], y[:]
         if isinstance(x[0], Share):
             stype = type(x[0])
             await returnType(stype, len(x))
@@ -733,6 +753,7 @@ class Runtime:
     @mpc_coro
     async def matrix_prod(self, A, B, tr=False):
         """Secure matrix product of A with (transposed) B."""
+        A, B = [r[:] for r in A], [r[:] for r in B]
         stype = type(A[0][0])
         m = len(B) if tr else len(B[0])
         await returnType(stype, len(A), m)
@@ -754,6 +775,7 @@ class Runtime:
     @mpc_coro
     async def gauss(self, A, d, b, c):
         """Secure Gaussian elimination A d - b c."""
+        A, b, c = [r[:] for r in A], b[:], c[:]
         stype = type(A[0][0])
         m = len(A[0])
         await returnType(stype, len(A), m)
@@ -840,6 +862,7 @@ class Runtime:
 
     def add_bits(self, x, y):
         """Secure binary addition of bit vectors x and y."""
+        x, y = x[:], y[:]
         def f(i, j, high=False):
             n = j - i
             if n == 1:
