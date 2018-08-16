@@ -137,7 +137,10 @@ def main():
         secnum = mpc.SecInt(37)
     batch_size = round(k - 0.01)
     if len(mpc.args) <= 1:
-        offset = random.randrange(10001 - batch_size)
+        if len(mpc.parties) == 1:
+            offset = random.randrange(10001 - batch_size)
+        else:
+            offset = 0
     else:
         offset = int(mpc.args[1])
     f = 6
