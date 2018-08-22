@@ -113,10 +113,6 @@ def ReLU(x):
     logging.info("- - - - - - - - ReLU    - - - - - - -")
     return np.vectorize(lambda a: (a >= 0) * a)(x)
 
-def truncate(f):
-    logging.info("- - - - - - - - truncate- - - - - - -")
-    return np.vectorize(lambda a: mpc.trunc(a + (1<<(f-1)), f))
-
 def argmax(x):
     stype = type(x[0])
     a = stype(0)
