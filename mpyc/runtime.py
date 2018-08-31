@@ -113,7 +113,7 @@ class Runtime:
 
         Open connections with other parties, if any.
         """
-        logging.info('Start')
+        logging.info('Start MPyC runtime v%s' % self.version)
         self.start_time = time.time()
         if len(self.parties) == 1:
             return
@@ -123,13 +123,16 @@ class Runtime:
             peer.protocol = Future() if peer.id == self.id else None
         factory = lambda: asyncoro.SharesExchanger(self)
 
-        listen_port = self.parties[self.id].port
-        listen = self._loop.create_server(factory, port=listen_port)
-        self.server = self.run(listen)
-        logging.info('Listening on port %d' % listen_port)
+        # Listen for all parties < self.id.
+        if self.id:
+            listen_port = self.parties[self.id].port
+            listen = self._loop.create_server(factory, port=listen_port)
+            server = self.run(listen)
+            logging.debug('Listening on port %d' % listen_port)
 
+        # Connect to all parties > self.id.
         for peer in self.parties[self.id + 1:]:
-            logging.info('Connecting to %s' % peer)
+            logging.debug('Connecting to %s' % peer)
             while True:
                 try:
                     connect = self._loop.create_connection(factory, peer.host, peer.port)
@@ -140,21 +143,26 @@ class Runtime:
                 time.sleep(1)
 
         self.run(self.parties[self.id].protocol)
+        logging.info('Connected to all parties.')
+        if self.id:
+            server.close()
 
     def shutdown(self):
         """Shutdown the MPC runtime.
 
-        Close all connections.
+        Close all connections, if any.
         """
         if len(self.parties) > 1:
-            self.server.close()
+            # Wait for all parties.
+            self.run(self.output(self.input(sectypes.SecFld(101)(self.id))))
+            # Close connections to all parties.
             for peer in self.parties:
                 if peer.id != self.id:
                     peer.protocol.close_connection()
 
         elapsed = time.time() - self.start_time
         from datetime import timedelta
-        logging.info('Stop -- elapsed time: %s', str(timedelta(seconds=elapsed)))
+        logging.info('Stop MPyC runtime -- elapsed time: %s', str(timedelta(seconds=elapsed)))
 
     SecFld = staticmethod(sectypes.SecFld)
     SecInt = staticmethod(sectypes.SecInt)
@@ -165,17 +173,17 @@ class Runtime:
 
     def input(self, a, senders=None):
         """Input a to the computation."""
+        if senders is None:
+            senders = list(range(len(self.parties)))
         if isinstance(senders, int):
             return self._distribute(a, [senders])[0]
         else:
             return self._distribute(a, senders)
 
     @mpc_coro
-    async def _distribute(self, a, senders=None):
+    async def _distribute(self, a, senders):
         """Distribute shares for each secret a provided by a sender."""
         value = a.df if not isinstance(a.df, Future) else None
-        if senders is None:
-            senders = list(range(len(self.parties)))
         assert value is None or self.id in senders
         stype = type(a)
         await returnType(stype, len(senders))
@@ -201,27 +209,22 @@ class Runtime:
         """Output the value of a to the receivers specified.
 
         Value a is a secure number, or a list of secure numbers.
-        """
-        if isinstance(a, list):
-            a = a[:]
-        if isinstance(receivers, int):
-            receivers = [receivers]
-        return gather_shares(self._recombine(a, receivers, threshold))
-#fix: use await on gather_shares to force cast to lists?
-
-    @mpc_coro
-    async def _recombine(self, a, receivers=None, threshold=None):
-        """Recombine shares of a.
-
         The receivers are the parties that will obtain the result.
         The default is to let everybody know the result.
         """
-        # all parties receive result by default
+        if isinstance(a, list):
+            a = a[:]
         if receivers is None:
             receivers = list(range(len(self.parties)))
+        elif isinstance(receivers, int):
+            receivers = [receivers]
         if threshold is None:
             threshold = self.threshold
+        return gather_shares(self._recombine(a, receivers, threshold))
 
+    @mpc_coro
+    async def _recombine(self, a, receivers, threshold):
+        """Recombine shares of a."""
         if not isinstance(a, list):
             a = tuple([a])
         sftype = type(a[0])  # all elts assumed of same type
@@ -1077,7 +1080,6 @@ def setup():
     Share.runtime = runtime
     import mpyc.asyncoro
     mpyc.asyncoro.runtime = runtime
-#    import mpyc
     runtime.version = mpyc.__version__
     global mpc
     mpc = runtime
