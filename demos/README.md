@@ -17,9 +17,11 @@ run-all 1
 
 run-all 2
 
+run-all 2 --ssl
+
 run-all 3
 
-run-all 3 -t0
+run-all 3 -t0 --ssl
 
 run-all 4
 

@@ -61,7 +61,7 @@ def GF(modulus, f=0):
         return _field_cache[(p, f)]
 
     if not gmpy2.is_prime(p):
-        raise ValueError("%d is not a prime" % p)
+        raise ValueError(f'{p} is not a prime')
 
     GFElement = type('GF('+str(p)+')', (PrimeFieldElement,), {'__slots__':()})
     GFElement.modulus = p
@@ -300,9 +300,9 @@ class PrimeFieldElement():
 
     def __repr__(self):
         if self.frac_length == 0:
-            return '%d' % self.__int__()
+            return f'{self.__int__()}'
         else:
-            return '%f' % self.__float__()
+            return f'{self.__float__()}'
 
     def __eq__(self, other):
         """Equality test."""

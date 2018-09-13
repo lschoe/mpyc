@@ -36,7 +36,7 @@ class SharesExchanger(asyncio.Protocol):
          4. data (length-data_size byte string).
         """
         pc_size, data_size = len(pc), len(data)
-        fmt = '!HI%dI%ds' % (pc_size, data_size)
+        fmt = f'!HI{pc_size}I{data_size}s'
         t = (pc_size, data_size) + pc + (data,)
         self.transport.write(struct.pack(fmt, *t))
 
@@ -61,7 +61,7 @@ class SharesExchanger(asyncio.Protocol):
             len_packet = 6 + pc_size * 4 + data_size
             if len(self.bytes) < len_packet:
                 return
-            fmt = '!%dI%ds' % (pc_size, data_size)
+            fmt = f'!{pc_size}I{data_size}s'
             unpacked = struct.unpack(fmt, self.bytes[6:len_packet])
             del self.bytes[:len_packet]
             pc = unpacked[:pc_size]

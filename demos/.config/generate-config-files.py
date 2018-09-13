@@ -16,10 +16,10 @@
 # keys used for pseudorandom secret sharing (PRSS). To keep the key material
 # secret, the configutation files should be distributed securely.
 
-from argparse import ArgumentParser
+import argparse
 from mpyc.runtime import generate_configs
 
-parser = ArgumentParser()
+parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--prefix',
                   help='output filename prefix')
 parser.add_argument('-n', '--parties', dest='n', type=int,
@@ -38,5 +38,5 @@ addresses = [arg.split(':', 1) for arg in args]
 configs = generate_configs(options.n, addresses)
 
 for party, config in enumerate(configs):
-    filename  = '%s%d_%d.ini' % (options.prefix, options.n, party)
+    filename  = f'{options.prefix}{options.n}_{party}.ini'
     config.write(open(filename, 'w'))

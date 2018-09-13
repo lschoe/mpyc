@@ -16,6 +16,7 @@ import itertools
 import configparser
 import argparse
 import asyncio
+import ssl
 from mpyc import thresha
 from mpyc import sectypes
 from mpyc import asyncoro
@@ -88,7 +89,7 @@ class Runtime:
 
     async def barrier(self):
         """Barrier for runtime."""
-        logging.info('Barrier' + ' ' + str(asyncoro.pc_level) + ' ' + str(len(self._program_counter)) + ' ' +  str(self._program_counter))
+        logging.info(f'Barrier {asyncoro.pc_level} {len(self._program_counter)} {self._program_counter}')
         if not self.options.no_async:
             while asyncoro.pc_level >= len(self._program_counter):
                 await asyncio.sleep(0)
@@ -113,7 +114,7 @@ class Runtime:
 
         Open connections with other parties, if any.
         """
-        logging.info('Start MPyC runtime v%s' % self.version)
+        logging.info(f'Start MPyC runtime v{self.version}')
         self.start_time = time.time()
         if len(self.parties) == 1:
             return
@@ -122,20 +123,40 @@ class Runtime:
         for peer in self.parties:
             peer.protocol = Future() if peer.id == self.id else None
         factory = lambda: asyncoro.SharesExchanger(self)
+        if self.options.ssl:
+            crtfile = os.path.join('.config', f'party_{self.id}.crt')
+            keyfile = os.path.join('.config', f'party_{self.id}.key')
+            cafile = os.path.join('.config', 'mpyc_ca.crt')
 
         # Listen for all parties < self.id.
         if self.id:
             listen_port = self.parties[self.id].port
-            listen = self._loop.create_server(factory, port=listen_port)
+            if self.options.ssl:
+                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+                context.load_cert_chain(crtfile, keyfile=keyfile)
+                context.load_verify_locations(cafile=cafile)
+                context.verify_mode = ssl.CERT_REQUIRED
+            else:
+                context = None
+            listen = self._loop.create_server(factory, port=listen_port, ssl=context)
             server = self.run(listen)
-            logging.debug('Listening on port %d' % listen_port)
+            logging.debug(f'Listening on port {listen_port}')
 
         # Connect to all parties > self.id.
         for peer in self.parties[self.id + 1:]:
-            logging.debug('Connecting to %s' % peer)
+            logging.debug(f'Connecting to {peer}')
             while True:
                 try:
-                    connect = self._loop.create_connection(factory, peer.host, peer.port)
+                    if self.options.ssl:
+                        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+                        context.load_cert_chain(crtfile, keyfile=keyfile)
+                        context.load_verify_locations(cafile=cafile)
+                        server_hostname = f'MPyC party {peer.id}'
+                    else:
+                        context = None
+                        server_hostname = None
+                    connect = self._loop.create_connection(factory, peer.host, peer.port, 
+                                           ssl=context, server_hostname=server_hostname)
                     self.run(connect)
                     break
                 except Exception as e:
@@ -143,7 +164,10 @@ class Runtime:
                 time.sleep(1)
 
         self.run(self.parties[self.id].protocol)
-        logging.info('Connected to all parties.')
+        if self.options.ssl:
+            logging.info('SSL connections to all parties.')
+        else:
+            logging.info('Connected to all parties.')
         if self.id:
             server.close()
 
@@ -162,7 +186,7 @@ class Runtime:
 
         elapsed = time.time() - self.start_time
         from datetime import timedelta
-        logging.info('Stop MPyC runtime -- elapsed time: %s', str(timedelta(seconds=elapsed)))
+        logging.info(f'Stop MPyC runtime -- elapsed time: {timedelta(seconds=elapsed)}')
 
     SecFld = staticmethod(sectypes.SecFld)
     SecInt = staticmethod(sectypes.SecInt)
@@ -965,9 +989,9 @@ class _Party:
     def __repr__(self):
         """String representation of the party."""
         if self.host is None:
-            return '<_Party %d>' % self.id
+            return f'<_Party {self.id}>'
         else:
-            return '<_Party %d: %s:%d>' % (self.id, self.host, self.port)
+            return f'<_Party {self.id}: {self.host}:{self.port}>'
 
 def generate_configs(n, addresses):
     """Generate party configurations.
@@ -987,16 +1011,16 @@ def generate_configs(n, addresses):
         if host == '':
             host = 'localhost'
         for config in configs:
-            config.add_section("Party " + str(p))
-            config.set("Party " + str(p), 'host', host)
-            config.set("Party " + str(p), 'port', port)
+            config.add_section(f'Party {p}')
+            config.set(f'Party {p}', 'host', host)
+            config.set(f'Party {p}', 'port', port)
 
     for t in range((n + 1) // 2):
         for subset in itertools.combinations(parties, n - t):
             key = hex(secrets.randbits(128)) # 128-bit key
-            subset_str = " ".join(map(str, subset))
+            subset_str = ' '.join(map(str, subset))
             for p in subset:
-                configs[p].set("Party " + str(p), subset_str, key)
+                configs[p].set(f'Party {p}', subset_str, key)
     return configs
 
 def _load_config(filename, t=None):
@@ -1047,6 +1071,8 @@ def setup():
                         help='Security parameter. Leakage probability 2**-K.')
     parser.add_argument('--no-log', action='store_true',
                         default=False, help='Disable logging.')
+    parser.add_argument('--ssl', action='store_true',
+                        default=False, help='Enable SSL connections.')
     parser.add_argument('--no-async', action='store_true',
                         default=False, help='Disable asynchronous evaluation.')
     parser.add_argument('-f', type=str,
