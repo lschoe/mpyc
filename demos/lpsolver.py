@@ -106,7 +106,7 @@ def main():
     l = mpc.options.bit_length
     m = len(T) - 1
     n = len(T[0]) - 1
-    secint = mpc.SecInt(l, m + n)
+    secint = mpc.SecInt(l, n=m + n)
     for i in range(len(T)):
         for j in range(len(T[0])):
             T[i][j] = secint(T[i][j])

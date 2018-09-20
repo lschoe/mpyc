@@ -253,7 +253,7 @@ class Runtime:
             a = tuple([a])
         sftype = type(a[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
-            if  sftype.field.frac_length == 0:
+            if sftype.field.frac_length == 0:
                 await returnType(sftype)
             else:
                 await returnType((sftype, a[0].integral))
@@ -848,12 +848,12 @@ class Runtime:
         else:
             return shares
 
-    def random_bit(self, sftype):
+    def random_bit(self, sftype, signed=False):
         """Secure random bit of the given type."""
-        return self.random_bits(sftype, 1)[0]
+        return self.random_bits(sftype, 1, signed)[0]
 
     @mpc_coro
-    async def random_bits(self, sftype, m):
+    async def random_bits(self, sftype, m, signed=False):
         """m secure random bits of the given type."""
         prss0 = False
         f1 = 1
@@ -869,7 +869,8 @@ class Runtime:
 
         bits = [None] * m
         p = field.modulus
-        q = (p + 1) >> 1 # q = 1/2 mod p
+        if not signed:
+            q = (p + 1) >> 1 # q = 1/2 mod p
         prfs = self.parties[self.id].prfs(p)
         h = m
         while h > 0:
@@ -884,7 +885,12 @@ class Runtime:
             for r, r2 in zip(rs, r2s):
                 if r2.value != 0:
                     h -= 1
-                    bits[h] = field(f1 * ((r.value * r2.sqrt(INV=True).value + 1) % p) * q)
+                    s = r.value * r2.sqrt(INV=True).value
+                    if not signed:
+                        s += 1
+                        s %= p
+                        s *= q
+                    bits[h] = field(f1 * s)
         return bits
 
     def add_bits(self, x, y):

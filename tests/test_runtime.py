@@ -37,6 +37,10 @@ class Arithmetic(unittest.TestCase):
             a > b
         with self.assertRaises(TypeError):
             a >= b
+        b = mpc.random_bit(secfld)
+        self.assertIn(mpc.run(mpc.output(b)), [0,1])
+        b = mpc.random_bit(secfld, signed=True)
+        self.assertIn(mpc.run(mpc.output(b)), [-1,1])
 
     def test_secint(self):
         secint = mpc.SecInt()
@@ -80,6 +84,10 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.lsb(secint(-50)))), 0)
 
         self.assertEqual(mpc.run(mpc.output(secint(3)**73)), 3**73)
+        b = mpc.random_bit(secint)
+        self.assertIn(mpc.run(mpc.output(b)), [0,1])
+        b = mpc.random_bit(secint, signed=True)
+        self.assertIn(mpc.run(mpc.output(b)), [-1,1])
 
     def test_secfxp(self):
         for f in [8, 16, 32, 64]:

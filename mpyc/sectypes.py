@@ -210,13 +210,17 @@ def SecFld(p=None, l=None):
                 super().__init__(field, value)
         SecureFld.field = field
         SecureFld.bit_length = l
-        name = 'SecFld' + str(SecureFld.bit_length) + '(' + str(SecureFld.field.modulus) + ')'
+        name = f'SecFld{SecureFld.bit_length}({SecureFld.field.modulus})' 
         _sectypes[(l, p)] = type(name, (SecureFld,), {'__slots__':()})
     return _sectypes[(l, p)]
 
-def _SecNum(l, f, n=2):
+def _SecNum(l, f, p, n):
     k = Share.runtime.options.security_parameter
-    field = pfield.GF(pfield.find_prime_root(l + max(f, k + 1) + 1, n=n), f)
+    if p is None:
+        p = pfield.find_prime_root(l + max(f, k + 1) + 1, n=n)
+    else:
+        assert p.bit_length() > l + k, 'Prime too small.'
+    field = pfield.GF(p, f)
 
     class SecureNum(Share):
         __slots__ = ()
@@ -226,18 +230,21 @@ def _SecNum(l, f, n=2):
     SecureNum.bit_length = l
     return SecureNum
 
-def SecInt(l=None, n=2):
+def SecInt(l=None, p=None, n=2):
     """Secure l-bit integers."""
     if l is None:
         l = Share.runtime.options.bit_length
 
-    if (l, 0, n) not in _sectypes:
-        SecureInt = _SecNum(l, 0, n)
-        name = 'SecInt' + str(SecureInt.bit_length)
-        _sectypes[(l, 0, n)] = type(name, (SecureInt,), {'__slots__':()})
-    return _sectypes[(l, 0, n)]
+    if (l, 0, p, n) not in _sectypes:
+        SecureInt = _SecNum(l, 0, p, n)
+        if p is None:
+            name = f'SecInt{l}'
+        else:
+            name = f'SecInt{l}({p})'
+        _sectypes[(l, 0, p, n)] = type(name, (SecureInt,), {'__slots__':()})
+    return _sectypes[(l, 0, p, n)]
 
-def SecFxp(l=None, f=None, n=2):
+def SecFxp(l=None, f=None, p=None, n=2):
     """Secure l-bit fixed-point numbers with f-bit fractional part.
     
     NB: if dividing secure fixed-point numbers, make sure that l =~ 2f.
@@ -247,20 +254,23 @@ def SecFxp(l=None, f=None, n=2):
     if f is None:
         f = l // 2 # l =~ 2f enables division such that x =~ 1/(1/x)
 
-    if (l, f, n) not in _sectypes:
-        SecureFxp = _SecNum(l, f, n)
-        name = 'SecFxp' + str(SecureFxp.bit_length) + ':' + str(SecureFxp.field.frac_length)
+    if (l, f, p, n) not in _sectypes:
+        SecureFxp = _SecNum(l, f, p, n)
+        if p is None:
+            name = f'SecFxp{l}:{f}' 
+        else:
+            name = f'SecFxp{l}:{f}({p})'
         def init(self, value=None, integral=False):
             if value is not None:
                 self.integral = isinstance(value, int)
                 if self.integral:
-                    value <<= SecureFxp.field.frac_length
+                    value <<= f
                 elif isinstance(value, float):
-                    value = round(value * (1 << SecureFxp.field.frac_length))
+                    value = round(value * (1 << f))
                 else:
                     self.integral = integral
             else:
                 self.integral = integral
-            super(_sectypes[(l, f, n)], self).__init__(value)
-        _sectypes[(l, f, n)] = type(name, (SecureFxp,), {'__slots__':'integral', '__init__':init})
-    return _sectypes[(l, f, n)]
+            super(_sectypes[(l, f, p, n)], self).__init__(value)
+        _sectypes[(l, f, p, n)] = type(name, (SecureFxp,), {'__slots__':'integral', '__init__':init})
+    return _sectypes[(l, f, p, n)]

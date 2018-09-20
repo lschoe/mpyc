@@ -43,7 +43,7 @@ def dim(x): # dimensions of tensor x
 
 @mpc.coroutine
 async def convolvetensor(x, W, b):
-    logging.info("- - - - - - - - conv2d  - - - - - - -")
+    logging.info('- - - - - - - - conv2d  - - - - - - -')
     # 2D convolutions on m*n sized images from X with s*s sized filters from W.
     # b is of dimension v
     k, r, m, n = dim(x)
@@ -96,12 +96,12 @@ def inprod2D(X, W):
     return Y
 
 def tensormatrix_prod(x, W, b):
-    logging.info("- - - - - - - - fc      - - - - - - -")
+    logging.info('- - - - - - - - fc      - - - - - - -')
     W, b = W.tolist(), b.tolist()
     return [mpc.vector_add(mpc.matrix_prod([z.tolist()], W)[0], b) for z in x]
 
 def maxpool(x):
-    logging.info("- - - - - - - - maxpool - - - - - - -")
+    logging.info('- - - - - - - - maxpool - - - - - - -')
     # maxpooling 2 * 2 squares in images of size m * n with stride 2
     k, r, m, n = dim(x)
     Y = [[[[mpc.max(y[i][j], y[i][j+1], y[i+1][j], y[i+1][j+1])
@@ -110,18 +110,17 @@ def maxpool(x):
     return np.array(Y)
 
 def ReLU(x):
-    logging.info("- - - - - - - - ReLU    - - - - - - -")
+    logging.info('- - - - - - - - ReLU    - - - - - - -')
     return np.vectorize(lambda a: (a >= 0) * a)(x)
 
 def argmax(x):
-    stype = type(x[0])
-    a = stype(0)
+    a = type(x[0])(0)
     m = x[0]
     for i in range(1, len(x)):
         b = m >= x[i]
         a = b * (a - i) + i
         m = b * (m - x[i]) + x[i]
-    return a, m
+    return a
 
 def main():
     global secnum
@@ -143,8 +142,8 @@ def main():
 
     mpc.start()
 
-    logging.info("--------------- INPUT   -------------")
-    print('SecNum type = %s, range = (%d, %d)' % (secnum.__name__, offset, offset + k))
+    logging.info('--------------- INPUT   -------------')
+    print(f'Type = {secnum.__name__}, range = ({offset}, {offset + batch_size})')
     # read batch_size labels and images at given offset
     df = gzip.open(os.path.join('data', 'cnn', 't10k-labels-idx1-ubyte.gz'))
     d = df.read()[8 + offset: 8 + offset + batch_size]
@@ -155,10 +154,10 @@ def main():
     x = list(map(lambda a: a / 255, d))
     x = np.array(x).reshape(batch_size, 1, 28, 28)
     if batch_size == 1:
-        print(np.vectorize(lambda a: int(bool(a)))(x))
+        print(np.vectorize(lambda a: int(bool(a)))(x[0,0]))
     x = scale_to_int(1 << f)(x)
 
-    logging.info("--------------- LAYER 1 -------------")
+    logging.info('--------------- LAYER 1 -------------')
     W, b = load('conv1', f)
     x = convolvetensor(x, W, b)
     mpc.run(mpc.barrier())
@@ -169,7 +168,7 @@ def main():
     x = ReLU(x)
     mpc.run(mpc.barrier())
 
-    logging.info("--------------- LAYER 2 -------------")
+    logging.info('--------------- LAYER 2 -------------')
     W, b = load('conv2', f, 3)
     x = convolvetensor(x, W, b)
     mpc.run(mpc.barrier())
@@ -180,7 +179,7 @@ def main():
     x = ReLU(x)
     mpc.run(mpc.barrier())
 
-    logging.info("--------------- LAYER 3 -------------")
+    logging.info('--------------- LAYER 3 -------------')
     x = x.reshape(batch_size, 64 * 7**2)
     W, b = load('fc1', f, 4)
     x = tensormatrix_prod(x, W, b)
@@ -189,15 +188,15 @@ def main():
     x = ReLU(x)
     mpc.run(mpc.barrier())
 
-    logging.info("--------------- LAYER 4 -------------")
+    logging.info('--------------- LAYER 4 -------------')
     W, b = load('fc2', f, 5)
     x = tensormatrix_prod(x, W, b)
 
-    logging.info("--------------- OUTPUT  -------------")
+    logging.info('--------------- OUTPUT  -------------')
     if secnum.__name__.startswith('SecInt'):
         secnum.bit_length = 37
     for i in range(batch_size):
-        print(labels[i], mpc.run(mpc.output(argmax(x[i])[0])))
+        print(labels[i], mpc.run(mpc.output(argmax(x[i]))))
         print(mpc.run(mpc.output(x[i])))
 
     mpc.shutdown()
