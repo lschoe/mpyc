@@ -155,7 +155,7 @@ class Runtime:
                     else:
                         context = None
                         server_hostname = None
-                    connect = self._loop.create_connection(factory, peer.host, peer.port, 
+                    connect = self._loop.create_connection(factory, peer.host, peer.port,
                                            ssl=context, server_hostname=server_hostname)
                     self.run(connect)
                     break
@@ -195,28 +195,47 @@ class Runtime:
     coroutine = staticmethod(mpc_coro)
     returnType = staticmethod(returnType)
 
-    def input(self, a, senders=None):
-        """Input a to the computation."""
+    def input(self, x, senders=None):
+        """Input x to the computation.
+
+        Value x is a secure number, or x list of secure numbers.
+        The senders are the parties that provide an input.
+        The default is to let every party be a sender.
+        """
+        x_is_list = isinstance(x, list)
+        if x_is_list:
+            x = x[:]
+        else:
+            x = [x]
         if senders is None:
             senders = list(range(len(self.parties)))
-        if isinstance(senders, int):
-            return self._distribute(a, [senders])[0]
+        senders_is_list = isinstance(senders, list)
+        if not senders_is_list:
+            senders = [senders]
+        y = self._distribute(x, senders)
+        if not senders_is_list:
+            y = y[0]
+            if not x_is_list:
+                y = y[0]
         else:
-            return self._distribute(a, senders)
+            if not x_is_list:
+                y = [a[0] for a in y]
+        return y
 
     @mpc_coro
-    async def _distribute(self, a, senders):
-        """Distribute shares for each secret a provided by a sender."""
-        value = a.df if not isinstance(a.df, Future) else None
-        assert value is None or self.id in senders
-        stype = type(a)
-        await returnType(stype, len(senders))
-
+    async def _distribute(self, x, senders):
+        """Distribute shares for each x provided by a sender."""
+        stype = type(x[0])  # all elts assumed of same type
         field = stype.field
+        await returnType(stype, len(senders), len(x))
+        value = x[0].df if not isinstance(x[0].df, Future) else None
+        assert value is None or self.id in senders
+
+        x = [a.df for a in x] # Extract values from all elements of x.
         shares = [None] * len(senders)
         for i, peer_id in enumerate(senders):
             if peer_id == self.id:
-                in_shares = thresha.random_split([value], self.threshold, len(self.parties))
+                in_shares = thresha.random_split(x, self.threshold, len(self.parties))
                 for other_id, data in enumerate(in_shares):
                     data = field.to_bytes(data)
                     if other_id == self.id:
@@ -226,47 +245,50 @@ class Runtime:
             else:
                 shares[i] = self._expect_share(peer_id)
         shares = await gather_shares(shares)
-        shares = [field(field.from_bytes(r)[0]) for r in shares]
-        return shares
+        return [[field(a) for a in field.from_bytes(r)] for r in shares]
 
-    def output(self, a, receivers=None, threshold=None):
-        """Output the value of a to the receivers specified.
+    def output(self, x, receivers=None, threshold=None):
+        """Output the value of x to the receivers specified.
 
-        Value a is a secure number, or a list of secure numbers.
-        The receivers are the parties that will obtain the result.
-        The default is to let everybody know the result.
+        Value x is a secure number, or a list of secure numbers.
+        The receivers are the parties that will obtain the output.
+        The default is to let every party be a receiver.
         """
-        if isinstance(a, list):
-            a = a[:]
+        x_is_list = isinstance(x, list)
+        if x_is_list:
+            x = x[:]
+        else:
+            x = [x]
         if receivers is None:
             receivers = list(range(len(self.parties)))
         elif isinstance(receivers, int):
             receivers = [receivers]
         if threshold is None:
             threshold = self.threshold
-        return gather_shares(self._recombine(a, receivers, threshold))
+        y = self._recombine(x, receivers, threshold)
+        if not x_is_list:
+            y = y[0]
+        return gather_shares(y)
 
     @mpc_coro
-    async def _recombine(self, a, receivers, threshold):
-        """Recombine shares of a."""
-        if not isinstance(a, list):
-            a = tuple([a])
-        sftype = type(a[0])  # all elts assumed of same type
+    async def _recombine(self, x, receivers, threshold):
+        """Recombine shares of elements of x."""
+        sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
             if sftype.field.frac_length == 0:
-                await returnType(sftype)
+                await returnType(sftype, len(x))
             else:
-                await returnType((sftype, a[0].integral))
-            a = await gather_shares(a)
-            field = type(a[0])
+                await returnType((sftype, x[0].integral), len(x))
+            x = await gather_shares(x)
+            field = type(x[0])
         else:
-            await returnType(Share)
+            await returnType(Share, len(x))
             field = sftype
 
         # Send share to all successors in receivers.
         for peer_id in receivers:
             if 0 < (peer_id - self.id) % len(self.parties) <= threshold:
-                self._send_share(peer_id, field.to_bytes(list(a)))
+                self._send_share(peer_id, field.to_bytes(x))
         # Receive and recombine shares if this party is a receiver.
         if self.id in receivers:
             shares = [None] * threshold
@@ -274,43 +296,39 @@ class Runtime:
                 shares[i] = self._expect_share((self.id - threshold + i) % len(self.parties))
             shares = await gather_shares(shares)
             shares = [((self.id - threshold + j) % len(self.parties) + 1, field.from_bytes(shares[j])) for j in range(threshold)]
-            shares.append((self.id + 1, list(a)))
-            b = thresha.recombine(field, shares)
-            if isinstance(a, tuple):
-                return b[0]
-            else:
-                return b
+            shares.append((self.id + 1, x))
+            return thresha.recombine(field, shares)
         else:
-            return
+            return [None] * len(x)
 
     @mpc_coro
-    async def _reshare(self, a):
-        if not isinstance(a, list):
-            a = tuple([a])
-        sftype = type(a[0]) # all elts assumed of same type
+    async def _reshare(self, x):
+        x_is_list = isinstance(x, list)
+        if not x_is_list:
+            x = [x]
+        sftype = type(x[0]) # all elts assumed of same type
         if issubclass(sftype, Share):
             if  sftype.field.frac_length == 0:
-                await returnType(sftype, len(a))
+                await returnType(sftype, len(x))
             else:
-                await returnType((sftype, a[0].integral), len(a))
-            a = await mpc.gather(a)
+                await returnType((sftype, x[0].integral), len(x))
+            x = await mpc.gather(x)
             field = sftype.field
         else:
             await returnType(Share)
             field = sftype
 
-        in_shares = thresha.random_split(a, self.threshold, len(self.parties))
+        in_shares = thresha.random_split(x, self.threshold, len(self.parties))
         in_shares = [field.to_bytes(elts) for elts in in_shares]
         # Recombine the first 2t+1 output_shares.
         out_shares = await gather_shares(self._exchange_shares(in_shares)[:2*self.threshold+1])
-        b = thresha.recombine(field, [(j + 1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))])
+        y = thresha.recombine(field, [(j + 1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))])
 
         if issubclass(sftype, Share):
-            b = [sftype(s) for s in b]
-        if isinstance(a, tuple):
-            return b[0]
-        else:
-            return b
+            y = [sftype(s) for s in y]
+        if not x_is_list:
+            y = y[0]
+        return y
 
     @mpc_coro
     async def trunc(self, a, f=None):
