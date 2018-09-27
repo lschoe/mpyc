@@ -1085,24 +1085,32 @@ def _load_config(filename, t=None):
 def setup():
     """Setup a runtime."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', metavar='C',
-                        help='Party configuration file. Defines N.')
-    parser.add_argument('-t', '--threshold', type=int, metavar='T',
-                        help='Threshold, 2T+1<=N.')
-    parser.add_argument('-l', '--bit-length', type=int, metavar='L',
-                        help='Maximum bit length (for comparisons).')
-    parser.add_argument('-k', '--security_parameter', type=int, metavar='K',
-                        help='Security parameter. Leakage probability 2**-K.')
-    parser.add_argument('--no-log', action='store_true',
-                        default=False, help='Disable logging.')
-    parser.add_argument('--ssl', action='store_true',
-                        default=False, help='Enable SSL connections.')
-    parser.add_argument('--no-async', action='store_true',
-                        default=False, help='Disable asynchronous evaluation.')
-    parser.add_argument('-f', type=str,
-                        default='', help='Consume IPython string.')
+    parser.add_argument('-H', '--HELP', action='store_true', default=False,
+                        help=f'show -h help message for {sys.argv[0]}, if any')
+    group = parser.add_argument_group('MPyC')
+    group.add_argument('-c', '--config', metavar='C',
+                        help='party configuration file C, which defines N')
+    group.add_argument('-t', '--threshold', type=int, metavar='T',
+                        help='threshold T, 2T+1<=N')
+    group.add_argument('-l', '--bit-length', type=int, metavar='L',
+                        help='maximum bit length L (for comparisons etc.)')
+    group.add_argument('-k', '--security-parameter', type=int, metavar='K',
+                        help='security parameter K for leakage probability 1/2**K')
+    group.add_argument('--no-log', action='store_true',
+                        default=False, help='disable logging')
+    group.add_argument('--ssl', action='store_true',
+                        default=False, help='enable SSL connections')
+    group.add_argument('--no-async', action='store_true',
+                        default=False, help='disable asynchronous evaluation')
+    group.add_argument('-f', type=str,
+                        default='', help='consume IPython string')
     parser.set_defaults(bit_length=32, security_parameter=30)
-    options, _args = parser.parse_known_args()
+    options, args = parser.parse_known_args()
+    if options.HELP:
+        args += ['-h']
+        print(f'Showing -h help message for {sys.argv[0]}, if available:')
+        print()
+    sys.argv = [sys.argv[0]] + args
     logging_enabled = not options.no_log
     if not logging_enabled:
         logging.basicConfig(level=logging.WARNING)
@@ -1123,8 +1131,8 @@ def setup():
     assert 2 * options.threshold < len(parties)
 
     runtime = Runtime(id, parties, options)
+    runtime.parser = parser
     runtime.options = options
-    runtime.args = _args
     runtime.logging_enabled = logging_enabled
     runtime._loop = asyncio.get_event_loop()
     Share.runtime = runtime
@@ -1136,5 +1144,5 @@ def setup():
 
 try: # ignore exceptions for pydoc etc.
     setup()
-except:
+except Exception:
     pass

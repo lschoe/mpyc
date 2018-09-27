@@ -197,14 +197,14 @@ async def random_unit_vector(n):                    # returns list of n secint e
 # In[8]:
 
 
-m = 7
+N = 7
 
 
 # In[9]:
 
 
 print('Random unit vectors:')
-for n in range(1, m + 1):
+for n in range(1, N + 1):
     s = mpc.run(mpc.output(random_unit_vector(n)))
     print('{0:2} {1}'.format(n, s))
 
@@ -213,7 +213,7 @@ for n in range(1, m + 1):
 
 
 print('Random permutations:')
-for n in range(1, m + 1):
+for n in range(1, N + 1):
     s = mpc.run(mpc.output(random_permutation(n)))
     print('{0:2} {1}'.format(n, s))
 
@@ -222,12 +222,10 @@ for n in range(1, m + 1):
 
 
 print('Random derangements:')
-for n in range(2, m + 1):
+for n in range(2, N + 1):
     s = mpc.run(mpc.output(random_derangement(n)))
     print('{0:2} {1}'.format(n, s))
 
-
-# This concludes the explanation of our MPyC protocol for the Secret Santa problem. The demo `secretsanta.py` can be run with  relies on the same 
 
 # In[12]:
 
@@ -237,9 +235,9 @@ mpc.shutdown()   # required only when run with multiple parties
 
 # ## Deploying the Python code with multiple parties
 # 
-# All the Python code contained in this notebook can be saved as Python script using the `Download as` option from the `File` menu in Jupyter notebooks. Choose to download the notebook as `Python (.py)`.
+# All the Python code contained in this notebook can be saved as a Python script using the `Download as` option from the `File` menu in Jupyter notebooks. Choose to download the notebook as `Python (.py)`.
 # 
-# We did so, using the file name `SecretSantaExplained.py` and stored this file in the same directory as the present notebook. Then we can run the Python script, as shown below. 
+# We have done so and the resulting file [SecretSantaExplained.py](SecretSantaExplained.py) is stored in the same directory as the present notebook. Now we can run the Python script, as shown below. 
 # 
 # First we show a run with one party only. However, this time the code runs outside the Jupyter notebook, using its own Python interpreter. 
 
@@ -267,6 +265,6 @@ get_ipython().system('run 3 SecretSantaExplained.py')
 get_ipython().system('run 5 SecretSantaExplained.py')
 
 
-# If desired, the code can also be run with two or four parties. The inlcuded test setup supports up to $m=5$ parties, of which at most $t$ can be corrupt, with $0\leq t\leq \lfloor (m-1)/2 \rfloor$.
+# If desired, the code can also be run with two or four parties. The included test setup supports up to $m=5$ parties, of which at most $t$ can be corrupt, with $0\leq t\leq \lfloor (m-1)/2 \rfloor$.
 # 
-# The included Python script `secretsanta.py` contains a slightly more extensive demo.
+# This concludes the explanation of our MPyC protocol for the Secret Santa problem. The Python script [secretsanta.py](secretsanta.py) contains a slightly more extensive demo, showing how secure fixed-point arithmetic or secure prime fields can be used instead of secure integers.

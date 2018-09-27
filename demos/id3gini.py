@@ -91,10 +91,9 @@ def main():
     global secint, S, C, attr_names
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--data', help='Input data.')
-    parser.add_argument('options', nargs='*')
+    parser.add_argument('-d', '--data', help='input data')
     parser.set_defaults(data='tennis')
-    args = parser.parse_args(mpc.args)
+    args = parser.parse_args()
 
     secint = mpc.SecInt()
 

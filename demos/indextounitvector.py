@@ -1,3 +1,4 @@
+import sys
 from mpyc.runtime import mpc
 
 def secret_index(x, n):
@@ -19,8 +20,8 @@ def secret_index(x, n):
 
 secint = mpc.SecInt()
 
-if mpc.args:
-    t = int(mpc.args[0])
+if sys.argv[1:]:
+    t = int(sys.argv[1])
 else:
     t = 12
     print('Setting input to default =', t)

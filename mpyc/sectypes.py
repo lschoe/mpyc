@@ -219,7 +219,7 @@ def _SecNum(l, f, p, n):
     if p is None:
         p = pfield.find_prime_root(l + max(f, k + 1) + 1, n=n)
     else:
-        assert p.bit_length() > l + k, 'Prime too small.'
+        assert p.bit_length() > l + max(f, k + 1), f'Prime {p} too small.'
     field = pfield.GF(p, f)
 
     class SecureNum(Share):

@@ -13,6 +13,10 @@ run -1 secretsanta.py
 
 run -2 secretsanta.py
 
+run 1 id3gini.py -h
+
+run 1 id3gini.py -H
+
 run-all 1
 
 run-all 2

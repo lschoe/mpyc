@@ -12,6 +12,7 @@ secure computation (reduces memory usage).
 """
 
 import os
+import sys
 import logging
 import random
 import gzip
@@ -125,19 +126,19 @@ def argmax(x):
 def main():
     global secnum
 
-    k = 1 if len(mpc.args) == 0 else float(mpc.args[0])
+    k = 1 if len(sys.argv) == 1 else float(sys.argv[1])
     if k - int(k) == 0.5:
         secnum = mpc.SecFxp(10, 4)
     else:
         secnum = mpc.SecInt(37)
     batch_size = round(k - 0.01)
-    if len(mpc.args) <= 1:
+    if len(sys.argv) <= 2:
         if len(mpc.parties) == 1:
             offset = random.randrange(10001 - batch_size)
         else:
             offset = 0
     else:
-        offset = int(mpc.args[1])
+        offset = int(sys.argv[2])
     f = 6
 
     mpc.start()

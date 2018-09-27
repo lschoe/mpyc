@@ -1,3 +1,4 @@
+import sys
 from mpyc.runtime import mpc
 
 def bsort(x):
@@ -27,8 +28,8 @@ def bsort(x):
     return x
 
 def main():
-    if mpc.args:
-        n = int(mpc.args[0])
+    if sys.argv[1:]:
+        m = int(sys.argv[1])
     else:
         n = 5
         print('Setting input to default =', n)

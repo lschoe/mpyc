@@ -237,7 +237,7 @@ def mpc_coro(f):
 
     An MPC coroutine is evaluated asychronously, returning empty placeholders.
     The type of the placeholders is defined either by a return annotation
-    of the form “-> expression” or by the first await expression in f.
+    of the form "-> expression" or by the first await expression in f.
     Return annotations can only be used for static types.
     """
 

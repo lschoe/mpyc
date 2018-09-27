@@ -21,7 +21,7 @@ See `demos` for usage examples.
 
 1. Python 3.6 or higher required (Python 3.5 or lower is not sufficient).
 
-2. Installing package `gmpy2` is optional, but will considerably benefit the performance of `mpyc`.
+2. Installing package `gmpy2` is optional, but will considerably enhance the performance of `mpyc`.
 On Linux, `pip install gmpy2` should do the job, but on Windows, this may fail with compiler errors.
 Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christoph Gohlke's excellent
 [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/) webpage.

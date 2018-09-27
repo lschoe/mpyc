@@ -6,6 +6,7 @@ which p(i)=i, hence the point is mapped to itself. Permutations without
 fixed points are also called 'derangements'.
 """
 
+import sys
 from mpyc.runtime import mpc
 
 @mpc.coroutine
@@ -48,12 +49,12 @@ async def random_derangement(n, sectype):
     return p
 
 def main():
-    if not mpc.args:
+    if sys.argv[1:]:
+        m = int(sys.argv[1])
+    else:
         m = 8
         print('Setting input to default =', m)
-    else:
-        m = int(mpc.args[0])
-
+    
     mpc.start()
 
     secfld = mpc.SecFld(l=max(len(mpc.parties), (m - 1)).bit_length() + 1)

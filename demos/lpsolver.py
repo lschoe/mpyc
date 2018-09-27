@@ -2,7 +2,7 @@
 
 The LP solver returns a solution to the following problem.
 
-Given m x n matrix A, length-m vector b >=0, and length-n vector c.
+Given m x n matrix A, length-m vector b >= 0, and length-n vector c.
 Find a length-n vector x minimizing c.x subject to A x <= b and x >= 0.
 
 The small (or, condensed) tableau variant of the Simplex algorithm is used.
@@ -92,10 +92,10 @@ def argmin_rat(xs):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--data', help='Filename for tableau.')
+    parser.add_argument('-d', '--data', help='filename for tableau')
     parser.add_argument('options', nargs='*')
     parser.set_defaults(data='default')
-    args = parser.parse_args(mpc.args)
+    args = parser.parse_args()
 
     if not args.options:
         certificate_filename = 'c' + str(mpc.id) + '.cert'

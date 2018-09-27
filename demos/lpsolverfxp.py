@@ -103,10 +103,10 @@ def unit_vector(a, n):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--data', help='Filename for tableau.')
+    parser.add_argument('-d', '--data', help='filename for tableau')
     parser.add_argument('options', nargs='*')
     parser.set_defaults(data='default')
-    args = parser.parse_args(mpc.args)
+    args = parser.parse_args()
 
     if not args.options:
         certificate_filename = "c" + str(mpc.id) + ".cert"
