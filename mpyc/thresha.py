@@ -15,22 +15,22 @@ __all__ = ['random_split', 'recombine', 'pseudorandom_share',
 import hashlib
 import secrets
 
-def random_split(s, d, n):
-    """Split each secret given in s into n random Shamir shares.
+def random_split(s, t, m):
+    """Split each secret given in s into m random Shamir shares.
 
-    The (maximum) degree for the Shamir polynomials is d, 0 <= d < n.
+    The (maximum) degree for the Shamir polynomials is t, 0 <= t < n.
     Return matrix of shares, one row per party.
     """
     p = s[0].modulus
-    m = len(s)
-    shares = [[None] * m for _ in range(n)]
-    for h in range(m):
-        c = [secrets.randbelow(p) for _ in range(d)]
-        # polynomial f(x) = s[h] + c[d-1] x + c[d-2] x^2 + ... + c[0] x^d
-        for i in range(n):
+    n = len(s)
+    shares = [[None] * n for _ in range(m)]
+    for h in range(n):
+        c = [secrets.randbelow(p) for _ in range(t)]
+        # polynomial f(x) = s[h] + c[t-1] x + c[t-2] x^2 + ... + c[0] x^t
+        for i in range(m):
             y = 0
-            for c_k in c:
-                y += c_k
+            for c_j in c:
+                y += c_j
                 y *= i + 1
             shares[i][h] = (y + s[h].value) % p
     return shares
@@ -63,16 +63,17 @@ def recombine(field, points, x_rs=0):
                         coefficient *= (x_r - x_j) / (x_i - x_j)
                 vector[r].append(coefficient.value)
             _recombination_vectors[(field, xs, x_r.value)] = vector[r]
-    m = len(shares[0])
-    sums = [[0] * m for _ in range(len(x_rs))]
-    for i in range(len(shares)):
-        for h in range(m):
+    m = len(shares)
+    n = len(shares[0])
+    sums = [[0] * n for _ in range(len(x_rs))]
+    for i in range(m):
+        for h in range(n):
             s = shares[i][h]
             if not isinstance(s, int):
                 s = s.value
             for r in range(len(sums)):
                 sums[r][h] += s * vector[r][i]
-    for h in range(m):
+    for h in range(n):
         for r in range(len(sums)):
             sums[r][h] = field(sums[r][h])
     if isinstance(x_rs, tuple):
@@ -84,58 +85,58 @@ def recombine(field, points, x_rs=0):
 #the party concerned, and the subset.
 _f_in_i_cache = {}
 
-def pseudorandom_share(field, n, i, prfs, uci, m):
-    """Return pseudorandom Shamir shares for party i for m random numbers.
+def pseudorandom_share(field, m, i, prfs, uci, n):
+    """Return pseudorandom Shamir shares for party i for n random numbers.
 
     The shares are based on the pseudorandom functions for party i,
     given in prfs, which maps subsets of parties to PRF instances.
     Input uci is used to evaluate the PRFs on a unique common input.
     """
     s = str(uci)
-    sums = [0] * m
-    # iterate over (n-1 choose d) subsets for degree d.
+    sums = [0] * n
+    # iterate over (m-1 choose t) subsets for degree t.
     for subset, prf in prfs.items():
         try:
             f_in_i = _f_in_i_cache[(field, i, subset)]
         except KeyError:
-            complement = frozenset(range(n)) - subset
+            complement = frozenset(range(m)) - subset
             points = [(0, [1])] + [(x + 1, [0]) for x in complement]
             f_in_i = recombine(field, points, i + 1)[0].value
             _f_in_i_cache[(field, i, subset)] = f_in_i
-        prl = prf(s, m)
-        for h in range(m):
+        prl = prf(s, n)
+        for h in range(n):
             sums[h] += prl[h] * f_in_i
-    for h in range(m):
+    for h in range(n):
         sums[h] = field(sums[h])
     return sums
 
-def pseudorandom_share_zero(field, n, i, prfs, uci, m):
-    """Return pseudorandom Shamir shares for party i for m sharings of 0.
+def pseudorandom_share_zero(field, m, i, prfs, uci, n):
+    """Return pseudorandom Shamir shares for party i for n sharings of 0.
 
     The shares are based on the pseudorandom functions for party i,
     given in prfs, which maps subsets of parties to PRF instances.
     Input uci is used to evaluate the PRFs on a unique common input.
     """
     s = str(uci)
-    sums = [0] * m
-    # iterate over (n-1 choose d) subsets for degree d.
+    sums = [0] * n
+    # iterate over (m-1 choose t) subsets for degree t.
     for subset, prf in prfs.items():
         try:
             f_in_i = _f_in_i_cache[(field, i, subset)]
         except KeyError:
-            complement = frozenset(range(n)) - subset
+            complement = frozenset(range(m)) - subset
             points = [(0, [1])] + [(x + 1, [0]) for x in complement]
             f_in_i = recombine(field, points, i + 1)[0].value
             _f_in_i_cache[(field, i, subset)] = f_in_i
-        d = n - len(subset)
-        prl = prf(s, m * d)
-        for h in range(m):
+        d = m - len(subset)
+        prl = prf(s, n * d)
+        for h in range(n):
             y = 0
-            for k in range(d):
-                y += prl[h * d + k]
+            for j in range(d):
+                y += prl[h * d + j]
                 y *= i + 1
             sums[h] += y * f_in_i
-    for h in range(m):
+    for h in range(n):
         sums[h] = field(sums[h])
     return sums
 
@@ -155,10 +156,10 @@ class PRF:
         self.max = bound
         self.byte_length = len(self.key) + ((bound-1).bit_length() + 7) // 8
 
-    def __call__(self, s, m=None):
+    def __call__(self, s, n=None):
         """Return a number or list of numbers in range(self.max) for input string s."""
-        n = m if m else 1
+        n_ = n if n else 1
         l = self.byte_length
-        dk = hashlib.pbkdf2_hmac('sha1', self.key, s.encode(), 1, n * l)
-        x = [int.from_bytes(dk[i * l: (i+1) * l], byteorder='little') % self.max for i in range(n)]
-        return x if m else x[0]
+        dk = hashlib.pbkdf2_hmac('sha1', self.key, s.encode(), 1, n_ * l)
+        x = [int.from_bytes(dk[i * l: (i+1) * l], byteorder='little') % self.max for i in range(n_)]
+        return x if n else x[0]

@@ -50,26 +50,26 @@ async def random_derangement(n, sectype):
 
 def main():
     if sys.argv[1:]:
-        m = int(sys.argv[1])
+        N = int(sys.argv[1])
     else:
-        m = 8
-        print('Setting input to default =', m)
+        N = 8
+        print('Setting input to default =', N)
     
     mpc.start()
 
-    secfld = mpc.SecFld(l=max(len(mpc.parties), (m - 1)).bit_length() + 1)
+    secfld = mpc.SecFld(l=max(len(mpc.parties), (N - 1)).bit_length() + 1)
     print('Using secure fields:', secfld)
-    for n in range(2, m + 1):
+    for n in range(2, N + 1):
         print(n, mpc.run(mpc.output(random_derangement(n, secfld))))
 
     secint = mpc.SecInt()
     print('Using secure integers:', secint)
-    for n in range(2, m + 1):
+    for n in range(2, N + 1):
         print(n, mpc.run(mpc.output(random_derangement(n, secint))))
 
     secfxp = mpc.SecFxp()
     print('Using secure fixed-point numbers:', secfxp)
-    for n in range(2, m + 1):
+    for n in range(2, N + 1):
         print(n, mpc.run(mpc.output(random_derangement(n, secfxp))))
 
     mpc.shutdown()

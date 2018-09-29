@@ -105,34 +105,32 @@ class PrimeFieldElement():
             return self.unsigned()
 
     @classmethod
-    def to_bytes(cls, values):
-        """Return an array of bytes representing the given list of values.
+    def to_bytes(cls, x):
+        """Return an array of bytes representing the given list of values x.
 
         Values are either integers or field elements.
         """
-        m = len(values)
         r = (cls.modulus.bit_length() + 7) // 8
-        data = bytearray(2 + m * r)
+        data = bytearray(2 + len(x) * r)
         data[:2] = r.to_bytes(2, byteorder='little')
         j = 2
-        for i in range(m):
-            e = values[i]
-            if not isinstance(e, int): e = e.value
-            data[j:j + r] = e.to_bytes(r, byteorder='little')
+        for v in x:
+            if not isinstance(v, int): v = v.value
+            data[j:j + r] = v.to_bytes(r, byteorder='little')
             j += r
         return data
 
     @staticmethod
     def from_bytes(data):
-        """Return the list of elements represented by the given array of bytes."""
+        """Return the list of integers represented by the given array of bytes."""
         r = int.from_bytes(data[:2], byteorder='little')
-        m = (len(data) - 2) // r
-        elements = [None] * m
+        n = (len(data) - 2) // r
+        x = [None] * n
         j = 2
-        for i in range(m):
-            elements[i] = int.from_bytes(data[j:j + r], byteorder='little')
+        for i in range(n):
+            x[i] = int.from_bytes(data[j:j + r], byteorder='little')
             j += r
-        return elements
+        return x
 
     def __add__(self, other):
         """Addition."""

@@ -29,7 +29,7 @@ def bsort(x):
 
 def main():
     if sys.argv[1:]:
-        m = int(sys.argv[1])
+        n = int(sys.argv[1])
     else:
         n = 5
         print('Setting input to default =', n)

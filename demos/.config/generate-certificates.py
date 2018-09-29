@@ -59,9 +59,9 @@ if __name__ == '__main__':
                       help='output filename prefix')
     parser.add_argument('-k', '--key-size', type=int,
                       help='key size')
-    parser.add_argument('-n', '--parties', dest='n', type=int,
+    parser.add_argument('-m', '--parties', dest='m', type=int,
                       help='number of parties')
-    parser.set_defaults(n=5, key_size=2048, prefix='party_')
+    parser.set_defaults(m=5, key_size=2048, prefix='party_')
     options = parser.parse_args()
 
     # self-signed certificate
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     save_key(ca_key, 'mpyc_ca.key')
     save_certificate(ca_cert, 'mpyc_ca.crt')
 
-    for i in range(options.n):
+    for i in range(options.m):
         key = create_key(options.key_size)
         req = create_request(key, f'MPyC party {i}')
         cert = create_certificate(req, ca_cert, ca_key, 256 + i)

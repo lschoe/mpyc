@@ -34,7 +34,7 @@ class Runtime:
     the list of parties, etc., and handles secret-shared values of type Share.
 
     1-party case is supported (with option to disable asynchronous evaluation).
-    Threshold 0 (no corrupted parties) is supported for n-party case as well
+    Threshold 0 (no corrupted parties) is supported for m-party case as well
     to enable distributed computation (without secret sharing).
     """
 
@@ -45,10 +45,10 @@ class Runtime:
         self.options = options
         self.threshold = options.threshold
         self._program_counter = [0]
-        n = len(self.parties)
+        m = len(self.parties)
         t = self.threshold
-        #caching (n choose t):
-        self._bincoef = math.factorial(n) // math.factorial(t) // math.factorial(n - t)
+        #caching (m choose t):
+        self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
 
     def _increment_pc(self):
         """Increment the program counter."""
@@ -116,10 +116,11 @@ class Runtime:
         """
         logging.info(f'Start MPyC runtime v{self.version}')
         self.start_time = time.time()
-        if len(self.parties) == 1:
+        m = len(self.parties)
+        if  m == 1:
             return
 
-        # len(self.parties) > 1
+        # m > 1
         for peer in self.parties:
             peer.protocol = Future() if peer.id == self.id else None
         factory = lambda: asyncoro.SharesExchanger(self)
@@ -176,7 +177,8 @@ class Runtime:
 
         Close all connections, if any.
         """
-        if len(self.parties) > 1:
+        m = len(self.parties)
+        if m > 1:
             # Wait for all parties.
             self.run(self.output(self.input(sectypes.SecFld(101)(self.id))))
             # Close connections to all parties.
@@ -208,7 +210,8 @@ class Runtime:
         else:
             x = [x]
         if senders is None:
-            senders = list(range(len(self.parties)))
+            m = len(self.parties)
+            senders = list(range(m))
         senders_is_list = isinstance(senders, list)
         if not senders_is_list:
             senders = [senders]
@@ -231,11 +234,13 @@ class Runtime:
         value = x[0].df if not isinstance(x[0].df, Future) else None
         assert value is None or self.id in senders
 
+        m = len(self.parties)
+        t = self.threshold
         x = [a.df for a in x] # Extract values from all elements of x.
         shares = [None] * len(senders)
         for i, peer_id in enumerate(senders):
             if peer_id == self.id:
-                in_shares = thresha.random_split(x, self.threshold, len(self.parties))
+                in_shares = thresha.random_split(x, t, m)
                 for other_id, data in enumerate(in_shares):
                     data = field.to_bytes(data)
                     if other_id == self.id:
@@ -260,7 +265,8 @@ class Runtime:
         else:
             x = [x]
         if receivers is None:
-            receivers = list(range(len(self.parties)))
+            m = len(self.parties)
+            receivers = list(range(m))
         elif isinstance(receivers, int):
             receivers = [receivers]
         if threshold is None:
@@ -271,7 +277,7 @@ class Runtime:
         return gather_shares(y)
 
     @mpc_coro
-    async def _recombine(self, x, receivers, threshold):
+    async def _recombine(self, x, receivers, t):
         """Recombine shares of elements of x."""
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
@@ -285,17 +291,18 @@ class Runtime:
             await returnType(Share, len(x))
             field = sftype
 
+        m = len(self.parties)
         # Send share to all successors in receivers.
         for peer_id in receivers:
-            if 0 < (peer_id - self.id) % len(self.parties) <= threshold:
+            if 0 < (peer_id - self.id) % m <= t:
                 self._send_share(peer_id, field.to_bytes(x))
         # Receive and recombine shares if this party is a receiver.
         if self.id in receivers:
-            shares = [None] * threshold
-            for i in range(threshold):
-                shares[i] = self._expect_share((self.id - threshold + i) % len(self.parties))
+            shares = [None] * t
+            for i in range(t):
+                shares[i] = self._expect_share((self.id - t + i) % m)
             shares = await gather_shares(shares)
-            shares = [((self.id - threshold + j) % len(self.parties) + 1, field.from_bytes(shares[j])) for j in range(threshold)]
+            shares = [((self.id - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
             shares.append((self.id + 1, x))
             return thresha.recombine(field, shares)
         else:
@@ -318,10 +325,12 @@ class Runtime:
             await returnType(Share)
             field = sftype
 
-        in_shares = thresha.random_split(x, self.threshold, len(self.parties))
+        m = len(self.parties)
+        t = self.threshold
+        in_shares = thresha.random_split(x, t, m)
         in_shares = [field.to_bytes(elts) for elts in in_shares]
         # Recombine the first 2t+1 output_shares.
-        out_shares = await gather_shares(self._exchange_shares(in_shares)[:2*self.threshold+1])
+        out_shares = await gather_shares(self._exchange_shares(in_shares)[:2 * t + 1])
         y = thresha.recombine(field, [(j + 1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))])
 
         if issubclass(sftype, Share):
@@ -350,7 +359,7 @@ class Runtime:
             r_modf += r_bits[i].value
         r_divf = self.random(Zp, 1<<(k + l - f))
         a = await gather_shares(a)
-        c = await self.output(a + (1<<l) + r_modf + (1<<f)*r_divf)
+        c = await self.output(a + (1<<l) + r_modf + (1<<f) * r_divf)
         c = c.value % (1<<f)
         return (a - c + r_modf) / (1<<f)
 
@@ -362,22 +371,24 @@ class Runtime:
     async def is_zero_public(self, a) -> Future:
         """Secure public zero test of a."""
         stype = type(a)
+        m = len(self.parties)
+        t = self.threshold
         if stype.__name__.startswith('SecFld'):
             prfs = self.parties[self.id].prfs(stype.field.modulus)
             while True:
                 r, s = self.randoms(stype.field, 2)
-                z = thresha.pseudorandom_share_zero(stype.field, len(self.parties), self.id, prfs, self._prss_uci(), 1)
-                if await self.output(r * s + z[0], threshold=2*self.threshold):
+                z = thresha.pseudorandom_share_zero(stype.field, m, self.id, prfs, self._prss_uci(), 1)
+                if await self.output(r * s + z[0], threshold=2 * t):
                     break
         else:
             r = self.random(stype.field) #failure shared r is 0 with prob. 1/p
         a = await gather_shares(a)
         if stype.__name__.startswith('SecFld'):
-            z = thresha.pseudorandom_share_zero(stype.field, len(self.parties), self.id, prfs, self._prss_uci(), 1)
+            z = thresha.pseudorandom_share_zero(stype.field, m, self.id, prfs, self._prss_uci(), 1)
             b = a * r + z[0]
         else:
             b = a * r
-        c = await self.output(b, threshold=2*self.threshold)
+        c = await self.output(b, threshold=2 * t)
         return c == 0
 
     @mpc_coro
@@ -431,7 +442,7 @@ class Runtime:
         else:
             a, b = await gather_shares(a, b)
         if stype.field.frac_length > 0 and a_integral:
-            a = a / (1<<stype.field.frac_length) # expensive # a /= inplace issue
+            a = a / (1 << stype.field.frac_length) # expensive # a /= inplace issue
         c = self._reshare(a * b)
         if stype.field.frac_length > 0 and not a_integral:
             c = self.trunc(stype(c.df))  # c.df
@@ -460,23 +471,23 @@ class Runtime:
         ar = await self.output(a * r, threshold=2*self.threshold)
         if ar == 0:
             return self.reciprocal(a)
-        return r * (1<<stype.field.frac_length) / ar
+        return r * (1 << stype.field.frac_length) / ar
 
-    def pow(self, a, n):
-        """Secure exponentation of a to public power n."""
-        if n == 0:
+    def pow(self, a, b):
+        """Secure exponentation of a to public power b."""
+        if b == 0:
             return type(a)(1)
-        if n < 0:
+        if b < 0:
             a = self.reciprocal(a)
-            n = -n
-        b = a
+            b = -b
+        d = a
         c = 1
-        for i in range(n.bit_length() - 1):
-            # b = a ** (1 << i) holds
-            if n & (1 << i):
-                c = c * b
-            b = b * b
-        c = c * b
+        for i in range(b.bit_length() - 1):
+            # d = a ** (1 << i) holds
+            if b & (1 << i):
+                c = c * d
+            d = d * d
+        c = c * d
         return c
 
     def and_(self, a, b):
@@ -538,7 +549,7 @@ class Runtime:
             else:
                 c[i] = 1 - z[i] if c[i].is_sqr() else z[i]
         e = await gather_shares(self.prod(c))
-        return e * (1<<stype.field.frac_length)
+        return e * (1 << stype.field.frac_length)
 
     @mpc_coro
     async def sgn(self, a, EQ=False, GE=False):
@@ -550,26 +561,26 @@ class Runtime:
         l = stype.bit_length
         r_bits = await gather_shares(self.random_bits(Zp, l))
         r_modl = 0
-        for i in range(l-1, -1, -1):
+        for i in range(l - 1, -1, -1):
             r_modl <<= 1
             r_modl += r_bits[i].value
         a = await gather_shares(a)
         a_rmodl = a + (1<<l) + r_modl
         k = self.options.security_parameter
         r_divl = self.random(Zp, 1<<k)
-        c = await self.output(a_rmodl + (1<<l)*r_divl)
+        c = await self.output(a_rmodl + (1<<l) * r_divl)
         c = c.value % (1<<l)
 
         if not EQ: # a la Toft
             s_bit = (await gather_shares(self.random_bits(Zp, 1)))[0]
             s_sign = (1 - 2 * s_bit).value
-            e = [None] * (l+1)
+            e = [None] * (l + 1)
             sumXors = 0
-            for i in range(l-1, -1, -1):
+            for i in range(l - 1, -1, -1):
                 c_i = (c >> i) & 1
-                e[i] = Zp(s_sign + r_bits[i].value - c_i + 3*sumXors)
+                e[i] = Zp(s_sign + r_bits[i].value - c_i + 3 * sumXors)
                 sumXors += 1 - r_bits[i].value if c_i else r_bits[i].value
-            e[l] = Zp(s_sign - 1 + 3*sumXors)
+            e[l] = Zp(s_sign - 1 + 3 * sumXors)
             f = await self.is_zero_public(self.prod(e))
             UF = s_bit if f == 1 else 1 - s_bit
             z = (a_rmodl - (c + UF * (1<<l))) / (1<<l)
@@ -584,7 +595,7 @@ class Runtime:
                 z = self._reshare(z)
                 z = await gather_shares(z)
 
-        return z * (1<<stype.field.frac_length)
+        return z * (1 << stype.field.frac_length)
 
     def min(self, *x):
         """Secure minimum of all given elements in x."""
@@ -619,11 +630,11 @@ class Runtime:
         k = self.options.security_parameter
         b = self.random_bit(stype)
         a, b = await gather_shares(a, b)
-        b = b / (1<<stype.field.frac_length)
+        b = b / (1 << stype.field.frac_length)
         r = self.random(stype.field, 1 << (l + k))
         c = await self.output(a + (1<<l) + b + (r.value << 1))
         x = 1 - b if c.value & 1 else b #xor
-        return x * (1<<stype.field.frac_length)
+        return x * (1 << stype.field.frac_length)
 
     @mpc_coro
     async def sum(self, x):
@@ -671,7 +682,7 @@ class Runtime:
         for i in range(len(x)):
             s += x[i].value * y[i].value
         if stype.field.frac_length > 0 and x_integral:
-            f1 = 1 / stype.field(1<<stype.field.frac_length) # expensive
+            f1 = 1 / stype.field(1 << stype.field.frac_length) # expensive
             s = s * f1.value
         s = self._reshare(stype.field(s))
         if stype.field.frac_length > 0 and not x_integral:
@@ -759,7 +770,7 @@ class Runtime:
             await returnType((stype, a_integral and x[0].integral), len(x))
         a, x = await gather_shares(a, x)
         if stype.field.frac_length > 0 and a_integral:
-            a = a / (1<<stype.field.frac_length) # expensive # a /= inplace issue
+            a = a / (1 << stype.field.frac_length) # expensive # a /= inplace issue
         for i in range(len(x)):
             x[i] = x[i] * a
         x = self._reshare(x)
@@ -800,13 +811,13 @@ class Runtime:
         """Secure matrix product of A with (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
         stype = type(A[0][0])
-        m = len(B) if tr else len(B[0])
-        await returnType(stype, len(A), m)
+        n = len(B) if tr else len(B[0])
+        await returnType(stype, len(A), n)
         A, B = await gather_shares(A, B)
         C = [None] * len(A)
         for ia in range(len(A)):
-            C[ia] = [None] * m
-            for ib in range(m):
+            C[ia] = [None] * n
+            for ib in range(n):
                 s = 0
                 for i in range(len(A[0])):
                     s += A[ia][i].value * (B[ib][i] if tr else B[i][ib]).value
@@ -822,13 +833,13 @@ class Runtime:
         """Secure Gaussian elimination A d - b c."""
         A, b, c = [r[:] for r in A], b[:], c[:]
         stype = type(A[0][0])
-        m = len(A[0])
-        await returnType(stype, len(A), m)
+        n = len(A[0])
+        await returnType(stype, len(A), n)
         A, d, b, c = await gather_shares(A, d, b, c)
         d = d.value
         for i in range(len(A)):
             b[i] = b[i].value
-            for j in range(m):
+            for j in range(n):
                 A[i][j] = stype.field(A[i][j].value * d - b[i] * c[j].value)
             A[i] = self._reshare(A[i])
         A = await gather_shares(A)
@@ -849,8 +860,8 @@ class Runtime:
         """Secure random value of the given type in the given range."""
         return self.randoms(sftype, 1, max)[0]
 
-    def randoms(self, sftype, m, max=None):
-        """m secure random values of the given type in the given range."""
+    def randoms(self, sftype, n, max=None):
+        """n secure random values of the given type in the given range."""
         if issubclass(sftype, Share):
             field = sftype.field
         else:
@@ -859,8 +870,9 @@ class Runtime:
             max = field.modulus
         else:
             max = (max - 1) // self._bincoef + 1
+        m = len(self.parties)
         prfs = self.parties[self.id].prfs(max)
-        shares = thresha.pseudorandom_share(field, len(self.parties), self.id, prfs, self._prss_uci(), m)
+        shares = thresha.pseudorandom_share(field, m, self.id, prfs, self._prss_uci(), n)
         if issubclass(sftype, Share):
             return [sftype(s) for s in shares]
         else:
@@ -871,12 +883,12 @@ class Runtime:
         return self.random_bits(sftype, 1, signed)[0]
 
     @mpc_coro
-    async def random_bits(self, sftype, m, signed=False):
-        """m secure random bits of the given type."""
+    async def random_bits(self, sftype, n, signed=False):
+        """n secure random bits of the given type."""
         prss0 = False
         f1 = 1
         if issubclass(sftype, Share):
-            await returnType((sftype, True), m)
+            await returnType((sftype, True), n)
             field = sftype.field
             if sftype.__name__.startswith('SecFld'):
                 prss0 = True
@@ -885,21 +897,23 @@ class Runtime:
             await returnType(Share)
             field = sftype
 
-        bits = [None] * m
+        bits = [None] * n
         p = field.modulus
         if not signed:
             q = (p + 1) >> 1 # q = 1/2 mod p
+        m = len(self.parties)
+        t = self.threshold
         prfs = self.parties[self.id].prfs(p)
-        h = m
+        h = n
         while h > 0:
-            rs = thresha.pseudorandom_share(field, len(self.parties), self.id, prfs, self._prss_uci(), h)
+            rs = thresha.pseudorandom_share(field, m, self.id, prfs, self._prss_uci(), h)
             # Compute and open the squares and compute square roots.
             r2s = [r * r for r in rs]
             if prss0:
-                z = thresha.pseudorandom_share_zero(field, len(self.parties), self.id, prfs, self._prss_uci(), h)
+                z = thresha.pseudorandom_share_zero(field, m, self.id, prfs, self._prss_uci(), h)
                 for i in range(h):
                     r2s[i] += z[i]
-            r2s = await self.output(r2s, threshold=2*self.threshold)
+            r2s = await self.output(r2s, threshold=2 * t)
             for r, r2 in zip(rs, r2s):
                 if r2.value != 0:
                     h -= 1
@@ -953,7 +967,7 @@ class Runtime:
             r_modl += r_bits[i].value
         r_divl = self.random(Zp, 1<<k)
         a = await gather_shares(a)
-        c = await self.output(a + (1<<l) - r_modl + (1<<l)*r_divl)
+        c = await self.output(a + (1<<l) - r_modl + (1<<l) * r_divl)
         c = c.value % (1<<l)
         r_bits = [stype(r.value) for r in r_bits]
         c_bits = [stype((c >> i) & 1) for i in range(l)]
@@ -1017,18 +1031,18 @@ class _Party:
         else:
             return f'<_Party {self.id}: {self.host}:{self.port}>'
 
-def generate_configs(n, addresses):
+def generate_configs(m, addresses):
     """Generate party configurations.
 
-    Generates n party configurations with thresholds 0 up to (n-1)//2.
+    Generates m party configurations with thresholds 0 up to (m-1)//2.
     addresses is a list of '(host, port)' pairs, specifying the
     hostnames and port numbers for each party. Moreover, the keys
     used in pseudorandom secret sharing (PRSS) are generated.
 
-    The n party configurations are returned as a list of ConfigParser
-    instances, which be saved in n separate INI-files.
+    The m party configurations are returned as a list of ConfigParser
+    instances, which be saved in m separate INI-files.
     """
-    parties = range(n)
+    parties = range(m)
     configs = [configparser.ConfigParser() for _ in parties]
     for p in parties:
         host, port = addresses[p]
@@ -1039,8 +1053,8 @@ def generate_configs(n, addresses):
             config.set(f'Party {p}', 'host', host)
             config.set(f'Party {p}', 'port', port)
 
-    for t in range((n + 1) // 2):
-        for subset in itertools.combinations(parties, n - t):
+    for t in range((m + 1) // 2):
+        for subset in itertools.combinations(parties, m - t):
             key = hex(secrets.randbits(128)) # 128-bit key
             subset_str = ' '.join(map(str, subset))
             for p in subset:
@@ -1048,7 +1062,7 @@ def generate_configs(n, addresses):
     return configs
 
 def _load_config(filename, t=None):
-    """Load n-party configuration file using threshold t (default (n-1) // 2).
+    """Load m-party configuration file using threshold t (default (m-1) // 2).
 
     Configuration files are simple INI-files containing information
     (hostname and port number) about the other parties in the protocol.
@@ -1060,10 +1074,10 @@ def _load_config(filename, t=None):
     """
     config = configparser.ConfigParser()
     config.read_file(open(filename, 'r'))
-    n = len(config.sections())
+    m = len(config.sections())
     if t is None:
-        t = (n - 1) // 2
-    parties = [None] * n
+        t = (m - 1) // 2
+    parties = [None] * m
     for party in config.sections():
         id = int(party[6:]) # strip 'Party ' prefix
         host = config.get(party, 'host')
@@ -1075,7 +1089,7 @@ def _load_config(filename, t=None):
             for option in config.options(party):
                 if not option in ['host', 'port']:
                     subset = frozenset(map(int, option.split()))
-                    if len(subset) == n - t:
+                    if len(subset) == m - t:
                         keys[subset] = config.get(party, option)
             parties[my_id] = _Party(my_id, host, port, keys)
         else:
@@ -1089,21 +1103,21 @@ def setup():
                         help=f'show -h help message for {sys.argv[0]}, if any')
     group = parser.add_argument_group('MPyC')
     group.add_argument('-c', '--config', metavar='C',
-                        help='party configuration file C, which defines N')
+                       help='party configuration file C, which defines M')
     group.add_argument('-t', '--threshold', type=int, metavar='T',
-                        help='threshold T, 2T+1<=N')
+                       help='threshold T, 2T+1<=M')
     group.add_argument('-l', '--bit-length', type=int, metavar='L',
-                        help='maximum bit length L (for comparisons etc.)')
+                       help='maximum bit length L (for comparisons etc.)')
     group.add_argument('-k', '--security-parameter', type=int, metavar='K',
-                        help='security parameter K for leakage probability 1/2**K')
+                       help='security parameter K for leakage probability 1/2**K')
     group.add_argument('--no-log', action='store_true',
-                        default=False, help='disable logging')
+                       default=False, help='disable logging')
     group.add_argument('--ssl', action='store_true',
-                        default=False, help='enable SSL connections')
+                       default=False, help='enable SSL connections')
     group.add_argument('--no-async', action='store_true',
-                        default=False, help='disable asynchronous evaluation')
+                       default=False, help='disable asynchronous evaluation')
     group.add_argument('-f', type=str,
-                        default='', help='consume IPython string')
+                       default='', help='consume IPython string')
     parser.set_defaults(bit_length=32, security_parameter=30)
     options, args = parser.parse_known_args()
     if options.HELP:
@@ -1126,9 +1140,10 @@ def setup():
     else:
         options.config = os.path.join('.config', options.config)
         id, parties = _load_config(options.config, options.threshold)
+    m = len(parties)
     if options.threshold is None:
-        options.threshold = (len(parties) - 1) // 2
-    assert 2 * options.threshold < len(parties)
+        options.threshold = (m - 1) // 2
+    assert 2 * options.threshold < m
 
     runtime = Runtime(id, parties, options)
     runtime.parser = parser

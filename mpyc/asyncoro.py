@@ -180,7 +180,7 @@ def returnType(rettype=None, *args):
 
     Used in first await expression in an MPC coroutine.
     """
-    if rettype == None:
+    if rettype is None:
         return _afuture(None)
     if isinstance(rettype, Future):
         return _afuture(Future)

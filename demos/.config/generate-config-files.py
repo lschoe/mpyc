@@ -22,21 +22,21 @@ from mpyc.runtime import generate_configs
 parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--prefix',
                   help='output filename prefix')
-parser.add_argument('-n', '--parties', dest='n', type=int,
+parser.add_argument('-m', '--parties', dest='m', type=int,
                   help='number of parties')
 parser.add_argument('args', nargs='*')                  
 
-parser.set_defaults(n=3, prefix='party')
+parser.set_defaults(m=3, prefix='party')
 
 options = parser.parse_args()
 args = options.args
 
-if len(args) != options.n:
+if len(args) != options.m:
     parser.error('A hostname:port argument required for each party.')
 
 addresses = [arg.split(':', 1) for arg in args]
-configs = generate_configs(options.n, addresses)
+configs = generate_configs(options.m, addresses)
 
 for party, config in enumerate(configs):
-    filename  = f'{options.prefix}{options.n}_{party}.ini'
+    filename  = f'{options.prefix}{options.m}_{party}.ini'
     config.write(open(filename, 'w'))

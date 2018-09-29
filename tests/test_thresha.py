@@ -11,25 +11,25 @@ class Arithmetic(unittest.TestCase):
     def test_secretsharing(self):
         field = self.f2
         t = 0
-        n = 1
+        m = 1
         a = [field(0), field(1)]
-        shares = thresha.random_split(a, t, n)
+        shares = thresha.random_split(a, t, m)
         b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
         self.assertEqual(a, b)
 
         field = self.f19
         for t in range(8):
-            n = 2 * t + 1
+            m = 2 * t + 1
             for i in range(t):
                 a = [field(i), field(-i), field(i**2), field(-i**2)]
-                shares = thresha.random_split(a, t, n)
+                shares = thresha.random_split(a, t, m)
                 b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
                 self.assertEqual(a, b)
-        n = 17
-        for t in range((n + 1) // 2):
+        m = 17
+        for t in range((m + 1) // 2):
             for i in range(t):
                 a = [field(i), field(-i), field(i**2), field(-i**2)]
-                shares = thresha.random_split(a, t, n)
+                shares = thresha.random_split(a, t, m)
                 b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
                 self.assertEqual(a, b)
 
@@ -48,16 +48,16 @@ class Arithmetic(unittest.TestCase):
         key = b'00112233445566778899aabbccddeeff'
         max = field.modulus
         F = thresha.PRF(key, max)
-        n = 1
+        m = 1
         id = 0
         prfs = {frozenset([0]): F}
         uci = 'test uci'
-        m = 8
-        a = F(uci, m)
-        shares = thresha.pseudorandom_share(field, n, id, prfs, uci, m)
+        n = 8
+        a = F(uci, n)
+        shares = thresha.pseudorandom_share(field, m, id, prfs, uci, n)
         b = thresha.recombine(field, [(1, shares)])
         self.assertEqual(a, b)
-        a = [0] * m
-        shares = thresha.pseudorandom_share_zero(field, n, id, prfs, uci, m)
+        a = [0] * n
+        shares = thresha.pseudorandom_share_zero(field, m, id, prfs, uci, n)
         b = thresha.recombine(field, [(1, shares)])
         self.assertEqual(a, b)

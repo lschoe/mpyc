@@ -3,13 +3,13 @@ import random
 import sys
 from mpyc.runtime import mpc
 
-n = len(mpc.parties)
+m = len(mpc.parties)
 
-if n % 2 == 0:
+if m % 2 == 0:
     print('OT runs with odd number of parties only.')
     sys.exit()
 
-t = n // 2
+t = m // 2
 message = [(None, None)] * t
 choice = [None] * t
 if mpc.id == 0:
@@ -25,10 +25,10 @@ mpc.start()
 
 secnum = mpc.SecInt()
 for i in range(1, t + 1):
-    m = mpc.input([secnum(message[i - 1][0]), secnum(message[i - 1][1])], i)
+    x = mpc.input([secnum(message[i - 1][0]), secnum(message[i - 1][1])], i)
     b = mpc.input(secnum(choice[i - t - 1]), t + i)
-    m = mpc.run(mpc.output(m[0] +  b * (m[1] - m[0]), t + i))
-    if m:
-        print(f'You have received message {m}.')
+    a = mpc.run(mpc.output(x[0] +  b * (x[1] - x[0]), t + i))
+    if a:
+        print(f'You have received message {a}.')
 
 mpc.shutdown()

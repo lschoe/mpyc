@@ -210,7 +210,7 @@ def SecFld(p=None, l=None):
                 super().__init__(field, value)
         SecureFld.field = field
         SecureFld.bit_length = l
-        name = f'SecFld{SecureFld.bit_length}({SecureFld.field.modulus})' 
+        name = f'SecFld{SecureFld.bit_length}({SecureFld.field.modulus})'
         _sectypes[(l, p)] = type(name, (SecureFld,), {'__slots__':()})
     return _sectypes[(l, p)]
 
@@ -246,7 +246,7 @@ def SecInt(l=None, p=None, n=2):
 
 def SecFxp(l=None, f=None, p=None, n=2):
     """Secure l-bit fixed-point numbers with f-bit fractional part.
-    
+
     NB: if dividing secure fixed-point numbers, make sure that l =~ 2f.
     """
     if l is None:
@@ -257,7 +257,7 @@ def SecFxp(l=None, f=None, p=None, n=2):
     if (l, f, p, n) not in _sectypes:
         SecureFxp = _SecNum(l, f, p, n)
         if p is None:
-            name = f'SecFxp{l}:{f}' 
+            name = f'SecFxp{l}:{f}'
         else:
             name = f'SecFxp{l}:{f}({p})'
         def init(self, value=None, integral=False):
