@@ -163,7 +163,7 @@ class PrimeFieldElement():
             return NotImplemented
 
     def __rsub__(self, other):
-        """Subtraction (reflected argument version)."""
+        """Subtraction (with reflected arguments)."""
         if isinstance(other, int):
             return type(self)(other - self.value)
         else:
@@ -218,7 +218,7 @@ class PrimeFieldElement():
             return NotImplemented
 
     def __rtruediv__(self, other):
-        """Division (reflected argument version)."""
+        """Division (with reflected arguments)."""
         if isinstance(other, int):
             return type(self)(other) * self._reciprocal()
         else:

@@ -11,8 +11,8 @@ def secret_index(x, n):
         elif n==2:
             return [x]
         else:
-            b = mpc.lsb(x)
-            v = si1((x - b) / 2, (n + 1) // 2)
+            x2, b = divmod(x, 2)
+            v = si1(x2, (n + 1) // 2)
             w = mpc.scalar_mul(b, v)
             return [b-sum(w)] + [v[i//2]-w[i//2] if i%2==0 else w[i//2] for i in range(n-2)]
     v = si1(x, n)

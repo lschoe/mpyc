@@ -474,7 +474,7 @@ class Runtime:
         return r * (1 << stype.field.frac_length) / ar
 
     def pow(self, a, b):
-        """Secure exponentation of a to public power b."""
+        """Secure exponentation a raised to the power of b, for public integer b."""
         if b == 0:
             return type(a)(1)
         if b < 0:

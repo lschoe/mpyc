@@ -32,23 +32,45 @@ class Share:
         """Use of secret-shared values in Boolean expressions makes no sense."""
         raise TypeError('cannot use secure type in Boolean expressions')
 
+    def _coerce(self, other):
+        if isinstance(other, Share):
+            if type(self) != type(other):
+                return NotImplemented
+        elif isinstance(other, int):
+            other = type(self)(other)
+        elif isinstance(other, float):
+            if type(self).field.frac_length == 0:
+                return NotImplemented
+            else:
+                other = type(self)(other)
+        elif type(self).field != type(other):
+            return NotImplemented
+        return other
+
+    def _coerce2(self, other):
+        if isinstance(other, Share):
+            if type(self) != type(other):
+                return NotImplemented
+        elif isinstance(other, int):
+#            other <<= type(self).field.frac_length
+            pass
+        elif isinstance(other, float):
+            if type(self).field.frac_length == 0:
+                return NotImplemented
+            else:
+                other = type(self)(other)
+        elif type(self).field != type(other):
+            return NotImplemented
+        return other
+
     def __neg__(self):
         """Negation."""
         return self.runtime.neg(self)
 
     def __add__(self, other):
         """Addition."""
-        if isinstance(other, Share):
-            if type(self) != type(other):
-                return NotImplemented
-        elif isinstance(other, float):
-            if type(self).field.frac_length == 0:
-                return NotImplemented
-            else:
-                other = type(self)(other)
-        elif isinstance(other, int):
-            other = type(self)(other)
-        elif type(self).field != type(other):
+        other = self._coerce(other)
+        if other is NotImplemented: 
             return NotImplemented
         return self.runtime.add(self, other)
 
@@ -56,50 +78,22 @@ class Share:
 
     def __sub__(self, other):
         """Subtraction."""
-        if isinstance(other, Share):
-            if type(self) != type(other):
-                return NotImplemented
-        elif isinstance(other, float):
-            if type(self).field.frac_length == 0:
-                return NotImplemented
-            else:
-                other = type(self)(other)
-        elif isinstance(other, int):
-            other = type(self)(other)
-        elif type(self).field != type(other):
+        other = self._coerce(other)
+        if other is NotImplemented: 
             return NotImplemented
         return self.runtime.sub(self, other)
 
     def __rsub__(self, other):
-        """Subtraction (reflected argument version)."""
-        if isinstance(other, Share):
-            if type(self) != type(other):
-                return NotImplemented
-        elif isinstance(other, float):
-            if type(self).field.frac_length == 0:
-                return NotImplemented
-            else:
-                other = type(self)(other)
-        elif isinstance(other, int):
-            other = type(self)(other)
-        elif type(self).field != type(other):
+        """Subtraction (with reflected arguments)."""
+        other = self._coerce(other)
+        if other is NotImplemented: 
             return NotImplemented
         return self.runtime.sub(other, self)
 
     def __mul__(self, other):
         """Multiplication."""
-        if isinstance(other, Share):
-            if type(self) != type(other):
-                return NotImplemented
-        elif isinstance(other, float):
-            if type(self).field.frac_length == 0:
-                return NotImplemented
-            else:
-                other = type(self)(other)
-        elif isinstance(other, int):
-#            other <<= type(self).field.frac_length
-            pass
-        elif type(self).field != type(other):
+        other = self._coerce2(other)
+        if other is NotImplemented: 
             return NotImplemented
         return self.runtime.mul(self, other)
 
@@ -107,19 +101,99 @@ class Share:
 
     def __truediv__(self, other):
         """Division."""
+        other = self._coerce(other)
+        if other is NotImplemented: 
+            return NotImplemented
         return self.runtime.div(self, other)
 
-    __floordiv__ = __truediv__
-
     def __rtruediv__(self, other):
-        """Division (reflected argument version)."""
+        """Division (with reflected arguments)."""
+        other = self._coerce2(other)
+        if other is NotImplemented: 
+            return NotImplemented
         return self.runtime.div(other, self)
 
-    __rfloordiv__ = __rtruediv__
+    def __mod__(self, other):
+        """Integer remainder."""
+        if type(self).__name__.startswith('SecFld'):
+            return NotImplemented
+        elif type(other).__name__.startswith('SecFld'):
+            return NotImplemented
+        other = self._coerce(other)
+        if other is NotImplemented: 
+            return NotImplemented
+        # stub: only mod 2
+        assert other.df.value == 2, 'Least significant bit only, for now!'
+        r = self.runtime.lsb(self)
+        return r
 
-    def __pow__(self, exponent):
+    def __rmod__(self, other):
+        """Integer remainder (with reflected arguments)."""
+        if type(self).__name__.startswith('SecFld'):
+            return NotImplemented
+        elif type(other).__name__.startswith('SecFld'):
+            return NotImplemented
+        # stub: only mod 2
+        assert self.df.value == 2, 'Least significant bit only, for now!'
+        other = self._coerce(other)
+        if other is NotImplemented: 
+            return NotImplemented
+        r = self.runtime.lsb(other)
+        return r
+
+    def __floordiv__(self, other):
+        """Integer quotient."""
+        # stub: only div 2
+        r = self.__mod__(other)
+        if r is NotImplemented: 
+            return NotImplemented
+        other = self._coerce(other) # avoid coercing twice
+        if other is NotImplemented: 
+            return NotImplemented
+        q = (self - r) / other.df
+        return q
+
+    def __rfloordiv__(self, other):
+        """Integer quotient (with reflected arguments)."""
+        # stub: only div 2
+        other = self._coerce(other)
+        if other is NotImplemented: 
+            return NotImplemented
+        r = other.__mod__(self) # avoid coercing twice
+        if r is NotImplemented: 
+            return NotImplemented
+        q = (other - r) / self.df
+        return q
+
+    def __divmod__(self, other):
+        """Integer division."""
+        # stub: only divmod 2
+        r = self.__mod__(other)
+        if r is NotImplemented: 
+            return NotImplemented
+        other = self._coerce(other) # avoid coercing twice
+        if other is NotImplemented: 
+            return NotImplemented
+        q = (self - r) / other.df
+        return q, r
+
+    def __rdivmod__(self, other):
+        """Integer division (with reflected arguments)."""
+        # stub: only divmod 2
+        other = self._coerce(other)
+        if other is NotImplemented: 
+            return NotImplemented
+        r = other.__mod__(self) # avoid coercing twice
+        if r is NotImplemented: 
+            return NotImplemented
+        q = (other - r) / self.df
+        return q, r
+
+    def __pow__(self, other):
         """Exponentation with publicly known integer exponent."""
-        return self.runtime.pow(self, exponent)
+        if not isinstance(other, int):
+            return NotImplemented
+        return self.runtime.pow(self, other)
 
     def __and__(self, other):
         """And 1-bit."""
@@ -186,7 +260,6 @@ class Share:
         # self != other
         c = self - other
         return 1 - self.runtime.is_zero(c)
-
 
 _sectypes = {}
 
