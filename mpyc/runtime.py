@@ -200,7 +200,7 @@ class Runtime:
     def input(self, x, senders=None):
         """Input x to the computation.
 
-        Value x is a secure number, or x list of secure numbers.
+        Value x is a secure number, or a list of secure numbers.
         The senders are the parties that provide an input.
         The default is to let every party be a sender.
         """

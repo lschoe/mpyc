@@ -1,7 +1,7 @@
 # MPyC -- Secure Multiparty Computation in Python.
 
 MPyC supports secure *m*-party computation tolerating a dishonest minority of up to *t* passively corrupt parties,
-where *m>=1* and *0 <= t <= (m-1)/2*. The underlying protocols are based on threshold secret sharing over prime
+where *m &ge; 1* and *0 &le; t &le; (m-1)/2*. The underlying protocols are based on threshold secret sharing over prime
 fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
@@ -19,7 +19,7 @@ See `demos` for usage examples.
 
 ## Notes:
 
-1. Python 3.6 or higher required (Python 3.5 or lower is not sufficient).
+1. Python 3.6+ (Python 3.5 or lower is not sufficient).
 
 2. Installing package `gmpy2` is optional, but will considerably enhance the performance of `mpyc`.
 On Linux, `pip install gmpy2` should do the job, but on Windows, this may fail with compiler errors.

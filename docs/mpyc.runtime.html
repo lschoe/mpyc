@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.runtime</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cappdata%5Croaming%5Cpython%5Cpython36%5Csite-packages%5Cmpyc-0.3-py3.6.egg%5Cmpyc%5Cruntime.py">c:\users\berry\appdata\roaming\python\python36\site-packages\mpyc-0.3-py3.6.egg\mpyc\runtime.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5Cruntime.py">c:\users\berry\documents\github\mympyc\mpyc\runtime.py</a></font></td></tr></table>
     <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
 &nbsp;<br>
 Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
@@ -33,8 +33,9 @@ available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&nbsp;operator&nbsp;
 </td><td width="25%" valign=top><a href="os.html">os</a><br>
 <a href="secrets.html">secrets</a><br>
 <a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
-<a href="sys.html">sys</a><br>
-</td><td width="25%" valign=top><a href="mpyc.thresha.html">mpyc.thresha</a><br>
+<a href="ssl.html">ssl</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+<a href="mpyc.thresha.html">mpyc.thresha</a><br>
 <a href="time.html">time</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -64,7 +65,7 @@ The&nbsp;runtime&nbsp;maintains&nbsp;basic&nbsp;information&nbsp;such&nbsp;as&nb
 the&nbsp;list&nbsp;of&nbsp;parties,&nbsp;etc.,&nbsp;and&nbsp;handles&nbsp;secret-shared&nbsp;values&nbsp;of&nbsp;type&nbsp;Share.<br>
 &nbsp;<br>
 1-party&nbsp;case&nbsp;is&nbsp;supported&nbsp;(with&nbsp;option&nbsp;to&nbsp;disable&nbsp;asynchronous&nbsp;evaluation).<br>
-Threshold&nbsp;0&nbsp;(no&nbsp;corrupted&nbsp;parties)&nbsp;is&nbsp;supported&nbsp;for&nbsp;n-party&nbsp;case&nbsp;as&nbsp;well<br>
+Threshold&nbsp;0&nbsp;(no&nbsp;corrupted&nbsp;parties)&nbsp;is&nbsp;supported&nbsp;for&nbsp;m-party&nbsp;case&nbsp;as&nbsp;well<br>
 to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;sharing).<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
@@ -90,7 +91,11 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 
 <dl><dt><a name="Runtime-in_prod"><strong>in_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;dot&nbsp;product&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;(one&nbsp;resharing).</tt></dd></dl>
 
-<dl><dt><a name="Runtime-input"><strong>input</strong></a>(self, a, senders=None)</dt><dd><tt>Input&nbsp;a&nbsp;to&nbsp;the&nbsp;computation.</tt></dd></dl>
+<dl><dt><a name="Runtime-input"><strong>input</strong></a>(self, x, senders=None)</dt><dd><tt>Input&nbsp;x&nbsp;to&nbsp;the&nbsp;computation.<br>
+&nbsp;<br>
+Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
+The&nbsp;senders&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;provide&nbsp;an&nbsp;input.<br>
+The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;sender.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-invert"><strong>invert</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;logical&nbsp;inverse&nbsp;(not)&nbsp;of&nbsp;bit&nbsp;a.</tt></dd></dl>
 
@@ -120,19 +125,23 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 
 <dl><dt><a name="Runtime-or_"><strong>or_</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;logical&nbsp;or&nbsp;of&nbsp;bits&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, a, receivers=None, threshold=None)</dt><dd><tt>Output&nbsp;the&nbsp;value&nbsp;of&nbsp;a&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.</tt></dd></dl>
+<dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, x, receivers=None, threshold=None)</dt><dd><tt>Output&nbsp;the&nbsp;value&nbsp;of&nbsp;x&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.<br>
+&nbsp;<br>
+Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
+The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;the&nbsp;output.<br>
+The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;receiver.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-pow"><strong>pow</strong></a>(self, a, n)</dt><dd><tt>Secure&nbsp;exponentation&nbsp;of&nbsp;a&nbsp;to&nbsp;public&nbsp;power&nbsp;n.</tt></dd></dl>
+<dl><dt><a name="Runtime-pow"><strong>pow</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;exponentation&nbsp;a&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;b,&nbsp;for&nbsp;public&nbsp;integer&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-prod"><strong>prod</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;product&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x&nbsp;(in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</tt></dd></dl>
 
 <dl><dt><a name="Runtime-random"><strong>random</strong></a>(self, sftype, max=None)</dt><dd><tt>Secure&nbsp;random&nbsp;value&nbsp;of&nbsp;the&nbsp;given&nbsp;type&nbsp;in&nbsp;the&nbsp;given&nbsp;range.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-random_bit"><strong>random_bit</strong></a>(self, sftype)</dt><dd><tt>Secure&nbsp;random&nbsp;bit&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
+<dl><dt><a name="Runtime-random_bit"><strong>random_bit</strong></a>(self, sftype, signed=False)</dt><dd><tt>Secure&nbsp;random&nbsp;bit&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-random_bits"><strong>random_bits</strong></a>(self, sftype, m)</dt><dd><tt>m&nbsp;secure&nbsp;random&nbsp;bits&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
+<dl><dt><a name="Runtime-random_bits"><strong>random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><tt>n&nbsp;secure&nbsp;random&nbsp;bits&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-randoms"><strong>randoms</strong></a>(self, sftype, m, max=None)</dt><dd><tt>m&nbsp;secure&nbsp;random&nbsp;values&nbsp;of&nbsp;the&nbsp;given&nbsp;type&nbsp;in&nbsp;the&nbsp;given&nbsp;range.</tt></dd></dl>
+<dl><dt><a name="Runtime-randoms"><strong>randoms</strong></a>(self, sftype, n, max=None)</dt><dd><tt>n&nbsp;secure&nbsp;random&nbsp;values&nbsp;of&nbsp;the&nbsp;given&nbsp;type&nbsp;in&nbsp;the&nbsp;given&nbsp;range.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-reciprocal"><strong>reciprocal</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;reciprocal&nbsp;(multiplicative&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;non-zero&nbsp;a.</tt></dd></dl>
 
@@ -146,7 +155,7 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 
 <dl><dt><a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPC&nbsp;runtime.<br>
 &nbsp;<br>
-Close&nbsp;all&nbsp;connections.</tt></dd></dl>
+Close&nbsp;all&nbsp;connections,&nbsp;if&nbsp;any.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-start"><strong>start</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;MPC&nbsp;runtime.<br>
 &nbsp;<br>
@@ -172,15 +181,17 @@ Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f.</tt></dd></dl>
 Static methods defined here:<br>
 <dl><dt><a name="Runtime-SecFld"><strong>SecFld</strong></a>(p=None, l=None)</dt><dd><tt>Secure&nbsp;prime&nbsp;field&nbsp;of&nbsp;l-bit&nbsp;order&nbsp;p.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-SecFxp"><strong>SecFxp</strong></a>(l=None, f=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;fixed-point&nbsp;numbers&nbsp;with&nbsp;f-bit&nbsp;fractional&nbsp;part.</tt></dd></dl>
+<dl><dt><a name="Runtime-SecFxp"><strong>SecFxp</strong></a>(l=None, f=None, p=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;fixed-point&nbsp;numbers&nbsp;with&nbsp;f-bit&nbsp;fractional&nbsp;part.<br>
+&nbsp;<br>
+NB:&nbsp;if&nbsp;dividing&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;make&nbsp;sure&nbsp;that&nbsp;l&nbsp;=~&nbsp;2f.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-SecInt"><strong>SecInt</strong></a>(l=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;integers.</tt></dd></dl>
+<dl><dt><a name="Runtime-SecInt"><strong>SecInt</strong></a>(l=None, p=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;integers.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-coroutine"><strong>coroutine</strong></a> = mpc_coro(f)</dt><dd><tt>Decorator&nbsp;turning&nbsp;coroutine&nbsp;f&nbsp;into&nbsp;an&nbsp;MPC&nbsp;coroutine.<br>
 &nbsp;<br>
 An&nbsp;MPC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asychronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
 The&nbsp;type&nbsp;of&nbsp;the&nbsp;placeholders&nbsp;is&nbsp;defined&nbsp;either&nbsp;by&nbsp;a&nbsp;return&nbsp;annotation<br>
-of&nbsp;the&nbsp;form&nbsp;“-&gt;&nbsp;expression”&nbsp;or&nbsp;by&nbsp;the&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;f.<br>
+of&nbsp;the&nbsp;form&nbsp;"-&gt;&nbsp;expression"&nbsp;or&nbsp;by&nbsp;the&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;f.<br>
 Return&nbsp;annotations&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;static&nbsp;types.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-gather"><strong>gather</strong></a> = gather_shares(*obj)</dt><dd><tt>Return&nbsp;all&nbsp;the&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shared&nbsp;values).</tt></dd></dl>
@@ -204,15 +215,15 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-generate_configs"><strong>generate_configs</strong></a>(n, addresses)</dt><dd><tt>Generate&nbsp;party&nbsp;configurations.<br>
+<td width="100%"><dl><dt><a name="-generate_configs"><strong>generate_configs</strong></a>(m, addresses)</dt><dd><tt>Generate&nbsp;party&nbsp;configurations.<br>
 &nbsp;<br>
-Generates&nbsp;n&nbsp;party&nbsp;configurations&nbsp;with&nbsp;thresholds&nbsp;0&nbsp;up&nbsp;to&nbsp;(n-1)//2.<br>
+Generates&nbsp;m&nbsp;party&nbsp;configurations&nbsp;with&nbsp;thresholds&nbsp;0&nbsp;up&nbsp;to&nbsp;(m-1)//2.<br>
 addresses&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;'(host,&nbsp;port)'&nbsp;pairs,&nbsp;specifying&nbsp;the<br>
 hostnames&nbsp;and&nbsp;port&nbsp;numbers&nbsp;for&nbsp;each&nbsp;party.&nbsp;Moreover,&nbsp;the&nbsp;keys<br>
 used&nbsp;in&nbsp;pseudorandom&nbsp;secret&nbsp;sharing&nbsp;(PRSS)&nbsp;are&nbsp;generated.<br>
 &nbsp;<br>
-The&nbsp;n&nbsp;party&nbsp;configurations&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;ConfigParser<br>
-instances,&nbsp;which&nbsp;be&nbsp;saved&nbsp;in&nbsp;n&nbsp;separate&nbsp;INI-files.</tt></dd></dl>
+The&nbsp;m&nbsp;party&nbsp;configurations&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;list&nbsp;of&nbsp;ConfigParser<br>
+instances,&nbsp;which&nbsp;be&nbsp;saved&nbsp;in&nbsp;m&nbsp;separate&nbsp;INI-files.</tt></dd></dl>
  <dl><dt><a name="-setup"><strong>setup</strong></a>()</dt><dd><tt>Setup&nbsp;a&nbsp;runtime.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
