@@ -1,7 +1,7 @@
 # MPyC -- Secure Multiparty Computation in Python
 
 MPyC supports secure *m*-party computation tolerating a dishonest minority of up to *t* passively corrupt parties,
-where *m &ge; 1* and *0 &le; t &le; (m-1)/2*. The underlying protocols are based on threshold secret sharing over prime
+where *m &ge; 1* and *0 &le; t &le; (m-1)/2*. The underlying protocols are based on threshold secret sharing over finite
 fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
