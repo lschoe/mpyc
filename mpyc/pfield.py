@@ -10,19 +10,21 @@ Modular square roots and quadratic residuosity tests supported as well.
 import mpyc.gmpy as gmpy2
 
 def find_prime_root(l, blum=True, n=1):
-    """Find smallest prime of bit length l satisfying given constraints.
+    """Find smallest prime of bit length at least l satisfying given constraints.
 
     Default is to return Blum primes (primes p with p % 4 == 3).
     Also, a primitive root w is returned of prime order at least n.
     """
-    if l == 1:
-        assert not blum
-        assert n == 1
-        p = 2
-        w = 1
+    if l == 2:
+        if not blum:
+            p = 2
+            assert n == 1
+            w = 1
+        else:
+            p = 3
+            n, w = 2, -1
     elif n <= 2:
-        n = 2
-        w = -1
+        n, w = 2, -1
         p = gmpy2.next_prime(2**(l - 1))
         if blum:
             while p % 4 != 3:
@@ -63,8 +65,9 @@ def GF(modulus, f=0):
     if not gmpy2.is_prime(p):
         raise ValueError(f'{p} is not a prime')
 
-    GFElement = type('GF('+str(p)+')', (PrimeFieldElement,), {'__slots__':()})
+    GFElement = type(f'GF({p})', (PrimeFieldElement,), {'__slots__':()})
     GFElement.modulus = p
+    GFElement.order = p
     GFElement.is_signed = True
     GFElement.nth = n
     GFElement.root = w % p

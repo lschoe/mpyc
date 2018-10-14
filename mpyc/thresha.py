@@ -21,14 +21,17 @@ def random_split(s, t, m):
     The (maximum) degree for the Shamir polynomials is t, 0 <= t < n.
     Return matrix of shares, one row per party.
     """
-    p = s[0].modulus
+    field = type(s[0])
+    p = field.modulus
+    order = field.order
+    T = type(p) # T is int or T is gf2x.Polynomial
     n = len(s)
     shares = [[None] * n for _ in range(m)]
     for h in range(n):
-        c = [secrets.randbelow(p) for _ in range(t)]
+        c = [secrets.randbelow(order) for _ in range(t)]
         # polynomial f(x) = s[h] + c[t-1] x + c[t-2] x^2 + ... + c[0] x^t
         for i in range(m):
-            y = 0
+            y = 0 if T is int else T(0)
             for c_j in c:
                 y += c_j
                 y *= i + 1
@@ -69,7 +72,8 @@ def recombine(field, points, x_rs=0):
     for i in range(m):
         for h in range(n):
             s = shares[i][h]
-            if not isinstance(s, int):
+#            if not isinstance(s, int):
+            if isinstance(s, field):
                 s = s.value
             for r in range(len(sums)):
                 sums[r][h] += s * vector[r][i]
@@ -130,8 +134,9 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
             _f_in_i_cache[(field, i, subset)] = f_in_i
         d = m - len(subset)
         prl = prf(s, n * d)
+        T = type(field.modulus) # T is int or T is gf2x.Polynomial\
         for h in range(n):
-            y = 0
+            y = 0 if T is int else T(0)
             for j in range(d):
                 y += prl[h * d + j]
                 y *= i + 1

@@ -14,7 +14,7 @@
 # 
 # To get started, we simply import the MPyC runtime `mpc` at the start of our program.
 
-# In[1]:
+# In[3]:
 
 
 from mpyc.runtime import mpc
@@ -32,7 +32,7 @@ from mpyc.runtime import mpc
 # 
 # To represent *secret-shared* derangements, we will use a secure MPyC type of integers. For simplicity, we choose 32-bit (default) secure integers.
 
-# In[2]:
+# In[4]:
 
 
 secint = mpc.SecInt() # 32-bit secure MPyC integers
@@ -40,7 +40,7 @@ secint = mpc.SecInt() # 32-bit secure MPyC integers
 
 # Finally, we start the `mpc` runtime, which means that point-to-point connections between each pair of parties will be established.
 
-# In[3]:
+# In[5]:
 
 
 mpc.start()   # required only when run with multiple parties 
@@ -50,11 +50,11 @@ mpc.start()   # required only when run with multiple parties
 
 # #### _Quick note on MPyC coroutines_
 # 
-# All computations pertaining to secure integers of type `secint` are done asynchronously in MPyC. The implementation of MPyC builds heavily on Python's `asyncio` module, available in Python 3.5+. Secure computations in MPyC are in fact implemented as MPyC coroutines, which are a special type of Python coroutines.
+# All computations pertaining to secure integers of type `secint` are done asynchronously in MPyC. The implementation of MPyC builds heavily on Python's `asyncio` module. Secure computations in MPyC are in fact implemented as MPyC coroutines, which are a special type of Python coroutines.
 # 
 # For example, consider the following code fragment.
 
-# In[4]:
+# In[6]:
 
 
 a = secint(5)    
@@ -70,7 +70,7 @@ print('Example: (5+13)*(5-13) =', f)
 # In this notebook, however, we will not focus on the asynchronous aspects of MPyC. Readers not familiar with coroutines and asynchronous computation may therefore skip to the next section, ignoring all aspects of asynchronous computation. Most MPyC code is meant to be understandable without bothering about the (order of) execution of the code anyway!
 # 
 # A Python coroutine, defined by the keyword `async` at the start of a function definition, is turned into an MPyC coroutine by using the decorator `mpc.coroutine`.
-# When called, an MPyC coroutine will return immediately (non-blocking). The main difference with Python coroutines is that an MPyC coroutine will return a placeholder or, more generally, nested lists/tuples containing placeholders. The placeholders are typed (e.g., of type `secint`, or any other secure MPyC type), and the type of the placeholders is defined by the first `await` expression in the MPyC coroutine, using the `mpc.returnType` method. 
+# When called, an MPyC coroutine will return immediately (nonblocking). The main difference with Python coroutines is that an MPyC coroutine will return a placeholder or, more generally, nested lists/tuples containing placeholders. The placeholders are typed (e.g., of type `secint`, or any other secure MPyC type), and the type of the placeholders is defined by the first `await` expression in the MPyC coroutine, using the `mpc.returnType` method. 
 
 # ## Random derangements from random permutations
 # 
@@ -84,7 +84,7 @@ print('Example: (5+13)*(5-13) =', f)
 # 
 # The leads to the following MPyC code for function `random_derangement`.
 
-# In[5]:
+# In[7]:
 
 
 @mpc.coroutine                                    # turn coroutine into an MPyC coroutine
@@ -95,7 +95,7 @@ async def random_derangement(n):                  # returns list of n secint ele
     if await mpc.is_zero_public(t):               # publicly test whether t is equal to zero
         return random_derangement(n)              # recurse if t is zero
     else:
-        return p                                  # done if t is non-zero
+        return p                                  # done if t is nonzero
 
 
 # Function `random_derangement` uses these four functions from the `mpc` runtime:
@@ -127,7 +127,7 @@ async def random_derangement(n):                  # returns list of n secint ele
 # 
 # We do so by representing `r` in a unary fashion, that is, as a unit vector `x_r` of length $n-i$. A unit vector is a list containing exactly one 1 and all other entries equal to 0. Taking the dot product between a secret unit vector `x_r` and a segment of `p` of the same length will select the intended element of `p`. At the same time no information whatsoever is given away about which element is selected.
 
-# In[6]:
+# In[8]:
 
 
 def random_permutation(n):                     # returns list of n secint elements
@@ -156,11 +156,11 @@ def random_permutation(n):                     # returns list of n secint elemen
 # 
 # Let $n\geq2$, and suppose $n$ is even. We generate a secret random bit $b$ and, recursively, we generate a random unit vector $x$ of length $n/2$. We multiply $b$ with all elements of $x$, yielding vector $y$. So, for the example above, we get $y = [0,0,0,0]$ if $b=0$ and $y = x = [0,0,1,0]$ if $b=1$. Also, we see that $x-y = x$ if $b=0$ and $x-y = [0,0,0,0]$ if $b=1$. The correct output is thus obtained by taking the concatenation of $y$ and $x-y$.
 # 
-# For odd $n$, we try the same approach, but a slight problem arises. We cannot generate a vector of non-integral length $n/2$. Instead, we recursively generate a random unit vector $x$ of length $m=(n+1)/2$. As before, we also generate a random bit $b$. Altogether, we thus get $2 m = n+1$ equally likely values for $b$ and $x$ jointly. Since our target is a uniformly random unit vector of length $n$, we need to reject one out of the $2m$ possible values for $b$ and $x$. Below we choose to reject in case $b=1$ and $x[0]=1$.
+# For odd $n$, we try the same approach, but a slight problem arises. We cannot generate a vector of nonintegral length $n/2$. Instead, we recursively generate a random unit vector $x$ of length $m=(n+1)/2$. As before, we also generate a random bit $b$. Altogether, we thus get $2 m = n+1$ equally likely values for $b$ and $x$ jointly. Since our target is a uniformly random unit vector of length $n$, we need to reject one out of the $2m$ possible values for $b$ and $x$. Below we choose to reject in case $b=1$ and $x[0]=1$.
 # 
 # This leaves us with the case $n=1$, which is handled by simply returning $[1]$, the only unit vector of length $1$.
 
-# In[7]:
+# In[9]:
 
 
 @mpc.coroutine                                      # turn coroutine into an MPyC coroutine
@@ -194,40 +194,40 @@ async def random_unit_vector(n):                    # returns list of n secint e
 # 
 # Let's now check what the results look like. We check the first few cases for each function.
 
-# In[8]:
+# In[10]:
 
 
 N = 7
 
 
-# In[9]:
+# In[11]:
 
 
 print('Random unit vectors:')
 for n in range(1, N + 1):
     s = mpc.run(mpc.output(random_unit_vector(n)))
-    print('{0:2} {1}'.format(n, s))
+    print(f'{n:2} {s}')
 
 
-# In[10]:
+# In[12]:
 
 
 print('Random permutations:')
 for n in range(1, N + 1):
     s = mpc.run(mpc.output(random_permutation(n)))
-    print('{0:2} {1}'.format(n, s))
+    print(f'{n:2} {s}')
 
 
-# In[11]:
+# In[13]:
 
 
 print('Random derangements:')
 for n in range(2, N + 1):
     s = mpc.run(mpc.output(random_derangement(n)))
-    print('{0:2} {1}'.format(n, s))
+    print(f'{n:2} {s}')
 
 
-# In[12]:
+# In[14]:
 
 
 mpc.shutdown()   # required only when run with multiple parties  
@@ -241,7 +241,7 @@ mpc.shutdown()   # required only when run with multiple parties
 # 
 # First we show a run with one party only. However, this time the code runs outside the Jupyter notebook, using its own Python interpreter. 
 
-# In[13]:
+# In[15]:
 
 
 get_ipython().system('run 1 SecretSantaExplained.py')
@@ -251,7 +251,7 @@ get_ipython().system('run 1 SecretSantaExplained.py')
 # 
 # Next, for the "real thing", we show a run with three parties, in which three processes are launched communicating via local tcp-connections.
 
-# In[14]:
+# In[16]:
 
 
 get_ipython().system('run 3 SecretSantaExplained.py')
@@ -259,7 +259,7 @@ get_ipython().system('run 3 SecretSantaExplained.py')
 
 # As a final test, we show a run with five parties.
 
-# In[15]:
+# In[19]:
 
 
 get_ipython().system('run 5 SecretSantaExplained.py')
@@ -267,4 +267,4 @@ get_ipython().system('run 5 SecretSantaExplained.py')
 
 # If desired, the code can also be run with two or four parties. The included test setup supports up to $m=5$ parties, of which at most $t$ can be corrupt, with $0\leq t\leq \lfloor (m-1)/2 \rfloor$.
 # 
-# This concludes the explanation of our MPyC protocol for the Secret Santa problem. The Python script [secretsanta.py](secretsanta.py) contains a slightly more extensive demo, showing how secure fixed-point arithmetic or secure prime fields can be used instead of secure integers.
+# This concludes the explanation of our MPyC protocol for the Secret Santa problem. The Python script [secretsanta.py](secretsanta.py) contains a slightly more extensive demo, showing how secure fixed-point arithmetic or secure finite fields can be used instead of secure integers.

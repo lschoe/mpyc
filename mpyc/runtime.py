@@ -98,7 +98,7 @@ class Runtime:
         """Run the given (MPC) coroutine or future until it is done."""
         return self._loop.run_until_complete(f)
 
-    def log(self, enable=None):
+    def logging(self, enable=None):
         """Toggle/enable/disable logging."""
         if enable is None:
             self.logging_enabled = not self.logging_enabled
@@ -180,7 +180,7 @@ class Runtime:
         m = len(self.parties)
         if m > 1:
             # Wait for all parties.
-            self.run(self.output(self.input(sectypes.SecFld(101)(self.id))))
+            self.run(self.output(self.input(sectypes.SecFld(modulus=101)(self.id))))
             # Close connections to all parties.
             for peer in self.parties:
                 if peer.id != self.id:
@@ -374,7 +374,7 @@ class Runtime:
         m = len(self.parties)
         t = self.threshold
         if stype.__name__.startswith('SecFld'):
-            prfs = self.parties[self.id].prfs(stype.field.modulus)
+            prfs = self.parties[self.id].prfs(stype.field.order)
             while True:
                 r, s = self.randoms(stype.field, 2)
                 z = thresha.pseudorandom_share_zero(stype.field, m, self.id, prfs, self._prss_uci(), 1)
@@ -449,7 +449,7 @@ class Runtime:
         return c
 
     def div(self, a, b):
-        """Secure division of a by b, for non-zero b."""
+        """Secure division of a by b, for nonzero b."""
         if isinstance(b, Share):
             if type(b).field.frac_length == 0:
                 c = self.reciprocal(b)
@@ -463,7 +463,7 @@ class Runtime:
 
     @mpc_coro
     async def reciprocal(self, a):
-        """Secure reciprocal (multiplicative inverse) of a, for non-zero a."""
+        """Secure reciprocal (multiplicative inverse) of a, for nonzero a."""
         stype = type(a)
         await returnType(stype)
         a = await gather_shares(a)
@@ -491,20 +491,27 @@ class Runtime:
         return c
 
     def and_(self, a, b):
-        """Secure logical and of bits a and b."""
-        return a * b
+        """Secure bitwise and of a and b."""
+        a2 = self.to_bits(a)
+        b2 = self.to_bits(b)
+        c2 = [a2[i] * b2[i] for i in range(len(a2))]
+        return sum(c2[i] * type(a).field(2**i) for i in range(len(c2)))
 
     def xor(self, a, b):
-        """Secure logical xor of bits a and b."""
-        return a + b - 2 * a * b
+        """Secure bitwise xor of a and b."""
+        return a + b
 
     def invert(self, a):
-        """Secure logical inverse (not) of bit a."""
-        return 1 - a
+        """Secure bitwise inverse (not) of a."""
+        return a + type(a)(a.field.order - 1)
 
     def or_(self, a, b):
-        """Secure logical or of bits a and b."""
-        return a + b - a * b
+        """Secure bitwise or of a and b."""
+        a2 = self.to_bits(a)
+        b2 = self.to_bits(b)
+        c2 = [a2[i] + b2[i] + a2[i] * b2[i] for i in range(len(a2))]
+        return sum(c2[i] * type(a).field(2**i) for i in range(len(c2)))
+#        return a + b - a * b # wrong, go via bits
 
     def eq(self, a, b):
         """Secure comparison a == b."""
@@ -517,9 +524,9 @@ class Runtime:
     def is_zero(self, a):
         """Secure zero test a == 0."""
         if type(a).__name__.startswith('SecFld'):
-            return 1 - self.pow(a, a.field.modulus - 1)
+            return 1 - self.pow(a, a.field.order - 1)
         elif (a.bit_length > 2 * self.options.security_parameter
-              and a.field.modulus % 4 == 3):
+              and a.field.order % 4 == 3):
             return self._is_zero(a)
         else:
             return self.sgn(a, EQ=True)
@@ -539,7 +546,7 @@ class Runtime:
         a = a.value
         r = self.randoms(Zp, k)
         c = [Zp(a * r[i].value + (1 - (z[i].value << 1)) * u2[i].value) for i in range(k)]
-        # -1 is non-square for Blum p, u_i !=0 w.v.h.p.
+        # -1 is nonsquare for Blum p, u_i !=0 w.v.h.p.
         # If a == 0, c_i is square mod p iff z[i] == 0.
         # If a != 0, c_i is square mod p independent of z[i].
         c = await self.output(c, threshold=2*self.threshold)
@@ -737,25 +744,25 @@ class Runtime:
         return x
 
     @mpc_coro
-    async def matrix_add(self, A, B):
-        """Secure addition of matrices A and B."""
+    async def matrix_add(self, A, B, tr=False):
+        """Secure addition of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
         await returnType(type(A[0][0]), len(A), len(A[0]))
         A, B = await gather_shares(A, B)
         for i in range(len(A)):
             for j in range(len(A[0])):
-                A[i][j] = A[i][j] + B[i][j]
+                A[i][j] = A[i][j] + (B[j][i] if tr else B[i][j])
         return A
 
     @mpc_coro
-    async def matrix_sub(self, A, B):
-        """Secure subtraction of matrices A and B."""
+    async def matrix_sub(self, A, B, tr=False):
+        """Secure subtraction of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
         await returnType(type(A[0][0]), len(A), len(A[0]))
         A, B = await gather_shares(A, B)
         for i in range(len(A)):
             for j in range(len(A[0])):
-                A[i][j] = A[i][j] - B[i][j]
+                A[i][j] = A[i][j] - (B[j][i] if tr else B[i][j])
         return A
 
     @mpc_coro
@@ -810,10 +817,18 @@ class Runtime:
     async def matrix_prod(self, A, B, tr=False):
         """Secure matrix product of A with (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
-        stype = type(A[0][0])
+        shA = isinstance(A[0][0], Share)
+        shB = isinstance(B[0][0], Share)
+        stype = type(A[0][0]) if shA else type(B[0][0])
         n = len(B) if tr else len(B[0])
         await returnType(stype, len(A), n)
-        A, B = await gather_shares(A, B)
+        if shA and shB:
+            A, B = await gather_shares(A, B)
+        elif shA:
+            A = await gather_shares(A)
+        else:
+            B = await gather_shares(B)
+        
         C = [None] * len(A)
         for ia in range(len(A)):
             C[ia] = [None] * n
@@ -822,8 +837,10 @@ class Runtime:
                 for i in range(len(A[0])):
                     s += A[ia][i].value * (B[ib][i] if tr else B[i][ib]).value
                 C[ia][ib] = stype.field(s)
-            C[ia] = self._reshare(C[ia])
-        C = await gather_shares(C)
+            if shA and shB:
+                C[ia] = self._reshare(C[ia])
+        if shA and shB:
+            C = await gather_shares(C)
         if stype.field.frac_length > 0:
             C = [[self.trunc(stype(Cij)) for Cij in Ci] for Ci in C]
         return C
@@ -867,7 +884,7 @@ class Runtime:
         else:
             field = sftype
         if max is None:
-            max = field.modulus
+            max = field.order
         else:
             max = (max - 1) // self._bincoef + 1
         m = len(self.parties)
@@ -897,13 +914,19 @@ class Runtime:
             await returnType(Share)
             field = sftype
 
+        m = len(self.parties)
+
+        if not isinstance(field.modulus, int):
+            prfs = self.parties[self.id].prfs(2)
+            bits = thresha.pseudorandom_share(field, m, self.id, prfs, self._prss_uci(), n)
+            return bits
+
         bits = [None] * n
         p = field.modulus
         if not signed:
             q = (p + 1) >> 1 # q = 1/2 mod p
-        m = len(self.parties)
-        t = self.threshold
         prfs = self.parties[self.id].prfs(p)
+        t = self.threshold
         h = n
         while h > 0:
             rs = thresha.pseudorandom_share(field, m, self.id, prfs, self._prss_uci(), h)
@@ -957,21 +980,31 @@ class Runtime:
         stype = type(a)
         l = stype.bit_length
         await returnType((stype, True), l)
-        Zp = stype.field
-        k = self.options.security_parameter
+        Fq = stype.field
 
-        r_bits = await gather_shares(self.random_bits(Zp, l))
+        r_bits = await gather_shares(self.random_bits(Fq, l))
         r_modl = 0
         for i in range(l - 1, -1, -1):
-            r_modl <<= 1
+            r_modl *= 2
             r_modl += r_bits[i].value
-        r_divl = self.random(Zp, 1<<k)
-        a = await gather_shares(a)
-        c = await self.output(a + (1<<l) - r_modl + (1<<l) * r_divl)
-        c = c.value % (1<<l)
-        r_bits = [stype(r.value) for r in r_bits]
-        c_bits = [stype((c >> i) & 1) for i in range(l)]
-        return self.add_bits(r_bits, c_bits)
+        if isinstance(Fq.modulus, int):
+            k = self.options.security_parameter
+            r_divl = self.random(Fq, 1<<k)
+            a = await gather_shares(a)
+            c = await self.output(a + (1<<l) - r_modl + (1<<l) * r_divl)
+            c = c.value % (1<<l)
+            r_bits = [stype(r.value) for r in r_bits]
+            c_bits = [stype((c >> i) & 1) for i in range(l)]
+            return self.add_bits(r_bits, c_bits)
+        else:
+            a = await gather_shares(a)          # use a.value?
+            c = await self.output(a + Fq(r_modl))  # fix this in +
+            c = int(c.value)
+            return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
+
+    def from_bits(self, x):
+        # TODO: also handle negative numbers with sign bit
+        return sum(x[i] * (1<<i) for i in range(len(x)))
 
     def _norm(self, a): # signed normalization factor
         stype = type(a)
@@ -982,12 +1015,12 @@ class Runtime:
         def __norm(x):
             n = len(x)
             if n == 1:
-                t = self.xor(s, x[0])
+                t = s + x[0] - 2 * s * x[0] #self.xor(s, x[0])
                 return 2 - t, t
             i0, nz0 = __norm(x[:n//2]) # low bits
             i1, nz1 = __norm(x[n//2:]) # high bits
             i0 *= (1 << ((n + 1) // 2))
-            return nz1 * (i1 - i0) + i0, self.or_(nz0, nz1)
+            return nz1 * (i1 - i0) + i0, nz0 + nz1 - nz0 * nz1 #self.or_(nz0, nz1)
         return (1 - 2 * s) * __norm(x[:-1])[0] * (2 ** (f - (l - 1))) # note f <= l
 
     def _rec(self, a): # enhance performance by reducing no. of truncs
@@ -1129,8 +1162,8 @@ def setup():
     if not logging_enabled:
         logging.basicConfig(level=logging.WARNING)
     else:
-        logging.basicConfig(stream=sys.stdout,
-                            level=logging.INFO, format='%(asctime)s %(message)s')
+        logging.basicConfig(format='{asctime} {message}', style='{',
+                            level=logging.INFO, stream=sys.stdout)
     if 'gmpy2' not in sys.modules:
         logging.info('Install package gmpy2 for better performance.')
     if not options.config:

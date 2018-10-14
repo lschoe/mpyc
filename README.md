@@ -1,4 +1,4 @@
-# MPyC -- Secure Multiparty Computation in Python.
+# MPyC -- Secure Multiparty Computation in Python
 
 MPyC supports secure *m*-party computation tolerating a dishonest minority of up to *t* passively corrupt parties,
 where *m &ge; 1* and *0 &le; t &le; (m-1)/2*. The underlying protocols are based on threshold secret sharing over prime

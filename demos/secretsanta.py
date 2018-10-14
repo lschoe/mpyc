@@ -54,13 +54,8 @@ def main():
     else:
         N = 8
         print('Setting input to default =', N)
-    
-    mpc.start()
 
-    secfld = mpc.SecFld(l=max(len(mpc.parties), (N - 1)).bit_length() + 1)
-    print('Using secure fields:', secfld)
-    for n in range(2, N + 1):
-        print(n, mpc.run(mpc.output(random_derangement(n, secfld))))
+    mpc.start()
 
     secint = mpc.SecInt()
     print('Using secure integers:', secint)
@@ -71,6 +66,16 @@ def main():
     print('Using secure fixed-point numbers:', secfxp)
     for n in range(2, N + 1):
         print(n, mpc.run(mpc.output(random_derangement(n, secfxp))))
+
+    secpfld = mpc.SecFld(l=max(len(mpc.parties), (N - 1)).bit_length())
+    print('Using secure prime fields:', secpfld)
+    for n in range(2, N + 1):
+        print(n, mpc.run(mpc.output(random_derangement(n, secpfld))))
+
+    secbfld = mpc.SecFld(char2=True, l=max(len(mpc.parties), (N - 1)).bit_length())
+    print('Using secure binary fields:', secbfld)
+    for n in range(2, N + 1):
+        print(n, mpc.run(mpc.output(random_derangement(n, secbfld))))
 
     mpc.shutdown()
 

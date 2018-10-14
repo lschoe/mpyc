@@ -23,11 +23,15 @@ class SharesExchanger(asyncio.Protocol):
         self.transport = None
 
     def connection_made(self, transport):
+        """Called when a connection is made.
+        
+        The party first sends its identity to the peer.
+        """
         self.transport = transport
         transport.write(str(self.runtime.id).encode())
 
     def send_data(self, pc, data):
-        """Send data labeled with pc to peer.
+        """Send data labeled with pc to the peer.
 
         Message format consists of 4 parts:
          1. pc_size (2 bytes)
