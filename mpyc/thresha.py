@@ -77,8 +77,8 @@ def recombine(field, points, x_rs=0):
                 s = s.value
             for r in range(len(sums)):
                 sums[r][h] += s * vector[r][i]
-    for h in range(n):
-        for r in range(len(sums)):
+    for r in range(len(sums)):
+        for h in range(n):
             sums[r][h] = field(sums[r][h])
     if isinstance(x_rs, tuple):
         return sums[0]

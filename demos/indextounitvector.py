@@ -26,7 +26,7 @@ else:
     t = 12
     print('Setting input to default =', t)
 
-mpc.start()
+mpc.run(mpc.start())
 for i in range(t):
     print(i, mpc.run(mpc.output(secret_index(secint(i), t))))
-mpc.shutdown()
+mpc.run(mpc.shutdown())

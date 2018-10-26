@@ -90,7 +90,7 @@ def argmin_rat(xs):
         return a, m
     return argmin(xs, arg_le_rat)
 
-def main():
+async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--data', help='filename for tableau')
     parser.add_argument('options', nargs='*')
@@ -124,12 +124,12 @@ def main():
     cobasis = [secint(w_powers[-j]) for j in range(n)]
     prev_pivot = secint(1)
 
-    mpc.start()
+    await mpc.start()
 
     iteration = 0
     logging.info('%d Termination?...', iteration)
     p_col_index, minimum = argmin_int(T[-1][:-1])
-    while mpc.run(mpc.output(minimum < 0)):
+    while await mpc.output(minimum < 0):
         iteration += 1
 
         logging.info('%d Determining pivot...', iteration)
@@ -159,8 +159,8 @@ def main():
         p_col_index, minimum = argmin_int(T[-1][:-1])
 
     logging.info('Termination...')
-    mx = mpc.run(mpc.output(T[-1][-1]))
-    cd = mpc.run(mpc.output(prev_pivot))
+    mx = await mpc.output(T[-1][-1])
+    cd = await mpc.output(prev_pivot)
     print(' max(f) = %d / %d = %f' % (mx.value, cd.value, float(mx.value)/cd.value))
 
     logging.info('Computing solution...')
@@ -172,7 +172,7 @@ def main():
     for j in range(n):
         coefs = [w_powers[(j*k)%N] for k in range(N)]
         solution[j] = mpc.lin_comb(coefs, sum_x_powers)
-    solution = mpc.run(mpc.output(solution))
+    solution = await mpc.output(solution)
 
     logging.info('Computing dual solution...')
     sum_x_powers = [secint(0) for _ in range(N)]
@@ -183,9 +183,9 @@ def main():
     for i in range(m):
         coefs = [w_powers[((n+i)*k)%N] for k in range(N)]
         dual_solution[i] = mpc.lin_comb(coefs, sum_x_powers)
-    dual_solution = mpc.run(mpc.output(dual_solution))
+    dual_solution = await mpc.output(dual_solution)
 
-    mpc.shutdown()
+    await mpc.shutdown()
 
     logging.info('Writing output to %s.', certificate_filename)
     with open(os.path.join('data', 'lp', certificate_filename), 'w') as f:
@@ -200,4 +200,4 @@ def main():
         f.write('\t'.join(str(x.value) for x in dual_solution) + '\n')
 
 if __name__ == '__main__':
-    main()
+    mpc.run(main())

@@ -98,7 +98,7 @@ async def gather_shares(*obj):
         if not runtime.options.no_async:
             assert isinstance(obj, (list, tuple)), obj
             c = _count_shares(obj)
-            if c != 0:
+            if c:
                 mux = Future()
                 _register_shares(obj, [c], mux)
                 await mux
@@ -180,27 +180,31 @@ class _afuture(Future):
         self.decl = decl
 
 def returnType(rettype=None, *args):
-    """Define return type for MPC coroutines.
+    """Define return type for MPyC coroutines.
 
-    Used in first await expression in an MPC coroutine.
+    Used in first await expression in an MPyC coroutine.
     """
     if rettype is None:
-        return _afuture(None)
-    if isinstance(rettype, Future):
-        return _afuture(Future)
-    def make(i):
-        if i == len(args):
-            if isinstance(rettype, tuple):
-                integral = rettype[1]
-                stype = rettype[0]
-                if  stype.field.frac_length > 0:
-                    return stype(None, integral)
-                else:
-                    return stype()
-            return rettype()
+        pass
+    elif isinstance(rettype, Future):
+        pass
+    else:
+        if isinstance(rettype, tuple):
+            integral = rettype[1]
+            stype = rettype[0]
+            if  stype.field.frac_length:
+                rt = lambda: stype(None, integral)
+            else:
+                rt = lambda: stype()
         else:
-            return [make(i + 1) for _ in range(args[i])]
-    return _afuture(make(0))
+            rt = lambda: rettype()
+        def nested_list(i):
+            if i:
+                return [nested_list(i - 1) for _ in range(args[-i])]
+            else:
+                return rt()
+        rettype = nested_list(len(args))
+    return _afuture(rettype)
 
 def _reconcile(decl, givn):
     if isinstance(givn, asyncio.Task) and givn.done():
@@ -227,19 +231,19 @@ def _reconcile(decl, givn):
     else:
         decl.df.set_result(givn)
 
-def _ncopy(nested_lists):
-    if isinstance(nested_lists, list):
-        return list(map(_ncopy, nested_lists))
+def _ncopy(nested_list):
+    if isinstance(nested_list, list):
+        return list(map(_ncopy, nested_list))
     else:
-        return nested_lists
+        return nested_list
 
 pc_level = 0
 """Tracks (length of) program counter to implement barriers."""
 
 def mpc_coro(f):
-    """Decorator turning coroutine f into an MPC coroutine.
+    """Decorator turning coroutine f into an MPyC coroutine.
 
-    An MPC coroutine is evaluated asychronously, returning empty placeholders.
+    An MPyC coroutine is evaluated asychronously, returning empty placeholders.
     The type of the placeholders is defined either by a return annotation
     of the form "-> expression" or by the first await expression in f.
     Return annotations can only be used for static types.

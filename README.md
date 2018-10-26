@@ -27,17 +27,16 @@ Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christ
 [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/) webpage.
 Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish installation.
 
-3. A few simple Windows batch files are provided in the `demos` directory.
+3. A few simple Windows batch files are provided in the `demos` directory. Also note the Windows batch files 
+in the `docs` and `tests` directories.
 
 4. Directory `demos\.config` contains configuration info and key material needed to run MPyC with 
 multiple parties. Windows batch file 'gen.bat' shows how to generate fresh key material for pseudorandom 
 secret sharing and SSL. OpenSSL is required to generate SSL key material of your own, use `pip install pyOpenSSL`.
 
-5. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, 
-you need to have Jupyter installed, e.g., using `pip install jupyter`. 
- 
-6. Latest versions of Jupyter use Tornado 5.0, which will not work with MPyC, see
-[Jupyter notebook issue #3397](https://github.com/jupyter/notebook/issues/3397).
-Downgrade Tornado by running `pip install tornado==4.5.3`.
+5. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, you need to have Jupyter installed, 
+e.g., using `pip install jupyter`. The latest version of Jupyter will come with IPython 7.0+, which supports
+top-level `await`. Instead of `mpc.run(mpc.start())` one can now simply write `await mpc.start()` anywhere in
+a notebook cell, even outside a coroutine.
 
 Copyright &copy; 2018, Berry Schoenmakers

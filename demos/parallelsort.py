@@ -34,7 +34,7 @@ def quickselect(x, k, l=None):
 mpc.threshold = 0 # No secret sharing.
 m = len(mpc.parties)
 
-mpc.start()
+mpc.run(mpc.start())
 
 secint = mpc.SecInt()
 print('Using secure integers:', secint)
@@ -76,4 +76,4 @@ x = list(itertools.chain(*x))
 x = mpc.run(mpc.output(x))
 print('Sorted outputs,', m, 'per party:', x)
 
-mpc.shutdown()
+mpc.run(mpc.shutdown())

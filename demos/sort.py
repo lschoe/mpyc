@@ -27,7 +27,7 @@ def bsort(x):
     bitonic_sort(0, len(x))
     return x
 
-def main():
+async def main():
     if sys.argv[1:]:
         n = int(sys.argv[1])
     else:
@@ -36,23 +36,23 @@ def main():
 
     s = [(-1)**i * (i + (n//2))**2 for i in range(n)]
 
-    mpc.start()
+    await mpc.start()
 
     global secnum
 
     secnum = mpc.SecInt()
     print('Using secure integers:', secnum)
     x = list(map(secnum, s))
-    print('Array:', mpc.run(mpc.output(x)))
-    print('Sorted array:', mpc.run(mpc.output(bsort(x))))
+    print('Array:', await mpc.output(x))
+    print('Sorted array:', await mpc.output(bsort(x)))
 
     secnum = mpc.SecFxp()
     print('Using secure fixed-point numbers:', secnum)
     x = list(map(secnum, s))
-    print('Input array:', mpc.run(mpc.output(x)))
-    print('Sorted array:', mpc.run(mpc.output(bsort(x))))
+    print('Input array:', await mpc.output(x))
+    print('Sorted array:', await mpc.output(bsort(x)))
 
-    mpc.shutdown()
+    await mpc.shutdown()
 
 if __name__ == '__main__':
-    main()
+    mpc.run(main())

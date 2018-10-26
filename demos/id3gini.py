@@ -87,7 +87,7 @@ def GI(x):
     G = mpc.in_prod(list(map(mpc.in_prod, x, x)), list(map(lambda x: 1/x, y)))
     return (D * G, D)
 
-def main():
+async def main():
     global secint, S, C, attr_names
 
     parser = argparse.ArgumentParser()
@@ -105,9 +105,9 @@ def main():
     C = n - 1
     T = [secint(1)] * len(transactions)
 
-    mpc.start()
+    await mpc.start()
 
-    tree = mpc.run(id3(T, frozenset(list(range(n))).difference([C])))
+    tree = await id3(T, frozenset(list(range(n))).difference([C]))
     print('Tree =', tree)
 
     height = lambda t: max(list(map(height, t[1])))+1 if isinstance(t, tuple) else 0
@@ -116,7 +116,7 @@ def main():
     size = lambda t: sum(map(size, t[1]))+1 if isinstance(t, tuple) else 1
     print('Tree size =', size(tree))
 
-    mpc.shutdown()
+    await mpc.shutdown()
 
 if __name__ == '__main__':
-    main()
+    mpc.run(main())

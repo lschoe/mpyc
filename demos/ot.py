@@ -21,7 +21,7 @@ else:
     choice[mpc.id - t - 1] = random.randint(0, 1)
     print(f'You are receiver {mpc.id - t} with random choice bit {choice[mpc.id - t - 1]}.')
 
-mpc.start()
+mpc.run(mpc.start())
 
 secnum = mpc.SecInt()
 for i in range(1, t + 1):
@@ -31,4 +31,4 @@ for i in range(1, t + 1):
     if a:
         print(f'You have received message {a}.')
 
-mpc.shutdown()
+mpc.run(mpc.shutdown())

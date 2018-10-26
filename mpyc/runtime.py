@@ -96,7 +96,16 @@ class Runtime:
 
     def run(self, f):
         """Run the given (MPC) coroutine or future until it is done."""
-        return self._loop.run_until_complete(f)
+        if self._loop.is_running():
+            val = None
+            try:
+                while True:
+                    val = f.send(val)
+            except StopIteration as e:
+                d = e.value
+            return d
+        else:
+            return self._loop.run_until_complete(f)
 
     def logging(self, enable=None):
         """Toggle/enable/disable logging."""
@@ -109,7 +118,7 @@ class Runtime:
         else:
             logging.disable(logging.INFO)
 
-    def start(self):
+    async def start(self):
         """Start the MPC runtime.
 
         Open connections with other parties, if any.
@@ -139,8 +148,7 @@ class Runtime:
                 context.verify_mode = ssl.CERT_REQUIRED
             else:
                 context = None
-            listen = self._loop.create_server(factory, port=listen_port, ssl=context)
-            server = self.run(listen)
+            server = await self._loop.create_server(factory, port=listen_port, ssl=context)
             logging.debug(f'Listening on port {listen_port}')
 
         # Connect to all parties > self.id.
@@ -156,15 +164,14 @@ class Runtime:
                     else:
                         context = None
                         server_hostname = None
-                    connect = self._loop.create_connection(factory, peer.host, peer.port,
+                    await self._loop.create_connection(factory, peer.host, peer.port,
                                            ssl=context, server_hostname=server_hostname)
-                    self.run(connect)
                     break
                 except Exception as e:
                     logging.debug(e)
                 time.sleep(1)
 
-        self.run(self.parties[self.id].protocol)
+        await self.parties[self.id].protocol
         if self.options.ssl:
             logging.info('SSL connections to all parties.')
         else:
@@ -172,15 +179,17 @@ class Runtime:
         if self.id:
             server.close()
 
-    def shutdown(self):
+    async def shutdown(self):
         """Shutdown the MPC runtime.
 
         Close all connections, if any.
         """
         m = len(self.parties)
         if m > 1:
-            # Wait for all parties.
-            self.run(self.output(self.input(sectypes.SecFld(modulus=101)(self.id))))
+            # Wait for all parties after a barrier.
+            while asyncoro.pc_level >= len(self._program_counter):
+                await asyncio.sleep(0)
+            await self.output(self.input(sectypes.SecFld(101)(self.id)), threshold=m-1)
             # Close connections to all parties.
             for peer in self.parties:
                 if peer.id != self.id:

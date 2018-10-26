@@ -36,11 +36,11 @@ def dim(x): # dimensions of tensor x
     if isinstance(x, np.ndarray):
         return list(x.shape)
     else:
-        def _dim(x):
-            if not isinstance(x, list):
-                return []
-            return [len(x)] + _dim(x[0])
-        return _dim(x)
+        s = []
+        while isinstance(x, list):
+            s.append(len(x))
+            x = x[0]
+        return s
 
 @mpc.coroutine
 async def convolvetensor(x, W, b):
@@ -70,8 +70,7 @@ async def convolvetensor(x, W, b):
                 Y[i][j][im] = mpc._reshare(Y[i][j][im])
     Y = await mpc.gather(Y)
     if stype.field.frac_length > 0:
-        Y = [[[[mpc.trunc(stype(Yijkl))
-                for Yijkl in Yijk] for Yijk in Yij] for Yij in Yi] for Yi in Y]
+        Y = [[[[mpc.trunc(stype(_)) for _ in _] for _ in _] for _ in _] for _ in Y]
     return Y
     # k, v, m, n = dim(Y)
 
@@ -123,7 +122,7 @@ def argmax(x):
         m = b * (m - x[i]) + x[i]
     return a
 
-def main():
+async def main():
     global secnum
 
     k = 1 if len(sys.argv) == 1 else float(sys.argv[1])
@@ -141,7 +140,7 @@ def main():
         offset = int(sys.argv[2])
     f = 6
 
-    mpc.start()
+    await mpc.start()
 
     logging.info('--------------- INPUT   -------------')
     print(f'Type = {secnum.__name__}, range = ({offset}, {offset + batch_size})')
@@ -161,24 +160,24 @@ def main():
     logging.info('--------------- LAYER 1 -------------')
     W, b = load('conv1', f)
     x = convolvetensor(x, W, b)
-    mpc.run(mpc.barrier())
+    await mpc.barrier()
     if secnum.__name__.startswith('SecInt'):
         secnum.bit_length = 16
     x = maxpool(x)
-    mpc.run(mpc.barrier())
+    await mpc.barrier()
     x = ReLU(x)
-    mpc.run(mpc.barrier())
+    await mpc.barrier()
 
     logging.info('--------------- LAYER 2 -------------')
     W, b = load('conv2', f, 3)
     x = convolvetensor(x, W, b)
-    mpc.run(mpc.barrier())
+    await mpc.barrier()
     if secnum.__name__.startswith('SecInt'):
         secnum.bit_length = 23
     x = maxpool(x)
-    mpc.run(mpc.barrier())
+    await mpc.barrier()
     x = ReLU(x)
-    mpc.run(mpc.barrier())
+    await mpc.barrier()
 
     logging.info('--------------- LAYER 3 -------------')
     x = x.reshape(batch_size, 64 * 7**2)
@@ -187,7 +186,7 @@ def main():
     if secnum.__name__.startswith('SecInt'):
         secnum.bit_length = 30
     x = ReLU(x)
-    mpc.run(mpc.barrier())
+    await mpc.barrier()
 
     logging.info('--------------- LAYER 4 -------------')
     W, b = load('fc2', f, 5)
@@ -197,10 +196,10 @@ def main():
     if secnum.__name__.startswith('SecInt'):
         secnum.bit_length = 37
     for i in range(batch_size):
-        print(labels[i], mpc.run(mpc.output(argmax(x[i]))))
-        print(mpc.run(mpc.output(x[i])))
+        print(labels[i], await mpc.output(argmax(x[i])))
+        print(await mpc.output(x[i]))
 
-    mpc.shutdown()
+    await mpc.shutdown()
 
 if __name__ == '__main__':
-    main()
+    mpc.run(main())

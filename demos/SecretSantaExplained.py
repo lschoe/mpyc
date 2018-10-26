@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 # coding: utf-8
 
 # # Secret Santa explained
@@ -14,7 +14,7 @@
 # 
 # To get started, we simply import the MPyC runtime `mpc` at the start of our program.
 
-# In[3]:
+# In[1]:
 
 
 from mpyc.runtime import mpc
@@ -32,7 +32,7 @@ from mpyc.runtime import mpc
 # 
 # To represent *secret-shared* derangements, we will use a secure MPyC type of integers. For simplicity, we choose 32-bit (default) secure integers.
 
-# In[4]:
+# In[2]:
 
 
 secint = mpc.SecInt() # 32-bit secure MPyC integers
@@ -40,10 +40,10 @@ secint = mpc.SecInt() # 32-bit secure MPyC integers
 
 # Finally, we start the `mpc` runtime, which means that point-to-point connections between each pair of parties will be established.
 
-# In[5]:
+# In[3]:
 
 
-mpc.start()   # required only when run with multiple parties 
+mpc.run(mpc.start())  # required only when run with multiple parties 
 
 
 # Insertion of this call ensures that the Python code can also be run with multiple parties, as shown at the end of this notebook.
@@ -54,7 +54,7 @@ mpc.start()   # required only when run with multiple parties
 # 
 # For example, consider the following code fragment.
 
-# In[6]:
+# In[4]:
 
 
 a = secint(5)    
@@ -84,7 +84,7 @@ print('Example: (5+13)*(5-13) =', f)
 # 
 # The leads to the following MPyC code for function `random_derangement`.
 
-# In[7]:
+# In[5]:
 
 
 @mpc.coroutine                                    # turn coroutine into an MPyC coroutine
@@ -127,7 +127,7 @@ async def random_derangement(n):                  # returns list of n secint ele
 # 
 # We do so by representing `r` in a unary fashion, that is, as a unit vector `x_r` of length $n-i$. A unit vector is a list containing exactly one 1 and all other entries equal to 0. Taking the dot product between a secret unit vector `x_r` and a segment of `p` of the same length will select the intended element of `p`. At the same time no information whatsoever is given away about which element is selected.
 
-# In[8]:
+# In[6]:
 
 
 def random_permutation(n):                     # returns list of n secint elements
@@ -160,7 +160,7 @@ def random_permutation(n):                     # returns list of n secint elemen
 # 
 # This leaves us with the case $n=1$, which is handled by simply returning $[1]$, the only unit vector of length $1$.
 
-# In[9]:
+# In[7]:
 
 
 @mpc.coroutine                                      # turn coroutine into an MPyC coroutine
@@ -194,13 +194,13 @@ async def random_unit_vector(n):                    # returns list of n secint e
 # 
 # Let's now check what the results look like. We check the first few cases for each function.
 
-# In[10]:
+# In[8]:
 
 
 N = 7
 
 
-# In[11]:
+# In[9]:
 
 
 print('Random unit vectors:')
@@ -209,7 +209,7 @@ for n in range(1, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[12]:
+# In[10]:
 
 
 print('Random permutations:')
@@ -218,7 +218,7 @@ for n in range(1, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[13]:
+# In[11]:
 
 
 print('Random derangements:')
@@ -227,10 +227,10 @@ for n in range(2, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[14]:
+# In[12]:
 
 
-mpc.shutdown()   # required only when run with multiple parties  
+mpc.run(mpc.shutdown())   # required only when run with multiple parties  
 
 
 # ## Deploying the Python code with multiple parties
@@ -241,7 +241,7 @@ mpc.shutdown()   # required only when run with multiple parties
 # 
 # First we show a run with one party only. However, this time the code runs outside the Jupyter notebook, using its own Python interpreter. 
 
-# In[15]:
+# In[13]:
 
 
 get_ipython().system('run 1 SecretSantaExplained.py')
@@ -251,7 +251,7 @@ get_ipython().system('run 1 SecretSantaExplained.py')
 # 
 # Next, for the "real thing", we show a run with three parties, in which three processes are launched communicating via local tcp-connections.
 
-# In[16]:
+# In[14]:
 
 
 get_ipython().system('run 3 SecretSantaExplained.py')
@@ -259,7 +259,7 @@ get_ipython().system('run 3 SecretSantaExplained.py')
 
 # As a final test, we show a run with five parties.
 
-# In[19]:
+# In[15]:
 
 
 get_ipython().system('run 5 SecretSantaExplained.py')

@@ -83,13 +83,13 @@ def decrypt(K, s):
     s = mpc.matrix_add(s, K[0])
     return s
 
-def xprint(text, s):
-    """Print 4x4 matrix s transposed and flattened as hex string."""
+async def xprint(text, s):
+    """Print matrix s transposed and flattened as hex string."""
     s = list(map(list, zip(*s)))
-    s = mpc.run(mpc.output(sum(s, [])))
+    s = await mpc.output(sum(s, []))
     logging.info(f'{text} {bytes(map(int, s)).hex()}')
 
-def main():
+async def main():
     if sys.argv[1:]:
         full = False
         print('AES-128 encryption only.')
@@ -97,31 +97,31 @@ def main():
         full = True
         print('AES-128 en/decryption and AES-256 en/decryption.')
 
-    mpc.start()
+    await mpc.start()
 
     p = [[secfld(17*(4 * j + i))  for j in range(4)] for i in range(4)]
-    xprint('Plaintext:  ', p)
+    await xprint('Plaintext:  ', p)
 
     k128 = [[secfld(4 * j + i)  for j in range(4)] for i in range(4)]
-    xprint('AES-128 key:', k128)
+    await xprint('AES-128 key:', k128)
     K = key_expansion(k128)
     c = encrypt(K, p)
-    xprint('Ciphertext: ', c)
+    await xprint('Ciphertext: ', c)
     if full: 
         p = decrypt(K, c)
-        xprint('Plaintext:  ', p)
+        await xprint('Plaintext:  ', p)
 
         k256 = [[secfld(4 * j + i) for j in range(8)] for i in range(4)]
-        xprint('AES-256 key:', k256)
+        await xprint('AES-256 key:', k256)
         K = key_expansion(k256)
         c = encrypt(K, p)
 
-        xprint('Ciphertext: ', c)
+        await xprint('Ciphertext: ', c)
         p = decrypt(K, c)
-        xprint('Plaintext:  ', p)
+        await xprint('Plaintext:  ', p)
 
-    mpc.shutdown()
+    await mpc.shutdown()
 
 if __name__ == '__main__':
-    main()
+    mpc.run(main())
     

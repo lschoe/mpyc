@@ -101,7 +101,7 @@ def unit_vector(a, n):
     x = si1(a, n)
     return [stype(1) - sum(x)] + x
 
-def main():
+async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--data', help='filename for tableau')
     parser.add_argument('options', nargs='*')
@@ -125,13 +125,13 @@ def main():
     basis = [secfxp(i + n) for i in range(m)]
     cobasis = [secfxp(j) for j in range(n)]
 
-    mpc.start()
+    await mpc.start()
 
     iteration = 0
     logging.info('%d Termination?...', iteration)
     p_col_index, minimum = argmin_int(T[-1][:-1])
 
-    while mpc.run(mpc.output(minimum < 0)):
+    while await mpc.output(minimum < 0):
         iteration += 1
 
         logging.info('%d Determining pivot...', iteration)
@@ -158,7 +158,7 @@ def main():
         p_col_index, minimum = argmin_int(T[-1][:-1])
 
     logging.info('Termination...')
-    mx = mpc.run(mpc.output(T[-1][-1]))
+    mx = await mpc.output(T[-1][-1])
     print(' max(f) =', mx)
 
     logging.info('Computing solution...')
@@ -167,7 +167,7 @@ def main():
         x = unit_vector(basis[i], m + n)[:n]
         y = mpc.scalar_mul(T[i][-1], x)
         solution = mpc.vector_add(solution, y)
-    solution = mpc.run(mpc.output(solution))
+    solution = await mpc.output(solution)
 
     logging.info('Computing dual solution...')
     dual_solution = [secfxp(0) for _ in range(m)]
@@ -175,9 +175,9 @@ def main():
         x = unit_vector(cobasis[j], m + n)[n:]
         y = mpc.scalar_mul(T[-1][j], x)
         dual_solution = mpc.vector_add(dual_solution, y)
-    dual_solution = mpc.run(mpc.output(dual_solution))
+    dual_solution = await mpc.output(dual_solution)
 
-    mpc.shutdown()
+    await mpc.shutdown()
 
     logging.info('Writing output to %s.', certificate_filename)
     with open(os.path.join('data', 'lp', certificate_filename), 'w') as f:
@@ -191,4 +191,4 @@ def main():
         f.write('\t'.join(x.__repr__() for x in dual_solution) + '\n')
 
 if __name__ == '__main__':
-    main()
+    mpc.run(main())

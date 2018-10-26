@@ -53,13 +53,13 @@ def _mod(a, b):
         return a
     if b == 0:
         raise ZeroDivisionError('division by zero polynomial')
-    m = a.bit_length()
-    n = b.bit_length()
+    m = _degree(a)
+    n = _degree(b)
     if m < n:
         return a
     b <<= m - n
     for i in range(m - n + 1):
-        if (a >> m - i - 1) & 1:
+        if (a >> m - i) & 1:
             a ^= b
         b >>= 1
     return a
@@ -76,15 +76,15 @@ def divmod(a, b):
 def _divmod(a, b):
     if b == 0:
         raise ZeroDivisionError('division by zero polynomial')
-    m = a.bit_length()
-    n = b.bit_length()
+    m = _degree(a)
+    n = _degree(b)
     if m < n:
         return 0, a
     b <<= m - n
     q = 0
     for i in range(m - n + 1):
         q <<= 1
-        if (a >> m - i - 1) & 1:
+        if (a >> m - i) & 1:
             a ^= b
             q ^= 1
         b >>= 1

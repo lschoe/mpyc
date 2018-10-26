@@ -14,5 +14,5 @@ Some operations for container datatypes holding secret-shared data items
 are provided as well (e.g., some matrix-vector operations).
 """
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 __license__ = 'Apache License 2.0'

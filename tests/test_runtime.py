@@ -7,11 +7,11 @@ class Arithmetic(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         mpc.logging(False)
-        mpc.start()
+        mpc.run(mpc.start())
 
     @classmethod
     def tearDownClass(cls):
-        mpc.shutdown()
+        mpc.run(mpc.shutdown())
 
     def test_SecFld(self):
         secfld = mpc.SecFld()
