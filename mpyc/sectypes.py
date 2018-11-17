@@ -310,7 +310,7 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
             char2 = char2 or (char2 is None)
             assert char2 # binary field
         else:
-            raise ValueError('Only prime fields and binary fields supported.')
+            raise ValueError('only prime fields and binary fields supported')
         l = l or order.bit_length() - 1
         assert l == order.bit_length() - 1
     if modulus is None:

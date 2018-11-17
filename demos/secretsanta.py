@@ -20,7 +20,7 @@ async def random_unit_vector(n, sectype):
     if n % 2 == 0:
         y = mpc.scalar_mul(b, x)
         return y + mpc.vector_sub(x, y)
-    elif await mpc.eq_public(b * x[0], 1):
+    elif await mpc.output(b * x[0]):
         return random_unit_vector(n, sectype)
     else:
         y = mpc.scalar_mul(b, x[1:])
@@ -31,7 +31,7 @@ def random_permutation(n, sectype):
     p = [sectype(i) for i in range(n)]
     for i in range(n - 1):
         x_r = random_unit_vector(n - i, sectype)
-        p_r = mpc.in_prod(p[i - n:], x_r)
+        p_r = mpc.in_prod(p[i:], x_r)
         d_r = mpc.scalar_mul(p[i] - p_r, x_r)
         p[i] = p_r
         for j in range(n - i):

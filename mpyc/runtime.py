@@ -905,12 +905,12 @@ class Runtime:
             return shares
 
     def random_bit(self, sftype, signed=False):
-        """Secure random bit of the given type."""
+        """Secure uniformly random bit of the given type."""
         return self.random_bits(sftype, 1, signed)[0]
 
     @mpc_coro
     async def random_bits(self, sftype, n, signed=False):
-        """n secure random bits of the given type."""
+        """n secure uniformly random bits of the given type."""
         prss0 = False
         f1 = 1
         if issubclass(sftype, Share):
@@ -1195,11 +1195,13 @@ def setup():
     Share.runtime = runtime
     import mpyc.asyncoro
     mpyc.asyncoro.runtime = runtime
+    import mpyc.random
+    mpyc.random.runtime = runtime
     runtime.version = mpyc.__version__
     global mpc
     mpc = runtime
 
-try: # ignore exceptions for pydoc etc.
+try: # suppress exceptions for pydoc etc.
     setup()
-except Exception:
-    pass
+except Exception as e:
+    print('MPyC runtime.setup() exception:', e)

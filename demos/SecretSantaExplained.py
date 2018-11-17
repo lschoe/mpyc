@@ -134,7 +134,7 @@ def random_permutation(n):                     # returns list of n secint elemen
     p = [secint(i) for i in range(n)]          # initialize p to identity permutation
     for i in range(n-1):
         x_r = random_unit_vector(n-i)          # x_r = [0]*(r-i) + [1] + [0]*(n-r), i <= r < n
-        p_r = mpc.in_prod(p[i-n:], x_r)        # p_r = p[r]
+        p_r = mpc.in_prod(p[i:], x_r)          # p_r = p[r]
         d_r = mpc.scalar_mul(p[i] - p_r, x_r)  # d_r = [0]*(r-i) + [p[i] - p[r]] + [0]*(n-r)
         p[i] = p_r                             # p[i] = p[r]
         for j in range(n-i):
@@ -160,7 +160,7 @@ def random_permutation(n):                     # returns list of n secint elemen
 # 
 # This leaves us with the case $n=1$, which is handled by simply returning $[1]$, the only unit vector of length $1$.
 
-# In[7]:
+# In[8]:
 
 
 @mpc.coroutine                                      # turn coroutine into an MPyC coroutine
@@ -194,13 +194,13 @@ async def random_unit_vector(n):                    # returns list of n secint e
 # 
 # Let's now check what the results look like. We check the first few cases for each function.
 
-# In[8]:
+# In[9]:
 
 
 N = 7
 
 
-# In[9]:
+# In[10]:
 
 
 print('Random unit vectors:')
@@ -209,7 +209,7 @@ for n in range(1, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[10]:
+# In[11]:
 
 
 print('Random permutations:')
@@ -218,7 +218,7 @@ for n in range(1, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[11]:
+# In[12]:
 
 
 print('Random derangements:')
@@ -227,7 +227,7 @@ for n in range(2, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[12]:
+# In[13]:
 
 
 mpc.run(mpc.shutdown())   # required only when run with multiple parties  
@@ -241,7 +241,7 @@ mpc.run(mpc.shutdown())   # required only when run with multiple parties
 # 
 # First we show a run with one party only. However, this time the code runs outside the Jupyter notebook, using its own Python interpreter. 
 
-# In[13]:
+# In[14]:
 
 
 get_ipython().system('run 1 SecretSantaExplained.py')
@@ -251,7 +251,7 @@ get_ipython().system('run 1 SecretSantaExplained.py')
 # 
 # Next, for the "real thing", we show a run with three parties, in which three processes are launched communicating via local tcp-connections.
 
-# In[14]:
+# In[15]:
 
 
 get_ipython().system('run 3 SecretSantaExplained.py')
@@ -259,7 +259,7 @@ get_ipython().system('run 3 SecretSantaExplained.py')
 
 # As a final test, we show a run with five parties.
 
-# In[15]:
+# In[16]:
 
 
 get_ipython().system('run 5 SecretSantaExplained.py')
