@@ -10,6 +10,8 @@ from mpyc import gf2x
 from mpyc import bfield
 from mpyc import pfield
 
+runtime = None
+
 class Share:
     """A secret-shared value.
 
@@ -37,45 +39,45 @@ class Share:
 
     def _coerce(self, other):
         if isinstance(other, Share):
-            if type(self) != type(other):
+            if not isinstance(other, type(self)):
                 return NotImplemented
         elif isinstance(other, int):
             other = type(self)(other)
         elif isinstance(other, float):
-            if type(self).field.frac_length == 0:
-                return NotImplemented
-            else:
+            if self.field.frac_length > 0:
                 other = type(self)(other)
-        elif type(self).field != type(other):
+            else:
+                return NotImplemented
+        elif not isinstance(other, self.field):
             return NotImplemented
         return other
 
     def _coerce2(self, other):
         if isinstance(other, Share):
-            if type(self) != type(other):
+            if not isinstance(other, type(self)):
                 return NotImplemented
         elif isinstance(other, int):
-#            other <<= type(self).field.frac_length
+#            other <<= self.field.frac_length
             pass
         elif isinstance(other, float):
-            if type(self).field.frac_length == 0:
-                return NotImplemented
-            else:
+            if self.field.frac_length > 0:
                 other = type(self)(other)
-        elif type(self).field != type(other):
+            else:
+                return NotImplemented
+        elif not isinstance(other, self.field):
             return NotImplemented
         return other
 
     def __neg__(self):
         """Negation."""
-        return self.runtime.neg(self)
+        return runtime.neg(self)
 
     def __add__(self, other):
         """Addition."""
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        return self.runtime.add(self, other)
+        return runtime.add(self, other)
 
     __radd__ = __add__
 
@@ -84,21 +86,21 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        return self.runtime.sub(self, other)
+        return runtime.sub(self, other)
 
     def __rsub__(self, other):
         """Subtraction (with reflected arguments)."""
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        return self.runtime.sub(other, self)
+        return runtime.sub(other, self)
 
     def __mul__(self, other):
         """Multiplication."""
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
-        return self.runtime.mul(self, other)
+        return runtime.mul(self, other)
 
     __rmul__ = __mul__
 
@@ -107,41 +109,41 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        return self.runtime.div(self, other)
+        return runtime.div(self, other)
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
-        return self.runtime.div(other, self)
+        return runtime.div(other, self)
 
     def __mod__(self, other):
         """Integer remainder."""
         if type(self).__name__.startswith('SecFld'):
             return NotImplemented
-        elif type(other).__name__.startswith('SecFld'):
+        if type(other).__name__.startswith('SecFld'):
             return NotImplemented
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
         # stub: only mod 2
         assert other.df.value == 2, 'Least significant bit only, for now!'
-        r = self.runtime.lsb(self)
+        r = runtime.lsb(self)
         return r
 
     def __rmod__(self, other):
         """Integer remainder (with reflected arguments)."""
         if type(self).__name__.startswith('SecFld'):
             return NotImplemented
-        elif type(other).__name__.startswith('SecFld'):
+        if type(other).__name__.startswith('SecFld'):
             return NotImplemented
         # stub: only mod 2
         assert self.df.value == 2, 'Least significant bit only, for now!'
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        r = self.runtime.lsb(other)
+        r = runtime.lsb(other)
         return r
 
     def __floordiv__(self, other):
@@ -196,13 +198,13 @@ class Share:
         """Exponentation with publicly known integer exponent."""
         if not isinstance(other, int):
             return NotImplemented
-        return self.runtime.pow(self, other)
+        return runtime.pow(self, other)
 
     def __and__(self, other):
         """Bitwise and for binary fields (otherwise 1-bit only)."""
         if type(self).__name__.startswith('SecFld'):
-            if not isinstance(type(self).field.modulus, int):
-                return self.runtime.and_(self, other)
+            if not isinstance(self.field.modulus, int):
+                return runtime.and_(self, other)
         return self * other
 
     __rand__ = __and__
@@ -210,8 +212,8 @@ class Share:
     def __xor__(self, other):
         """Bitwise exclusive-or for binary fields (otherwise 1-bit only)."""
         if type(self).__name__.startswith('SecFld'):
-            if not isinstance(type(self).field.modulus, int):
-                return self.runtime.xor(self, other)
+            if not isinstance(self.field.modulus, int):
+                return runtime.xor(self, other)
         return self + other - 2 * self * other
 
     __rxor__ = __xor__
@@ -219,15 +221,15 @@ class Share:
     def __invert__(self):
         """Bitwise inversion (not) for binary fields (otherwise 1-bit only)."""
         if type(self).__name__.startswith('SecFld'):
-            if not isinstance(type(self).field.modulus, int):
-                return self.runtime.invert(self)
+            if not isinstance(self.field.modulus, int):
+                return runtime.invert(self)
         return 1 - self
-        
+
     def __or__(self, other):
         """Bitwise or for binary fields (otherwise 1-bit only)."""
         if type(self).__name__.startswith('SecFld'):
-            if not isinstance(type(self).field.modulus, int):
-                return self.runtime.or_(self, other)
+            if not isinstance(self.field.modulus, int):
+                return runtime.or_(self, other)
         return self + other - self * other
 
     __ror__ = __or__
@@ -238,7 +240,7 @@ class Share:
         c = self - other
         if type(c).__name__.startswith('SecFld'):
             return NotImplemented
-        return self.runtime.sgn(c, GE=True)
+        return runtime.sgn(c, GE=True)
 
     def __gt__(self, other):
         """Strictly greater-than comparison."""
@@ -246,7 +248,7 @@ class Share:
         c = other - self
         if type(c).__name__.startswith('SecFld'):
             return NotImplemented
-        return 1 - self.runtime.sgn(c, GE=True)
+        return 1 - runtime.sgn(c, GE=True)
 
     def __le__(self, other):
         """Less-than or equal comparison."""
@@ -254,7 +256,7 @@ class Share:
         c = other - self
         if type(c).__name__.startswith('SecFld'):
             return NotImplemented
-        return self.runtime.sgn(c, GE=True)
+        return runtime.sgn(c, GE=True)
 
     def __lt__(self, other):
         """Strictly less-than comparison."""
@@ -262,19 +264,19 @@ class Share:
         c = self - other
         if type(c).__name__.startswith('SecFld'):
             return NotImplemented
-        return 1 - self.runtime.sgn(c, GE=True)
+        return 1 - runtime.sgn(c, GE=True)
 
     def __eq__(self, other):
         """Equality testing."""
         # self == other
         c = self - other
-        return self.runtime.is_zero(c)
+        return runtime.is_zero(c)
 
     def __ne__(self, other):
         """Negated equality testing."""
         # self != other
         c = self - other
-        return 1 - self.runtime.is_zero(c)
+        return 1 - runtime.is_zero(c)
 
 _sectypes = {}
 
@@ -287,7 +289,7 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
     """
     if isinstance(modulus, str):
         modulus = gf2x.Polynomial(modulus)
-    if isinstance(modulus, gf2x.Polynomial): 
+    if isinstance(modulus, gf2x.Polynomial):
         char2 = char2 or (char2 is None)
         assert char2 # binary field
         modulus = int(modulus)
@@ -296,7 +298,7 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
             assert modulus is None or modulus == 2 or modulus == 3
             if modulus is None or modulus == 2:
                 # default: prime field
-                char2 = char2 or False 
+                char2 = char2 or False
             else:
                 char2 = char2 or (char2 is None)
                 assert char2 # binary field
@@ -324,7 +326,7 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
         field = bfield.GF(modulus)
     else:
         field = pfield.GF(modulus)
-    assert Share.runtime.threshold == 0 or field.order > len(Share.runtime.parties), \
+    assert runtime.threshold == 0 or field.order > len(runtime.parties), \
             'Field order must exceed number of parties, unless threshold is 0.'
     # field.order >= number of parties for MDS
     field.is_signed = False
@@ -341,7 +343,7 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
     return _sectypes[(modulus, char2)]
 
 def _SecNum(l, f, p, n):
-    k = Share.runtime.options.security_parameter
+    k = runtime.options.security_parameter
     if p is None:
         p = pfield.find_prime_root(l + max(f, k + 1) + 1, n=n)
     else:
@@ -359,7 +361,7 @@ def _SecNum(l, f, p, n):
 def SecInt(l=None, p=None, n=2):
     """Secure l-bit integers."""
     if l is None:
-        l = Share.runtime.options.bit_length
+        l = runtime.options.bit_length
 
     if (l, 0, p, n) not in _sectypes:
         SecureInt = _SecNum(l, 0, p, n)
@@ -376,7 +378,7 @@ def SecFxp(l=None, f=None, p=None, n=2):
     NB: if dividing secure fixed-point numbers, make sure that l =~ 2f.
     """
     if l is None:
-        l = Share.runtime.options.bit_length
+        l = runtime.options.bit_length
     if f is None:
         f = l // 2 # l =~ 2f enables division such that x =~ 1/(1/x)
 
@@ -398,5 +400,6 @@ def SecFxp(l=None, f=None, p=None, n=2):
             else:
                 self.integral = integral
             super(_sectypes[(l, f, p, n)], self).__init__(value)
-        _sectypes[(l, f, p, n)] = type(name, (SecureFxp,), {'__slots__':'integral', '__init__':init})
+        _sectypes[(l, f, p, n)] = type(name, (SecureFxp,),
+                                       {'__slots__':'integral', '__init__':init})
     return _sectypes[(l, f, p, n)]

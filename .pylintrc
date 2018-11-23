@@ -1,0 +1,15 @@
+[MESSAGES CONTROL]
+disable=single-string-used-for-slots,
+	logging-fstring-interpolation
+
+[BASIC]
+argument-naming-style=any
+attr-naming-style=any
+variable-naming-style=any
+const-naming-style=any
+function-naming-style=any
+method-naming-style=any
+
+[DESIGN]
+# Maximum number of arguments for function / method.
+max-args=6

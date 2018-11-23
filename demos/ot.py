@@ -12,14 +12,14 @@ if m % 2 == 0:
 t = m // 2
 message = [(None, None)] * t
 choice = [None] * t
-if mpc.id == 0:
+if mpc.pid == 0:
     print('You are the trusted third party.')
-elif 1 <= mpc.id <= t:
-    message[mpc.id - 1] = (random.randint(0, 99), random.randint(0, 99))
-    print(f'You are sender {mpc.id} holding messages {message[mpc.id - 1][0]} and {message[mpc.id - 1][1]}.')
+elif 1 <= mpc.pid <= t:
+    message[mpc.pid - 1] = (random.randint(0, 99), random.randint(0, 99))
+    print(f'You are sender {mpc.pid} holding messages {message[mpc.pid - 1][0]} and {message[mpc.pid - 1][1]}.')
 else:
-    choice[mpc.id - t - 1] = random.randint(0, 1)
-    print(f'You are receiver {mpc.id - t} with random choice bit {choice[mpc.id - t - 1]}.')
+    choice[mpc.pid - t - 1] = random.randint(0, 1)
+    print(f'You are receiver {mpc.pid - t} with random choice bit {choice[mpc.pid - t - 1]}.')
 
 mpc.run(mpc.start())
 

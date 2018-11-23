@@ -20,7 +20,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(gf2x.degree(poly(2)), 1)
         self.assertEqual(gf2x.degree(poly(3)), 1)
         self.assertEqual(gf2x.degree(poly(7)), 2)
-        
+
     def test_arithmetic(self):
         a = poly(1)
         b = poly(2)
@@ -64,23 +64,23 @@ class Arithmetic(unittest.TestCase):
         d, s, t = gf2x.gcdext(poly(621), poly(1905))
         self.assertEqual(d, poly(11))
         self.assertEqual(poly(621) * s + poly(1905) * t, poly(11))
-        
+
         self.assertEqual((gf2x.invert(poly(11), poly(283)) * poly(11)) % poly(283), 1)
         self.assertEqual((gf2x.invert(poly(11) + poly(283), poly(283)) * poly(11)) % poly(283), 1)
         with self.assertRaises(ZeroDivisionError):
             gf2x.invert(poly(283), poly(283))
-        
+
     def test_irreducible(self):
-        self.assertFalse(gf2x._is_irreducible(0))
-        self.assertFalse(gf2x._is_irreducible(1))
-        self.assertTrue(gf2x._is_irreducible(2))
-        self.assertTrue(gf2x._is_irreducible(3))
-        self.assertFalse(gf2x._is_irreducible(4))
-        self.assertFalse(gf2x._is_irreducible(5))
-        self.assertFalse(gf2x._is_irreducible(6))
-        self.assertTrue(gf2x._is_irreducible(7))
-        self.assertFalse(gf2x._is_irreducible(17))
-        self.assertTrue(gf2x._is_irreducible(283))
-        self.assertTrue(gf2x._is_irreducible(391))
-        self.assertFalse(gf2x._is_irreducible(621))
-        self.assertFalse(gf2x._is_irreducible(1905))
+        self.assertFalse(gf2x.is_irreducible(0))
+        self.assertFalse(gf2x.is_irreducible(1))
+        self.assertTrue(gf2x.is_irreducible(2))
+        self.assertTrue(gf2x.is_irreducible(3))
+        self.assertFalse(gf2x.is_irreducible(4))
+        self.assertFalse(gf2x.is_irreducible(5))
+        self.assertFalse(gf2x.is_irreducible(6))
+        self.assertTrue(gf2x.is_irreducible(7))
+        self.assertFalse(gf2x.is_irreducible(17))
+        self.assertTrue(gf2x.is_irreducible(283))
+        self.assertTrue(gf2x.is_irreducible(391))
+        self.assertFalse(gf2x.is_irreducible(621))
+        self.assertFalse(gf2x.is_irreducible(1905))

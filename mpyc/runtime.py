@@ -5,11 +5,11 @@ Shamir's threshold secret sharing scheme is used for fields of prime order.
 MPyC provides secure number types and operations, many of which are
 available through Python's mechanism for operator overloading.
 """
+
 import os
 import sys
 import time
 import logging
-import operator
 import math
 import secrets
 import itertools
@@ -38,9 +38,9 @@ class Runtime:
     to enable distributed computation (without secret sharing).
     """
 
-    def __init__(self, id, parties, options):
+    def __init__(self, pid, parties, options):
         """Initialize runtime."""
-        self.id = id
+        self.pid = pid
         self.parties = parties
         self.options = options
         self.threshold = options.threshold
@@ -62,58 +62,62 @@ class Runtime:
         """Leave a fork of the program counter."""
         self._program_counter.pop()
 
-    def _send_share(self, peer_id, data):
+    def _send_share(self, peer_pid, data):
         pc = tuple(self._program_counter)
-        self.parties[peer_id].protocol.send_data(pc, data)
+        self.parties[peer_pid].protocol.send_data(pc, data)
 
-    def _expect_share(self, peer_id):
+    def _expect_share(self, peer_pid):
         pc = tuple(self._program_counter)
-        if pc in self.parties[peer_id].protocol.buffers:
+        if pc in self.parties[peer_pid].protocol.buffers:
             # Data already received from peer.
-            data = self.parties[peer_id].protocol.buffers.pop(pc)
+            data = self.parties[peer_pid].protocol.buffers.pop(pc)
         else:
             # Data not yet received from peer.
-            data = self.parties[peer_id].protocol.buffers[pc] = Future()
+            data = self.parties[peer_pid].protocol.buffers[pc] = Future()
         return data
 
     def _exchange_shares(self, in_shares):
         out_shares = [None] * len(in_shares)
-        for peer_id, data in enumerate(in_shares):
-            if peer_id == self.id:
+        for peer_pid, data in enumerate(in_shares):
+            if peer_pid == self.pid:
                 d = data
             else:
-                self._send_share(peer_id, data)
-                d = self._expect_share(peer_id)
-            out_shares[peer_id] = d
+                self._send_share(peer_pid, data)
+                d = self._expect_share(peer_pid)
+            out_shares[peer_pid] = d
         return out_shares
 
     async def barrier(self):
         """Barrier for runtime."""
-        logging.info(f'Barrier {asyncoro.pc_level} {len(self._program_counter)} {self._program_counter}')
+        logging.info(f'Barrier {asyncoro.pc_level} '
+                     f'{len(self._program_counter)} '
+                     f'{self._program_counter}'
+                    )
         if not self.options.no_async:
             while asyncoro.pc_level >= len(self._program_counter):
                 await asyncio.sleep(0)
 
     def run(self, f):
         """Run the given (MPC) coroutine or future until it is done."""
-        if self._loop.is_running():
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
             val = None
             try:
                 while True:
                     val = f.send(val)
-            except StopIteration as e:
-                d = e.value
+            except StopIteration as exc:
+                d = exc.value
             return d
-        else:
-            return self._loop.run_until_complete(f)
+
+        return loop.run_until_complete(f)
 
     def logging(self, enable=None):
         """Toggle/enable/disable logging."""
         if enable is None:
-            self.logging_enabled = not self.logging_enabled
+            self._logging_enabled = not self._logging_enabled
         else:
-            self.logging_enabled = enable
-        if self.logging_enabled:
+            self._logging_enabled = enable
+        if self._logging_enabled:
             logging.disable(logging.NOTSET)
         else:
             logging.disable(logging.INFO)
@@ -131,16 +135,17 @@ class Runtime:
 
         # m > 1
         for peer in self.parties:
-            peer.protocol = Future() if peer.id == self.id else None
-        factory = lambda: asyncoro.SharesExchanger(self)
+            peer.protocol = Future() if peer.pid == self.pid else None
+        factory = asyncoro.SharesExchanger
         if self.options.ssl:
-            crtfile = os.path.join('.config', f'party_{self.id}.crt')
-            keyfile = os.path.join('.config', f'party_{self.id}.key')
+            crtfile = os.path.join('.config', f'party_{self.pid}.crt')
+            keyfile = os.path.join('.config', f'party_{self.pid}.key')
             cafile = os.path.join('.config', 'mpyc_ca.crt')
+        loop = asyncio.get_event_loop()
 
-        # Listen for all parties < self.id.
-        if self.id:
-            listen_port = self.parties[self.id].port
+        # Listen for all parties < self.pid.
+        if self.pid:
+            listen_port = self.parties[self.pid].port
             if self.options.ssl:
                 context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
                 context.load_cert_chain(crtfile, keyfile=keyfile)
@@ -148,11 +153,11 @@ class Runtime:
                 context.verify_mode = ssl.CERT_REQUIRED
             else:
                 context = None
-            server = await self._loop.create_server(factory, port=listen_port, ssl=context)
+            server = await loop.create_server(factory, port=listen_port, ssl=context)
             logging.debug(f'Listening on port {listen_port}')
 
-        # Connect to all parties > self.id.
-        for peer in self.parties[self.id + 1:]:
+        # Connect to all parties > self.pid.
+        for peer in self.parties[self.pid + 1:]:
             logging.debug(f'Connecting to {peer}')
             while True:
                 try:
@@ -160,23 +165,23 @@ class Runtime:
                         context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
                         context.load_cert_chain(crtfile, keyfile=keyfile)
                         context.load_verify_locations(cafile=cafile)
-                        server_hostname = f'MPyC party {peer.id}'
+                        server_hostname = f'MPyC party {peer.pid}'
                     else:
                         context = None
                         server_hostname = None
-                    await self._loop.create_connection(factory, peer.host, peer.port,
-                                           ssl=context, server_hostname=server_hostname)
+                    await loop.create_connection(factory, peer.host, peer.port, ssl=context,
+                                                 server_hostname=server_hostname)
                     break
-                except Exception as e:
-                    logging.debug(e)
+                except Exception as exc:
+                    logging.debug(exc)
                 time.sleep(1)
 
-        await self.parties[self.id].protocol
+        await self.parties[self.pid].protocol
         if self.options.ssl:
             logging.info('SSL connections to all parties.')
         else:
             logging.info('Connected to all parties.')
-        if self.id:
+        if self.pid:
             server.close()
 
     async def shutdown(self):
@@ -189,10 +194,10 @@ class Runtime:
             # Wait for all parties after a barrier.
             while asyncoro.pc_level >= len(self._program_counter):
                 await asyncio.sleep(0)
-            await self.output(self.input(sectypes.SecFld(101)(self.id)), threshold=m-1)
+            await self.output(self.input(sectypes.SecFld(101)(self.pid)), threshold=m-1)
             # Close connections to all parties.
             for peer in self.parties:
-                if peer.id != self.id:
+                if peer.pid != self.pid:
                     peer.protocol.close_connection()
 
         elapsed = time.time() - self.start_time
@@ -241,23 +246,23 @@ class Runtime:
         field = stype.field
         await returnType(stype, len(senders), len(x))
         value = x[0].df if not isinstance(x[0].df, Future) else None
-        assert value is None or self.id in senders
+        assert value is None or self.pid in senders
 
         m = len(self.parties)
         t = self.threshold
         x = [a.df for a in x] # Extract values from all elements of x.
         shares = [None] * len(senders)
-        for i, peer_id in enumerate(senders):
-            if peer_id == self.id:
+        for i, peer_pid in enumerate(senders):
+            if peer_pid == self.pid:
                 in_shares = thresha.random_split(x, t, m)
-                for other_id, data in enumerate(in_shares):
+                for other_pid, data in enumerate(in_shares):
                     data = field.to_bytes(data)
-                    if other_id == self.id:
+                    if other_pid == self.pid:
                         shares[i] = data
                     else:
-                        self._send_share(other_id, data)
+                        self._send_share(other_pid, data)
             else:
-                shares[i] = self._expect_share(peer_id)
+                shares[i] = self._expect_share(peer_pid)
         shares = await gather_shares(shares)
         return [[field(a) for a in field.from_bytes(r)] for r in shares]
 
@@ -302,20 +307,20 @@ class Runtime:
 
         m = len(self.parties)
         # Send share to all successors in receivers.
-        for peer_id in receivers:
-            if 0 < (peer_id - self.id) % m <= t:
-                self._send_share(peer_id, field.to_bytes(x))
+        for peer_pid in receivers:
+            if 0 < (peer_pid - self.pid) % m <= t:
+                self._send_share(peer_pid, field.to_bytes(x))
         # Receive and recombine shares if this party is a receiver.
-        if self.id in receivers:
+        if self.pid in receivers:
             shares = [None] * t
             for i in range(t):
-                shares[i] = self._expect_share((self.id - t + i) % m)
+                shares[i] = self._expect_share((self.pid - t + i) % m)
             shares = await gather_shares(shares)
-            shares = [((self.id - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
-            shares.append((self.id + 1, x))
-            return thresha.recombine(field, shares)
-        else:
-            return [None] * len(x)
+            points = [((self.pid - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
+            points.append((self.pid + 1, x))
+            return thresha.recombine(field, points)
+
+        return [None] * len(x)
 
     @mpc_coro
     async def _reshare(self, x):
@@ -340,7 +345,8 @@ class Runtime:
         in_shares = [field.to_bytes(elts) for elts in in_shares]
         # Recombine the first 2t+1 output_shares.
         out_shares = await gather_shares(self._exchange_shares(in_shares)[:2 * t + 1])
-        y = thresha.recombine(field, [(j + 1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))])
+        points = [(j + 1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))]
+        y = thresha.recombine(field, points)
 
         if issubclass(sftype, Share):
             y = [sftype(s) for s in y]
@@ -366,11 +372,11 @@ class Runtime:
         for i in range(f - 1, -1, -1):
             r_modf <<= 1
             r_modf += r_bits[i].value
-        r_divf = self.random(Zp, 1<<(k + l - f))
+        r_divf = self._random(Zp, 1<<(k + l - f))
         a = await gather_shares(a)
-        c = await self.output(a + (1<<l) + r_modf + (1<<f) * r_divf)
+        c = await self.output(r_modf + (r_divf.value << f) + (1<<l) + a)
         c = c.value % (1<<f)
-        return (a - c + r_modf) / (1<<f)
+        return (r_modf - c + a) / (1<<f)
 
     def eq_public(self, a, b):
         """Secure public equality test of a and b."""
@@ -380,20 +386,21 @@ class Runtime:
     async def is_zero_public(self, a) -> Future:
         """Secure public zero test of a."""
         stype = type(a)
+        field = stype.field
         m = len(self.parties)
         t = self.threshold
         if stype.__name__.startswith('SecFld'):
-            prfs = self.parties[self.id].prfs(stype.field.order)
+            prfs = self.parties[self.pid].prfs(field.order)
             while True:
-                r, s = self.randoms(stype.field, 2)
-                z = thresha.pseudorandom_share_zero(stype.field, m, self.id, prfs, self._prss_uci(), 1)
+                r, s = self._randoms(field, 2)
+                z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
                 if await self.output(r * s + z[0], threshold=2 * t):
                     break
         else:
-            r = self.random(stype.field) #failure shared r is 0 with prob. 1/p
+            r = self._random(field) #failure shared r is 0 with prob. 1/p
         a = await gather_shares(a)
         if stype.__name__.startswith('SecFld'):
-            z = thresha.pseudorandom_share_zero(stype.field, m, self.id, prfs, self._prss_uci(), 1)
+            z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
             b = a * r + z[0]
         else:
             b = a * r
@@ -446,6 +453,7 @@ class Runtime:
         if not isinstance(b, Share):
             a = await gather_shares(a)
             return a * b
+
         if a is b:
             a = b = await gather_shares(a)
         else:
@@ -476,16 +484,18 @@ class Runtime:
         stype = type(a)
         await returnType(stype)
         a = await gather_shares(a)
-        r = self.random(stype.field)
+        r = self._random(stype.field)
         ar = await self.output(a * r, threshold=2*self.threshold)
         if ar == 0:
             return self.reciprocal(a)
+
         return r * (1 << stype.field.frac_length) / ar
 
     def pow(self, a, b):
         """Secure exponentation a raised to the power of b, for public integer b."""
         if b == 0:
             return type(a)(1)
+
         if b < 0:
             a = self.reciprocal(a)
             b = -b
@@ -534,11 +544,11 @@ class Runtime:
         """Secure zero test a == 0."""
         if type(a).__name__.startswith('SecFld'):
             return 1 - self.pow(a, a.field.order - 1)
-        elif (a.bit_length > 2 * self.options.security_parameter
-              and a.field.order % 4 == 3):
+
+        if (a.bit_length > 2*self.options.security_parameter and a.field.order%4 == 3):
             return self._is_zero(a)
-        else:
-            return self.sgn(a, EQ=True)
+
+        return self.sgn(a, EQ=True)
 
     @mpc_coro
     async def _is_zero(self, a):
@@ -549,12 +559,11 @@ class Runtime:
 
         k = self.options.security_parameter
         z = self.random_bits(Zp, k)
-        u = self.randoms(Zp, k)
+        u = self._randoms(Zp, k)
         u2 = self.schur_prod(u, u)
         a, u2, z = await gather_shares(a, u2, z)
-        a = a.value
-        r = self.randoms(Zp, k)
-        c = [Zp(a * r[i].value + (1 - (z[i].value << 1)) * u2[i].value) for i in range(k)]
+        r = self._randoms(Zp, k)
+        c = [Zp(a.value * r[i].value + (1 - (z[i].value << 1)) * u2[i].value) for i in range(k)]
         # -1 is nonsquare for Blum p, u_i !=0 w.v.h.p.
         # If a == 0, c_i is square mod p iff z[i] == 0.
         # If a != 0, c_i is square mod p independent of z[i].
@@ -581,10 +590,10 @@ class Runtime:
             r_modl <<= 1
             r_modl += r_bits[i].value
         a = await gather_shares(a)
-        a_rmodl = a + (1<<l) + r_modl
+        a_rmodl = a + ((1<<l) + r_modl)
         k = self.options.security_parameter
-        r_divl = self.random(Zp, 1<<k)
-        c = await self.output(a_rmodl + (1<<l) * r_divl)
+        r_divl = self._random(Zp, 1<<k)
+        c = await self.output(a_rmodl + (r_divl.value << l))
         c = c.value % (1<<l)
 
         if not EQ: # a la Toft
@@ -620,6 +629,7 @@ class Runtime:
         n = len(x)
         if n == 1:
             return x[0]
+
         m0 = self.min(x[:n // 2])
         m1 = self.min(x[n // 2:])
         d = m0 - m1
@@ -632,6 +642,7 @@ class Runtime:
         n = len(x)
         if n == 1:
             return x[0]
+
         m0 = self.max(x[:n // 2])
         m1 = self.max(x[n // 2:])
         d = m1 - m0
@@ -647,7 +658,7 @@ class Runtime:
         b = self.random_bit(stype)
         a, b = await gather_shares(a, b)
         b = b / (1 << stype.field.frac_length)
-        r = self.random(stype.field, 1 << (l + k))
+        r = self._random(stype.field, 1 << (l + k))
         c = await self.output(a + (1<<l) + b + (r.value << 1))
         x = 1 - b if c.value & 1 else b #xor
         return x * (1 << stype.field.frac_length)
@@ -837,7 +848,7 @@ class Runtime:
             A = await gather_shares(A)
         else:
             B = await gather_shares(B)
-        
+
         C = [None] * len(A)
         for ia in range(len(A)):
             C[ia] = [None] * n
@@ -882,27 +893,26 @@ class Runtime:
         self._increment_pc()
         return self._program_counter
 
-    def random(self, sftype, max=None):
+    def _random(self, sftype, bound=None):
         """Secure random value of the given type in the given range."""
-        return self.randoms(sftype, 1, max)[0]
+        return self._randoms(sftype, 1, bound)[0]
 
-    def randoms(self, sftype, n, max=None):
+    def _randoms(self, sftype, n, bound=None):
         """n secure random values of the given type in the given range."""
         if issubclass(sftype, Share):
             field = sftype.field
         else:
             field = sftype
-        if max is None:
-            max = field.order
+        if bound is None:
+            bound = field.order
         else:
-            max = (max - 1) // self._bincoef + 1
+            bound = (bound - 1) // self._bincoef + 1
         m = len(self.parties)
-        prfs = self.parties[self.id].prfs(max)
-        shares = thresha.pseudorandom_share(field, m, self.id, prfs, self._prss_uci(), n)
+        prfs = self.parties[self.pid].prfs(bound)
+        shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
         if issubclass(sftype, Share):
-            return [sftype(s) for s in shares]
-        else:
-            return shares
+            shares = [sftype(s) for s in shares]
+        return shares
 
     def random_bit(self, sftype, signed=False):
         """Secure uniformly random bit of the given type."""
@@ -926,23 +936,23 @@ class Runtime:
         m = len(self.parties)
 
         if not isinstance(field.modulus, int):
-            prfs = self.parties[self.id].prfs(2)
-            bits = thresha.pseudorandom_share(field, m, self.id, prfs, self._prss_uci(), n)
+            prfs = self.parties[self.pid].prfs(2)
+            bits = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
             return bits
 
         bits = [None] * n
         p = field.modulus
         if not signed:
             q = (p + 1) >> 1 # q = 1/2 mod p
-        prfs = self.parties[self.id].prfs(p)
+        prfs = self.parties[self.pid].prfs(p)
         t = self.threshold
         h = n
         while h > 0:
-            rs = thresha.pseudorandom_share(field, m, self.id, prfs, self._prss_uci(), h)
+            rs = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
             # Compute and open the squares and compute square roots.
             r2s = [r * r for r in rs]
             if prss0:
-                z = thresha.pseudorandom_share_zero(field, m, self.id, prfs, self._prss_uci(), h)
+                z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), h)
                 for i in range(h):
                     r2s[i] += z[i]
             r2s = await self.output(r2s, threshold=2 * t)
@@ -998,20 +1008,21 @@ class Runtime:
             r_modl += r_bits[i].value
         if isinstance(Fq.modulus, int):
             k = self.options.security_parameter
-            r_divl = self.random(Fq, 1<<k)
+            r_divl = self._random(Fq, 1<<k)
             a = await gather_shares(a)
             c = await self.output(a + (1<<l) - r_modl + (1<<l) * r_divl)
             c = c.value % (1<<l)
             r_bits = [stype(r.value) for r in r_bits]
             c_bits = [stype((c >> i) & 1) for i in range(l)]
             return self.add_bits(r_bits, c_bits)
-        else:
-            a = await gather_shares(a)          # use a.value?
-            c = await self.output(a + Fq(r_modl))  # fix this in +
-            c = int(c.value)
-            return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
+
+        a = await gather_shares(a)          # use a.value?
+        c = await self.output(a + Fq(r_modl))  # fix this in +
+        c = int(c.value)
+        return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
 
     def from_bits(self, x):
+        """Recover secure number from its binary representation x."""
         # TODO: also handle negative numbers with sign bit
         return sum(x[i] * (1<<i) for i in range(len(x)))
 
@@ -1026,6 +1037,7 @@ class Runtime:
             if n == 1:
                 t = s + x[0] - 2 * s * x[0] #self.xor(s, x[0])
                 return 2 - t, t
+
             i0, nz0 = __norm(x[:n//2]) # low bits
             i1, nz1 = __norm(x[n//2:]) # high bits
             i0 *= (1 << ((n + 1) // 2))
@@ -1045,33 +1057,33 @@ class Runtime:
 class _Party:
     """Information about a party in the MPC protocol."""
 
-    def __init__(self, id, host=None, port=None, keys=None):
-        """Initialize a party with given id."""
-        self.id = id
+    def __init__(self, pid, host=None, port=None, keys=None):
+        """Initialize a party with given party identity pid."""
+        self.pid = pid
         self.host = host
         self.port = port
         self.keys = keys
         self._prfs = {}
 
-    def prfs(self, max):
-        """PRFs with codomain range(max) for pseudorandom secret sharing.
+    def prfs(self, bound):
+        """PRFs with codomain range(bound) for pseudorandom secret sharing.
 
         Return a mapping from sets of parties to PRFs.
         """
         try:
-            return self._prfs[max]
+            return self._prfs[bound]
         except KeyError:
-            self._prfs[max] = {}
+            self._prfs[bound] = {}
             for subset, key in self.keys.items():
-                self._prfs[max][subset] = thresha.PRF(key, max)
-            return self._prfs[max]
+                self._prfs[bound][subset] = thresha.PRF(key, bound)
+            return self._prfs[bound]
 
     def __repr__(self):
         """String representation of the party."""
         if self.host is None:
-            return f'<_Party {self.id}>'
-        else:
-            return f'<_Party {self.id}: {self.host}:{self.port}>'
+            return f'<_Party {self.pid}>'
+
+        return f'<_Party {self.pid}: {self.host}:{self.port}>'
 
 def generate_configs(m, addresses):
     """Generate party configurations.
@@ -1112,7 +1124,7 @@ def _load_config(filename, t=None):
     One of the parties owns the configuration file and for this party
     additional information on PRSS keys is available.
 
-    Returns the id of the owner and a list of _Party objects.
+    Returns the pid of the owning party and a list of _Party objects.
     """
     config = configparser.ConfigParser()
     config.read_file(open(filename, 'r'))
@@ -1121,22 +1133,22 @@ def _load_config(filename, t=None):
         t = (m - 1) // 2
     parties = [None] * m
     for party in config.sections():
-        id = int(party[6:]) # strip 'Party ' prefix
+        pid = int(party[6:]) # strip 'Party ' prefix
         host = config.get(party, 'host')
         port = config.getint(party, 'port')
         if len(config.options(party)) > 2:
             # read PRSS keys
-            my_id = id
+            my_pid = pid
             keys = {}
             for option in config.options(party):
                 if not option in ['host', 'port']:
                     subset = frozenset(map(int, option.split()))
                     if len(subset) == m - t:
                         keys[subset] = config.get(party, option)
-            parties[my_id] = _Party(my_id, host, port, keys)
+            parties[my_pid] = _Party(my_pid, host, port, keys)
         else:
-            parties[id] = _Party(id, host, port)
-    return my_id, parties
+            parties[pid] = _Party(pid, host, port)
+    return my_pid, parties
 
 def setup():
     """Setup a runtime."""
@@ -1167,8 +1179,7 @@ def setup():
         print(f'Showing -h help message for {sys.argv[0]}, if available:')
         print()
     sys.argv = [sys.argv[0]] + args
-    logging_enabled = not options.no_log
-    if not logging_enabled:
+    if options.no_log:
         logging.basicConfig(level=logging.WARNING)
     else:
         logging.basicConfig(format='{asctime} {message}', style='{',
@@ -1177,31 +1188,28 @@ def setup():
         logging.info('Install package gmpy2 for better performance.')
     if not options.config:
         options.no_async = True
-        id = 0
-        parties = [_Party(id, keys={frozenset([id]): hex(secrets.randbits(128))})]
+        pid = 0
+        parties = [_Party(pid, keys={frozenset([pid]): hex(secrets.randbits(128))})]
     else:
         options.config = os.path.join('.config', options.config)
-        id, parties = _load_config(options.config, options.threshold)
+        pid, parties = _load_config(options.config, options.threshold)
     m = len(parties)
     if options.threshold is None:
         options.threshold = (m - 1) // 2
     assert 2 * options.threshold < m
 
-    runtime = Runtime(id, parties, options)
-    runtime.parser = parser
-    runtime.options = options
-    runtime.logging_enabled = logging_enabled
-    runtime._loop = asyncio.get_event_loop()
-    Share.runtime = runtime
-    import mpyc.asyncoro
-    mpyc.asyncoro.runtime = runtime
+    rt = Runtime(pid, parties, options)
+    sectypes.runtime = rt
+    asyncoro.runtime = rt
     import mpyc.random
-    mpyc.random.runtime = runtime
-    runtime.version = mpyc.__version__
+    mpyc.random.runtime = rt
+    rt.version = mpyc.__version__
+    rt.options = options
+    rt._logging_enabled = not options.no_log
     global mpc
-    mpc = runtime
+    mpc = rt
 
 try: # suppress exceptions for pydoc etc.
     setup()
-except Exception as e:
-    print('MPyC runtime.setup() exception:', e)
+except Exception as exc:
+    print('MPyC runtime.setup() exception:', exc)

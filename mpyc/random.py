@@ -1,10 +1,10 @@
-"""This module provides secure versions of several functions for 
+"""This module provides secure versions of several functions for
 generating pseudorandom numbers, cf. the random module of Python's
 standard library. Each function behaves like its Python counterpart,
 except that a secure type is required as additional (first) argument.
 
-Additionally, random_unit_vector() generates a random bit vector 
-with exactly one bit set to 1, using approximately log_2 n secure 
+Additionally, random_unit_vector() generates a random bit vector
+with exactly one bit set to 1, using approximately log_2 n secure
 random bits for a bit vector of length n.
 
 Also, random_permutation() is provided as a convenience function.
@@ -14,13 +14,16 @@ complexity, that is, to limit the usage of secure random bits as
 provided by runtime.random_bits(). Other than this, the code is
 relatively simple for now.
 
-NB: runtime.random(sectype, n) cannot be used as an alternative to 
+NB: runtime.random(sectype, n) cannot be used as an alternative to
 _randbelow(sectype, n) as its output is not uniformly random.
 """
+
 import math
 import functools
 import itertools
 from mpyc import asyncoro
+
+runtime = None
 
 def getrandbits(sectype, k):
     """Uniformly random nonnegative k-bit integer value."""
@@ -30,7 +33,7 @@ def getrandbits(sectype, k):
 @asyncoro.mpc_coro
 async def _randbelow(sectype, n):
     """Uniformly random secret integer in range(n).
-    
+
     Expected number of secret random bits needed is log_2 n + c,
     with c a small constant, c < 3.
     """
@@ -98,7 +101,7 @@ def choice(sectype, seq):
     """Uniformly random secret element chosen from seq.
 
     Given seq may contain public and/or secret elements.
-    
+
     If seq is empty, raises IndexError.
     """
     if not seq:
@@ -143,11 +146,11 @@ def choices(sectype, population, weights=None, *, cum_weights=None, k=1):
 
 def shuffle(sectype, x):
     """Shuffle list x secretly in place, and return None.
-    
+
     Given list x may contain public or secret elements.
     """
     n = len(x)
-    if not type(x[0]) is sectype: # assume same type for all elts of x
+    if not isinstance(x[0], sectype): # assume same type for all elts of x
         for i in range(len(x)):
             x[i] = sectype(x[i])
     for i in range(n - 1):
@@ -164,7 +167,7 @@ def random_permutation(sectype, x):
     x = list(x)
     shuffle(sectype, x)
     return x
-    
+
 @asyncoro.mpc_coro
 async def sample(sectype, population, k):
     """List of k uniformly random secret elements chosen from population.
@@ -173,7 +176,7 @@ async def sample(sectype, population, k):
 
     Given population may contain public and/or secret elements.
 
-    If the population contains repeats, then each occurrence is a 
+    If the population contains repeats, then each occurrence is a
     possible selection in the sample.
 
     To choose a sample in a range of integers, use range as an argument.
@@ -186,7 +189,7 @@ async def sample(sectype, population, k):
         raise ValueError('sample larger than population or size is negative')
     elif not isinstance(population, range):
         x = list(population)
-        if not type(x[0]) is sectype: # assume same type for all elts of x
+        if not isinstance(x[0], sectype): # assume same type for all elts of x
             for i in range(len(x)):
                 x[i] = sectype(x[i])
         for i in range(k):

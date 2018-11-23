@@ -6,9 +6,9 @@ See lpsolver.py.
 import os
 import logging
 import argparse
+from distutils.version import StrictVersion
 from mpyc.runtime import mpc
 
-from distutils.version import StrictVersion
 assert StrictVersion(mpc.version) >= StrictVersion('0.3.1')
 
 def load_tableau(filename):
@@ -88,16 +88,19 @@ def unit_vector(a, n):
     stype = type(a)
 
     def si1(a, n):
-        """Return all-0 vector of length n-1 (if a=0) and (a-1)-st unit vector of length n-1 (if 1 <= a < n)."""
+        """Return (a-1)-st unit vector of length n-1 (if 1 <= a < n)
+        or all-0 vector of length n-1 (if a=0).
+        """
         if n == 1:
-            return []
+            x = []
         elif n == 2:
-            return [a]
+            x = [a]
         else:
             b = mpc.lsb(a / 2**stype.field.frac_length)
-            x = si1((a - b) / 2, (n + 1) // 2)
-            y = mpc.scalar_mul(b, x)
-            return [b - sum(y)] + [x[i//2] - y[i//2] if i%2==0 else y[i//2] for i in range(n-2)]
+            z = si1((a - b) / 2, (n + 1) // 2)
+            y = mpc.scalar_mul(b, z)
+            x = [b - sum(y)] + [z[i//2] - y[i//2] if i%2 == 0 else y[i//2] for i in range(n-2)]
+        return x
     x = si1(a, n)
     return [stype(1) - sum(x)] + x
 
@@ -109,7 +112,7 @@ async def main():
     args = parser.parse_args()
 
     if not args.options:
-        certificate_filename = "c" + str(mpc.id) + ".cert"
+        certificate_filename = f'c{mpc.pid}.cert'
         logging.info('Setting certificate file to default = %s', certificate_filename)
     else:
         certificate_filename = args.options[0]
@@ -118,8 +121,8 @@ async def main():
     n = len(T[0]) - 1
     l = mpc.options.bit_length
     secfxp = mpc.SecFxp(l)
-    for i in range(len(T)):
-        for j in range(len(T[0])):
+    for i in range(m + 1):
+        for j in range(n + 1):
             T[i][j] = secfxp(T[i][j])
 
     basis = [secfxp(i + n) for i in range(m)]
@@ -141,7 +144,7 @@ async def main():
         pivot = mpc.in_prod(p_row_index, p_col)
 
         logging.info('%d Updating tableau...', iteration)
-        h = mpc.scalar_mul(1 / pivot, [(p_row_index[i] if i < m else 0) - p_col[i] for i in range(m + 1)])
+        h = mpc.scalar_mul(1/pivot, [(p_row_index[i] if i < m else 0) - p_col[i] for i in range(m + 1)])
         p_row = index_matrix_prod(p_row_index, T[:-1])
         v = mpc.vector_add(p_row, p_col_index + [0])
         for i in range(m + 1):

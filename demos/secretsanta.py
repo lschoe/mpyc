@@ -15,16 +15,18 @@ async def random_unit_vector(n, sectype):
     await mpc.returnType((sectype, True), n)
     if n == 1:
         return [sectype(1)]
+
     b = mpc.random_bit(sectype)
     x = random_unit_vector((n + 1) // 2, sectype)
     if n % 2 == 0:
         y = mpc.scalar_mul(b, x)
         return y + mpc.vector_sub(x, y)
-    elif await mpc.output(b * x[0]):
-        return random_unit_vector(n, sectype)
-    else:
+
+    if not await mpc.output(b * x[0]):
         y = mpc.scalar_mul(b, x[1:])
         return x[:1] + y + mpc.vector_sub(x[1:], y)
+
+    return random_unit_vector(n, sectype)
 
 def random_permutation(n, sectype):
     """Random permutation of [sectype(i) for i in range(n)]. """

@@ -82,8 +82,8 @@ def recombine(field, points, x_rs=0):
             sums[r][h] = field(sums[r][h])
     if isinstance(x_rs, tuple):
         return sums[0]
-    else:
-        return sums
+
+    return sums
 
 #Cache coefficients used to construct shares, which depend on the field,
 #the party concerned, and the subset.
@@ -134,7 +134,7 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
             _f_in_i_cache[(field, i, subset)] = f_in_i
         d = m - len(subset)
         prl = prf(s, n * d)
-        T = type(field.modulus) # T is int or T is gf2x.Polynomial\
+        T = type(field.modulus) # T is int or T is gf2x.Polynomial
         for h in range(n):
             y = 0 if T is int else T(0)
             for j in range(d):

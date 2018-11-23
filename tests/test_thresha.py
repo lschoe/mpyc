@@ -37,29 +37,29 @@ class Arithmetic(unittest.TestCase):
 
     def test_prf(self):
         key = b'00112233445566778899aabbccddeeff'
-        max = 100
-        F = thresha.PRF(key, max)
+        bound = 100
+        F = thresha.PRF(key, bound)
         x = ''
         y = F(x)
-        self.assertTrue(0 <= y < max)
+        self.assertTrue(0 <= y < bound)
         y2 = F(x)
         self.assertEqual(y, y2)
 
     def test_prss(self):
         field = self.f256
         key = b'00112233445566778899aabbccddeeff'
-        max = 256 #field.modulus
-        F = thresha.PRF(key, max)
+        bound = 256 #field.modulus
+        F = thresha.PRF(key, bound)
         m = 1
-        id = 0
+        pid = 0
         prfs = {frozenset([0]): F}
         uci = 'test uci'
         n = 8
         a = F(uci, n)
-        shares = thresha.pseudorandom_share(field, m, id, prfs, uci, n)
+        shares = thresha.pseudorandom_share(field, m, pid, prfs, uci, n)
         b = thresha.recombine(field, [(1, shares)])
         self.assertEqual(a, [s.value for s in b])
         a = [0] * n
-        shares = thresha.pseudorandom_share_zero(field, m, id, prfs, uci, n)
+        shares = thresha.pseudorandom_share_zero(field, m, pid, prfs, uci, n)
         b = thresha.recombine(field, [(1, shares)])
         self.assertEqual(a, b)

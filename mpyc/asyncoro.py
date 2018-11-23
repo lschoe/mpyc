@@ -1,79 +1,81 @@
 """This module provides the basic support for asynchronous communication and
 computation of secret-shared values.
 """
+
 import struct
 import functools
 import typing
-import asyncio
-from mpyc import sectypes
+from asyncio import Protocol, Future, Task, ensure_future
+from mpyc.sectypes import Share
 
-Future = asyncio.Future
+runtime = None
 
-class SharesExchanger(asyncio.Protocol):
+class SharesExchanger(Protocol):
     """Send and receive shares.
 
     Bidirectional connection with one of the other parties (peers).
     """
 
-    def __init__(self, runtime):
-        self.runtime = runtime
-        self.peer_id = None
+    def __init__(self):
+        self.peer_pid = None
         self.bytes = bytearray()
         self.buffers = {}
         self.transport = None
 
     def connection_made(self, transport):
         """Called when a connection is made.
-        
+
         The party first sends its identity to the peer.
         """
         self.transport = transport
-        transport.write(str(self.runtime.id).encode())
+        transport.write(str(runtime.pid).encode())
 
-    def send_data(self, pc, data):
-        """Send data labeled with pc to the peer.
+    def send_data(self, pc, payload):
+        """Send payload labeled with pc to the peer.
 
-        Message format consists of 4 parts:
+        Message format consists of four parts:
          1. pc_size (2 bytes)
-         2. data_size (4 bytes)
+         2. payload_size (4 bytes)
          3. pc (pc_size 4-byte ints)
-         4. data (length-data_size byte string).
+         4. payload (byte string of length payload_size).
         """
-        pc_size, data_size = len(pc), len(data)
-        fmt = f'!HI{pc_size}I{data_size}s'
-        t = (pc_size, data_size) + pc + (data,)
+        pc_size, payload_size = len(pc), len(payload)
+        fmt = f'!HI{pc_size}I{payload_size}s'
+        t = (pc_size, payload_size) + pc + (payload,)
         self.transport.write(struct.pack(fmt, *t))
 
-    def data_received(self, bytes_received):
+    def data_received(self, data):
         """Called when data is received from the peer.
 
-        Received bytes are unpacked as the program counter and a data part.
-        The data is passed to the appropriate Future, if any.
+        Received bytes are unpacked as a program counter and the payload
+        (actual data). The payload is passed to the appropriate Future, if any.
         """
-        self.bytes.extend(bytes_received)
-        if self.peer_id is None:
+        self.bytes.extend(data)
+        if self.peer_pid is None:
             # record new protocol peer
-            self.peer_id = int(self.bytes[:1])
+            self.peer_pid = int(self.bytes[:1])
             del self.bytes[:1]
-            self.runtime.parties[self.peer_id].protocol = self
-            if all([p.protocol != None for p in self.runtime.parties]):
-                self.runtime.parties[self.runtime.id].protocol.set_result(self.runtime)
+            runtime.parties[self.peer_pid].protocol = self
+            if all([p.protocol is not None for p in runtime.parties]):
+                runtime.parties[runtime.pid].protocol.set_result(runtime)
         while self.bytes:
             if len(self.bytes) < 6:
                 return
-            pc_size, data_size = struct.unpack('!HI', self.bytes[:6])
-            len_packet = 6 + pc_size * 4 + data_size
+
+            pc_size, payload_size = struct.unpack('!HI', self.bytes[:6])
+            len_packet = 6 + pc_size * 4 + payload_size
             if len(self.bytes) < len_packet:
                 return
-            fmt = f'!{pc_size}I{data_size}s'
+
+            fmt = f'!{pc_size}I{payload_size}s'
             unpacked = struct.unpack(fmt, self.bytes[6:len_packet])
             del self.bytes[:len_packet]
             pc = unpacked[:pc_size]
-            data = unpacked[-1]
+            payload = unpacked[-1]
             if pc in self.buffers:
-                self.buffers.pop(pc).set_result(data)
+                self.buffers.pop(pc).set_result(payload)
             else:
-                self.buffers[pc] = data
+                self.buffers[pc] = payload
 
     def connection_lost(self, exc):
         pass
@@ -87,44 +89,43 @@ async def gather_shares(*obj):
         obj = obj[0]
     if isinstance(obj, Future):
         return await obj
-    elif isinstance(obj, sectypes.Share):
+
+    if isinstance(obj, Share):
         if isinstance(obj.df, Future):
             if runtime.options.no_async:
                 obj.df = obj.df.result()
             else:
                 obj.df = await obj.df
         return obj.df
-    else:
-        if not runtime.options.no_async:
-            assert isinstance(obj, (list, tuple)), obj
-            c = _count_shares(obj)
-            if c:
-                mux = Future()
-                _register_shares(obj, [c], mux)
-                await mux
-        return _get_results(obj)
+
+    if not runtime.options.no_async:
+        assert isinstance(obj, (list, tuple)), obj
+        c = _count_shares(obj)
+        if c:
+            mux = Future()
+            _register_shares(obj, [c], mux)
+            await mux
+    return _get_results(obj)
 
 def _count_shares(obj):
     # Count the number of Share/Future objects in a nested structure of lists
-    if isinstance(obj, sectypes.Share):
+    c = 0
+    if isinstance(obj, Share):
         if isinstance(obj.df, Future):
-            return 1
-        else:
-            return 0
+            c = 1
     elif isinstance(obj, Future):
-        return 1
+        c = 1
     elif isinstance(obj, (list, tuple)):
-        return sum(map(_count_shares, obj))
-    else:
-        return 0
+        c = sum(map(_count_shares, obj))
+    return c
 
 def _register_shares(obj, c, mux):
-    if isinstance(obj, (sectypes.Share, Future)):
+    if isinstance(obj, (Share, Future)):
         def got_share(_):
             c[0] -= 1
             if c[0] == 0:
                 mux.set_result(None)
-        if isinstance(obj, sectypes.Share):
+        if isinstance(obj, Share):
             if isinstance(obj.df, Future):
                 obj.df.add_done_callback(got_share)
         else:
@@ -134,17 +135,19 @@ def _register_shares(obj, c, mux):
             _register_shares(x, c, mux)
 
 def _get_results(obj):
-    if isinstance(obj, sectypes.Share):
+    if isinstance(obj, Share):
         if isinstance(obj.df, Future):
             return obj.df.result()
-        else:
-            return obj.df
-    elif isinstance(obj, Future): #expect_share
+
+        return obj.df
+
+    if isinstance(obj, Future): #expect_share
         return obj.result()
-    elif isinstance(obj, (list, tuple)):
+
+    if isinstance(obj, (list, tuple)):
         return type(obj)(map(_get_results, obj))
-    else:
-        return obj
+
+    return obj
 
 class _ProgramCounterWrapper:
 
@@ -192,35 +195,38 @@ def returnType(rettype=None, *args):
         if isinstance(rettype, tuple):
             integral = rettype[1]
             stype = rettype[0]
-            if  stype.field.frac_length:
+            if stype.field.frac_length:
                 rt = lambda: stype(None, integral)
             else:
-                rt = lambda: stype()
+                rt = stype
         else:
-            rt = lambda: rettype()
+            rt = rettype
         def nested_list(i):
-            if i:
-                return [nested_list(i - 1) for _ in range(args[-i])]
+            if i == 0:
+                s = rt()
             else:
-                return rt()
+                s = [nested_list(i - 1) for _ in range(args[-i])]
+            return s
         rettype = nested_list(len(args))
     return _afuture(rettype)
 
 def _reconcile(decl, givn):
-    if isinstance(givn, asyncio.Task) and givn.done():
+    if isinstance(givn, Task) and givn.done():
         givn = givn.result()
     if decl is None:
         return
-    elif isinstance(decl, Future):
+
+    if isinstance(decl, Future):
         decl.set_result(givn)
     elif isinstance(decl, list):
-        for (d, g) in zip(decl, givn): _reconcile(d, g)
+        for (d, g) in zip(decl, givn):
+            _reconcile(d, g)
     elif isinstance(givn, Future):
         if runtime.options.no_async:
             decl.df.set_result(givn.result())
         else:
             givn.add_done_callback(lambda x: decl.df.set_result(x.result()))
-    elif isinstance(givn, sectypes.Share):
+    elif isinstance(givn, Share):
         if isinstance(givn.df, Future):
             if runtime.options.no_async:
                 decl.df.set_result(givn.df.result())
@@ -234,11 +240,15 @@ def _reconcile(decl, givn):
 def _ncopy(nested_list):
     if isinstance(nested_list, list):
         return list(map(_ncopy, nested_list))
-    else:
-        return nested_list
+
+    return nested_list
 
 pc_level = 0
 """Tracks (length of) program counter to implement barriers."""
+
+def _dec_pc_level(_):
+    global pc_level
+    pc_level -= 1
 
 def mpc_coro(f):
     """Decorator turning coroutine f into an MPyC coroutine.
@@ -266,18 +276,15 @@ def mpc_coro(f):
             try:
                 while True:
                     val = coro.send(val)
-            except StopIteration as e:
-                d = e.value
+            except StopIteration as exc:
+                d = exc.value
             pc_level -= 1
             _reconcile(ret.decl, d)
             return ret.decl
-        else:
-            d = asyncio.ensure_future(_ProgramCounterWrapper(coro))
-            def dec_pc_level():
-                global pc_level
-                pc_level -= 1
-            d.add_done_callback(lambda _: dec_pc_level())
-            d.add_done_callback(lambda v: _reconcile(ret.decl, v))
-            return _ncopy(ret.decl)
+
+        d = ensure_future(_ProgramCounterWrapper(coro))
+        d.add_done_callback(_dec_pc_level)
+        d.add_done_callback(lambda v: _reconcile(ret.decl, v))
+        return _ncopy(ret.decl)
 
     return typed_asyncoro

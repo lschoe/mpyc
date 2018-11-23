@@ -6,6 +6,7 @@ operators such as + (addition), - (subtraction), * (multiplication),
 and / (division), etc., to compute with field elements.
 In-place versions of the field operators are also provided.
 """
+
 from mpyc import gf2x
 
 def find_irreducible(d):
@@ -47,7 +48,7 @@ class BinaryFieldElement():
         if isinstance(value, int):
             assert 0 <= value < self.order
             value = gf2x.Polynomial(value)
-        self.value =  value % self.modulus
+        self.value = value % self.modulus
 
     def __int__(self):
         """Extract polynomial field element as an integer."""
@@ -64,8 +65,10 @@ class BinaryFieldElement():
         data[:2] = r.to_bytes(2, byteorder='little')
         j = 2
         for v in x:
-            if not isinstance(v, int): v = v.value
-            if not isinstance(v, int): v = v.value # extra
+            if not isinstance(v, int):
+                v = v.value
+            if not isinstance(v, int): # extra
+                v = v.value
             data[j:j + r] = v.to_bytes(r, byteorder='little')
             j += r
         return data
@@ -84,21 +87,23 @@ class BinaryFieldElement():
 
     def __add__(self, other):
         """Addition."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return type(self)(self.value + other.value)
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return type(self)(self.value + other)
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     __radd__ = __add__  # NB: __radd__ may skip first test
 
     def __iadd__(self, other):
         """In-place addition."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value += other
         return self
 
@@ -108,21 +113,23 @@ class BinaryFieldElement():
 
     def __mul__(self, other):
         """Multiplication."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return type(self)(self.value * other.value)
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return type(self)(self.value * other)
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     __rmul__ = __mul__
 
     def __imul__(self, other):
         """In-place multiplication."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value *= other
         self.value %= self.modulus.value
         return self
@@ -131,6 +138,7 @@ class BinaryFieldElement():
         """Exponentiation."""
         if not isinstance(other, int):
             return NotImplemented
+
         return type(self)(gf2x.powmod(self.value, other, self.modulus.value))
 
     def __neg__(self):
@@ -139,28 +147,30 @@ class BinaryFieldElement():
 
     def __truediv__(self, other):
         """Division."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return self * other._reciprocal()
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return self * type(self)(other)._reciprocal()
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
         if isinstance(other, int):
             return type(self)(other) * self._reciprocal()
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __itruediv__(self, other):
         """In-place division."""
         if isinstance(other, int):
             other = type(self)(other)
-        elif type(self) != type(other):
+        elif not isinstance(other, type(self)):
             return NotImplemented
+
         self.value *= other._reciprocal().value
-        self.value %= type(self).modulus.value
+        self.value %= self.modulus.value
         return self
 
     def _reciprocal(self):
@@ -172,12 +182,13 @@ class BinaryFieldElement():
 
     def __eq__(self, other):
         """Equality test."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return self.value == other.value
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return self.value == other
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __hash__(self):
         """Hash value."""

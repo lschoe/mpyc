@@ -7,6 +7,7 @@ and / (division), etc., to compute with field elements.
 In-place versions of the field operators are also provided.
 Modular square roots and quadratic residuosity tests supported as well.
 """
+
 import mpyc.gmpy as gmpy2
 
 def find_prime_root(l, blum=True, n=1):
@@ -84,28 +85,31 @@ class PrimeFieldElement():
     __slots__ = 'value'
 
     def __init__(self, value):
-        self.value = value % type(self).modulus
+        self.value = value % self.modulus
 
     def __int__(self):
         """Extract (signed) integer value from the field element."""
         if self.is_signed:
-            return round(self.signed())
+            v = self.signed()
         else:
-            return round(self.unsigned())
+            v = self.unsigned()
+        return round(v)
 
     def __float__(self):
         """Extract (signed) float value from the field element."""
         if self.is_signed:
-            return float(self.signed())
+            v = self.signed()
         else:
-            return float(self.unsigned())
+            v = self.unsigned()
+        return float(v)
 
     def __abs__(self):
         """Absolute value of (signed) value."""
         if self.is_signed:
-            return abs(self.signed())
+            v = self.signed()
         else:
-            return self.unsigned()
+            v = self.unsigned()
+        return abs(v)
 
     @classmethod
     def to_bytes(cls, x):
@@ -118,7 +122,8 @@ class PrimeFieldElement():
         data[:2] = r.to_bytes(2, byteorder='little')
         j = 2
         for v in x:
-            if not isinstance(v, int): v = v.value
+            if not isinstance(v, int):
+                v = v.value
             data[j:j + r] = v.to_bytes(r, byteorder='little')
             j += r
         return data
@@ -137,75 +142,81 @@ class PrimeFieldElement():
 
     def __add__(self, other):
         """Addition."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return type(self)(self.value + other.value)
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return type(self)(self.value + other)
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     __radd__ = __add__
 
     def __iadd__(self, other):
         """In-place addition."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value += other
-        self.value %= type(self).modulus
+        self.value %= self.modulus
         return self
 
     def __sub__(self, other):
         """Subtraction."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return type(self)(self.value - other.value)
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return type(self)(self.value - other)
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __rsub__(self, other):
         """Subtraction (with reflected arguments)."""
         if isinstance(other, int):
             return type(self)(other - self.value)
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __isub__(self, other):
         """In-place subtraction."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value -= other
-        self.value %= type(self).modulus
+        self.value %= self.modulus
         return self
 
     def __mul__(self, other):
         """Multiplication."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return type(self)(self.value * other.value)
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return type(self)(self.value * other)
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     __rmul__ = __mul__
 
     def __imul__(self, other):
         """In-place multiplication."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value *= other
-        self.value %= type(self).modulus
+        self.value %= self.modulus
         return self
 
     def __pow__(self, exponent):
         """Exponentiation."""
-        return type(self)(int(gmpy2.powmod(self.value, exponent, type(self).modulus)))
+        return type(self)(int(gmpy2.powmod(self.value, exponent, self.modulus)))
 
     def __neg__(self):
         """Negation."""
@@ -213,48 +224,51 @@ class PrimeFieldElement():
 
     def __truediv__(self, other):
         """Division."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return self * other._reciprocal()
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return self * type(self)(other)._reciprocal()
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
         if isinstance(other, int):
             return type(self)(other) * self._reciprocal()
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __itruediv__(self, other):
         """In-place division."""
         if isinstance(other, int):
             other = type(self)(other)
-        elif type(self) != type(other):
+        elif not isinstance(other, type(self)):
             return NotImplemented
+
         self.value *= other._reciprocal().value
-        self.value %= type(self).modulus
+        self.value %= self.modulus
         return self
 
     def _reciprocal(self):
         """Multiplicative inverse."""
-        return type(self)(int(gmpy2.invert(self.value, type(self).modulus)))
+        return type(self)(int(gmpy2.invert(self.value, self.modulus)))
 
     def is_sqr(self):
         """Test for quadratic residuosity (0 is also square)."""
-        p = type(self).modulus
+        p = self.modulus
         if p == 2:
             return True
-        else:
-            return gmpy2.legendre(self.value, p) != -1
+
+        return gmpy2.legendre(self.value, p) != -1
 
     def sqrt(self, INV=False):
         """Modular (inverse) square roots."""
         a = self.value
-        p = type(self).modulus
+        p = self.modulus
         if p == 2:
             return type(self)(a)
+
         if p & 3 == 3:
             if INV:
                 q = (3 * p - 5) // 4 # a**q == a**(-1/2) == 1/sqrt(a) mod p
@@ -279,13 +293,13 @@ class PrimeFieldElement():
                 u, v = (v + b * u) % p, (-a * u) % p
         if INV:
             return type(self)(v)._reciprocal()
-        else:
-            return type(self)(v)
+
+        return type(self)(v)
 
     def signed(self):
         """Return signed integer representation, symmetric around zero."""
-        if self.value > type(self).modulus // 2:
-            v = self.value - type(self).modulus
+        if self.value > self.modulus // 2:
+            v = self.value - self.modulus
         else:
             v = self.value
         if self.frac_length > 0:
@@ -296,23 +310,24 @@ class PrimeFieldElement():
         """Return unsigned integer representation."""
         if self.frac_length == 0:
             return self.value
-        else:
-            return float(self.value / 2**self.frac_length)
+
+        return float(self.value / 2**self.frac_length)
 
     def __repr__(self):
         if self.frac_length == 0:
             return f'{self.__int__()}'
-        else:
-            return f'{self.__float__()}'
+
+        return f'{self.__float__()}'
 
     def __eq__(self, other):
         """Equality test."""
-        if type(self) == type(other):
+        if isinstance(other, type(self)):
             return self.value == other.value
-        elif isinstance(other, int):
+
+        if isinstance(other, int):
             return self.value == type(self)(other).value
-        else:
-            return NotImplemented
+
+        return NotImplemented
 
     def __hash__(self):
         """Hash value."""

@@ -6,13 +6,13 @@ The MPC protocols are based on Shamir's threshold secret sharing scheme
 and withstand passive adversaries controlling less than half of the parties.
 
 Secure finite field arithmetic is supported for fields of prime order
-and fields of characteristic two. Secure integer and fixed-point arithmetic 
-is supported for parameterized number ranges, also including support 
+and fields of characteristic two. Secure integer and fixed-point arithmetic
+is supported for parameterized number ranges, also including support
 for comparison and bitwise operations.
 These operations are all available via Python's operator overloading.
 Some operations for container datatypes holding secret-shared data items
 are provided as well (e.g., some matrix-vector operations).
 """
 
-__version__ = '0.4.3'
+__version__ = '0.4.4'
 __license__ = 'Apache License 2.0'

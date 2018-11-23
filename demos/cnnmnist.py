@@ -1,12 +1,12 @@
 """ Demo Convolutional Neural Network (CNN) MNIST classifier.
 
-The MNIST dataset of handwritten digits consists of a training set of 
-60,000 images of a test set of 10,000 images. The training images have been 
+The MNIST dataset of handwritten digits consists of a training set of
+60,000 images of a test set of 10,000 images. The training images have been
 used in the clear to obtain a highly reliable CNN classifier. The demo
 feeds the classifier with random test images keeping both the CNN parameters
-(neuron weights and bias for all layers) and the test image secret. 
+(neuron weights and bias for all layers) and the test image secret.
 
-The secure CNN classifier is run either with scaled secure integers or 
+The secure CNN classifier is run either with scaled secure integers or
 with secure fixed-point numbers. Barriers are used to throttle the MPyC
 secure computation (reduces memory usage).
 """
@@ -21,9 +21,10 @@ from mpyc.runtime import mpc
 
 def scale_to_int(f):
     if secnum.field.frac_length == 0:
-        return np.vectorize(lambda a: secnum(round(a * f)))
+        scale = lambda a: secnum(round(a * f))
     else:
-        return np.vectorize(secnum)
+        scale = secnum
+    return np.vectorize(scale)
 
 def load(name, f, a=2):
     W = np.load(os.path.join('data', 'cnn', 'W_' + name + '.npy'))
@@ -35,12 +36,12 @@ def load(name, f, a=2):
 def dim(x): # dimensions of tensor x
     if isinstance(x, np.ndarray):
         return list(x.shape)
-    else:
-        s = []
-        while isinstance(x, list):
-            s.append(len(x))
-            x = x[0]
-        return s
+
+    s = []
+    while isinstance(x, list):
+        s.append(len(x))
+        x = x[0]
+    return s
 
 @mpc.coroutine
 async def convolvetensor(x, W, b):
@@ -154,7 +155,7 @@ async def main():
     x = list(map(lambda a: a / 255, d))
     x = np.array(x).reshape(batch_size, 1, 28, 28)
     if batch_size == 1:
-        print(np.vectorize(lambda a: int(bool(a)))(x[0,0]))
+        print(np.vectorize(lambda a: int(bool(a)))(x[0, 0]))
     x = scale_to_int(1 << f)(x)
 
     logging.info('--------------- LAYER 1 -------------')

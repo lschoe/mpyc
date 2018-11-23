@@ -5,8 +5,8 @@ The polynomial b_n x^n + ... + b_1 x + b_0 corresponds
 to the integer b_n 2^n + ... + b_1 2 + b_0, for bits b_n,...,b_0.
 
 The operators +, -, *, //, %, and function divmod are overloaded.
-Using the direct correspondence between polynomials and integers, 
-the operators <, <=, >, >=, ==, != are overloaded as well, where 
+Using the direct correspondence between polynomials and integers,
+the operators <, <=, >, >=, ==, != are overloaded as well, where
 the zero polynomial is the smallest polynomial.
 
 GCD, extended GCD, modular inverse and powers are all supported.
@@ -31,7 +31,9 @@ def mul(a, b):
     return Polynomial(_mul(a, b))
 
 def _mul(a, b):
-    if a < b: a, b = b, a # Ensure a >= b.
+    if a < b:
+        a, b = b, a
+    # a >= b
     c = 0
     while b:
         if b & 1:
@@ -164,11 +166,11 @@ def _to_terms(a, x='x'):
             else:
                 p += f'+{x}^{i}'
     return p[1:]
-    
+
 def from_terms(s, x='x'):
     """Convert string s with sum of powers of x to a polynomial."""
     return Polynomial(_from_terms(s, x))
-    
+
 def _from_terms(s, x='x'):
     s = "".join(s.split()) # remove all whitespace
     a = 0
@@ -176,7 +178,7 @@ def _from_terms(s, x='x'):
         if term == '0':
             t = 0
         elif term == '1':
-            t = 1 # 2^0 
+            t = 1 # 2^0
         elif term == x:
             t = 2 # 2^1
         elif term.startswith(f'{x}^'):
@@ -205,7 +207,7 @@ def powmod(a, n, b):
     if isinstance(b, Polynomial):
         b = b.value
     return Polynomial(_powmod(a, n, b))
-    
+
 def _powmod(a, n, b=None):
     if n == 0:
         return 1
@@ -228,7 +230,7 @@ def _powmod(a, n, b=None):
     return c
 
 def is_irreducible(a):
-    """Test polynomial a for irreducibiity."""
+    """Test polynomial a for irreducibility."""
     if isinstance(a, Polynomial):
         a = a.value
     return _is_irreducible(a)
@@ -246,7 +248,7 @@ def _is_irreducible(a):
 
 def next_irreducible(a):
     """Return next irreducible polynomial > a.
-    
+
     NB: 'x' < 'x+1' < 'x^2+x+1' < 'x^3+x+1' < 'x^3+x^2+1' < ...
     """
     if isinstance(a, Polynomial):
@@ -255,15 +257,15 @@ def next_irreducible(a):
 
 def _next_irreducible(a):
     if a <= 2:
-        return a + 1
+        a += 1
     else:
         a += 1 + (a % 2)
         while not _is_irreducible(a):
             a += 2
-        return a
+    return a
 
 class Polynomial:
-
+    """Polynomials over GF(2) represented as nonnegative integers."""
     __slots__ = 'value'
 
     def __init__(self, value, x='x'):
@@ -272,9 +274,11 @@ class Polynomial:
         self.value = value
 
     def degree(self):
+        """Degree of polynomial (-1 for zero polynomial)."""
         return _degree(self.value)
 
     def is_irreducible(self):
+        """Test polynomial for irreducibility."""
         return _is_irreducible(self.value)
 
     def __int__(self):

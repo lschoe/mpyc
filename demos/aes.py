@@ -4,8 +4,8 @@ The demo performs an AES encryption followed by an AES decryption
 for a 128-bit AES key and a 256-bit AES key, cf. the examples in
 Appendices C.1 and C.3 of the Advanced Encryption Standard (FIPS PUB 197).
 
-The plaintext p, key k, and ciphertext c are represented as lists 
-of secure GF(2^8) elements. Note that computations over GF(2) are 
+The plaintext p, key k, and ciphertext c are represented as lists
+of secure GF(2^8) elements. Note that computations over GF(2) are
 done by using GF(2) as a subfield of GF(2^8).
 """
 
@@ -23,24 +23,24 @@ def circulant_matrix(r):
     r = list(map(f256, r))
     return [r[-i:] + r[:-i] for i in range(len(r))]
 
-A  = circulant_matrix([1,0, 0, 0, 1, 1, 1, 1])   # 8x8 matrix A over GF(2)
+A  = circulant_matrix([1, 0, 0, 0, 1, 1, 1, 1])  # 8x8 matrix A over GF(2)
 A1 = circulant_matrix([0, 0, 1, 0, 0, 1, 0, 1])  # inverse of A
-c  = list(map(f256,   [1, 1, 0, 0, 0, 1, 1, 0])) # vector c over GF(2)
-B  = circulant_matrix([2, 3, 1, 1])              # 4x4 matrix over GF(2^8)
-B1 = circulant_matrix([14, 11, 13, 9])           # inverse of B
+B = list(map(f256, [1, 1, 0, 0, 0, 1, 1, 0]))    # vector B over GF(2)
+C  = circulant_matrix([2, 3, 1, 1])              # 4x4 matrix C over GF(2^8)
+C1 = circulant_matrix([14, 11, 13, 9])           # inverse of C
 
 def sbox(x):
     """AES S-Box."""
     y = mpc.to_bits(x**254)
     z = mpc.matrix_prod([y], A, True)[0]
-    w = mpc.vector_add(z, c)
+    w = mpc.vector_add(z, B)
     v = mpc.from_bits(w)
     return v
 
 def sbox1(v):
     """AES inverse S-Box."""
     w = mpc.to_bits(v)
-    z = mpc.vector_add(w, c)
+    z = mpc.vector_add(w, B)
     y = mpc.matrix_prod([z], A1, True)[0]
     x = mpc.from_bits(y)**254
     return x
@@ -68,7 +68,8 @@ def encrypt(K, s):
     for i in range(1, Nr + 1):
         s = [[sbox(x) for x in _] for _ in s]
         s = [s[j][j:] + s[j][:j] for j in range(4)]
-        if i < Nr: s = mpc.matrix_prod(B, s)
+        if i < Nr:
+            s = mpc.matrix_prod(C, s)
         s = mpc.matrix_add(s, K[i])
     return s
 
@@ -77,7 +78,8 @@ def decrypt(K, s):
     Nr = len(K) - 1 # Nr is 10 or 14
     for i in range(Nr, 0, -1):
         s = mpc.matrix_add(s, K[i])
-        if i < Nr: s = mpc.matrix_prod(B1, s)
+        if i < Nr:
+            s = mpc.matrix_prod(C1, s)
         s = [s[j][-j:] + s[j][:-j] for j in range(4)]
         s = [[sbox1(x) for x in _] for _ in s]
     s = mpc.matrix_add(s, K[0])
@@ -107,7 +109,7 @@ async def main():
     K = key_expansion(k128)
     c = encrypt(K, p)
     await xprint('Ciphertext: ', c)
-    if full: 
+    if full:
         p = decrypt(K, c)
         await xprint('Plaintext:  ', p)
 
@@ -124,4 +126,3 @@ async def main():
 
 if __name__ == '__main__':
     mpc.run(main())
-    

@@ -6,7 +6,7 @@ the class attribute, according to which the transactions are classified.
 Gini impurity is used to determine the best split.
 
 The transactions are assumed to be secret, but the resulting decision tree
-is supposed to be public. All calculations are implemented using secure 
+is supposed to be public. All calculations are implemented using secure
 integer arithmetic only.
 """
 
@@ -68,18 +68,20 @@ async def id3(T, R) -> asyncio.Future:
     stop = (sizeT <= int(0.05*len(T))) + (mx == sizeT)
     if not (R and await mpc.is_zero_public(stop)):
         i = (await mpc.output(i)).value
-        logging.info('Leaf node label %d' % i)
-        return i
+        logging.info(f'Leaf node label {i}')
+        tree = i
     else:
         T_R = [[mpc.schur_prod(T, v) for v in S[A]] for A in R]
         gains = [GI(mpc.matrix_prod(T_A, S[C], True)) for T_A in T_R]
         k = (await mpc.output(max_rat(gains))).value
-        T_Rk = T_R[k]; T_R = gains = None # release memory
+        T_Rk = T_R[k]
+        T_R = gains = None # release memory
         A = list(R)[k]
-        logging.info('Attribute node %s' % attr_names[A])
+        logging.info(f'Attribute node {attr_names[A]}')
 #        trees = await mpc.gather([id3(t, R.difference([A])) for t in T_Rk])
         trees = [await id3(t, R.difference([A])) for t in T_Rk]
-        return attr_names[A], trees
+        tree = attr_names[A], trees
+    return tree
 
 def GI(x):
     y = [8 * s + 1 for s in map(mpc.sum, x)] #s + (s == 0)

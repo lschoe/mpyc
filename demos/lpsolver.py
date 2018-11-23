@@ -98,7 +98,7 @@ async def main():
     args = parser.parse_args()
 
     if not args.options:
-        certificate_filename = 'c' + str(mpc.id) + '.cert'
+        certificate_filename = f'c{mpc.pid}.cert'
         logging.info('Setting certificate file to default = %s', certificate_filename)
     else:
         certificate_filename = args.options[0]
@@ -107,12 +107,11 @@ async def main():
     m = len(T) - 1
     n = len(T[0]) - 1
     secint = mpc.SecInt(l, n=m + n)
-    for i in range(len(T)):
-        for j in range(len(T[0])):
+    for i in range(m + 1):
+        for j in range(n + 1):
             T[i][j] = secint(T[i][j])
 
     Zp = secint.field
-    p = Zp.modulus
     N = Zp.nth
     w = Zp.root
     w_powers = [Zp(1)]
@@ -148,6 +147,7 @@ async def main():
         p_col = mpc.vector_sub(p_col, p_row_index + [secint(0)])
         T = mpc.gauss(T, pivot * prev_p_inv, p_col, p_row)
         prev_pivot = pivot
+
         # swap basis entries
         delta = mpc.in_prod(basis, p_row_index) - mpc.in_prod(cobasis, p_col_index)
         p_row_index = mpc.scalar_mul(delta, p_row_index)
