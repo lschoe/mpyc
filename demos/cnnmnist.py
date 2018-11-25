@@ -14,7 +14,6 @@ secure computation (reduces memory usage).
 import os
 import sys
 import logging
-import random
 import gzip
 import numpy as np
 from mpyc.runtime import mpc
@@ -35,12 +34,12 @@ def load(name, f, a=2):
 
 def dim(x): # dimensions of tensor x
     if isinstance(x, np.ndarray):
-        return list(x.shape)
-
-    s = []
-    while isinstance(x, list):
-        s.append(len(x))
-        x = x[0]
+        s = list(x.shape)
+    else:
+        s = []
+        while isinstance(x, list):
+            s.append(len(x))
+            x = x[0]
     return s
 
 @mpc.coroutine
@@ -132,16 +131,17 @@ async def main():
     else:
         secnum = mpc.SecInt(37)
     batch_size = round(k - 0.01)
-    if len(sys.argv) <= 2:
-        if len(mpc.parties) == 1:
-            offset = random.randrange(10001 - batch_size)
-        else:
-            offset = 0
-    else:
-        offset = int(sys.argv[2])
-    f = 6
 
     await mpc.start()
+
+    if len(sys.argv) <= 2:
+        import mpyc.random as secrnd
+        offset = await mpc.output(secrnd.randrange(secnum, 10001 - batch_size))
+    else:
+        offset = sys.argv[2]
+    offset = int(offset)
+
+    f = 6
 
     logging.info('--------------- INPUT   -------------')
     print(f'Type = {secnum.__name__}, range = ({offset}, {offset + batch_size})')
@@ -197,7 +197,9 @@ async def main():
     if secnum.__name__.startswith('SecInt'):
         secnum.bit_length = 37
     for i in range(batch_size):
-        print(labels[i], await mpc.output(argmax(x[i])))
+        prediction = int(await mpc.output(argmax(x[i])))
+        error = '******* ERROR *******' if prediction != labels[i] else ''
+        print(f'Image #{offset+i} with label {labels[i]}: {prediction} predicted. {error}')
         print(await mpc.output(x[i]))
 
     await mpc.shutdown()

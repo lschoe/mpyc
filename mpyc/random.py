@@ -88,6 +88,9 @@ async def random_unit_vector(sectype, n):
 
 def randrange(sectype, start, stop=None, step=1):
     """Uniformly random secret integer in range(start, stop[, step])."""
+    if stop is None:
+        stop = start
+        start = 0
     n = len(range(start, stop, step))
     if not n:
         raise ValueError('empty range for randrange()')

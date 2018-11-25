@@ -39,9 +39,11 @@ python cnnmnist.py 3
 
 run 1 cnnmnist.py 1.5 0
 
-run 3 cnnminst.py 1 0
+python bnnmnist.py -1
 
-python -m cProfile -s time cnnmnist.py | more
+run 3 bnnmnist.py -1
+
+python -m cProfile -s time bnnmnist.py | more
 
 python -m cProfile -s cumtime sort.py 64 | more
 
