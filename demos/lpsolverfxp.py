@@ -48,20 +48,19 @@ def argmin(x, arg_le):
 def argmin_int(xs):
     def arg_le_int(x0, x1):
         a = x0 >= x1
-        m = x0 + a * (x1 - x0)
+        m = mpc.if_else(a, x1, x0)
         return a, m
     return argmin(xs, arg_le_int)
 
 def argmin_rat(xs):
     def arg_le_rat(x0, x1):
-        (n0, d0) = x0
-        (n1, d1) = x1
+        n0, d0 = x0
+        n1, d1 = x1
         a = mpc.in_prod([n0, d0], [d1, -n1]) >= 0
-        h = mpc.scalar_mul(a, [n1 - n0, d1 - d0])
-        m = (h[0] + n0, h[1] + d0)
+        m = mpc.if_else(a, [n1, d1], [n0, d0])
         return a, m
     return argmin(xs, arg_le_rat)
-
+    
 @mpc.coroutine
 async def index_matrix_prod(x, A, tr=False):
     """Secure index-matrix product of unit vector x with (transposed) A."""

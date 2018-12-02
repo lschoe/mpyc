@@ -130,7 +130,7 @@ class Runtime:
         logging.info(f'Start MPyC runtime v{self.version}')
         self.start_time = time.time()
         m = len(self.parties)
-        if  m == 1:
+        if m == 1:
             return
 
         # m > 1
@@ -795,6 +795,7 @@ class Runtime:
         else:
             a_integral = a.integral
             await returnType((stype, a_integral and x[0].integral), len(x))
+
         a, x = await gather_shares(a, x)
         if stype.field.frac_length > 0 and a_integral:
             a = a / (1 << stype.field.frac_length) # expensive # a /= inplace issue
@@ -805,6 +806,34 @@ class Runtime:
         if stype.field.frac_length > 0 and not a_integral:
             x = [self.trunc(stype(xi)) for xi in x]
         return x
+
+    @mpc_coro
+    async def _if_else_list(self, c, x, y):
+        x, y = x[:], y[:]
+        stype = type(c)
+        if stype.field.frac_length == 0:
+            await returnType(stype, len(x))
+        else:
+            c_integral = c.integral
+            if not c_integral:
+                raise ValueError('condition must be integral')
+            await returnType((stype, c_integral and x[0].integral and y[0].integral), len(x))
+
+        c, x, y = await gather_shares(c, x, y)
+        if stype.field.frac_length > 0:
+            c = c / (1 << stype.field.frac_length) # expensive # c /= inplace issue
+        for i in range(len(x)):
+            x[i] = stype.field(c.value * (x[i].value - y[i].value) + y[i].value)
+        x = self._reshare(x)
+        return await gather_shares(x)
+
+    def if_else(self, c, x, y):
+        '''Secure selection based on condition c between x and y.'''
+        if isinstance(x, list):
+            z = self._if_else_list(c, x, y)
+        else:
+            z = c * (x - y) + y
+        return z
 
     @mpc_coro
     async def schur_prod(self, x, y):
@@ -990,7 +1019,7 @@ class Runtime:
             f(0, n)
         # c = prefix carries for addition of x and y
         for i in range(n - 1, -1, -1):
-            c[i] = x[i] + y[i] - 2 * c[i] + (c[i - 1] if i >= 1 else 0)
+            c[i] = x[i] + y[i] - c[i] * 2 + (c[i - 1] if i else 0)
         return c
 
     @mpc_coro
@@ -1010,10 +1039,10 @@ class Runtime:
             k = self.options.security_parameter
             r_divl = self._random(Fq, 1<<k)
             a = await gather_shares(a)
-            c = await self.output(a + (1<<l) - r_modl + (1<<l) * r_divl)
+            c = await self.output((r_divl.value << l) - r_modl + (1<<l) + a)
             c = c.value % (1<<l)
+            c_bits = [(c >> i) & 1 for i in range(l)]
             r_bits = [stype(r.value) for r in r_bits]
-            c_bits = [stype((c >> i) & 1) for i in range(l)]
             return self.add_bits(r_bits, c_bits)
 
         a = await gather_shares(a)          # use a.value?
@@ -1027,29 +1056,30 @@ class Runtime:
         return sum(x[i] * (1<<i) for i in range(len(x)))
 
     def _norm(self, a): # signed normalization factor
-        stype = type(a)
-        l = stype.bit_length
-        f = stype.field.frac_length
         x = self.to_bits(a) # low to high bits
-        s = x[-1] # sign bit
+        b = x[-1] # sign bit
+        s = 1 - b * 2 # sign s = (-1)^b
+        x = x[:-1]
         def __norm(x):
             n = len(x)
             if n == 1:
-                t = s + x[0] - 2 * s * x[0] #self.xor(s, x[0])
+                t = s * x[0] + b #self.xor(b, x[0])
                 return 2 - t, t
 
             i0, nz0 = __norm(x[:n//2]) # low bits
             i1, nz1 = __norm(x[n//2:]) # high bits
             i0 *= (1 << ((n + 1) // 2))
             return nz1 * (i1 - i0) + i0, nz0 + nz1 - nz0 * nz1 #self.or_(nz0, nz1)
-        return (1 - 2 * s) * __norm(x[:-1])[0] * (2 ** (f - (l - 1))) # note f <= l
+        l = type(a).bit_length
+        f = type(a).field.frac_length
+        return s * __norm(x)[0] * (2 ** (f - (l - 1))) # note f <= l
 
     def _rec(self, a): # enhance performance by reducing no. of truncs
         f = type(a).field.frac_length
         v = self._norm(a)
         b = a * v # 1/2 <= b <= 1
         theta = int(math.ceil(math.log((2 * f + 1) / 3.5, 2)))
-        c = 2.9142 - 2 * b
+        c = 2.9142 - b * 2
         for _ in range(theta):
             c *= 2 - c * b
         return c * v

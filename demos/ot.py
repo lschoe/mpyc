@@ -27,7 +27,7 @@ secnum = mpc.SecInt()
 for i in range(1, t + 1):
     x = mpc.input([secnum(message[i - 1][0]), secnum(message[i - 1][1])], i)
     b = mpc.input(secnum(choice[i - t - 1]), t + i)
-    a = mpc.run(mpc.output(x[0] +  b * (x[1] - x[0]), t + i))
+    a = mpc.run(mpc.output(mpc.if_else(b, x[1], x[0]), t + i))
     if a:
         print(f'You have received message {a}.')
 

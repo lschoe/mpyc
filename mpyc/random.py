@@ -14,8 +14,9 @@ complexity, that is, to limit the usage of secure random bits as
 provided by runtime.random_bits(). Other than this, the code is
 relatively simple for now.
 
-NB: runtime.random(sectype, n) cannot be used as an alternative to
-_randbelow(sectype, n) as its output is not uniformly random.
+NB: runtime._random(sectype, n) cannot be used as an alternative to
+_randbelow(sectype, n) as its output is not uniformly random, except
+when n is equal to the order of sectype's finite field.
 """
 
 import math
@@ -36,8 +37,15 @@ async def _randbelow(sectype, n):
 
     Expected number of secret random bits needed is log_2 n + c,
     with c a small constant, c < 3.
+
+    Special case: if sectype is a secure finite field and
+    n is equal to the order of the finite field, then the
+    uniformly random output can be generated directly.
     """
     await runtime.returnType((sectype, True))
+    if sectype.__name__.startswith('SecFld') and n == sectype.field.order:
+        return runtime._random(sectype)
+
     b = n - 1
     k = b.bit_length()
     x = runtime.random_bits(sectype, k)

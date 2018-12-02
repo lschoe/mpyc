@@ -41,23 +41,23 @@ def argmax(xs, arg_ge):
         return secint(0), xs[0]
     i0, max0 = argmax(xs[:n//2], arg_ge)
     i1, max1 = argmax(xs[n//2:], arg_ge)
-    b, mx = arg_ge(max0, max1)
-    return i0 + b * (n//2 + i1 - i0), mx
+    a, m = arg_ge(max0, max1)
+    return mpc.if_else(a, n//2 + i1, i0), m
 
 def argmax_int(xs):
     def arg_ge_int(x0, x1):
-        b = x0 <= x1
-        mx = b * (x1 - x0) + x0
-        return b, mx
+        a = x0 <= x1
+        m = mpc.if_else(a, x1, x0)
+        return a, m
     return argmax(xs, arg_ge_int)
 
 def max_rat(xs):
     def arg_ge_rat(x0, x1):
-        (n0, d0) = x0
-        (n1, d1) = x1
-        b = mpc.in_prod([n0, d0], [d1, -n1]) <= 0
-        h = mpc.scalar_mul(b, [n1 - n0, d1 - d0])
-        return b, (h[0] + n0, h[1] + d0)
+        n0, d0 = x0
+        n1, d1 = x1
+        a = mpc.in_prod([n0, d0], [d1, -n1]) <= 0
+        m = mpc.if_else(a, [n1, d1], [n0, d0])
+        return a, m
     return argmax(xs, arg_ge_rat)[0]
 
 @mpc.coroutine

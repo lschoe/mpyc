@@ -25,7 +25,7 @@ Basically, vector_bsgn(x) securely computes, for all a in x:
 
     (t | p), with t = sum((2(a+i)+1 | p) for i=-2,-1,0,1,2),
 
-where ( a | p ) = a^((p-1)/2) mod p denotes the Legendre symbol.
+where (a | p ) = a^((p-1)/2) mod p denotes the Legendre symbol.
 
 Benchmarking against the built-in MPyC integer comparison is also supported.
 The limited 10-bit range for the second and third layers is exploited in this
