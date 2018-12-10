@@ -24,6 +24,8 @@ class Share:
 
     __slots__ = 'df'
 
+    field = None
+
     def __init__(self, field=None, value=None):
         """Initialize a share."""
         if value is not None:
@@ -31,7 +33,7 @@ class Share:
                 value = field(value)
             self.df = value
         else:
-            self.df = asyncio.Future()
+            self.df = asyncio.Future(loop=runtime._loop)
 
     def __bool__(self):
         """Use of secret-shared values in Boolean expressions makes no sense."""
@@ -127,7 +129,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        # stub: only mod 2
+        # TODO: extend beyond mod 2
         assert other.df.value == 2, 'Least significant bit only, for now!'
         r = runtime.lsb(self)
         return r
@@ -138,7 +140,7 @@ class Share:
             return NotImplemented
         if type(other).__name__.startswith('SecFld'):
             return NotImplemented
-        # stub: only mod 2
+        # TODO: extend beyond mod 2
         assert self.df.value == 2, 'Least significant bit only, for now!'
         other = self._coerce(other)
         if other is NotImplemented:
@@ -148,7 +150,7 @@ class Share:
 
     def __floordiv__(self, other):
         """Integer quotient."""
-        # stub: only div 2
+        # TODO: extend beyond div 2
         r = self.__mod__(other)
         if r is NotImplemented:
             return NotImplemented
@@ -160,7 +162,7 @@ class Share:
 
     def __rfloordiv__(self, other):
         """Integer quotient (with reflected arguments)."""
-        # stub: only div 2
+        # TODO: extend beyond div 2
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
@@ -172,7 +174,7 @@ class Share:
 
     def __divmod__(self, other):
         """Integer division."""
-        # stub: only divmod 2
+        # TODO: extend beyond div 2
         r = self.__mod__(other)
         if r is NotImplemented:
             return NotImplemented
@@ -184,7 +186,7 @@ class Share:
 
     def __rdivmod__(self, other):
         """Integer division (with reflected arguments)."""
-        # stub: only divmod 2
+        # TODO: extend beyond div 2
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
@@ -195,10 +197,34 @@ class Share:
         return q, r
 
     def __pow__(self, other):
-        """Exponentation with publicly known integer exponent."""
+        """Exponentation for public integral exponent."""
+        # TODO: extend to secret exponent
         if not isinstance(other, int):
             return NotImplemented
         return runtime.pow(self, other)
+
+    def __lshift__(self, other):
+        """Left shift with public integral offset."""
+        # TODO: extend to secret offset
+        if not isinstance(other, int):
+            return NotImplemented
+        return runtime.mul(self, 1 << other)
+
+    def __rlshift__(self, other):
+        """Left shift (with reflected arguments)."""
+        return NotImplemented
+
+    def __rshift__(self, other):
+        """Right shift with public integral offset."""
+        # TODO: extend to secret offset
+        # TODO: extend beyond offset 1
+        if not isinstance(other, int):
+            return NotImplemented
+        return self.__floordiv__(1 << other)
+
+    def __rrshift__(self, other):
+        """Right shift (with reflected arguments)."""
+        return NotImplemented
 
     def __and__(self, other):
         """Bitwise and for binary fields (otherwise 1-bit only)."""

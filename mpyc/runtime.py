@@ -38,17 +38,22 @@ class Runtime:
     to enable distributed computation (without secret sharing).
     """
 
+    version = None
+
     def __init__(self, pid, parties, options):
         """Initialize runtime."""
         self.pid = pid
         self.parties = parties
         self.options = options
         self.threshold = options.threshold
+        self._logging_enabled = not options.no_log
         self._program_counter = [0]
         m = len(self.parties)
         t = self.threshold
         #caching (m choose t):
         self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
+        self._loop = asyncio.get_event_loop() # cache running loop
+        self.start_time = None
 
     def _increment_pc(self):
         """Increment the program counter."""
@@ -295,17 +300,18 @@ class Runtime:
         """Recombine shares of elements of x."""
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
-            if sftype.field.frac_length == 0:
+            field = sftype.field
+            if field.frac_length == 0:
                 await returnType(sftype, len(x))
             else:
                 await returnType((sftype, x[0].integral), len(x))
             x = await gather_shares(x)
-            field = type(x[0])
         else:
-            await returnType(Share, len(x))
             field = sftype
+            await returnType(Future, len(x))
 
         m = len(self.parties)
+        x = [a.value for a in x]
         # Send share to all successors in receivers.
         for peer_pid in receivers:
             if 0 < (peer_pid - self.pid) % m <= t:
@@ -329,15 +335,15 @@ class Runtime:
             x = [x]
         sftype = type(x[0]) # all elts assumed of same type
         if issubclass(sftype, Share):
-            if  sftype.field.frac_length == 0:
+            field = sftype.field
+            if field.frac_length == 0:
                 await returnType(sftype, len(x))
             else:
                 await returnType((sftype, x[0].integral), len(x))
-            x = await mpc.gather(x)
-            field = sftype.field
+            x = await gather_shares(x)
         else:
-            await returnType(Share)
             field = sftype
+            await returnType(Future)
 
         m = len(self.parties)
         t = self.threshold
@@ -366,17 +372,20 @@ class Runtime:
         l = stype.bit_length
         if f is None:
             f = Zp.frac_length
+            rsf = Zp.rshift_factor
+        else:
+            rsf = 1 / Zp(1 << f)
         k = self.options.security_parameter
-        r_bits = await gather_shares(self.random_bits(Zp, f))
+        r_bits = await self.random_bits(Zp, f)
         r_modf = 0
         for i in range(f - 1, -1, -1):
             r_modf <<= 1
             r_modf += r_bits[i].value
         r_divf = self._random(Zp, 1<<(k + l - f))
         a = await gather_shares(a)
-        c = await self.output(r_modf + (r_divf.value << f) + (1<<l) + a)
+        c = await self.output(a + ((1<<l) + (r_divf.value << f) + r_modf)) # pylint: disable=E1101
         c = c.value % (1<<f)
-        return (r_modf - c + a) / (1<<f)
+        return (r_modf - c + a) * rsf
 
     def eq_public(self, a, b):
         """Secure public equality test of a and b."""
@@ -444,7 +453,8 @@ class Runtime:
     async def mul(self, a, b):
         """Secure multiplication of a and b."""
         stype = type(a)
-        if stype.field.frac_length == 0:
+        field = stype.field
+        if field.frac_length == 0:
             await returnType(stype)
         else:
             a_integral = a.integral
@@ -458,11 +468,11 @@ class Runtime:
             a = b = await gather_shares(a)
         else:
             a, b = await gather_shares(a, b)
-        if stype.field.frac_length > 0 and a_integral:
-            a = a / (1 << stype.field.frac_length) # expensive # a /= inplace issue
+        if field.frac_length > 0 and a_integral:
+            a = a * field.rshift_factor # NB: no inplace a *=
         c = self._reshare(a * b)
-        if stype.field.frac_length > 0 and not a_integral:
-            c = self.trunc(stype(c.df))  # c.df
+        if field.frac_length > 0 and not a_integral:
+            c = self.trunc(stype(c))
         return c
 
     def div(self, a, b):
@@ -472,24 +482,26 @@ class Runtime:
                 c = self.reciprocal(b)
             else:
                 c = self._rec(b)
-        elif isinstance(b, a.field):
-            c = 1 / b
-        else:
-            c = 1 / a.field(b)
+        else: # isinstance(a, Share) ensured
+            if not isinstance(b, a.field):
+                b = a.field(b)
+            c = b._reciprocal()
         return a * c
 
     @mpc_coro
     async def reciprocal(self, a):
         """Secure reciprocal (multiplicative inverse) of a, for nonzero a."""
         stype = type(a)
+        field = stype.field
         await returnType(stype)
         a = await gather_shares(a)
-        r = self._random(stype.field)
-        ar = await self.output(a * r, threshold=2*self.threshold)
-        if ar == 0:
-            return self.reciprocal(a)
-
-        return r * (1 << stype.field.frac_length) / ar
+        while 1:
+            r = self._random(field)
+            ar = await self.output(a * r, threshold=2*self.threshold)
+            if ar:
+                break
+        r *= field.lshift_factor
+        return r / ar
 
     def pow(self, a, b):
         """Secure exponentation a raised to the power of b, for public integer b."""
@@ -511,10 +523,11 @@ class Runtime:
 
     def and_(self, a, b):
         """Secure bitwise and of a and b."""
+        field = type(a).field
         a2 = self.to_bits(a)
         b2 = self.to_bits(b)
         c2 = [a2[i] * b2[i] for i in range(len(a2))]
-        return sum(c2[i] * type(a).field(2**i) for i in range(len(c2)))
+        return sum(c2[i] * field(1 << i) for i in range(len(c2)))
 
     def xor(self, a, b):
         """Secure bitwise xor of a and b."""
@@ -526,10 +539,11 @@ class Runtime:
 
     def or_(self, a, b):
         """Secure bitwise or of a and b."""
+        field = type(a).field
         a2 = self.to_bits(a)
         b2 = self.to_bits(b)
         c2 = [a2[i] + b2[i] + a2[i] * b2[i] for i in range(len(a2))]
-        return sum(c2[i] * type(a).field(2**i) for i in range(len(c2)))
+        return sum(c2[i] * field(1 << i) for i in range(len(c2)))
 #        return a + b - a * b # wrong, go via bits
 
     def eq(self, a, b):
@@ -545,7 +559,7 @@ class Runtime:
         if type(a).__name__.startswith('SecFld'):
             return 1 - self.pow(a, a.field.order - 1)
 
-        if (a.bit_length > 2*self.options.security_parameter and a.field.order%4 == 3):
+        if (a.bit_length/2 > self.options.security_parameter >= 8 and a.field.order%4 == 3):
             return self._is_zero(a)
 
         return self.sgn(a, EQ=True)
@@ -555,7 +569,7 @@ class Runtime:
         """Probabilistic zero test."""
         stype = type(a)
         await returnType((stype, True))
-        Zp = a.field
+        Zp = stype.field
 
         k = self.options.security_parameter
         z = self.random_bits(Zp, k)
@@ -573,18 +587,19 @@ class Runtime:
                 c[i] = Zp(1)
             else:
                 c[i] = 1 - z[i] if c[i].is_sqr() else z[i]
-        e = await gather_shares(self.prod(c))
-        return e * (1 << stype.field.frac_length)
+        e = await self.prod(c)
+        e *= Zp.lshift_factor
+        return e
 
     @mpc_coro
     async def sgn(self, a, EQ=False, GE=False):
         """Secure sign(um) of a, -1 if a < 0 else 0 if a == 0 else 1."""
         stype = type(a)
         await returnType((stype, True))
-        Zp = a.field
+        Zp = stype.field
 
         l = stype.bit_length
-        r_bits = await gather_shares(self.random_bits(Zp, l))
+        r_bits = await self.random_bits(Zp, l)
         r_modl = 0
         for i in range(l - 1, -1, -1):
             r_modl <<= 1
@@ -593,12 +608,11 @@ class Runtime:
         a_rmodl = a + ((1<<l) + r_modl)
         k = self.options.security_parameter
         r_divl = self._random(Zp, 1<<k)
-        c = await self.output(a_rmodl + (r_divl.value << l))
+        c = await self.output(a_rmodl + (r_divl.value << l)) # pylint: disable=E1101
         c = c.value % (1<<l)
 
         if not EQ: # a la Toft
-            s_bit = (await gather_shares(self.random_bits(Zp, 1)))[0]
-            s_sign = (1 - 2 * s_bit).value
+            s_sign = (await self.random_bits(Zp, 1, signed=True))[0].value
             e = [None] * (l + 1)
             sumXors = 0
             for i in range(l - 1, -1, -1):
@@ -606,21 +620,22 @@ class Runtime:
                 e[i] = Zp(s_sign + r_bits[i].value - c_i + 3 * sumXors)
                 sumXors += 1 - r_bits[i].value if c_i else r_bits[i].value
             e[l] = Zp(s_sign - 1 + 3 * sumXors)
-            f = await self.is_zero_public(self.prod(e))
-            UF = s_bit if f == 1 else 1 - s_bit
-            z = (a_rmodl - (c + UF * (1<<l))) / (1<<l)
+            e = await self.prod(e)
+            g = await self.is_zero_public(stype(e))
+            UF = 1 - s_sign if g else s_sign + 1
+            z = (a_rmodl - (c + (UF << l - 1))) / (1<<l)
 
         if not GE:
             h = self.prod([r_bits[i] if (c >> i) & 1 else 1 - r_bits[i] for i in range(l)])
-            h = await gather_shares(h)
+            h = await h
             if EQ:
                 z = h
             else:
                 z = (1 - h) * (2 * z - 1)
-                z = self._reshare(z)
-                z = await gather_shares(z)
+                z = await self._reshare(z)
 
-        return z * (1 << stype.field.frac_length)
+        z *= Zp.lshift_factor
+        return z
 
     def min(self, *x):
         """Secure minimum of all given elements in x."""
@@ -653,15 +668,17 @@ class Runtime:
         """Secure least significant bit of a.""" # a la [ST06]
         stype = type(a)
         await returnType((stype, True))
+        Zp = stype.field
         l = stype.bit_length
         k = self.options.security_parameter
         b = self.random_bit(stype)
         a, b = await gather_shares(a, b)
-        b = b / (1 << stype.field.frac_length)
-        r = self._random(stype.field, 1 << (l + k))
-        c = await self.output(a + (1<<l) + b + (r.value << 1))
-        x = 1 - b if c.value & 1 else b #xor
-        return x * (1 << stype.field.frac_length)
+        b *= Zp.rshift_factor
+        r = self._random(Zp, 1 << (l + k - 1))
+        c = await self.output(a + ((1<<l) + (r.value << 1) + b.value)) # pylint: disable=E1101
+        x = 1 - b if c.value & 1 else b # xor
+        x *= Zp.lshift_factor
+        return x
 
     @mpc_coro
     async def sum(self, x):
@@ -696,7 +713,8 @@ class Runtime:
         else:
             x, y = x[:], y[:]
         stype = type(x[0])
-        if stype.field.frac_length == 0:
+        field = stype.field
+        if field.frac_length == 0:
             await returnType(stype)
         else:
             x_integral = x[0].integral
@@ -708,12 +726,11 @@ class Runtime:
         s = 0
         for i in range(len(x)):
             s += x[i].value * y[i].value
-        if stype.field.frac_length > 0 and x_integral:
-            f1 = 1 / stype.field(1 << stype.field.frac_length) # expensive
-            s = s * f1.value
-        s = self._reshare(stype.field(s))
-        if stype.field.frac_length > 0 and not x_integral:
-            s = self.trunc(stype(s.df))
+        if field.frac_length > 0 and x_integral:
+            s *= field.rshift_factor
+        s = self._reshare(field(s))
+        if field.frac_length > 0 and not x_integral:
+            s = self.trunc(stype(s))
         return s
 
     @mpc_coro
@@ -724,14 +741,13 @@ class Runtime:
             await returnType(type(x[0]))
             x = await gather_shares(x)
         else:
-            Share.field = type(x[0])  # avoid hack? see prod in sgn, _is_zero
-            await returnType(Share)
+            await returnType(Future)
 
         while len(x) > 1:
             h = [None] * (len(x)//2)
             for i in range(len(h)):
                 h[i] = x[2*i] * x[2*i+1]
-            h = await gather_shares(self._reshare(h))
+            h = await self._reshare(h) # TODO: handle trunc
             x = x[2*len(h):] + h
         return x[0]
 
@@ -790,42 +806,43 @@ class Runtime:
         """Secure scalar multiplication of scalar a with vector x."""
         x = x[:]
         stype = type(a)
-        if stype.field.frac_length == 0:
+        field = stype.field
+        if field.frac_length == 0:
             await returnType(stype, len(x))
         else:
             a_integral = a.integral
             await returnType((stype, a_integral and x[0].integral), len(x))
 
         a, x = await gather_shares(a, x)
-        if stype.field.frac_length > 0 and a_integral:
-            a = a / (1 << stype.field.frac_length) # expensive # a /= inplace issue
+        if field.frac_length > 0 and a_integral:
+            a = a * field.rshift_factor # NB: no inplace a *=
         for i in range(len(x)):
             x[i] = x[i] * a
-        x = self._reshare(x)
-        x = await gather_shares(x)
-        if stype.field.frac_length > 0 and not a_integral:
+        x = await self._reshare(x)
+        if field.frac_length > 0 and not a_integral:
             x = [self.trunc(stype(xi)) for xi in x]
         return x
 
     @mpc_coro
-    async def _if_else_list(self, c, x, y):
+    async def _if_else_list(self, a, x, y):
         x, y = x[:], y[:]
-        stype = type(c)
-        if stype.field.frac_length == 0:
+        stype = type(a)
+        field = stype.field
+        if field.frac_length == 0:
             await returnType(stype, len(x))
         else:
-            c_integral = c.integral
-            if not c_integral:
+            a_integral = a.integral
+            if not a_integral:
                 raise ValueError('condition must be integral')
-            await returnType((stype, c_integral and x[0].integral and y[0].integral), len(x))
+            await returnType((stype, a_integral and x[0].integral and y[0].integral), len(x))
 
-        c, x, y = await gather_shares(c, x, y)
-        if stype.field.frac_length > 0:
-            c = c / (1 << stype.field.frac_length) # expensive # c /= inplace issue
+        a, x, y = await gather_shares(a, x, y)
+        if field.frac_length > 0:
+            a = a * field.rshift_factor # NB: no inplace a *=
         for i in range(len(x)):
-            x[i] = stype.field(c.value * (x[i].value - y[i].value) + y[i].value)
-        x = self._reshare(x)
-        return await gather_shares(x)
+            x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
+        x = await self._reshare(x)
+        return x
 
     def if_else(self, c, x, y):
         '''Secure selection based on condition c between x and y.'''
@@ -852,12 +869,11 @@ class Runtime:
                 x, y = await gather_shares(x, y)
             truncy = stype.field.frac_length > 0
         else:
-            await returnType(Share)
+            await returnType(Future)
             truncy = False
         for i in range(len(x)):
             x[i] = x[i] * y[i]
-        x = self._reshare(x)
-        x = await gather_shares(x)
+        x = await self._reshare(x)
         if truncy:
             x = [self.trunc(stype(xi)) for xi in x]
         return x
@@ -869,6 +885,7 @@ class Runtime:
         shA = isinstance(A[0][0], Share)
         shB = isinstance(B[0][0], Share)
         stype = type(A[0][0]) if shA else type(B[0][0])
+        field = stype.field
         n = len(B) if tr else len(B[0])
         await returnType(stype, len(A), n)
         if shA and shB:
@@ -885,12 +902,12 @@ class Runtime:
                 s = 0
                 for i in range(len(A[0])):
                     s += A[ia][i].value * (B[ib][i] if tr else B[i][ib]).value
-                C[ia][ib] = stype.field(s)
+                C[ia][ib] = field(s)
             if shA and shB:
                 C[ia] = self._reshare(C[ia])
         if shA and shB:
             C = await gather_shares(C)
-        if stype.field.frac_length > 0:
+        if field.frac_length > 0:
             C = [[self.trunc(stype(Cij)) for Cij in Ci] for Ci in C]
         return C
 
@@ -899,6 +916,7 @@ class Runtime:
         """Secure Gaussian elimination A d - b c."""
         A, b, c = [r[:] for r in A], b[:], c[:]
         stype = type(A[0][0])
+        field = stype.field
         n = len(A[0])
         await returnType(stype, len(A), n)
         A, d, b, c = await gather_shares(A, d, b, c)
@@ -906,10 +924,10 @@ class Runtime:
         for i in range(len(A)):
             b[i] = b[i].value
             for j in range(n):
-                A[i][j] = stype.field(A[i][j].value * d - b[i] * c[j].value)
+                A[i][j] = field(A[i][j].value * d - b[i] * c[j].value)
             A[i] = self._reshare(A[i])
         A = await gather_shares(A)
-        if stype.field.frac_length > 0:
+        if field.frac_length > 0:
             A = [[self.trunc(stype(Aij)) for Aij in Ai] for Ai in A]
         return A
 
@@ -943,9 +961,9 @@ class Runtime:
             shares = [sftype(s) for s in shares]
         return shares
 
-    def random_bit(self, sftype, signed=False):
+    def random_bit(self, stype, signed=False):
         """Secure uniformly random bit of the given type."""
-        return self.random_bits(sftype, 1, signed)[0]
+        return self.random_bits(stype, 1, signed)[0]
 
     @mpc_coro
     async def random_bits(self, sftype, n, signed=False):
@@ -957,9 +975,9 @@ class Runtime:
             field = sftype.field
             if sftype.__name__.startswith('SecFld'):
                 prss0 = True
-            f1 = 1<<sftype.field.frac_length
+            f1 = field.lshift_factor
         else:
-            await returnType(Share)
+            await returnType(Future)
             field = sftype
 
         m = len(self.parties)
@@ -1019,7 +1037,7 @@ class Runtime:
             f(0, n)
         # c = prefix carries for addition of x and y
         for i in range(n - 1, -1, -1):
-            c[i] = x[i] + y[i] - c[i] * 2 + (c[i - 1] if i else 0)
+            c[i] = x[i] + y[i] - c[i] * 2 + (c[i - 1] if i > 0 else 0)
         return c
 
     @mpc_coro
@@ -1028,25 +1046,25 @@ class Runtime:
         stype = type(a)
         l = stype.bit_length
         await returnType((stype, True), l)
-        Fq = stype.field
+        field = stype.field
 
-        r_bits = await gather_shares(self.random_bits(Fq, l))
+        r_bits = await self.random_bits(field, l)
         r_modl = 0
         for i in range(l - 1, -1, -1):
             r_modl *= 2
             r_modl += r_bits[i].value
-        if isinstance(Fq.modulus, int):
+        if isinstance(field.modulus, int):
             k = self.options.security_parameter
-            r_divl = self._random(Fq, 1<<k)
+            r_divl = self._random(field, 1<<k)
             a = await gather_shares(a)
-            c = await self.output((r_divl.value << l) - r_modl + (1<<l) + a)
+            c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl)) # pylint: disable=E1101
             c = c.value % (1<<l)
             c_bits = [(c >> i) & 1 for i in range(l)]
             r_bits = [stype(r.value) for r in r_bits]
             return self.add_bits(r_bits, c_bits)
 
         a = await gather_shares(a)          # use a.value?
-        c = await self.output(a + Fq(r_modl))  # fix this in +
+        c = await self.output(a + field(r_modl))  # fix this in +
         c = int(c.value)
         return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
 
@@ -1063,16 +1081,16 @@ class Runtime:
         def __norm(x):
             n = len(x)
             if n == 1:
-                t = s * x[0] + b #self.xor(b, x[0])
+                t = s * x[0] + b # self.xor(b, x[0])
                 return 2 - t, t
 
             i0, nz0 = __norm(x[:n//2]) # low bits
             i1, nz1 = __norm(x[n//2:]) # high bits
             i0 *= (1 << ((n + 1) // 2))
-            return nz1 * (i1 - i0) + i0, nz0 + nz1 - nz0 * nz1 #self.or_(nz0, nz1)
+            return nz1 * (i1 - i0) + i0, nz0 + nz1 - nz0 * nz1 # self.or_(nz0, nz1)
         l = type(a).bit_length
         f = type(a).field.frac_length
-        return s * __norm(x)[0] * (2 ** (f - (l - 1))) # note f <= l
+        return s * __norm(x)[0] * (2 ** (f - (l - 1))) # NB: f <= l
 
     def _rec(self, a): # enhance performance by reducing no. of truncs
         f = type(a).field.frac_length
@@ -1234,11 +1252,10 @@ def setup():
     import mpyc.random
     mpyc.random.runtime = rt
     rt.version = mpyc.__version__
-    rt.options = options
-    rt._logging_enabled = not options.no_log
     global mpc
     mpc = rt
 
+mpc = None
 try: # suppress exceptions for pydoc etc.
     setup()
 except Exception as exc:

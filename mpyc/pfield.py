@@ -26,7 +26,7 @@ def find_prime_root(l, blum=True, n=1):
             n, w = 2, -1
     elif n <= 2:
         n, w = 2, -1
-        p = gmpy2.next_prime(2**(l - 1))
+        p = gmpy2.next_prime(1 << l - 1)
         if blum:
             while p % 4 != 3:
                 p = gmpy2.next_prime(p)
@@ -35,7 +35,7 @@ def find_prime_root(l, blum=True, n=1):
         assert blum
         if not gmpy2.is_prime(n):
             n = int(gmpy2.next_prime(n))
-        p = 1 + n * (1 + (n**2) % 4 + 4 * ((2**(l - 2)) // n))
+        p = 1 + n * (1 + (n**2) % 4 + 4 * ((1 << l - 2) // n))
         while not gmpy2.is_prime(p):
             p += 4 * n
 
@@ -73,6 +73,8 @@ def GF(modulus, f=0):
     GFElement.nth = n
     GFElement.root = w % p
     GFElement.frac_length = f
+    GFElement.lshift_factor = 1 << f
+    GFElement.rshift_factor = int(gmpy2.invert(1 << f, p))
     _field_cache[(p, f)] = GFElement
     return GFElement
 
@@ -83,6 +85,15 @@ class PrimeFieldElement():
     """
 
     __slots__ = 'value'
+
+    modulus = None
+    order = None
+    is_signed = None
+    nth = None
+    root = None
+    frac_length = None
+    lshift_factor = None
+    rshift_factor = None
 
     def __init__(self, value):
         self.value = value % self.modulus
@@ -113,17 +124,12 @@ class PrimeFieldElement():
 
     @classmethod
     def to_bytes(cls, x):
-        """Return an array of bytes representing the given list of values x.
-
-        Values are either integers or field elements.
-        """
+        """Return an array of bytes representing the given list of integers x."""
         r = (cls.modulus.bit_length() + 7) // 8
         data = bytearray(2 + len(x) * r)
         data[:2] = r.to_bytes(2, byteorder='little')
         j = 2
         for v in x:
-            if not isinstance(v, int):
-                v = v.value
             data[j:j + r] = v.to_bytes(r, byteorder='little')
             j += r
         return data
@@ -303,7 +309,7 @@ class PrimeFieldElement():
         else:
             v = self.value
         if self.frac_length > 0:
-            v = float(v / 2**self.frac_length)
+            v = float(v / (1 << self.frac_length))
         return v
 
     def unsigned(self):
@@ -311,7 +317,7 @@ class PrimeFieldElement():
         if self.frac_length == 0:
             return self.value
 
-        return float(self.value / 2**self.frac_length)
+        return float(self.value / (1 << self.frac_length))
 
     def __repr__(self):
         if self.frac_length == 0:

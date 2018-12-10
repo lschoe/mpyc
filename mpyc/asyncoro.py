@@ -81,6 +81,7 @@ class SharesExchanger(Protocol):
         pass
 
     def close_connection(self):
+        """Close connection with the peer."""
         self.transport.close()
 
 async def gather_shares(*obj):
@@ -171,7 +172,7 @@ class _ProgramCounterWrapper:
         current_pc = runtime._program_counter[:]
         runtime._program_counter[:] = self.saved_pc
         try:
-            return self.f.__next__() # throws exception for async return
+            return self.f.__next__() # NB: throws exception for async return
         finally:
             self.saved_pc = runtime._program_counter[:]
             runtime._program_counter[:] = current_pc
@@ -179,48 +180,60 @@ class _ProgramCounterWrapper:
 class _afuture(Future):
     __slots__ = 'decl'
     def __init__(self, decl):
-        Future.__init__(self)
+        Future.__init__(self, loop=runtime._loop)
         self.decl = decl
 
-def returnType(rettype=None, *args):
+def _nested_list(rt, n, dims):
+    if dims:
+        n0 = dims[0]
+        dims = dims[1:]
+        s = [_nested_list(rt, n0, dims) for _ in range(n)]
+    else:
+        s = [rt() for _ in range(n)]
+    return s
+
+def returnType(rettype=None, *dims):
     """Define return type for MPyC coroutines.
 
     Used in first await expression in an MPyC coroutine.
     """
-    if rettype is None:
-        pass
-    elif isinstance(rettype, Future):
-        pass
-    else:
+    if rettype is not None:
         if isinstance(rettype, tuple):
-            integral = rettype[1]
             stype = rettype[0]
+            integral = rettype[1]
             if stype.field.frac_length:
                 rt = lambda: stype(None, integral)
             else:
                 rt = stype
+        elif issubclass(rettype, Future):
+            rt = lambda: rettype(loop=runtime._loop)
         else:
             rt = rettype
-        def nested_list(i):
-            if i == 0:
-                s = rt()
-            else:
-                s = [nested_list(i - 1) for _ in range(args[-i])]
-            return s
-        rettype = nested_list(len(args))
+        if dims:
+            rettype = _nested_list(rt, dims[0], dims[1:])
+        else:
+            rettype = rt()
     return _afuture(rettype)
 
+pc_level = 0
+"""Tracks (length of) program counter to implement barriers."""
+
 def _reconcile(decl, givn):
-    if isinstance(givn, Task) and givn.done():
-        givn = givn.result()
+    global pc_level
+    pc_level -= 1
     if decl is None:
         return
 
+    if isinstance(givn, Task):
+        givn = givn.result()
+    __reconcile(decl, givn)
+
+def __reconcile(decl, givn):
     if isinstance(decl, Future):
         decl.set_result(givn)
     elif isinstance(decl, list):
         for (d, g) in zip(decl, givn):
-            _reconcile(d, g)
+            __reconcile(d, g)
     elif isinstance(givn, Future):
         if runtime.options.no_async:
             decl.df.set_result(givn.result())
@@ -242,13 +255,6 @@ def _ncopy(nested_list):
         return list(map(_ncopy, nested_list))
 
     return nested_list
-
-pc_level = 0
-"""Tracks (length of) program counter to implement barriers."""
-
-def _dec_pc_level(_):
-    global pc_level
-    pc_level -= 1
 
 def mpc_coro(f):
     """Decorator turning coroutine f into an MPyC coroutine.
@@ -283,7 +289,6 @@ def mpc_coro(f):
             return ret.decl
 
         d = ensure_future(_ProgramCounterWrapper(coro))
-        d.add_done_callback(_dec_pc_level)
         d.add_done_callback(lambda v: _reconcile(ret.decl, v))
         return _ncopy(ret.decl)
 

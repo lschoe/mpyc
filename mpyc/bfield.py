@@ -32,7 +32,6 @@ def GF(modulus):
     GFElement.modulus = poly
     GFElement.ext_deg = poly.degree()
     GFElement.order = 2**poly.degree()
-    GFElement.frac_length = 0
     _field_cache[poly] = GFElement
     return GFElement
 
@@ -43,6 +42,13 @@ class BinaryFieldElement():
     """
 
     __slots__ = 'value'
+
+    modulus = None
+    ext_deg = None
+    order = None
+    frac_length = 0
+    lshift_factor = 1
+    rshift_factor = 1
 
     def __init__(self, value):
         if isinstance(value, int):
@@ -56,18 +62,13 @@ class BinaryFieldElement():
 
     @classmethod
     def to_bytes(cls, x):
-        """Return an array of bytes representing the given list of values x.
-
-        Values are either integers or field elements.
-        """
+        """Return an array of bytes representing the given list of polynomials x."""
         r = (cls.ext_deg + 7) // 8 # -1
         data = bytearray(2 + len(x) * r)
         data[:2] = r.to_bytes(2, byteorder='little')
         j = 2
         for v in x:
             if not isinstance(v, int):
-                v = v.value
-            if not isinstance(v, int): # extra
                 v = v.value
             data[j:j + r] = v.to_bytes(r, byteorder='little')
             j += r
@@ -95,7 +96,7 @@ class BinaryFieldElement():
 
         return NotImplemented
 
-    __radd__ = __add__  # NB: __radd__ may skip first test
+    __radd__ = __add__  # TODO: __radd__ may skip first test
 
     def __iadd__(self, other):
         """In-place addition."""

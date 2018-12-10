@@ -16,26 +16,30 @@ The operations are performed using secure 14-bit integers. In the first
 layer and in the output layer, the secure comparisons are performed
 assuming the full 14-bit range for the input values. However, for the second
 and third layers, the input values are assumed to be limited to a 10-bit range,
-or more precisely, to the range [-493, 493]. The function vector_bsgn() is
-used to efficiently compare inputs from this range with 0.
+or more precisely, to the range [-493, 493]. The function bsgn() is used to 
+efficiently compare inputs from this range with 0.
 
-Function vector_bsgn(x) securely computes binary signs using the prime
+Function bsgn(a) securely computes binary signs using the prime
 p = 13835556230699448671 as the modulus for the underlying prime field.
-Basically, vector_bsgn(x) securely computes, for all a in x:
+Basically, bsgn(a) securely computes:
 
     (t | p), with t = sum((2(a+i)+1 | p) for i=-2,-1,0,1,2),
 
-where (a | p ) = a^((p-1)/2) mod p denotes the Legendre symbol.
+where (a | p) = a^((p-1)/2) mod p denotes the Legendre symbol.
 
 Benchmarking against the built-in MPyC integer comparison is also supported.
 The limited 10-bit range for the second and third layers is exploited in this
-case by setting the bit length for the comparison inputs to 10. Note, however,
-that built-in MPyC comparisons do not (yet;) apply vectorization.
+case by setting the bit length for the comparison inputs to 10. 
+
+Additionally, functions vector_bsgn(x) and vector_sge(x), respectively, 
+compute bsgn(a) and 2*(a>=0)-1, for all elements a of x in parallel.
+This reduces the overall time spent on integer comparisons by a factor of 2 to 3.
 """
 
 import os
 import sys
 import logging
+import argparse
 import gzip
 import numpy as np
 from mpyc.runtime import mpc
@@ -61,8 +65,8 @@ def load_b(name):
     return b
 
 @mpc.coroutine
-async def vector_bsgn(x):
-    """Compute binary signs securely for all elements of x.
+async def bsgn(a):
+    """Compute binary sign of a securely.
 
     Binary sign of a (1 if a>=0 else -1) is obtained by securely computing
     (t | p), with t = sum((2(a+i)+1 | p) for i=-2,-1,0,1,2).
@@ -71,22 +75,89 @@ async def vector_bsgn(x):
     (a s r^2 | p) in the clear for secret random sign s and secret random r modulo p,
     and outputting secret s * (a s r^2 | p).
     """
+    stype = type(a)
+    await mpc.returnType(stype)
+    Zp = stype.field
+    p = Zp.modulus
+    legendre_p = lambda a: gmpy2.legendre(a.value, p)
+
+    s = mpc.random_bits(Zp, 6, signed=True) # 6 random signs
+    r = mpc._randoms(Zp, 6)
+    r = mpc.schur_prod(r, r) # 6 random squares modulo p
+    a, s, r = await mpc.gather(a, s, r)
+    y = [b + i for b in (a * 2 + 1,) for i in (-4, -2, 0, 2, 4)]
+    y = await mpc.schur_prod(y, s[:-1])
+    y.append(s[-1])
+    y = await mpc.output(await mpc.schur_prod(y, r))
+    t = sum(s[i] * legendre_p(y[i]) for i in range(5))
+    t = await mpc.output(t * y[-1])
+    return s[-1] * legendre_p(t)
+
+@mpc.coroutine
+async def vector_bsgn(x):
+    """Compute binary signs securely for all elements of x in parallel."""
     stype = type(x[0])
     n = len(x)
     await mpc.returnType(stype, n)
-    p = stype.field.modulus
+    Zp = stype.field
+    p = Zp.modulus
     legendre_p = lambda a: gmpy2.legendre(a.value, p)
 
-    s = mpc.random_bits(stype, 6*n, signed=True) # 6n random signs
-    r = mpc._randoms(stype, 6*n)
+    s = mpc.random_bits(Zp, 6*n, signed=True) # 6n random signs
+    r = mpc._randoms(Zp, 6*n)
     r = mpc.schur_prod(r, r) # 6n random squares modulo p
-    y = [b + i for b in [a * 2 + 1 for a in x] for i in (-4, -2, 0, 2, 4)]
-    y = mpc.schur_prod(y, s[:-n])
+    x, s, r = await mpc.gather(x, s, r)
+    y = [b + i for b in (a * 2 + 1 for a in x) for i in (-4, -2, 0, 2, 4)]
+    y = await mpc.schur_prod(y, s[:-n])
     y.extend(s[-n:])
-    y = await mpc.output(mpc.schur_prod(y, r))
-    t = [mpc.sum([s[5*j + i] * legendre_p(y[5*j + i]) for i in range(5)]) for j in range(n)]
-    t = await mpc.output(mpc.schur_prod(t, y[-n:]))
+    y = await mpc.output(await mpc.schur_prod(y, r))
+    t = [sum(s[5*j + i] * legendre_p(y[5*j + i]) for i in range(5)) for j in range(n)]
+    t = await mpc.output(await mpc.schur_prod(t, y[-n:]))
     return [c * legendre_p(d) for c, d in zip(s[-n:], t)]
+
+@mpc.coroutine
+async def vector_sge(x):
+    """Compute binary signs securely for all elements of x in parallel.
+
+    Vectorized version of MPyC's built-in secure comparison.
+    Cf. mpc.sgn() with GE=True (and EQ=False).
+    
+    NB: mpc.prod() and mpc.is_zero_public() are not (yet) vectorized.
+    """
+    stype = type(x[0])
+    n = len(x)
+    await mpc.returnType(stype, n)
+    Zp = stype.field
+    l = stype.bit_length
+    k = mpc.options.security_parameter
+
+    r_bits = await mpc.random_bits(Zp, (l + 1) * n)
+    r_bits = [b.value for b in r_bits]
+    r_modl = [0] * n
+    for j in range(n):
+        for i in range(l - 1, -1, -1):
+            r_modl[j] <<= 1
+            r_modl[j] += r_bits[l*j + i]
+    r_divl = mpc._randoms(Zp, n, 1<<k)
+    x = await mpc.gather(x)
+    x_r = [a + ((1<<l) + b) for a, b in zip(x, r_modl)]
+    c = await mpc.output([a + (b.value << l) for a, b in zip(x_r, r_divl)])
+
+    c = [c.value % (1<<l) for c in c]
+    e = [[None] * (l + 1) for _ in range(n)]
+    for j in range(n):
+        s_sign = (r_bits[l*n + j] << 1) - 1
+        sumXors = 0
+        for i in range(l - 1, -1, -1):
+            c_i = (c[j] >> i) & 1
+            e[j][i] = Zp(s_sign + r_bits[l*j + i] - c_i + 3 * sumXors)
+            sumXors += 1 - r_bits[l*j + i] if c_i else r_bits[l*j + i]
+        e[j][l] = Zp(s_sign - 1 + 3 * sumXors)
+    e = await mpc.gather([mpc.prod(_) for _ in e])
+    g = await mpc.gather([mpc.is_zero_public(stype(_)) for _ in e])
+    UF = [1 - b if g else b for b, g in zip(r_bits[-n:], g)]
+    z = [(a - (c + (b << l))) / (1 << l - 1) - 1 for a, b, c in zip(x_r, UF, c)]
+    return z
 
 def argmax(x):
     a = type(x[0])(0)
@@ -100,21 +171,31 @@ def argmax(x):
 async def main():
     global secnum
 
-    k = 1 if len(sys.argv) == 1 else int(sys.argv[1])
-    if k < 0:
-        secnum = mpc.SecInt(14, p=13835556230699448671) # Legendre-2 range [-493, 493]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-b', '--batch-size', type=int, metavar='B',
+                       help='number of images to classify')
+    parser.add_argument('-o', '--offset', type=int, metavar='O',
+                       help='offset for batch (otherwise random in [0,10000-B])')
+    parser.add_argument('--no-legendre', action='store_true',
+                       default=False, help='disable Legendre-based comparison')
+    parser.add_argument('--no-vectorization', action='store_true',
+                       default=False, help='disable vectorization of comparisons')
+    parser.set_defaults(batch_size=1, offset=-1)
+    args = parser.parse_args()
+    
+    batch_size = args.batch_size
+    offset = args.offset
+    if args.no_legendre:
+        secnum = mpc.SecInt(14) # using vectorized MPyC integer comparison
     else:
-        secnum = mpc.SecInt(14) # using built-in MPyC integer comparison
-    batch_size = abs(k)
+        secnum = mpc.SecInt(14, p=13835556230699448671) # Legendre-2 range [-493, 493]
+    one_by_one = args.no_vectorization
 
     await mpc.start()
 
-    if len(sys.argv) <= 2:
+    if offset < 0:
         import mpyc.random as secrnd
-        offset = await mpc.output(secrnd.randrange(secnum, 10001 - batch_size))
-    else:
-        offset = sys.argv[2]
-    offset = int(offset)
+        offset = int(await mpc.output(secrnd.randrange(secnum, 10001 - batch_size)))
 
     logging.info('--------------- INPUT   -------------')
     print(f'Type = {secnum.__name__}, range = ({offset}, {offset + batch_size})')
@@ -137,7 +218,10 @@ async def main():
     L = mpc.matrix_prod(L, load_W('fc1'))
     L = mpc.matrix_add(L, [load_b('fc1')] * len(L))
     logging.info('- - - - - - - - bsgn    - - - - - - -')
-    L = np.vectorize(lambda a: (a >= 0) * 2 - 1)(L).tolist()
+    if one_by_one:
+        L = np.vectorize(lambda a: (a >= 0) * 2 - 1)(L).tolist()
+    else:
+        L = [vector_sge(_) for _ in L]
     await mpc.barrier()
 
     logging.info('--------------- LAYER 2 -------------')
@@ -148,10 +232,17 @@ async def main():
     logging.info('- - - - - - - - bsgn    - - - - - - -')
     if not secnum.__name__.endswith(')'):
         secnum.bit_length = 10
-        activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
-        L = activate(L).tolist()
+        if one_by_one:
+            activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
+            L = activate(L).tolist()
+        else:
+            L = [vector_sge(_) for _ in L]
     else:
-        L = [vector_bsgn(_) for _ in L]
+        if one_by_one:
+            activate = np.vectorize(bsgn)
+            L = activate(L).tolist()
+        else:
+            L = [vector_bsgn(_) for _ in L]
     await mpc.barrier()
 
     logging.info('--------------- LAYER 3 -------------')
@@ -162,10 +253,17 @@ async def main():
     logging.info('- - - - - - - - bsgn    - - - - - - -')
     if not secnum.__name__.endswith(')'):
         secnum.bit_length = 10
-        activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
-        L = activate(L).tolist()
+        if one_by_one:
+            activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
+            L = activate(L).tolist()
+        else:
+            L = [vector_sge(_) for _ in L]
     else:
-        L = [vector_bsgn(_) for _ in L]
+        if one_by_one:
+            activate = np.vectorize(bsgn)
+            L = activate(L).tolist()
+        else:
+            L = [vector_bsgn(_) for _ in L]
     await mpc.barrier()
 
     logging.info('--------------- LAYER 4 -------------')

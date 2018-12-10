@@ -24,7 +24,7 @@ def random_split(s, t, m):
     field = type(s[0])
     p = field.modulus
     order = field.order
-    T = type(p) # T is int or T is gf2x.Polynomial
+    T = type(p) # T is int or gf2x.Polynomial
     n = len(s)
     shares = [[None] * n for _ in range(m)]
     for h in range(n):
@@ -50,13 +50,13 @@ def recombine(field, points, x_rs=0):
     xs, shares = list(zip(*points))
     if not isinstance(x_rs, list):
         x_rs = (x_rs,)
-    vector = [None] * len(x_rs)
+    width = len(x_rs)
+    vector = [None] * width
     for r, x_r in enumerate(x_rs):
         try:
             vector[r] = _recombination_vectors[(field, xs, x_r)]
         except KeyError:
             vector[r] = []
-            x_r = field(x_r)
             for i, x_i in enumerate(xs):
                 x_i = field(x_i)
                 coefficient = field(1)
@@ -65,19 +65,20 @@ def recombine(field, points, x_rs=0):
                     if i != j:
                         coefficient *= (x_r - x_j) / (x_i - x_j)
                 vector[r].append(coefficient.value)
-            _recombination_vectors[(field, xs, x_r.value)] = vector[r]
+            _recombination_vectors[(field, xs, x_r)] = vector[r]
     m = len(shares)
     n = len(shares[0])
-    sums = [[0] * n for _ in range(len(x_rs))]
+    sums = [[0] * n for _ in range(width)]
+    T_is_field = isinstance(shares[0][0], field) # all elts assumed of same type
     for i in range(m):
         for h in range(n):
             s = shares[i][h]
-#            if not isinstance(s, int):
-            if isinstance(s, field):
+            if T_is_field:
                 s = s.value
-            for r in range(len(sums)):
+            # type(s) is int or gf2x.Polynomial
+            for r in range(width):
                 sums[r][h] += s * vector[r][i]
-    for r in range(len(sums)):
+    for r in range(width):
         for h in range(n):
             sums[r][h] = field(sums[r][h])
     if isinstance(x_rs, tuple):

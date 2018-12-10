@@ -66,7 +66,7 @@ def _mod(a, b):
         b >>= 1
     return a
 
-def divmod(a, b):
+def divmod_(a, b):
     """Divide polynomial a by polynomial b with remainder, for nonzero b."""
     if isinstance(a, Polynomial):
         a = a.value

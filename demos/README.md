@@ -39,9 +39,7 @@ python cnnmnist.py 3
 
 run 1 cnnmnist.py 1.5 0
 
-python bnnmnist.py -1
-
-run 3 bnnmnist.py -1
+python bnnmnist.py --HELP
 
 python -m cProfile -s time bnnmnist.py | more
 
