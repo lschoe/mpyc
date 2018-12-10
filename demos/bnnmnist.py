@@ -19,9 +19,9 @@ and third layers, the input values are assumed to be limited to a 10-bit range,
 approximately. 
 
 Functions bsgn_1(a) and bsgn_2(a) securely compute binary signs using the primes
-p=9409569905028393239 and p=13835556230699448671, respectively, as the modulus 
+p=9409569905028393239 and p=15569949805843283171, respectively, as the modulus 
 for the underlying prime field. Function bsgn_1(a) yields the correct result 
-for a in [-383, 383], and bsgn_2(a) is correct for a in [-493, 493].
+for a in [-383, 383], and bsgn_2(a) is correct for a in [-594, 594].
 
 Basically, bsgn_1(a) securely computes:
 
@@ -255,7 +255,7 @@ async def main():
             bsgn = bsgn_1
             vector_bsgn = vector_bsgn_1
         else:
-            secnum = mpc.SecInt(14, p=13835556230699448671) # Legendre-2 range [-493, 493]
+            secnum = mpc.SecInt(14, p=15569949805843283171) # Legendre-2 range [-594, 594]
             bsgn = bsgn_2
             vector_bsgn = vector_bsgn_2
 
