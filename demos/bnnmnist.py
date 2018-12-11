@@ -16,11 +16,11 @@ The operations are performed using secure 14-bit integers. In the first
 layer and in the output layer, the secure comparisons are performed
 assuming the full 14-bit range for the input values. However, for the second
 and third layers, the input values are assumed to be limited to a 10-bit range,
-approximately. 
+approximately.
 
 Functions bsgn_1(a) and bsgn_2(a) securely compute binary signs using the primes
-p=9409569905028393239 and p=15569949805843283171, respectively, as the modulus 
-for the underlying prime field. Function bsgn_1(a) yields the correct result 
+p=9409569905028393239 and p=15569949805843283171, respectively, as the modulus
+for the underlying prime field. Function bsgn_1(a) yields the correct result
 for a in [-383, 383], and bsgn_2(a) is correct for a in [-594, 594].
 
 Basically, bsgn_1(a) securely computes:
@@ -69,6 +69,41 @@ def load_b(name):
     for i in range(len(b)):
         b[i] = secnum(int(b[i]))
     return b
+
+@mpc.coroutine
+async def bsgn_0(a):
+    stype = type(a)
+    await mpc.returnType(stype)
+    Zp = stype.field
+    p = Zp.modulus
+    legendre_p = lambda a: gmpy2.legendre(a.value, p)
+
+    s = mpc.random_bits(Zp, 1, signed=True) # random sign
+    r = mpc._random(Zp)
+    r = r * r # random square modulo p
+    a, s, r = await mpc.gather(a, s, r)
+    b = (2 * a + 1) * s[0] * r
+    b = await mpc.output(b)
+    return s[0] * legendre_p(b)
+
+@mpc.coroutine
+async def vector_bsgn_0(x):
+    """Compute bsgn_0(a) for all elements a of x in parallel."""
+    stype = type(x[0])
+    n = len(x)
+    await mpc.returnType(stype, n)
+    Zp = stype.field
+    p = Zp.modulus
+    legendre_p = lambda a: gmpy2.legendre(a.value, p)
+
+    s = mpc.random_bits(Zp, n, signed=True) # n random signs
+    r = mpc._randoms(Zp, n)
+    r = mpc.schur_prod(r, r) # n random squares modulo p
+    x, s, r = await mpc.gather(x, s, r)
+    y = [2 * a + 1 for a in x]
+    y = await mpc.schur_prod(y, s)
+    y = await mpc.output(await mpc.schur_prod(y, r))
+    return [s[j] * legendre_p(y[j]) for j in range(n)]
 
 @mpc.coroutine
 async def bsgn_1(a):
@@ -250,7 +285,11 @@ async def main():
     if args.no_legendre:
         secnum = mpc.SecInt(14) # using vectorized MPyC integer comparison
     else:
-        if args.d_k_star == 1:
+        if args.d_k_star == 0:
+            secnum = mpc.SecInt(14, p=3546374752298322551) # Legendre-0 range [-135, 135]
+            bsgn = bsgn_0
+            vector_bsgn = vector_bsgn_0
+        elif args.d_k_star == 1:
             secnum = mpc.SecInt(14, p=9409569905028393239) # Legendre-1 range [-383, 383]
             bsgn = bsgn_1
             vector_bsgn = vector_bsgn_1
