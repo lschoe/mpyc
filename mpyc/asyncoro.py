@@ -284,7 +284,6 @@ def mpc_coro(f):
                     val = coro.send(val)
             except StopIteration as exc:
                 d = exc.value
-            pc_level -= 1
             _reconcile(ret.decl, d)
             return ret.decl
 
