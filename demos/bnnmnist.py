@@ -94,7 +94,7 @@ async def bsgn_0(a):
     r = mpc._random(Zp)
     r = r * r # random square modulo p
     a, s, r = await mpc.gather(a, s, r)
-    b = (2 * a + 1) * s[0] * r
+    b = await mpc.prod([2 * a + 1, s[0], r])
     b = await mpc.output(b)
     return s[0] * legendre_p(b)
 
