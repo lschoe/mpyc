@@ -18,32 +18,36 @@ assuming the full 14-bit range for the input values. However, for the second
 and third layers, the input values are assumed to be limited to a 10-bit range,
 approximately.
 
-Functions bsgn_1(a) and bsgn_2(a) securely compute binary signs using the primes
-p=9409569905028393239 and p=15569949805843283171, respectively, as the modulus
-for the underlying prime field. Function bsgn_1(a) yields the correct result
+Functions bsgn_0/1/2(a) securely compute binary signs using the primes
+p=3546374752298322551/9409569905028393239/15569949805843283171, respectively,
+as the modulus for the underlying prime field. Function bsgn_0(a) yields the
+correct result for a in [-134, 134], bsgn_1(a) yields the correct result
 for a in [-383, 383], and bsgn_2(a) is correct for a in [-594, 594].
 
-Basically, bsgn_1(a) securely computes:
+Let (t | p) = t^((p-1)/2) mod p denote the Legendre symbol. The Legendre symbol
+is evaluated at odd numbers t only to avoid issues at t=0, as (0 | p) = 0. For
+nonzero t (modulo p), (t | p) is -1 or +1.
 
-    (t | p), with t = sum((2(a+i)+1 | p) for i=-1,0,1),
+Function bsgn_0(a) simply computes the Legendre symbol (2a+1 | p) securely.
 
-where (t | p) = t^((p-1)/2) mod p denotes the Legendre symbol.
-And, bsgn_2(a) securely computes:
+Function bsgn_1(a) securely computes:
 
-    (t | p), with t = sum((2(a+i)+1 | p) for i=-2,-1,0,1,2),
+    (t | p), with t = sum((2(a+i)+1 | p) for i=-1,0,1).
+
+And, function bsgn_2(a) securely computes:
+
+    (t | p), with t = sum((2(a+i)+1 | p) for i=-2,-1,0,1,2).
 
 Benchmarking against the built-in MPyC integer comparison is also supported.
 The limited 10-bit range for the second and third layers is exploited in this
 case by setting the bit length for the comparison inputs to 10.
 
-Additionally, functions vector_bsgn_1(x), vector_bsgn_2(x),and vector_sge(x),
-respectively, compute bsgn_1(a), bsgn_2(a), and 2*(a>=0)-1, for all elements a
-of x in parallel. This reduces the overall time spent on integer comparisons
-by a factor of 2 to 3.
+Additionally, functions vector_bsgn_0/1/2(x) and vector_sge(x), respectively,
+compute bsgn_0/1/2(a) and 2*(a>=0)-1, for all elements a of x in parallel.
+This reduces the overall time spent on integer comparisons by a factor of 2 to 3.
 """
 
 import os
-import sys
 import logging
 import argparse
 import gzip
@@ -72,6 +76,14 @@ def load_b(name):
 
 @mpc.coroutine
 async def bsgn_0(a):
+    """Compute binary sign of a securely.
+
+    Binary sign of a (1 if a>=0 else -1) is obtained by securely computing (2a+1 | p).
+
+    Legendre symbols (a | p) for secret a are computed securely by evaluating
+    (a s r^2 | p) in the clear for secret random sign s and secret random r modulo p,
+    and outputting secret s * (a s r^2 | p).
+    """
     stype = type(a)
     await mpc.returnType(stype)
     Zp = stype.field
@@ -102,7 +114,8 @@ async def vector_bsgn_0(x):
     x, s, r = await mpc.gather(x, s, r)
     y = [2 * a + 1 for a in x]
     y = await mpc.schur_prod(y, s)
-    y = await mpc.output(await mpc.schur_prod(y, r))
+    y = await mpc.schur_prod(y, r)
+    y = await mpc.output(y)
     return [s[j] * legendre_p(y[j]) for j in range(n)]
 
 @mpc.coroutine
@@ -111,10 +124,6 @@ async def bsgn_1(a):
 
     Binary sign of a (1 if a>=0 else -1) is obtained by securely computing
     (u+v+w - u*v*w)/2 with u=(2a-1 | p), v=(2a+1 | p), and w=(2a+3 | p).
-
-    Legendre symbols (a | p) for secret a are computed securely by evaluating
-    (a s r^2 | p) in the clear for secret random sign s and secret random r modulo p,
-    and outputting secret s * (a s r^2 | p).
     """
     stype = type(a)
     await mpc.returnType(stype)
@@ -131,7 +140,8 @@ async def bsgn_1(a):
     s.append(s[1])
     r.append(s[2])
     y = await mpc.schur_prod(y, s)
-    y = await mpc.output(await mpc.schur_prod(y, r))
+    y = await mpc.schur_prod(y, r)
+    y = await mpc.output(y)
     h = [legendre_p(y[i]) for i in range(3)]
     u, v, w = [s[i] * h[i] for i in range(3)]
     uvw = h[0] * h[1] * h[2] * y[3]
@@ -156,7 +166,8 @@ async def vector_bsgn_1(x):
     s.extend(s[n:2*n])
     r.extend(s[-n:])
     y = await mpc.schur_prod(y, s)
-    y = await mpc.output(await mpc.schur_prod(y, r))
+    y = await mpc.schur_prod(y, r)
+    y = await mpc.output(y)
     h = [legendre_p(y[j]) for j in range(3*n)]
     t = [s[j] * h[j] for j in range(3*n)]
     z = [h[3*j] * h[3*j+1] * h[3*j+2] * y[3*n + j] for j in range(n)]
@@ -168,7 +179,7 @@ async def bsgn_2(a):
     """Compute binary sign of a securely.
 
     Binary sign of a (1 if a>=0 else -1) is obtained by securely computing
-    (t | p), with t = sum((2a+2i+1 | p) for i=-2,-1,0,1,2).
+    (t | p), with t = sum((2a+1+2i | p) for i=-2,-1,0,1,2).
     """
     stype = type(a)
     await mpc.returnType(stype)
@@ -183,7 +194,8 @@ async def bsgn_2(a):
     y = [b + 2 * i for b in (2 * a + 1,) for i in (-2, -1, 0, 1, 2)]
     y = await mpc.schur_prod(y, s[:-1])
     y.append(s[-1])
-    y = await mpc.output(await mpc.schur_prod(y, r))
+    y = await mpc.schur_prod(y, r)
+    y = await mpc.output(y)
     t = sum(s[i] * legendre_p(y[i]) for i in range(5))
     t = await mpc.output(t * y[-1])
     return s[-1] * legendre_p(t)
@@ -205,7 +217,8 @@ async def vector_bsgn_2(x):
     y = [b + 2 * i for b in (2 * a + 1 for a in x) for i in (-2, -1, 0, 1, 2)]
     y = await mpc.schur_prod(y, s[:-n])
     y.extend(s[-n:])
-    y = await mpc.output(await mpc.schur_prod(y, r))
+    y = await mpc.schur_prod(y, r)
+    y = await mpc.output(y)
     t = [sum(s[5*j + i] * legendre_p(y[5*j + i]) for i in range(5)) for j in range(n)]
     t = await mpc.output(await mpc.schur_prod(t, y[-n:]))
     return [c * legendre_p(d) for c, d in zip(s[-n:], t)]
