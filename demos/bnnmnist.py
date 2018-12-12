@@ -285,7 +285,7 @@ async def main():
     parser.add_argument('-o', '--offset', type=int, metavar='O',
                         help='offset for batch (otherwise random in [0,10000-B])')
     parser.add_argument('-d', '--d-k-star', type=int, metavar='D',
-                        help='k=D=1,2 for Legendre-based comparison using d_k^*')
+                        help='k=D=0,1,2 for Legendre-based comparison using d_k^*')
     parser.add_argument('--no-legendre', action='store_true',
                         default=False, help='disable Legendre-based comparison')
     parser.add_argument('--no-vectorization', action='store_true',
