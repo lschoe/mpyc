@@ -92,7 +92,7 @@ async def bsgn_0(a):
 
     s = mpc.random_bits(Zp, 1, signed=True) # random sign
     r = mpc._random(Zp)
-    r = r * r # random square modulo p
+    r = mpc.prod([r, r]) # random square modulo p
     a, s, r = await mpc.gather(a, s, r)
     b = await mpc.prod([2 * a + 1, s[0], r])
     b = await mpc.output(b)
