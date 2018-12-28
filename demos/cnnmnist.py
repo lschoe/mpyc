@@ -18,6 +18,8 @@ import gzip
 import numpy as np
 from mpyc.runtime import mpc
 
+secnum = None
+
 def scale_to_int(f):
     if secnum.field.frac_length == 0:
         scale = lambda a: secnum(round(a * f))

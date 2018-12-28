@@ -91,9 +91,9 @@ class PrimeFieldElement():
     is_signed = None
     nth = None
     root = None
-    frac_length = None
-    lshift_factor = None
-    rshift_factor = None
+    frac_length = 0
+    lshift_factor = 1
+    rshift_factor = 1
 
     def __init__(self, value):
         self.value = value % self.modulus
@@ -125,7 +125,7 @@ class PrimeFieldElement():
     @classmethod
     def to_bytes(cls, x):
         """Return an array of bytes representing the given list of integers x."""
-        r = (cls.modulus.bit_length() + 7) // 8
+        r = (cls.modulus.bit_length() + 7) >> 3
         data = bytearray(2 + len(x) * r)
         data[:2] = r.to_bytes(2, byteorder='little')
         j = 2
@@ -231,17 +231,17 @@ class PrimeFieldElement():
     def __truediv__(self, other):
         """Division."""
         if isinstance(other, type(self)):
-            return self * other._reciprocal()
+            return self * other.reciprocal()
 
         if isinstance(other, int):
-            return self * type(self)(other)._reciprocal()
+            return self * type(self)(other).reciprocal()
 
         return NotImplemented
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
         if isinstance(other, int):
-            return type(self)(other) * self._reciprocal()
+            return type(self)(other) * self.reciprocal()
 
         return NotImplemented
 
@@ -252,11 +252,11 @@ class PrimeFieldElement():
         elif not isinstance(other, type(self)):
             return NotImplemented
 
-        self.value *= other._reciprocal().value
+        self.value *= other.reciprocal().value
         self.value %= self.modulus
         return self
 
-    def _reciprocal(self):
+    def reciprocal(self):
         """Multiplicative inverse."""
         return type(self)(int(gmpy2.invert(self.value, self.modulus)))
 
@@ -277,9 +277,9 @@ class PrimeFieldElement():
 
         if p & 3 == 3:
             if INV:
-                q = (3 * p - 5) // 4 # a**q == a**(-1/2) == 1/sqrt(a) mod p
+                q = (p * 3 - 5) >> 2 # a**q == a**(-1/2) == 1/sqrt(a) mod p
             else:
-                q = (p + 1) // 4
+                q = (p + 1) >> 2
             return type(self)(int(gmpy2.powmod(a, q, p)))
 
         # 1 (mod 4) primes are covered using Cipolla-Lehmer's algorithm.
@@ -290,7 +290,7 @@ class PrimeFieldElement():
 
         # compute u*X + v = X^{(p+1)/2} mod f, for f = X^2 - b*X + a
         u, v = 0, 1
-        e = (p + 1) // 2
+        e = (p + 1) >> 1
         for i in range(e.bit_length() - 1, -1, -1):
             u2 = (u * u) % p
             u = ((u << 1) * v + b * u2) % p
@@ -298,32 +298,31 @@ class PrimeFieldElement():
             if (e >> i) & 1:
                 u, v = (v + b * u) % p, (-a * u) % p
         if INV:
-            return type(self)(v)._reciprocal()
+            return type(self)(v).reciprocal()
 
         return type(self)(v)
 
     def signed(self):
         """Return signed integer representation, symmetric around zero."""
-        if self.value > self.modulus // 2:
-            v = self.value - self.modulus
-        else:
-            v = self.value
-        if self.frac_length > 0:
-            v = float(v / (1 << self.frac_length))
+        v = self.value
+        if v > self.modulus >> 1:
+            v -= self.modulus
+        if self.frac_length:
+            v = float(v / self.lshift_factor)
         return v
 
     def unsigned(self):
         """Return unsigned integer representation."""
-        if self.frac_length == 0:
-            return self.value
+        if self.frac_length:
+            return float(self.value / self.lshift_factor)
 
-        return float(self.value / (1 << self.frac_length))
+        return self.value
 
     def __repr__(self):
-        if self.frac_length == 0:
-            return f'{self.__int__()}'
+        if self.frac_length:
+            return f'{self.__float__()}'
 
-        return f'{self.__float__()}'
+        return f'{self.__int__()}'
 
     def __eq__(self, other):
         """Equality test."""

@@ -75,7 +75,7 @@ async def id3(T, R) -> asyncio.Future:
         gains = [GI(mpc.matrix_prod(T_A, S[C], True)) for T_A in T_R]
         k = (await mpc.output(max_rat(gains))).value
         T_Rk = T_R[k]
-        T_R = gains = None # release memory
+        del T_R, gains # release memory
         A = list(R)[k]
         logging.info(f'Attribute node {attr_names[A]}')
 #        trees = await mpc.gather([id3(t, R.difference([A])) for t in T_Rk])

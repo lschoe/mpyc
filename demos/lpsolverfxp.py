@@ -60,7 +60,7 @@ def argmin_rat(xs):
         m = mpc.if_else(a, [n1, d1], [n0, d0])
         return a, m
     return argmin(xs, arg_le_rat)
-    
+
 @mpc.coroutine
 async def index_matrix_prod(x, A, tr=False):
     """Secure index-matrix product of unit vector x with (transposed) A."""

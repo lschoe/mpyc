@@ -63,7 +63,7 @@ class BinaryFieldElement():
     @classmethod
     def to_bytes(cls, x):
         """Return an array of bytes representing the given list of polynomials x."""
-        r = (cls.ext_deg + 7) // 8 # -1
+        r = (cls.ext_deg + 7) >> 3
         data = bytearray(2 + len(x) * r)
         data[:2] = r.to_bytes(2, byteorder='little')
         j = 2
@@ -149,17 +149,17 @@ class BinaryFieldElement():
     def __truediv__(self, other):
         """Division."""
         if isinstance(other, type(self)):
-            return self * other._reciprocal()
+            return self * other.reciprocal()
 
         if isinstance(other, int):
-            return self * type(self)(other)._reciprocal()
+            return self * type(self)(other).reciprocal()
 
         return NotImplemented
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
         if isinstance(other, int):
-            return type(self)(other) * self._reciprocal()
+            return type(self)(other) * self.reciprocal()
 
         return NotImplemented
 
@@ -170,11 +170,11 @@ class BinaryFieldElement():
         elif not isinstance(other, type(self)):
             return NotImplemented
 
-        self.value *= other._reciprocal().value
+        self.value *= other.reciprocal().value
         self.value %= self.modulus.value
         return self
 
-    def _reciprocal(self):
+    def reciprocal(self):
         """Multiplicative inverse."""
         return type(self)(gf2x.invert(self.value, self.modulus))
 

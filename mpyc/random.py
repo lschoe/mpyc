@@ -180,6 +180,23 @@ def random_permutation(sectype, x):
     return x
 
 @asyncoro.mpc_coro
+async def random_derangement(sectype, x):
+    """Uniformly random derangement of given sequence x or range(x).
+
+    A derangement is a permutation without fixed points.
+    """
+    if isinstance(x, int):
+        x = range(x)
+    x = list(x)
+    await runtime.returnType((sectype, True), len(x))
+    while True:
+        shuffle(sectype, x)
+        t = runtime.prod([x[i] - i for i in range(len(x))])
+        if not await runtime.is_zero_public(t):
+            break
+    return x
+
+@asyncoro.mpc_coro
 async def sample(sectype, population, k):
     """List of k uniformly random secret elements chosen from population.
 

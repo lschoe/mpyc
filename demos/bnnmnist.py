@@ -55,23 +55,25 @@ import numpy as np
 from mpyc.runtime import mpc
 import mpyc.gmpy as gmpy2
 
+secint = None
+
 def load_W(name):
     """Load signed binary weights for fully connected layer 'name'."""
     W = np.load(os.path.join('data', 'bnn', 'W_' + name + '.npy'))
     W = np.unpackbits(W, axis=0).tolist()
-    neg_one, pos_one = secnum(-1), secnum(1)
+    neg_one, pos_one = secint(-1), secint(1)
     for w in W:
         for j in range(len(w)):
 # representations neg_one and pos_one of -1 and 1 shared to avoid overhead.
             w[j] = neg_one if w[j] == 0 else pos_one # shared sharings
-#            w[j] = secnum(-1) if w[j] == 0 else secnum(1) # fresh sharings
+#            w[j] = secint(-1) if w[j] == 0 else secint(1) # fresh sharings
     return W
 
 def load_b(name):
     """Load signed integer bias values for fully connected layer 'name'."""
     b = np.load(os.path.join('data', 'bnn', 'b_' + name + '.npy')).tolist()
     for i in range(len(b)):
-        b[i] = secnum(int(b[i]))
+        b[i] = secint(int(b[i]))
     return b
 
 @mpc.coroutine
@@ -277,7 +279,7 @@ def argmax(x):
     return a
 
 async def main():
-    global secnum
+    global secint
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--batch-size', type=int, metavar='B',
@@ -296,18 +298,18 @@ async def main():
     batch_size = args.batch_size
     offset = args.offset
     if args.no_legendre:
-        secnum = mpc.SecInt(14) # using vectorized MPyC integer comparison
+        secint = mpc.SecInt(14) # using vectorized MPyC integer comparison
     else:
         if args.d_k_star == 0:
-            secnum = mpc.SecInt(14, p=3546374752298322551) # Legendre-0 range [-135, 135]
+            secint = mpc.SecInt(14, p=3546374752298322551) # Legendre-0 range [-134, 134]
             bsgn = bsgn_0
             vector_bsgn = vector_bsgn_0
         elif args.d_k_star == 1:
-            secnum = mpc.SecInt(14, p=9409569905028393239) # Legendre-1 range [-383, 383]
+            secint = mpc.SecInt(14, p=9409569905028393239) # Legendre-1 range [-383, 383]
             bsgn = bsgn_1
             vector_bsgn = vector_bsgn_1
         else:
-            secnum = mpc.SecInt(14, p=15569949805843283171) # Legendre-2 range [-594, 594]
+            secint = mpc.SecInt(14, p=15569949805843283171) # Legendre-2 range [-594, 594]
             bsgn = bsgn_2
             vector_bsgn = vector_bsgn_2
 
@@ -317,10 +319,10 @@ async def main():
 
     if offset < 0:
         import mpyc.random as secrnd
-        offset = int(await mpc.output(secrnd.randrange(secnum, 10001 - batch_size)))
+        offset = int(await mpc.output(secrnd.randrange(secint, 10001 - batch_size)))
 
     logging.info('--------------- INPUT   -------------')
-    print(f'Type = {secnum.__name__}, range = ({offset}, {offset + batch_size})')
+    print(f'Type = {secint.__name__}, range = ({offset}, {offset + batch_size})')
     # read batch_size labels and images at given offset
     df = gzip.open(os.path.join('data', 'cnn', 't10k-labels-idx1-ubyte.gz'))
     d = df.read()[8 + offset: 8 + offset + batch_size]
@@ -333,7 +335,7 @@ async def main():
         x = np.array(L[0]).reshape(28, 28)
         print(np.vectorize(lambda a: int(bool(a / 255)))(x))
 
-    L = np.vectorize(lambda a: secnum(int(a)))(L).tolist()
+    L = np.vectorize(lambda a: secint(int(a)))(L).tolist()
 
     logging.info('--------------- LAYER 1 -------------')
     logging.info('- - - - - - - - fc      - - - - - - -')
@@ -352,8 +354,8 @@ async def main():
     L = mpc.matrix_add(L, [load_b('fc2')] * len(L))
     await mpc.barrier()
     logging.info('- - - - - - - - bsgn    - - - - - - -')
-    if not secnum.__name__.endswith(')'):
-        secnum.bit_length = 10
+    if not secint.__name__.endswith(')'):
+        secint.bit_length = 10
         if one_by_one:
             activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
             L = activate(L).tolist()
@@ -373,8 +375,8 @@ async def main():
     L = mpc.matrix_add(L, [load_b('fc3')] * len(L))
     await mpc.barrier()
     logging.info('- - - - - - - - bsgn    - - - - - - -')
-    if not secnum.__name__.endswith(')'):
-        secnum.bit_length = 10
+    if not secint.__name__.endswith(')'):
+        secint.bit_length = 10
         if one_by_one:
             activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
             L = activate(L).tolist()
@@ -395,8 +397,8 @@ async def main():
     await mpc.barrier()
 
     logging.info('--------------- OUTPUT  -------------')
-    if not secnum.__name__.endswith(')'):
-        secnum.bit_length = 14
+    if not secint.__name__.endswith(')'):
+        secint.bit_length = 14
     for i in range(batch_size):
         prediction = await mpc.output(argmax(L[i]))
         error = '******* ERROR *******' if prediction != labels[i] else ''

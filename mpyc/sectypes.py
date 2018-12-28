@@ -46,7 +46,7 @@ class Share:
         elif isinstance(other, int):
             other = type(self)(other)
         elif isinstance(other, float):
-            if self.field.frac_length > 0:
+            if self.field.frac_length:
                 other = type(self)(other)
             else:
                 return NotImplemented
@@ -59,11 +59,11 @@ class Share:
             if not isinstance(other, type(self)):
                 return NotImplemented
         elif isinstance(other, int):
-#            other <<= self.field.frac_length
             pass
         elif isinstance(other, float):
-            if self.field.frac_length > 0:
-                other = type(self)(other)
+            if self.field.frac_length:
+                if other.is_integer():
+                    other = round(other)
             else:
                 return NotImplemented
         elif not isinstance(other, self.field):
@@ -108,7 +108,7 @@ class Share:
 
     def __truediv__(self, other):
         """Division."""
-        other = self._coerce(other)
+        other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
         return runtime.div(self, other)
@@ -416,10 +416,11 @@ def SecFxp(l=None, f=None, p=None, n=2):
             name = f'SecFxp{l}:{f}({p})'
         def init(self, value=None, integral=False):
             if value is not None:
-                self.integral = isinstance(value, int)
-                if self.integral:
+                if isinstance(value, int):
+                    self.integral = True
                     value <<= f
                 elif isinstance(value, float):
+                    self.integral = value.is_integer()
                     value = round(value * (1 << f))
                 else:
                     self.integral = integral

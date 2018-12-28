@@ -66,6 +66,7 @@ class Arithmetic(unittest.TestCase):
         b = secfld(-1)
         self.assertEqual(mpc.run(mpc.output(a + b)), 0)
         self.assertEqual(mpc.run(mpc.output(a * b)), 100)
+        self.assertEqual(mpc.run(mpc.output(a / b)), 100)
         self.assertEqual(mpc.run(mpc.output(a == b)), 0)
         self.assertEqual(mpc.run(mpc.output(a == -b)), 1)
         self.assertEqual(mpc.run(mpc.output(a**2 == b**2)), 1)
@@ -96,8 +97,12 @@ class Arithmetic(unittest.TestCase):
         b = secfld(67)
         c = mpc.run(mpc.output(mpc.input(a, 0)))
         self.assertEqual(c.value.value, 57)
+        c = mpc.run(mpc.output(a - (-a)))
+        self.assertEqual(c.value.value, 0)
         c = mpc.run(mpc.output(a * b))
         self.assertEqual(c.value.value, 137)
+        c = mpc.run(mpc.output(c / a))
+        self.assertEqual(c.value.value, 67)
         c = mpc.run(mpc.output(a & b))
         self.assertEqual(c.value.value, 1)
         c = mpc.run(mpc.output(a | b))
@@ -123,6 +128,10 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c, [12, 13])
         c = mpc.run(mpc.output(a * b + b))
         self.assertEqual(c, 12 * 13 + 13)
+        c = mpc.run(mpc.output((a * b) / b))
+        self.assertEqual(c, 12)
+        c = mpc.run(mpc.output((a * b) / 12))
+        self.assertEqual(c, 13)
         c = mpc.run(mpc.output(a**11 * a**(-6) * a**(-5)))
         self.assertEqual(c, 1)
         c = mpc.run(mpc.output(a**(secint.field.modulus - 1)))
@@ -189,6 +198,10 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(d, 2 * 2**f)
             d = mpc.run(mpc.output(secfxp(2**-f) + secfxp(1)))
             self.assertEqual(d, 1 + 2**f)
+            d = mpc.run(mpc.output(secfxp(0.5) * secfxp(2.0)))
+            self.assertEqual(d, 2**f)
+            d = mpc.run(mpc.output(secfxp(2.0) * secfxp(0.5)))
+            self.assertEqual(d, 2**f)
 
             s = [10.7, -3.4, 0.1, -0.11]
             ss = [round(v * (1 << f)) for v in s]
@@ -287,5 +300,4 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(1 - c, a, b)))), 1.0)
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(c, 0.0, 1.0)))), 0.0)
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(1 - c, 0.0, 1.0)))), 1.0)
-        
-        
+

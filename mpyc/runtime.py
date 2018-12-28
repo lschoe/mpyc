@@ -25,6 +25,7 @@ Future = asyncio.Future
 Share = sectypes.Share
 gather_shares = asyncoro.gather_shares
 mpc_coro = asyncoro.mpc_coro
+mpc_coro_no_pc = asyncoro._mpc_coro_no_pc
 returnType = asyncoro.returnType
 
 class Runtime:
@@ -57,15 +58,7 @@ class Runtime:
 
     def _increment_pc(self):
         """Increment the program counter."""
-        self._program_counter[-1] += 1
-
-    def _fork_pc(self):
-        """Fork the program counter."""
-        self._program_counter.append(0)
-
-    def _unfork_pc(self):
-        """Leave a fork of the program counter."""
-        self._program_counter.pop()
+        self._program_counter[0] += 1
 
     def _send_share(self, peer_pid, data):
         pc = tuple(self._program_counter)
@@ -78,7 +71,7 @@ class Runtime:
             data = self.parties[peer_pid].protocol.buffers.pop(pc)
         else:
             # Data not yet received from peer.
-            data = self.parties[peer_pid].protocol.buffers[pc] = Future()
+            data = self.parties[peer_pid].protocol.buffers[pc] = Future(loop=self._loop)
         return data
 
     def _exchange_shares(self, in_shares):
@@ -96,7 +89,7 @@ class Runtime:
         """Barrier for runtime."""
         logging.info(f'Barrier {asyncoro.pc_level} '
                      f'{len(self._program_counter)} '
-                     f'{self._program_counter}'
+                     f'{self._program_counter[::-1]}'
                     )
         if not self.options.no_async:
             while asyncoro.pc_level >= len(self._program_counter):
@@ -107,12 +100,11 @@ class Runtime:
         loop = asyncio.get_event_loop()
         if loop.is_running():
             val = None
-            try:
-                while True:
+            while True:
+                try:
                     val = f.send(val)
-            except StopIteration as exc:
-                d = exc.value
-            return d
+                except StopIteration as exc:
+                    return exc.value
 
         return loop.run_until_complete(f)
 
@@ -140,7 +132,7 @@ class Runtime:
 
         # m > 1
         for peer in self.parties:
-            peer.protocol = Future() if peer.pid == self.pid else None
+            peer.protocol = Future(loop=self._loop) if peer.pid == self.pid else None
         factory = asyncoro.SharesExchanger
         if self.options.ssl:
             crtfile = os.path.join('.config', f'party_{self.pid}.crt')
@@ -252,7 +244,6 @@ class Runtime:
         await returnType(stype, len(senders), len(x))
         value = x[0].df if not isinstance(x[0].df, Future) else None
         assert value is None or self.pid in senders
-
         m = len(self.parties)
         t = self.threshold
         x = [a.df for a in x] # Extract values from all elements of x.
@@ -301,7 +292,7 @@ class Runtime:
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
             field = sftype.field
-            if field.frac_length == 0:
+            if not field.frac_length:
                 await returnType(sftype, len(x))
             else:
                 await returnType((sftype, x[0].integral), len(x))
@@ -336,7 +327,7 @@ class Runtime:
         sftype = type(x[0]) # all elts assumed of same type
         if issubclass(sftype, Share):
             field = sftype.field
-            if field.frac_length == 0:
+            if not field.frac_length:
                 await returnType(sftype, len(x))
             else:
                 await returnType((sftype, x[0].integral), len(x))
@@ -416,77 +407,121 @@ class Runtime:
         c = await self.output(b, threshold=2 * t)
         return c == 0
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def neg(self, a):
         """Secure negation (additive inverse) of a."""
         stype = type(a)
-        if stype.field.frac_length == 0:
+        if not stype.field.frac_length:
             await returnType(stype)
         else:
             await returnType((stype, a.integral))
         a = await gather_shares(a)
         return -a
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def add(self, a, b):
         """Secure addition of a and b."""
         stype = type(a)
-        if stype.field.frac_length == 0:
+        if not stype.field.frac_length:
             await returnType(stype)
         else:
             await returnType((stype, a.integral and b.integral))
         a, b = await gather_shares(a, b)
         return a + b
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def sub(self, a, b):
         """Secure subtraction of a and b."""
         stype = type(a)
-        if stype.field.frac_length == 0:
+        if not stype.field.frac_length:
             await returnType(stype)
         else:
             await returnType((stype, a.integral and b.integral))
         a, b = await gather_shares(a, b)
         return a - b
 
+    # @mpc_coro
+    # async def mul(self, a, b):
+        # """Secure multiplication of a and b."""
+        # stype = type(a)
+        # field = stype.field
+        # if not field.frac_length:
+            # await returnType(stype)
+        # else:
+            # a_integral = a.integral
+            # b_integral = isinstance(b, int) or (isinstance(b, Share) and b.integral)
+            # await returnType((stype, a_integral and b_integral))
+        # if not isinstance(b, Share):
+            # a = await gather_shares(a)
+            # return a * b
+
+        # if a is b:
+            # a = b = await gather_shares(a)
+        # else:
+            # a, b = await gather_shares(a, b)
+        # if field.frac_length and not a_integral and b_integral:
+            # a, b = b, a
+        # if field.frac_length and a_integral:
+            # a = a * field.rshift_factor # NB: no inplace a *=
+        # c = self._reshare(a * b)
+        # if field.frac_length and not a_integral:
+            # c = self.trunc(stype(c))
+        # return c
+
     @mpc_coro
     async def mul(self, a, b):
         """Secure multiplication of a and b."""
         stype = type(a)
         field = stype.field
-        if field.frac_length == 0:
+        if not field.frac_length:
             await returnType(stype)
         else:
             a_integral = a.integral
-            b_integral = isinstance(b, int) or (isinstance(b, Share) and b.integral)
+            b_integral = isinstance(b, int) or isinstance(b, Share) and b.integral
+            if isinstance(b, float):
+                b = round(b * field.lshift_factor)
             await returnType((stype, a_integral and b_integral))
-        if not isinstance(b, Share):
-            a = await gather_shares(a)
-            return a * b
 
-        if a is b:
+        shb = isinstance(b, Share)
+        if not shb:
+            a = await gather_shares(a)
+        elif a is b:
             a = b = await gather_shares(a)
         else:
             a, b = await gather_shares(a, b)
-        if field.frac_length > 0 and a_integral:
+        if field.frac_length and b_integral:
+            a, b = b, a
+        if field.frac_length and (a_integral or b_integral) and not isinstance(a, int):
             a = a * field.rshift_factor # NB: no inplace a *=
-        c = self._reshare(a * b)
-        if field.frac_length > 0 and not a_integral:
+        c = a * b
+        if shb:
+            c = self._reshare(c)
+        if field.frac_length and not (a_integral or b_integral):
             c = self.trunc(stype(c))
         return c
 
     def div(self, a, b):
         """Secure division of a by b, for nonzero b."""
         if isinstance(b, Share):
-            if type(b).field.frac_length == 0:
-                c = self.reciprocal(b)
-            else:
+            if type(b).field.frac_length:
                 c = self._rec(b)
-        else: # isinstance(a, Share) ensured
+            else:
+                c = self.reciprocal(b)
+            return self.mul(c, a)
+
+        # isinstance(a, Share) ensured
+        if type(a).field.frac_length:
+            if isinstance(b, (int, float)):
+                c = 1 / b
+                if c.is_integer():
+                    c = round(c)
+            else:
+                c = b.reciprocal() * type(a).field.lshift_factor
+        else:
             if not isinstance(b, a.field):
                 b = a.field(b)
-            c = b._reciprocal()
-        return a * c
+            c = b.reciprocal()
+        return self.mul(a, c)
 
     @mpc_coro
     async def reciprocal(self, a):
@@ -495,7 +530,7 @@ class Runtime:
         field = stype.field
         await returnType(stype)
         a = await gather_shares(a)
-        while 1:
+        while True:
             r = self._random(field)
             ar = await self.output(a * r, threshold=2*self.threshold)
             if ar:
@@ -680,7 +715,7 @@ class Runtime:
         x *= Zp.lshift_factor
         return x
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def sum(self, x):
         """Secure sum of all elements in x."""
         x = x[:]
@@ -692,7 +727,7 @@ class Runtime:
             s += x[i].value
         return field(s)
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def lin_comb(self, a, x):
         """Secure linear combination: dot product of public a and secret x."""
         x = x[:]
@@ -714,7 +749,7 @@ class Runtime:
             x, y = x[:], y[:]
         stype = type(x[0])
         field = stype.field
-        if field.frac_length == 0:
+        if not field.frac_length:
             await returnType(stype)
         else:
             x_integral = x[0].integral
@@ -726,10 +761,10 @@ class Runtime:
         s = 0
         for i in range(len(x)):
             s += x[i].value * y[i].value
-        if field.frac_length > 0 and x_integral:
+        if field.frac_length and x_integral:
             s *= field.rshift_factor
         s = self._reshare(field(s))
-        if field.frac_length > 0 and not x_integral:
+        if field.frac_length and not x_integral:
             s = self.trunc(stype(s))
         return s
 
@@ -751,12 +786,12 @@ class Runtime:
             x = x[2*len(h):] + h
         return x[0]
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def vector_add(self, x, y):
         """Secure addition of vectors x and y."""
         x, y = x[:], y[:]
         stype = type(x[0])
-        if stype.field.frac_length == 0:
+        if not stype.field.frac_length:
             await returnType(stype, len(x))
         else:
             await returnType((stype, x[0].integral and y[0].integral), len(x))
@@ -765,12 +800,12 @@ class Runtime:
             x[i] = x[i] + y[i]
         return x
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def vector_sub(self, x, y):
         """Secure subtraction of vectors x and y."""
         x, y = x[:], y[:]
         stype = type(x[0])
-        if stype.field.frac_length == 0:
+        if not stype.field.frac_length:
             await returnType(stype, len(x))
         else:
             await returnType((stype, x[0].integral and y[0].integral), len(x))
@@ -779,7 +814,7 @@ class Runtime:
             x[i] = x[i] - y[i]
         return x
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def matrix_add(self, A, B, tr=False):
         """Secure addition of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
@@ -790,7 +825,7 @@ class Runtime:
                 A[i][j] = A[i][j] + (B[j][i] if tr else B[i][j])
         return A
 
-    @mpc_coro
+    @mpc_coro_no_pc
     async def matrix_sub(self, A, B, tr=False):
         """Secure subtraction of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
@@ -807,19 +842,19 @@ class Runtime:
         x = x[:]
         stype = type(a)
         field = stype.field
-        if field.frac_length == 0:
+        if not field.frac_length:
             await returnType(stype, len(x))
         else:
             a_integral = a.integral
             await returnType((stype, a_integral and x[0].integral), len(x))
 
         a, x = await gather_shares(a, x)
-        if field.frac_length > 0 and a_integral:
+        if field.frac_length and a_integral:
             a = a * field.rshift_factor # NB: no inplace a *=
         for i in range(len(x)):
             x[i] = x[i] * a
         x = await self._reshare(x)
-        if field.frac_length > 0 and not a_integral:
+        if field.frac_length and not a_integral:
             x = [self.trunc(stype(xi)) for xi in x]
         return x
 
@@ -828,7 +863,7 @@ class Runtime:
         x, y = x[:], y[:]
         stype = type(a)
         field = stype.field
-        if field.frac_length == 0:
+        if not field.frac_length:
             await returnType(stype, len(x))
         else:
             a_integral = a.integral
@@ -837,7 +872,7 @@ class Runtime:
             await returnType((stype, a_integral and x[0].integral and y[0].integral), len(x))
 
         a, x, y = await gather_shares(a, x, y)
-        if field.frac_length > 0:
+        if field.frac_length:
             a = a * field.rshift_factor # NB: no inplace a *=
         for i in range(len(x)):
             x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
@@ -867,7 +902,7 @@ class Runtime:
                 x = y = await gather_shares(x)
             else:
                 x, y = await gather_shares(x, y)
-            truncy = stype.field.frac_length > 0
+            truncy = stype.field.frac_length
         else:
             await returnType(Future)
             truncy = False
@@ -907,7 +942,7 @@ class Runtime:
                 C[ia] = self._reshare(C[ia])
         if shA and shB:
             C = await gather_shares(C)
-        if field.frac_length > 0:
+        if field.frac_length:
             C = [[self.trunc(stype(Cij)) for Cij in Ci] for Ci in C]
         return C
 
@@ -927,7 +962,7 @@ class Runtime:
                 A[i][j] = field(A[i][j].value * d - b[i] * c[j].value)
             A[i] = self._reshare(A[i])
         A = await gather_shares(A)
-        if field.frac_length > 0:
+        if field.frac_length:
             A = [[self.trunc(stype(Aij)) for Aij in Ai] for Ai in A]
         return A
 

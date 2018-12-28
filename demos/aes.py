@@ -10,7 +10,6 @@ done by using GF(2) as a subfield of GF(2^8).
 """
 
 import sys
-import logging
 from mpyc.runtime import mpc
 
 secfld = mpc.SecFld(2**8) # Secure AES field GF(2^8) for secret values.
@@ -89,7 +88,7 @@ async def xprint(text, s):
     """Print matrix s transposed and flattened as hex string."""
     s = list(map(list, zip(*s)))
     s = await mpc.output(sum(s, []))
-    logging.info(f'{text} {bytes(map(int, s)).hex()}')
+    print(f'{text} {bytes(map(int, s)).hex()}')
 
 async def main():
     if sys.argv[1:]:
