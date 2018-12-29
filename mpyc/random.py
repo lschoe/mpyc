@@ -7,7 +7,8 @@ Additionally, random_unit_vector() generates a random bit vector
 with exactly one bit set to 1, using approximately log_2 n secure
 random bits for a bit vector of length n.
 
-Also, random_permutation() is provided as a convenience function.
+Also, random_permutation() and random_derangement() are provided as
+convenience functions.
 
 Main concern for the implementations is to minimize the randomness
 complexity, that is, to limit the usage of secure random bits as
@@ -188,13 +189,23 @@ async def random_derangement(sectype, x):
     if isinstance(x, int):
         x = range(x)
     x = list(x)
-    await runtime.returnType((sectype, True), len(x))
+    if sectype.field.frac_length:
+        # assume same type for all elts of x
+        x_integral = True
+        if isinstance(x[0], sectype):
+            x_integral = x[0].integral
+        elif isinstance(x[0], float):
+            x_integral = x[0].is_integer()
+        await runtime.returnType((sectype, x_integral), len(x))
+    else:
+        await runtime.returnType(sectype, len(x))
+    y = x[:] # NB: x is assumed to be free of duplicates
     while True:
-        shuffle(sectype, x)
-        t = runtime.prod([x[i] - i for i in range(len(x))])
+        shuffle(sectype, y)
+        t = runtime.prod([y[i] - x[i] for i in range(len(x))])
         if not await runtime.is_zero_public(t):
             break
-    return x
+    return y
 
 @asyncoro.mpc_coro
 async def sample(sectype, population, k):
