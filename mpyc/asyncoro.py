@@ -186,27 +186,29 @@ def _nested_list(rt, n, dims):
         s = [rt() for _ in range(n)]
     return s
 
-def returnType(rettype=None, *dims, wrap=True):
+def returnType(*args, wrap=True):
     """Define return type for MPyC coroutines.
 
     Used in first await expression in an MPyC coroutine.
     """
-    if rettype is not None:
-        if isinstance(rettype, tuple):
-            stype = rettype[0]
-            integral = rettype[1]
-            if stype.field.frac_length:
-                rt = lambda: stype(None, integral)
-            else:
-                rt = stype
-        elif issubclass(rettype, Future):
-            rt = lambda: rettype(loop=runtime._loop)
+    # todo: handle None as returnType properly
+    assert args, 'returnType cannot be None'
+    rettype, *dims = args
+    if isinstance(rettype, tuple):
+        stype = rettype[0]
+        integral = rettype[1]
+        if stype.field.frac_length:
+            rt = lambda: stype(None, integral)
         else:
-            rt = rettype
-        if dims:
-            rettype = _nested_list(rt, dims[0], dims[1:])
-        else:
-            rettype = rt()
+            rt = stype
+    elif issubclass(rettype, Future):
+        rt = lambda: rettype(loop=runtime._loop)
+    else:
+        rt = rettype
+    if dims:
+        rettype = _nested_list(rt, dims[0], dims[1:])
+    else:
+        rettype = rt()
     if wrap:
         rettype = _Awaitable(rettype)
     return rettype
@@ -221,12 +223,11 @@ class _ProgramCounterWrapper:
         self.pc = [0] + runtime._program_counter # fork
 
     def __await__(self):
-        coro = self.coro.__await__()
         while True:
             pc = runtime._program_counter[:]
             runtime._program_counter = self.pc
             try:
-                val = coro.__next__()
+                val = self.coro.send(None)
                 self.pc = runtime._program_counter[:]
             except StopIteration as exc:
                 return exc.value # NB: required for Python 3.7
@@ -301,10 +302,9 @@ def mpc_coro(func, pc=True):
         else:
             decl = coro.send(None)
         if runtime.options.no_async:
-            val = None
             while True:
                 try:
-                    val = coro.send(val)
+                    coro.send(None)
                 except StopIteration as exc:
                     _reconcile(decl, exc.value)
                     return decl

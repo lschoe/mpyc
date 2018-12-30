@@ -1,9 +1,9 @@
 """The MPyC runtime module is used to execute secure multiparty computations.
 
 Parties perform computations on secret-shared values by exchanging messages.
-Shamir's threshold secret sharing scheme is used for fields of prime order.
-MPyC provides secure number types and operations, many of which are
-available through Python's mechanism for operator overloading.
+Shamir's threshold secret sharing scheme is used for fields of prime order and 
+fields of characteristic two. MPyC provides secure number types and operations, 
+many of which are available through Python's mechanism for operator overloading.
 """
 
 import os
@@ -60,11 +60,11 @@ class Runtime:
         """Increment the program counter."""
         self._program_counter[0] += 1
 
-    def _send_share(self, peer_pid, data):
+    def _send_shares(self, peer_pid, data):
         pc = tuple(self._program_counter)
         self.parties[peer_pid].protocol.send_data(pc, data)
 
-    def _expect_share(self, peer_pid):
+    def _receive_shares(self, peer_pid):
         pc = tuple(self._program_counter)
         if pc in self.parties[peer_pid].protocol.buffers:
             # Data already received from peer.
@@ -80,8 +80,8 @@ class Runtime:
             if peer_pid == self.pid:
                 d = data
             else:
-                self._send_share(peer_pid, data)
-                d = self._expect_share(peer_pid)
+                self._send_shares(peer_pid, data)
+                d = self._receive_shares(peer_pid)
             out_shares[peer_pid] = d
         return out_shares
 
@@ -96,17 +96,19 @@ class Runtime:
                 await asyncio.sleep(0)
 
     def run(self, f):
-        """Run the given (MPC) coroutine or future until it is done."""
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            val = None
+        """Run the given coroutine or future until it is done."""
+        if self._loop.is_running():
+            if not asyncio.iscoroutine(f):
+                async def _wrap(fut):
+                    return await fut
+                f = _wrap(f)
             while True:
                 try:
-                    val = f.send(val)
+                    f.send(None)
                 except StopIteration as exc:
                     return exc.value
 
-        return loop.run_until_complete(f)
+        return self._loop.run_until_complete(f)
 
     def logging(self, enable=None):
         """Toggle/enable/disable logging."""
@@ -120,7 +122,7 @@ class Runtime:
             logging.disable(logging.INFO)
 
     async def start(self):
-        """Start the MPC runtime.
+        """Start the MPyC runtime.
 
         Open connections with other parties, if any.
         """
@@ -256,13 +258,13 @@ class Runtime:
                     if other_pid == self.pid:
                         shares[i] = data
                     else:
-                        self._send_share(other_pid, data)
+                        self._send_shares(other_pid, data)
             else:
-                shares[i] = self._expect_share(peer_pid)
+                shares[i] = self._receive_shares(peer_pid)
         shares = await gather_shares(shares)
         return [[field(a) for a in field.from_bytes(r)] for r in shares]
 
-    def output(self, x, receivers=None, threshold=None):
+    async def output(self, x, receivers=None, threshold=None):
         """Output the value of x to the receivers specified.
 
         Value x is a secure number, or a list of secure numbers.
@@ -284,7 +286,7 @@ class Runtime:
         y = self._recombine(x, receivers, threshold)
         if not x_is_list:
             y = y[0]
-        return gather_shares(y)
+        return await gather_shares(y)
 
     @mpc_coro
     async def _recombine(self, x, receivers, t):
@@ -306,12 +308,12 @@ class Runtime:
         # Send share to all successors in receivers.
         for peer_pid in receivers:
             if 0 < (peer_pid - self.pid) % m <= t:
-                self._send_share(peer_pid, field.to_bytes(x))
+                self._send_shares(peer_pid, field.to_bytes(x))
         # Receive and recombine shares if this party is a receiver.
         if self.pid in receivers:
             shares = [None] * t
             for i in range(t):
-                shares[i] = self._expect_share((self.pid - t + i) % m)
+                shares[i] = self._receive_shares((self.pid - t + i) % m)
             shares = await gather_shares(shares)
             points = [((self.pid - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
             points.append((self.pid + 1, x))
@@ -439,34 +441,6 @@ class Runtime:
             await returnType((stype, a.integral and b.integral))
         a, b = await gather_shares(a, b)
         return a - b
-
-    # @mpc_coro
-    # async def mul(self, a, b):
-        # """Secure multiplication of a and b."""
-        # stype = type(a)
-        # field = stype.field
-        # if not field.frac_length:
-            # await returnType(stype)
-        # else:
-            # a_integral = a.integral
-            # b_integral = isinstance(b, int) or (isinstance(b, Share) and b.integral)
-            # await returnType((stype, a_integral and b_integral))
-        # if not isinstance(b, Share):
-            # a = await gather_shares(a)
-            # return a * b
-
-        # if a is b:
-            # a = b = await gather_shares(a)
-        # else:
-            # a, b = await gather_shares(a, b)
-        # if field.frac_length and not a_integral and b_integral:
-            # a, b = b, a
-        # if field.frac_length and a_integral:
-            # a = a * field.rshift_factor # NB: no inplace a *=
-        # c = self._reshare(a * b)
-        # if field.frac_length and not a_integral:
-            # c = self.trunc(stype(c))
-        # return c
 
     @mpc_coro
     async def mul(self, a, b):
