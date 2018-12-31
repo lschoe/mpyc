@@ -3,7 +3,7 @@
 MPyC demo accompanying the paper 'Fast Secure Comparison for Medium-Sized
 Integers and Its Application in Binarized Neural Networks' by Mark Abspoel,
 Niek J. Bouman, Berry Schoenmakers, and Niels de Vreede, Cryptographer's 
-Track RSA 2019. See `eprint.iacr.org/2018/2136 <https://ia.cr/2018/1236/>`. 
+Track RSA 2019. See https://eprint.iacr.org/2018/2136/.
 
 Alternative to Convolutional Neural Network MNIST classifier, see cnnmnist.py.
 
