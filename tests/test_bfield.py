@@ -80,6 +80,13 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, f256(1))
         a /= 1
         self.assertEqual(a, f256(1))
+        a <<= 0
+        a >>= 0
+        self.assertEqual(a, f256(1))
+        a <<= 2
+        self.assertEqual(a, f256(4))
+        a >>= 2
+        self.assertEqual(a, f256(1))
 
         a = f256(3) # generator x + 1
         s = [int((a**i).value) for i in range(255)]

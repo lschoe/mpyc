@@ -80,6 +80,14 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, 12)
         a *= b
         self.assertEqual(a, 18)
+        a <<= 2
+        self.assertEqual(a, 15)
+        a <<= 0
+        self.assertEqual(a, 15)
+        a >>= 2
+        self.assertEqual(a, 18)
+        a >>= 0
+        self.assertEqual(a, 18)
 
     def test_f2_vs_f19(self):
         f2 = self.f2

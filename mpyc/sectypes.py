@@ -4,6 +4,7 @@ Secure (secret-shared) number types all use a common base class, which
 ensures that operators such as +, *, >= are defined by operator overloading.
 """
 
+import functools
 import asyncio
 from mpyc import gmpy
 from mpyc import gf2x
@@ -26,11 +27,11 @@ class Share:
 
     field = None
 
-    def __init__(self, field=None, value=None):
+    def __init__(self, value=None):
         """Initialize a share."""
         if value is not None:
             if isinstance(value, int):
-                value = field(value)
+                value = self.field(value)
             self.df = value
         else:
             self.df = asyncio.Future(loop=runtime._loop)
@@ -122,35 +123,34 @@ class Share:
 
     def __mod__(self, other):
         """Integer remainder."""
-        if type(self).__name__.startswith('SecFld'):
-            return NotImplemented
-        if type(other).__name__.startswith('SecFld'):
-            return NotImplemented
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        # TODO: extend beyond mod 2
-        assert other.df.value == 2, 'Least significant bit only, for now!'
-        r = runtime.lsb(self)
+        # TODO: extend beyond powers of 2
+        a = other.df.value
+        assert not a & (a - 1), 'Powers of 2 only, for now!'
+        if a == 2:
+            r = runtime.lsb(self)
+        else:
+            r = runtime.from_bits(runtime.to_bits(self, a.bit_length() - 1))
         return r
 
     def __rmod__(self, other):
         """Integer remainder (with reflected arguments)."""
-        if type(self).__name__.startswith('SecFld'):
-            return NotImplemented
-        if type(other).__name__.startswith('SecFld'):
-            return NotImplemented
-        # TODO: extend beyond mod 2
-        assert self.df.value == 2, 'Least significant bit only, for now!'
+        # TODO: extend beyond powers of 2
+        a = self.df.value
+        assert not a & (a - 1), 'Powers of 2 only, for now!'
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        r = runtime.lsb(other)
+        if a == 2:
+            r = runtime.lsb(other)
+        else:
+            r = runtime.from_bits(runtime.to_bits(other, a.bit_length() - 1))
         return r
 
     def __floordiv__(self, other):
         """Integer quotient."""
-        # TODO: extend beyond div 2
         r = self.__mod__(other)
         if r is NotImplemented:
             return NotImplemented
@@ -162,7 +162,6 @@ class Share:
 
     def __rfloordiv__(self, other):
         """Integer quotient (with reflected arguments)."""
-        # TODO: extend beyond div 2
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
@@ -174,7 +173,6 @@ class Share:
 
     def __divmod__(self, other):
         """Integer division."""
-        # TODO: extend beyond div 2
         r = self.__mod__(other)
         if r is NotImplemented:
             return NotImplemented
@@ -186,7 +184,6 @@ class Share:
 
     def __rdivmod__(self, other):
         """Integer division (with reflected arguments)."""
-        # TODO: extend beyond div 2
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
@@ -227,35 +224,23 @@ class Share:
         return NotImplemented
 
     def __and__(self, other):
-        """Bitwise and for binary fields (otherwise 1-bit only)."""
-        if type(self).__name__.startswith('SecFld'):
-            if not isinstance(self.field.modulus, int):
-                return runtime.and_(self, other)
+        """Bitwise and, for now 1-bit only."""
         return self * other
 
     __rand__ = __and__
 
     def __xor__(self, other):
-        """Bitwise exclusive-or for binary fields (otherwise 1-bit only)."""
-        if type(self).__name__.startswith('SecFld'):
-            if not isinstance(self.field.modulus, int):
-                return runtime.xor(self, other)
+        """Bitwise exclusive-or, for now 1-bit only."""
         return self + other - 2 * self * other
 
     __rxor__ = __xor__
 
     def __invert__(self):
-        """Bitwise inversion (not) for binary fields (otherwise 1-bit only)."""
-        if type(self).__name__.startswith('SecFld'):
-            if not isinstance(self.field.modulus, int):
-                return runtime.invert(self)
+        """Bitwise not (inversion), for now 1-bit only."""
         return 1 - self
 
     def __or__(self, other):
-        """Bitwise or for binary fields (otherwise 1-bit only)."""
-        if type(self).__name__.startswith('SecFld'):
-            if not isinstance(self.field.modulus, int):
-                return runtime.or_(self, other)
+        """Bitwise or, for now 1-bit only."""
         return self + other - self * other
 
     __ror__ = __or__
@@ -264,32 +249,24 @@ class Share:
         """Greater-than or equal comparison."""
         # self >= other
         c = self - other
-        if type(c).__name__.startswith('SecFld'):
-            return NotImplemented
         return runtime.sgn(c, GE=True)
 
     def __gt__(self, other):
         """Strictly greater-than comparison."""
         # self > other <=> not (self <= other)
         c = other - self
-        if type(c).__name__.startswith('SecFld'):
-            return NotImplemented
         return 1 - runtime.sgn(c, GE=True)
 
     def __le__(self, other):
         """Less-than or equal comparison."""
         # self <= other <=> other >= self
         c = other - self
-        if type(c).__name__.startswith('SecFld'):
-            return NotImplemented
         return runtime.sgn(c, GE=True)
 
     def __lt__(self, other):
         """Strictly less-than comparison."""
         # self < other <=> not (self >= other)
         c = self - other
-        if type(c).__name__.startswith('SecFld'):
-            return NotImplemented
         return 1 - runtime.sgn(c, GE=True)
 
     def __eq__(self, other):
@@ -300,9 +277,79 @@ class Share:
 
     def __ne__(self, other):
         """Negated equality testing."""
-        # self != other
+        # self != other <=> not (self == other)
         c = self - other
         return 1 - runtime.is_zero(c)
+
+class SecureFiniteField(Share):
+    """Base class for secret-shared finite field values.
+
+    NB: bit-oriented operations will be supported for prime fields.
+    """
+
+    __slots__ = ()
+
+    def __mod__(self, other):
+        """Currently no support at all."""
+        return NotImplemented
+
+    def __rmod__(self, other):
+        """Currently no support at all."""
+        return NotImplemented
+
+    def __and__(self, other):
+        """Bitwise and for binary fields (otherwise 1-bit only)."""
+        if not isinstance(self.field.modulus, int):
+            return runtime.and_(self, other)
+
+        return super().__and__(other)
+
+    def __xor__(self, other):
+        """Bitwise exclusive-or for binary fields (otherwise 1-bit only)."""
+        if not isinstance(self.field.modulus, int):
+            return runtime.xor(self, other)
+
+        return super().__xor__(other)
+
+    def __invert__(self):
+        """Bitwise not (inversion) for binary fields (otherwise 1-bit only)."""
+        if not isinstance(self.field.modulus, int):
+            return runtime.invert(self)
+
+        return super().__invert__()
+
+    def __or__(self, other):
+        """Bitwise or for binary fields (otherwise 1-bit only)."""
+        if not isinstance(self.field.modulus, int):
+            return runtime.or_(self, other)
+
+        return super().__or__(other)
+
+    def __ge__(self, other):
+        """Currently no support at all."""
+        return NotImplemented
+
+    def __gt__(self, other):
+        """Currently no support at all."""
+        return NotImplemented
+
+    def __le__(self, other):
+        """Currently no support at all."""
+        return NotImplemented
+
+    def __lt__(self, other):
+        """Currently no support at all."""
+        return NotImplemented
+
+class SecureInteger(Share):
+    """Base class for secret-shared integer values."""
+
+    __slots__ = ()
+
+class SecureFixedPoint(Share):
+    """Base class for secret-shared fixed-point values."""
+
+    __slots__ = ()
 
 _sectypes = {}
 
@@ -356,47 +403,39 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
             'Field order must exceed number of parties, unless threshold is 0.'
     # field.order >= number of parties for MDS
     field.is_signed = False
+    return _SecFld(l, field)
 
-    if (modulus, char2) not in _sectypes:
-        class SecureFld(Share):
-            __slots__ = ()
-            def __init__(self, value=None):
-                super().__init__(field, value)
-        SecureFld.field = field
-        SecureFld.bit_length = l
-        name = f'SecFld{SecureFld.bit_length}({SecureFld.field.modulus})'
-        _sectypes[(modulus, char2)] = type(name, (SecureFld,), {'__slots__':()})
-    return _sectypes[(modulus, char2)]
+@functools.lru_cache(maxsize=None)
+def _SecFld(l, field):
+    sectype = type(f'SecFld{l}({field})', (SecureFiniteField,), {'__slots__':()})
+    sectype.field = field
+    sectype.bit_length = l
+    return sectype
 
-def _SecNum(l, f, p, n):
+def _pfield(l, f, p, n):
     k = runtime.options.security_parameter
     if p is None:
         p = pfield.find_prime_root(l + max(f, k + 1) + 1, n=n)
     else:
         assert p.bit_length() > l + max(f, k + 1), f'Prime {p} too small.'
-    field = pfield.GF(p, f)
-
-    class SecureNum(Share):
-        __slots__ = ()
-        def __init__(self, value=None):
-            super().__init__(field, value)
-    SecureNum.field = field
-    SecureNum.bit_length = l
-    return SecureNum
+    return pfield.GF(p, f)
 
 def SecInt(l=None, p=None, n=2):
     """Secure l-bit integers."""
     if l is None:
         l = runtime.options.bit_length
+    return _SecInt(l, p, n)
 
-    if (l, 0, p, n) not in _sectypes:
-        SecureInt = _SecNum(l, 0, p, n)
-        if p is None:
-            name = f'SecInt{l}'
-        else:
-            name = f'SecInt{l}({p})'
-        _sectypes[(l, 0, p, n)] = type(name, (SecureInt,), {'__slots__':()})
-    return _sectypes[(l, 0, p, n)]
+@functools.lru_cache(maxsize=None)
+def _SecInt(l, p, n):
+    if p is None:
+        name = f'SecInt{l}'
+    else:
+        name = f'SecInt{l}({p})'
+    sectype = type(name, (SecureInteger,), {'__slots__':()})
+    sectype.field = _pfield(l, 0, p, n)
+    sectype.bit_length = l
+    return sectype
 
 def SecFxp(l=None, f=None, p=None, n=2):
     """Secure l-bit fixed-point numbers with f-bit fractional part.
@@ -408,25 +447,29 @@ def SecFxp(l=None, f=None, p=None, n=2):
     if f is None:
         f = l // 2 # l =~ 2f enables division such that x =~ 1/(1/x)
 
-    if (l, f, p, n) not in _sectypes:
-        SecureFxp = _SecNum(l, f, p, n)
-        if p is None:
-            name = f'SecFxp{l}:{f}'
-        else:
-            name = f'SecFxp{l}:{f}({p})'
-        def init(self, value=None, integral=False):
-            if value is not None:
-                if isinstance(value, int):
-                    self.integral = True
-                    value <<= f
-                elif isinstance(value, float):
-                    self.integral = value.is_integer()
-                    value = round(value * (1 << f))
-                else:
-                    self.integral = integral
+    return _SecFxp(l, f, p, n)
+
+@functools.lru_cache(maxsize=None)
+def _SecFxp(l, f, p, n):
+    if p is None:
+        name = f'SecFxp{l}:{f}'
+    else:
+        name = f'SecFxp{l}:{f}({p})'
+    def init(self, value=None, integral=False):
+        if value is not None:
+            if isinstance(value, int):
+                self.integral = True
+                value <<= f
+            elif isinstance(value, float):
+                self.integral = value.is_integer()
+                value = round(value * (1 << f))
             else:
                 self.integral = integral
-            super(_sectypes[(l, f, p, n)], self).__init__(value)
-        _sectypes[(l, f, p, n)] = type(name, (SecureFxp,),
-                                       {'__slots__':'integral', '__init__':init})
-    return _sectypes[(l, f, p, n)]
+        else:
+            self.integral = integral
+        super(sectype, self).__init__(value)
+    sectype = type(name, (SecureFixedPoint,),
+                   {'__slots__':'integral', '__init__':init})
+    sectype.field = _pfield(l, f, p, n)
+    sectype.bit_length = l
+    return sectype

@@ -4,7 +4,7 @@ Polynomials over GF(2) are represented as nonnegative integers.
 The polynomial b_n x^n + ... + b_1 x + b_0 corresponds
 to the integer b_n 2^n + ... + b_1 2 + b_0, for bits b_n,...,b_0.
 
-The operators +, -, *, //, %, and function divmod are overloaded.
+The operators +, -, *, <<, //, %, and function divmod are overloaded.
 Using the direct correspondence between polynomials and integers,
 the operators <, <=, >, >=, ==, != are overloaded as well, where
 the zero polynomial is the smallest polynomial.
@@ -53,12 +53,14 @@ def mod(a, b):
 def _mod(a, b):
     if b is None: # see _powmod()
         return a
+
     if b == 0:
         raise ZeroDivisionError('division by zero polynomial')
     m = _degree(a)
     n = _degree(b)
     if m < n:
         return a
+
     b <<= m - n
     for i in range(m - n + 1):
         if (a >> m - i) & 1:
@@ -82,6 +84,7 @@ def _divmod(a, b):
     n = _degree(b)
     if m < n:
         return 0, a
+
     b <<= m - n
     q = 0
     for i in range(m - n + 1):
@@ -156,6 +159,7 @@ def to_terms(a, x='x'):
 def _to_terms(a, x='x'):
     if a == 0:
         return '0'
+
     p = ''
     for i in range(a.bit_length(), -1, -1):
         if (a >> i) & 1:
@@ -211,6 +215,7 @@ def powmod(a, n, b):
 def _powmod(a, n, b=None):
     if n == 0:
         return 1
+
     if n < 0:
         if b is None:
             raise ValueError('negative exponent')
@@ -238,12 +243,14 @@ def is_irreducible(a):
 def _is_irreducible(a):
     if a <= 1:
         return False
+
     b = 2
     for _ in range(_degree(a) // 2):
         b = _mul(b, b)
         b = _mod(b, a)
         if _gcd(b ^ 2, a) != 1:
             return False
+
     return True
 
 def next_irreducible(a):
@@ -289,11 +296,13 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(self.value ^ other)
 
     def __radd__(self, other):
         if not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(self.value ^ other)
 
     def __iadd__(self, other):
@@ -301,6 +310,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value ^= other
         return self
 
@@ -313,11 +323,13 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_mul(self.value, other))
 
     def __rmul__(self, other):
         if not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_mul(self.value, other))
 
     def __imul__(self, other):
@@ -325,6 +337,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value = _mul(self.value, other)
         return self
 
@@ -333,11 +346,13 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_divmod(self.value, other)[0])
 
     def __rfloordiv__(self, other):
         if not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_divmod(self.value, other)[0])
 
     def __ifloordiv__(self, other):
@@ -345,6 +360,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value = _divmod(self.value, other)[0]
         return self
 
@@ -353,11 +369,13 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_mod(self.value, other))
 
     def __rmod__(self, other):
         if not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_mod(self.value, other))
 
     def __imod__(self, other):
@@ -365,6 +383,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         self.value = _mod(self.value, other)
         return self
 
@@ -373,15 +392,30 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_divmod(self.value, other))
 
     def __rdivmod__(self, other):
         if not isinstance(other, int):
             return NotImplemented
+
         return Polynomial(_divmod(self.value, other))
 
     def __pow__(self, exponent):
         return Polynomial(_powmod(self.value, exponent))
+
+    def __lshift__(self, other):
+        if not isinstance(other, int):
+            return NotImplemented
+
+        return Polynomial(self.value << other)
+
+    def __ilshift__(self, other):
+        if not isinstance(other, int):
+            return NotImplemented
+
+        self.value <<= other
+        return self
 
     def __ge__(self, other):
         """Greater-than or equal comparison."""
@@ -389,6 +423,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return self.value >= other
 
     def __gt__(self, other):
@@ -397,6 +432,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return self.value > other
 
     def __le__(self, other):
@@ -405,6 +441,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return self.value <= other
 
     def __lt__(self, other):
@@ -413,6 +450,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return self.value < other
 
     def __repr__(self):
@@ -424,6 +462,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return self.value == other
 
     def __ne__(self, other):
@@ -432,6 +471,7 @@ class Polynomial:
             other = other.value
         elif not isinstance(other, int):
             return NotImplemented
+
         return self.value != other
 
     def __hash__(self):

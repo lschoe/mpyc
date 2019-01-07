@@ -2,7 +2,7 @@
 
 MPyC demo accompanying the paper 'Fast Secure Comparison for Medium-Sized
 Integers and Its Application in Binarized Neural Networks' by Mark Abspoel,
-Niek J. Bouman, Berry Schoenmakers, and Niels de Vreede, Cryptographer's 
+Niek J. Bouman, Berry Schoenmakers, and Niels de Vreede, Cryptographer's
 Track RSA 2019. See https://eprint.iacr.org/2018/2136/.
 
 Alternative to Convolutional Neural Network MNIST classifier, see cnnmnist.py.
@@ -354,7 +354,7 @@ async def main():
     L = mpc.matrix_add(L, [load_b('fc2')] * len(L))
     await mpc.barrier()
     logging.info('- - - - - - - - bsgn    - - - - - - -')
-    if not secint.__name__.endswith(')'):
+    if args.no_legendre:
         secint.bit_length = 10
         if one_by_one:
             activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
@@ -375,7 +375,7 @@ async def main():
     L = mpc.matrix_add(L, [load_b('fc3')] * len(L))
     await mpc.barrier()
     logging.info('- - - - - - - - bsgn    - - - - - - -')
-    if not secint.__name__.endswith(')'):
+    if args.no_legendre:
         secint.bit_length = 10
         if one_by_one:
             activate = np.vectorize(lambda a: (a >= 0) * 2 - 1)
@@ -397,7 +397,7 @@ async def main():
     await mpc.barrier()
 
     logging.info('--------------- OUTPUT  -------------')
-    if not secint.__name__.endswith(')'):
+    if args.no_legendre:
         secint.bit_length = 14
     for i in range(batch_size):
         prediction = await mpc.output(argmax(L[i]))

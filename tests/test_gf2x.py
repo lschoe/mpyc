@@ -22,8 +22,6 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(gf2x.degree(poly(7)), 2)
 
     def test_arithmetic(self):
-        a = poly(1)
-        b = poly(2)
         self.assertFalse(poly(0))
         self.assertTrue(poly(1))
         self.assertIsNot(0, poly(0))
@@ -32,6 +30,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(1 + poly(0), 0 + poly(1))
         self.assertEqual(1 + poly(1), 0)
         self.assertEqual(1 - poly(1), 0)
+        self.assertEqual(poly(15) << 2, poly(60))
         self.assertEqual(poly(32) // poly(8), poly(4))
         self.assertEqual(poly(32) % poly(8), 0)
         self.assertEqual(poly(5) // poly(3), poly(3))
@@ -52,6 +51,10 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, poly(1))
         a //= b
         self.assertEqual(a, poly(1))
+        a <<= 0
+        self.assertEqual(a, poly(1))
+        a <<= 1
+        self.assertEqual(a, poly(2))
 
         self.assertEqual(gf2x.gcd(poly(2), poly(5)), poly(1))
         self.assertEqual(gf2x.gcd(poly(3), poly(5)), poly(3))

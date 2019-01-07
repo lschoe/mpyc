@@ -55,7 +55,7 @@ def key_expansion(k):
             t = [sbox(x) for x in t]
         if i % Nk == 0:
             a, b, c, d = t
-            t = [b + f256(2)**((i // Nk) - 1), c, d, a]
+            t = [b + (f256(1) << (i // Nk) - 1), c, d, a]
         w.append(mpc.vector_add(w[-Nk], t))
     K = [list(zip(*_)) for _ in zip(*[iter(w)]*4)]
     return K

@@ -47,8 +47,6 @@ class BinaryFieldElement():
     ext_deg = None
     order = None
     frac_length = 0
-    lshift_factor = 1
-    rshift_factor = 1
 
     def __init__(self, value):
         if isinstance(value, int):
@@ -91,7 +89,7 @@ class BinaryFieldElement():
         if isinstance(other, type(self)):
             return type(self)(self.value + other.value)
 
-        if isinstance(other, int):
+        if isinstance(other, (int, gf2x.Polynomial)):
             return type(self)(self.value + other)
 
         return NotImplemented
@@ -102,7 +100,7 @@ class BinaryFieldElement():
         """In-place addition."""
         if isinstance(other, type(self)):
             other = other.value
-        elif not isinstance(other, int):
+        elif not isinstance(other, (int, gf2x.Polynomial)):
             return NotImplemented
 
         self.value += other
@@ -117,7 +115,7 @@ class BinaryFieldElement():
         if isinstance(other, type(self)):
             return type(self)(self.value * other.value)
 
-        if isinstance(other, int):
+        if isinstance(other, (int, gf2x.Polynomial)):
             return type(self)(self.value * other)
 
         return NotImplemented
@@ -128,7 +126,7 @@ class BinaryFieldElement():
         """In-place multiplication."""
         if isinstance(other, type(self)):
             other = other.value
-        elif not isinstance(other, int):
+        elif not isinstance(other, (int, gf2x.Polynomial)):
             return NotImplemented
 
         self.value *= other
@@ -151,21 +149,21 @@ class BinaryFieldElement():
         if isinstance(other, type(self)):
             return self * other.reciprocal()
 
-        if isinstance(other, int):
+        if isinstance(other, (int, gf2x.Polynomial)):
             return self * type(self)(other).reciprocal()
 
         return NotImplemented
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
-        if isinstance(other, int):
+        if isinstance(other, (int, gf2x.Polynomial)):
             return type(self)(other) * self.reciprocal()
 
         return NotImplemented
 
     def __itruediv__(self, other):
         """In-place division."""
-        if isinstance(other, int):
+        if isinstance(other, (int, gf2x.Polynomial)):
             other = type(self)(other)
         elif not isinstance(other, type(self)):
             return NotImplemented
@@ -178,6 +176,46 @@ class BinaryFieldElement():
         """Multiplicative inverse."""
         return type(self)(gf2x.invert(self.value, self.modulus))
 
+    def __lshift__(self, other):
+        """Left shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        return type(self)(self.value << other)
+
+    def __rlshift__(self, other):
+        """Left shift (with reflected arguments)."""
+        return NotImplemented
+
+    def __ilshift__(self, other):
+        """In-place left shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        self.value <<= other
+        self.value %= self.modulus.value
+        return self
+
+    def __rshift__(self, other):
+        """Right shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        return self * type(self)(1 << other).reciprocal()
+
+    def __rrshift__(self, other):
+        """Right shift (with reflected arguments)."""
+        return NotImplemented
+
+    def __irshift__(self, other):
+        """In-place right shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        self.value *= type(self)(1 << other).reciprocal().value
+        self.value %= self.modulus.value
+        return self
+
     def __repr__(self):
         return f'{self.value}'
 
@@ -186,7 +224,7 @@ class BinaryFieldElement():
         if isinstance(other, type(self)):
             return self.value == other.value
 
-        if isinstance(other, int):
+        if isinstance(other, (int, gf2x.Polynomial)):
             return self.value == other
 
         return NotImplemented

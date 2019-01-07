@@ -1,8 +1,8 @@
 """The MPyC runtime module is used to execute secure multiparty computations.
 
 Parties perform computations on secret-shared values by exchanging messages.
-Shamir's threshold secret sharing scheme is used for fields of prime order and 
-fields of characteristic two. MPyC provides secure number types and operations, 
+Shamir's threshold secret sharing scheme is used for fields of prime order and
+fields of characteristic two. MPyC provides secure number types and operations,
 many of which are available through Python's mechanism for operator overloading.
 """
 
@@ -23,6 +23,7 @@ from mpyc import asyncoro
 
 Future = asyncio.Future
 Share = sectypes.Share
+SecureFiniteField = sectypes.SecureFiniteField
 gather_shares = asyncoro.gather_shares
 mpc_coro = asyncoro.mpc_coro
 mpc_coro_no_pc = asyncoro._mpc_coro_no_pc
@@ -354,31 +355,44 @@ class Runtime:
         return y
 
     @mpc_coro
-    async def trunc(self, a, f=None):
-        """Secure truncation of f least significant bits of a.
+    async def trunc(self, x, f=None, l=None):
+        """Secure truncation of f least significant bits of (elements of) x.
 
-        Probabilistic rounding of a / 2**f.
+        Probabilistic rounding of a / 2**f for a in x.
         """
-        stype = type(a)
-        await returnType(stype)
-        Zp = stype.field
-        l = stype.bit_length
+        x_is_list = isinstance(x, list)
+        if not x_is_list:
+            x = [x]
+        n = len(x)
+        sftype = type(x[0]) # all elts assumed of same type
+        if issubclass(sftype, Share):
+            if x_is_list:
+                await returnType(sftype, n)
+            else:
+                await returnType(sftype)
+            Zp = sftype.field
+            l = sftype.bit_length
+        else:
+            await returnType(Future)
+            Zp = sftype
         if f is None:
             f = Zp.frac_length
-            rsf = Zp.rshift_factor
-        else:
-            rsf = 1 / Zp(1 << f)
         k = self.options.security_parameter
-        r_bits = await self.random_bits(Zp, f)
-        r_modf = 0
-        for i in range(f - 1, -1, -1):
-            r_modf <<= 1
-            r_modf += r_bits[i].value
-        r_divf = self._random(Zp, 1<<(k + l - f))
-        a = await gather_shares(a)
-        c = await self.output(a + ((1<<l) + (r_divf.value << f) + r_modf)) # pylint: disable=E1101
-        c = c.value % (1<<f)
-        return (r_modf - c + a) * rsf
+        r_bits = await self.random_bits(Zp, f * n)
+        r_modf = [0] * n
+        for j in range(n):
+            for i in range(f - 1, -1, -1):
+                r_modf[j] <<= 1
+                r_modf[j] += r_bits[f*j + i]
+        r_divf = self._randoms(Zp, n, 1<<(k + l - f))
+        if issubclass(sftype, Share):
+            x = await gather_shares(x)
+        c = await mpc.output([a + ((1<<f) + (b.value << f) + c) for a, b, c in zip(x, r_divf, r_modf)])
+        c = [c.value % (1<<f) for c in c]
+        y = [(b - c + a) >> f for a, b, c in zip(x, r_modf, c)]
+        if not x_is_list:
+            y = y[0]
+        return y
 
     def eq_public(self, a, b):
         """Secure public equality test of a and b."""
@@ -391,7 +405,7 @@ class Runtime:
         field = stype.field
         m = len(self.parties)
         t = self.threshold
-        if stype.__name__.startswith('SecFld'):
+        if issubclass(stype, SecureFiniteField):
             prfs = self.parties[self.pid].prfs(field.order)
             while True:
                 r, s = self._randoms(field, 2)
@@ -401,7 +415,7 @@ class Runtime:
         else:
             r = self._random(field) #failure shared r is 0 with prob. 1/p
         a = await gather_shares(a)
-        if stype.__name__.startswith('SecFld'):
+        if issubclass(stype, SecureFiniteField):
             z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
             b = a * r + z[0]
         else:
@@ -453,7 +467,7 @@ class Runtime:
             a_integral = a.integral
             b_integral = isinstance(b, int) or isinstance(b, Share) and b.integral
             if isinstance(b, float):
-                b = round(b * field.lshift_factor)
+                b = round(b * 2**field.frac_length)
             await returnType((stype, a_integral and b_integral))
 
         shb = isinstance(b, Share)
@@ -466,7 +480,7 @@ class Runtime:
         if field.frac_length and b_integral:
             a, b = b, a
         if field.frac_length and (a_integral or b_integral) and not isinstance(a, int):
-            a = a * field.rshift_factor # NB: no inplace a *=
+            a = a >> field.frac_length # NB: no inplace a >>=
         c = a * b
         if shb:
             c = self._reshare(c)
@@ -490,7 +504,7 @@ class Runtime:
                 if c.is_integer():
                     c = round(c)
             else:
-                c = b.reciprocal() * type(a).field.lshift_factor
+                c = b.reciprocal() << type(a).field.frac_length
         else:
             if not isinstance(b, a.field):
                 b = a.field(b)
@@ -509,7 +523,7 @@ class Runtime:
             ar = await self.output(a * r, threshold=2*self.threshold)
             if ar:
                 break
-        r *= field.lshift_factor
+        r <<= field.frac_length
         return r / ar
 
     def pow(self, a, b):
@@ -553,7 +567,6 @@ class Runtime:
         b2 = self.to_bits(b)
         c2 = [a2[i] + b2[i] + a2[i] * b2[i] for i in range(len(a2))]
         return sum(c2[i] * field(1 << i) for i in range(len(c2)))
-#        return a + b - a * b # wrong, go via bits
 
     def eq(self, a, b):
         """Secure comparison a == b."""
@@ -565,7 +578,7 @@ class Runtime:
 
     def is_zero(self, a):
         """Secure zero test a == 0."""
-        if type(a).__name__.startswith('SecFld'):
+        if isinstance(a, SecureFiniteField):
             return 1 - self.pow(a, a.field.order - 1)
 
         if (a.bit_length/2 > self.options.security_parameter >= 8 and a.field.order%4 == 3):
@@ -597,7 +610,7 @@ class Runtime:
             else:
                 c[i] = 1 - z[i] if c[i].is_sqr() else z[i]
         e = await self.prod(c)
-        e *= Zp.lshift_factor
+        e <<= Zp.frac_length
         return e
 
     @mpc_coro
@@ -643,7 +656,7 @@ class Runtime:
                 z = (1 - h) * (2 * z - 1)
                 z = await self._reshare(z)
 
-        z *= Zp.lshift_factor
+        z <<= Zp.frac_length
         return z
 
     def min(self, *x):
@@ -682,11 +695,11 @@ class Runtime:
         k = self.options.security_parameter
         b = self.random_bit(stype)
         a, b = await gather_shares(a, b)
-        b *= Zp.rshift_factor
+        b >>= Zp.frac_length
         r = self._random(Zp, 1 << (l + k - 1))
         c = await self.output(a + ((1<<l) + (r.value << 1) + b.value)) # pylint: disable=E1101
         x = 1 - b if c.value & 1 else b # xor
-        x *= Zp.lshift_factor
+        x <<= Zp.frac_length
         return x
 
     @mpc_coro_no_pc
@@ -704,6 +717,7 @@ class Runtime:
     @mpc_coro_no_pc
     async def lin_comb(self, a, x):
         """Secure linear combination: dot product of public a and secret x."""
+        # TODO: merge with in_prod()
         x = x[:]
         field = x[0].field
         await returnType(type(x[0]))
@@ -735,9 +749,10 @@ class Runtime:
         s = 0
         for i in range(len(x)):
             s += x[i].value * y[i].value
+        s = field(s)
         if field.frac_length and x_integral:
-            s *= field.rshift_factor
-        s = self._reshare(field(s))
+            s >>= field.frac_length
+        s = self._reshare(s)
         if field.frac_length and not x_integral:
             s = self.trunc(stype(s))
         return s
@@ -824,12 +839,13 @@ class Runtime:
 
         a, x = await gather_shares(a, x)
         if field.frac_length and a_integral:
-            a = a * field.rshift_factor # NB: no inplace a *=
+            a = a >> field.frac_length # NB: no inplace a >>=
         for i in range(len(x)):
             x[i] = x[i] * a
         x = await self._reshare(x)
         if field.frac_length and not a_integral:
-            x = [self.trunc(stype(xi)) for xi in x]
+            x = self.trunc(x, l=stype.bit_length)
+            x = await gather_shares(x)
         return x
 
     @mpc_coro
@@ -847,7 +863,7 @@ class Runtime:
 
         a, x, y = await gather_shares(a, x, y)
         if field.frac_length:
-            a = a * field.rshift_factor # NB: no inplace a *=
+            a = a >> field.frac_length # NB: no inplace a >>=
         for i in range(len(x)):
             x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
         x = await self._reshare(x)
@@ -884,7 +900,8 @@ class Runtime:
             x[i] = x[i] * y[i]
         x = await self._reshare(x)
         if truncy:
-            x = [self.trunc(stype(xi)) for xi in x]
+            x = self.trunc(x, l=stype.bit_length)
+            x = await gather_shares(x)
         return x
 
     @mpc_coro
@@ -917,7 +934,9 @@ class Runtime:
         if shA and shB:
             C = await gather_shares(C)
         if field.frac_length:
-            C = [[self.trunc(stype(Cij)) for Cij in Ci] for Ci in C]
+            l = stype.bit_length
+            C = [self.trunc(c, l=l) for c in C]
+            C = await gather_shares(C)
         return C
 
     @mpc_coro
@@ -937,7 +956,9 @@ class Runtime:
             A[i] = self._reshare(A[i])
         A = await gather_shares(A)
         if field.frac_length:
-            A = [[self.trunc(stype(Aij)) for Aij in Ai] for Ai in A]
+            l = stype.bit_length
+            A = [self.trunc(a, l=l) for a in A]
+            A = await gather_shares(A)
         return A
 
     def _prss_uci(self):
@@ -978,13 +999,13 @@ class Runtime:
     async def random_bits(self, sftype, n, signed=False):
         """n secure uniformly random bits of the given type."""
         prss0 = False
-        f1 = 1
+        f0 = 0
         if issubclass(sftype, Share):
             await returnType((sftype, True), n)
             field = sftype.field
-            if sftype.__name__.startswith('SecFld'):
+            if issubclass(sftype, SecureFiniteField):
                 prss0 = True
-            f1 = field.lshift_factor
+            f0 = field.frac_length
         else:
             await returnType(Future)
             field = sftype
@@ -1020,7 +1041,7 @@ class Runtime:
                         s += 1
                         s %= p
                         s *= q
-                    bits[h] = field(f1 * s)
+                    bits[h] = field(s << f0)
         return bits
 
     def add_bits(self, x, y):
@@ -1050,17 +1071,19 @@ class Runtime:
         return c
 
     @mpc_coro
-    async def to_bits(self, a):
-        """Secure extraction of bits of a.""" # a la [ST06].
+    async def to_bits(self, a, l=None):
+        """Secure extraction of l (or all) least significant bits of a.""" # a la [ST06].
         stype = type(a)
-        l = stype.bit_length
+        if l is None:
+            l = stype.bit_length
+        assert l <= stype.bit_length, 'extracting too many bits'
         await returnType((stype, True), l)
         field = stype.field
 
         r_bits = await self.random_bits(field, l)
         r_modl = 0
         for i in range(l - 1, -1, -1):
-            r_modl *= 2
+            r_modl <<= 1
             r_modl += r_bits[i].value
         if isinstance(field.modulus, int):
             k = self.options.security_parameter
@@ -1072,21 +1095,30 @@ class Runtime:
             r_bits = [stype(r.value) for r in r_bits]
             return self.add_bits(r_bits, c_bits)
 
-        a = await gather_shares(a)          # use a.value?
-        c = await self.output(a + field(r_modl))  # fix this in +
+        a = await gather_shares(a)
+        c = await self.output(a + r_modl)
         c = int(c.value)
         return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
 
-    def from_bits(self, x):
+    @mpc_coro_no_pc
+    async def from_bits(self, x):
         """Recover secure number from its binary representation x."""
-        # TODO: also handle negative numbers with sign bit
-        return sum(x[i] * (1<<i) for i in range(len(x)))
+        # TODO: also handle negative numbers with sign bit (NB: from_bits() in random.py)
+        x = x[:]
+        await returnType((type(x[0]), True))
+        x = await gather_shares(x)
+        field = type(x[0])
+        s = 0
+        for i in range(len(x)):
+            s += x[i].value << i
+        return field(s)
 
     def _norm(self, a): # signed normalization factor
         x = self.to_bits(a) # low to high bits
         b = x[-1] # sign bit
         s = 1 - b * 2 # sign s = (-1)^b
         x = x[:-1]
+        _1 = type(a)(1)
         def __norm(x):
             n = len(x)
             if n == 1:
@@ -1096,7 +1128,8 @@ class Runtime:
             i0, nz0 = __norm(x[:n//2]) # low bits
             i1, nz1 = __norm(x[n//2:]) # high bits
             i0 *= (1 << ((n + 1) // 2))
-            return nz1 * (i1 - i0) + i0, nz0 + nz1 - nz0 * nz1 # self.or_(nz0, nz1)
+            return self.if_else(nz1, [i1, _1], [i0, nz0]) # self.or_(nz0, nz1)
+
         l = type(a).bit_length
         f = type(a).field.frac_length
         return s * __norm(x)[0] * (2 ** (f - (l - 1))) # NB: f <= l

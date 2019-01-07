@@ -23,6 +23,7 @@ when n is equal to the order of sectype's finite field.
 import math
 import functools
 import itertools
+from mpyc import sectypes
 from mpyc import asyncoro
 
 runtime = None
@@ -44,7 +45,7 @@ async def _randbelow(sectype, n):
     uniformly random output can be generated directly.
     """
     await runtime.returnType((sectype, True))
-    if sectype.__name__.startswith('SecFld') and n == sectype.field.order:
+    if issubclass(sectype, sectypes.SecureFiniteField) and n == sectype.field.order:
         return runtime._random(sectype)
 
     b = n - 1
@@ -57,7 +58,7 @@ async def _randbelow(sectype, n):
             h -= h * (1 - x[i])
             i -= 1
         else:
-            if await runtime.output(h * x[i]): # todo: mul_public
+            if await runtime.output(h * x[i]): # TODO: mul_public
                 # restart, keeping unused secret random bits x[:i]
                 x = x[:i] + runtime.random_bits(sectype, k - i)
                 i = k - 1
@@ -84,7 +85,7 @@ async def random_unit_vector(sectype, n):
             u = v + runtime.vector_sub(u, v)
             i -= 1
         else:
-            if await runtime.output(u[0] * x[i]): # todo: mul_public
+            if await runtime.output(u[0] * x[i]): # TODO: mul_public
                 # restart, keeping unused secret random bits x[:i]
                 x = x[:i] + runtime.random_bits(sectype, k - i)
                 u = [sectype(1)]

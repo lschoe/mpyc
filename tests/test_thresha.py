@@ -40,9 +40,9 @@ class Arithmetic(unittest.TestCase):
         bound = 100
         F = thresha.PRF(key, bound)
         x = ''
-        y = F(x)
+        y = F(x.encode())
         self.assertTrue(0 <= y < bound)
-        y2 = F(x)
+        y2 = F(x.encode())
         self.assertEqual(y, y2)
 
     def test_prss(self):
@@ -55,7 +55,7 @@ class Arithmetic(unittest.TestCase):
         prfs = {frozenset([0]): F}
         uci = 'test uci'
         n = 8
-        a = F(uci, n)
+        a = F(uci.encode(), n)
         shares = thresha.pseudorandom_share(field, m, pid, prfs, uci, n)
         b = thresha.recombine(field, [(1, shares)])
         self.assertEqual(a, [s.value for s in b])

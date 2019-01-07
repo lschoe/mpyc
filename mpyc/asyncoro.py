@@ -191,24 +191,25 @@ def returnType(*args, wrap=True):
 
     Used in first await expression in an MPyC coroutine.
     """
-    # todo: handle None as returnType properly
-    assert args, 'returnType cannot be None'
     rettype, *dims = args
-    if isinstance(rettype, tuple):
-        stype = rettype[0]
-        integral = rettype[1]
-        if stype.field.frac_length:
-            rt = lambda: stype(None, integral)
+    if rettype is type(None):
+        rettype = None
+    if rettype is not None:
+        if isinstance(rettype, tuple):
+            stype = rettype[0]
+            integral = rettype[1]
+            if stype.field.frac_length:
+                rt = lambda: stype(None, integral)
+            else:
+                rt = stype
+        elif issubclass(rettype, Future):
+            rt = lambda: rettype(loop=runtime._loop)
         else:
-            rt = stype
-    elif issubclass(rettype, Future):
-        rt = lambda: rettype(loop=runtime._loop)
-    else:
-        rt = rettype
-    if dims:
-        rettype = _nested_list(rt, dims[0], dims[1:])
-    else:
-        rettype = rt()
+            rt = rettype
+        if dims:
+            rettype = _nested_list(rt, dims[0], dims[1:])
+        else:
+            rettype = rt()
     if wrap:
         rettype = _Awaitable(rettype)
     return rettype

@@ -1,5 +1,4 @@
 import unittest
-from mpyc import gf2x
 from mpyc.runtime import mpc
 
 class Arithmetic(unittest.TestCase):
@@ -12,47 +11,6 @@ class Arithmetic(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         mpc.run(mpc.shutdown())
-
-    def test_secfld(self):
-        secfld = mpc.SecFld()
-        self.assertEqual(secfld.field.modulus, 2)
-        secfld = mpc.SecFld(char2=True)
-        self.assertEqual(secfld.field.modulus, 2)
-        secfld = mpc.SecFld(modulus='x')
-        self.assertEqual(secfld.field.modulus, 2)
-        secfld = mpc.SecFld(modulus='x+1')
-        self.assertEqual(secfld.field.modulus, 3)
-        secfld = mpc.SecFld(l=1)
-        self.assertEqual(secfld.field.modulus, 2)
-        secfld = mpc.SecFld(l=1, char2=True)
-        self.assertEqual(secfld.field.modulus, 2)
-        secfld = mpc.SecFld(modulus=3, l=1)
-        self.assertEqual(secfld.field.modulus, 3)
-        self.assertEqual(secfld.field.order, 3)
-        secfld = mpc.SecFld(modulus=3, char2=True, l=1)
-        self.assertEqual(secfld.field.modulus, 3)
-        self.assertEqual(secfld.field.order, 2)
-        secfld = mpc.SecFld(order=3, char2=False, l=1)
-        self.assertEqual(secfld.field.modulus, 3)
-        self.assertEqual(secfld.field.order, 3)
-        secfld = mpc.SecFld(order=4, char2=True, l=2)
-        self.assertEqual(secfld.field.modulus, 7)
-        self.assertEqual(secfld.field.order, 4)
-        secfld = mpc.SecFld(modulus='1+x^8+x^4+x^3+x')
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
-        self.assertEqual(secfld.field.order, 256)
-        secfld = mpc.SecFld(order=256)
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
-        self.assertEqual(secfld.field.order, 256)
-        secfld = mpc.SecFld(order=256, modulus=283)
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
-        self.assertEqual(secfld.field.order, 256)
-        secfld = mpc.SecFld(modulus=283, char2=True)
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
-        self.assertEqual(secfld.field.order, 256)
-        secfld = mpc.SecFld(modulus=gf2x.Polynomial(283))
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
-        self.assertEqual(secfld.field.order, 256)
 
     def test_psecfld(self):
         secfld = mpc.SecFld(l=16)
@@ -71,6 +29,12 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(a == -b)), 1)
         self.assertEqual(mpc.run(mpc.output(a**2 == b**2)), 1)
         self.assertEqual(mpc.run(mpc.output(a != b)), 1)
+        a = secfld(0)
+        b = secfld(1)
+        self.assertEqual(mpc.run(mpc.output(a & b)), 0)
+        self.assertEqual(mpc.run(mpc.output(a | b)), 1)
+        self.assertEqual(mpc.run(mpc.output(a ^ b)), 1)
+        self.assertEqual(mpc.run(mpc.output(~a)), 1)
         for a, b in [(secfld(1), secfld(1)), (1, secfld(1)), (secfld(1), 1)]:
             with self.assertRaises(TypeError):
                 a < b
@@ -117,6 +81,10 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c, [1, 0, 0, 0, 0, 0, 0, 0])
         c = mpc.run(mpc.output(mpc.to_bits(secfld(255))))
         self.assertEqual(c, [1, 1, 1, 1, 1, 1, 1, 1])
+        c = mpc.run(mpc.output(mpc.to_bits(secfld(255), 1)))
+        self.assertEqual(c, [1])
+        c = mpc.run(mpc.output(mpc.to_bits(secfld(255), 4)))
+        self.assertEqual(c, [1, 1, 1, 1])
 
     def test_secint(self):
         secint = mpc.SecInt()
@@ -143,6 +111,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c, [0])
         c = mpc.run(mpc.output(mpc.to_bits(mpc.SecInt(1)(1))))
         self.assertEqual(c, [1])
+        c = mpc.to_bits(secint(0), 0) # mpc.output() only works for non-empty lists
+        self.assertEqual(c, [])
         c = mpc.run(mpc.output(mpc.to_bits(secint(0))))
         self.assertEqual(c, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
@@ -155,17 +125,20 @@ class Arithmetic(unittest.TestCase):
         c = mpc.run(mpc.output(mpc.to_bits(secint(2**31 - 1))))
         self.assertEqual(c, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0])
-        c = mpc.run(mpc.output(mpc.to_bits(secint(-1))))
-        self.assertEqual(c, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        c = mpc.run(mpc.output(mpc.to_bits(secint(2**31 - 1), 16)))
+        self.assertEqual(c, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        c = mpc.run(mpc.output(mpc.to_bits(secint(-1), 8)))
+        self.assertEqual(c, [1, 1, 1, 1, 1, 1, 1, 1])
         c = mpc.run(mpc.output(mpc.to_bits(secint(-2**31))))
         self.assertEqual(c, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+        c = mpc.run(mpc.output(mpc.to_bits(secint(-2**31), 16)))
+        self.assertEqual(c, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         c = mpc.run(mpc.output(mpc.from_bits(mpc.to_bits(secint(8113)))))
         self.assertEqual(c, 8113)
         c = mpc.run(mpc.output(mpc.from_bits(mpc.to_bits(secint(2**31 - 1)))))
         self.assertEqual(c, 2**31 - 1)
-        #TODO:
+        # TODO:
         #c = mpc.run(mpc.output(mpc.from_bits(mpc.to_bits(secint(-2**31)))))
         #self.assertEqual(c, -2**31)
 
@@ -176,11 +149,17 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(secint(1) % 2)), 1)
         self.assertEqual(mpc.run(mpc.output(secint(2**31 - 1) % 2)), 1)
         self.assertEqual(mpc.run(mpc.output(secint(5) % 2)), 1)
+        self.assertEqual(mpc.run(mpc.output(5 % secint(2))), 1)
+        self.assertEqual(mpc.run(mpc.output(5 % secint(4))), 1)
         self.assertEqual(mpc.run(mpc.output(secint(-5) % 2)), 1)
         self.assertEqual(mpc.run(mpc.output(secint(50) % 2)), 0)
+        self.assertEqual(mpc.run(mpc.output(secint(50) % 4)), 2)
+        self.assertEqual(mpc.run(mpc.output(secint(50) % 32)), 18)
         self.assertEqual(mpc.run(mpc.output(secint(-50) % 2)), 0)
+        self.assertEqual(mpc.run(mpc.output(secint(-50) % 32)), 14)
         self.assertEqual(mpc.run(mpc.output(secint(5) // 2)), 2)
         self.assertEqual(mpc.run(mpc.output(secint(50) // 2)), 25)
+        self.assertEqual(mpc.run(mpc.output(secint(50) // 4)), 12)
         self.assertEqual(mpc.run(mpc.output(secint(11) << 3)), 88)
         self.assertEqual(mpc.run(mpc.output(secint(70) >> 1)), 35)
 
@@ -212,6 +191,7 @@ class Arithmetic(unittest.TestCase):
             s2 = [v*v for v in s]
             ss2 = [round(v * (1 << f)) for v in s2]
             self.assertEqual(mpc.run(mpc.output([x*x, y*y, z*z, w*w])), ss2)
+            self.assertEqual(mpc.run(mpc.output(mpc.schur_prod([x, y, z, w], [x, y, z, w]))), ss2)
             s2 = [s[0]+s[1], s[0]*s[1], s[0]-s[1]]
             ss2 = [round(v * (1 << f)) for v in s2]
             self.assertEqual(mpc.run(mpc.output([x+y, x*y, x-y])), ss2)
@@ -300,4 +280,3 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(1 - c, a, b)))), 1.0)
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(c, 0.0, 1.0)))), 0.0)
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(1 - c, 0.0, 1.0)))), 1.0)
-

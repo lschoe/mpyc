@@ -72,7 +72,9 @@ async def convolvetensor(x, W, b):
                 Y[i][j][im] = mpc._reshare(Y[i][j][im])
     Y = await mpc.gather(Y)
     if stype.field.frac_length > 0:
-        Y = [[[[mpc.trunc(stype(_)) for _ in _] for _ in _] for _ in _] for _ in Y]
+        l = stype.bit_length
+        Y = [[[mpc.trunc(y, l=l) for y in _] for _ in _] for _ in Y]
+    Y = await mpc.gather(Y)
     return Y
     # k, v, m, n = dim(Y)
 

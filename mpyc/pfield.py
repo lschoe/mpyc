@@ -73,8 +73,7 @@ def GF(modulus, f=0):
     GFElement.nth = n
     GFElement.root = w % p
     GFElement.frac_length = f
-    GFElement.lshift_factor = 1 << f
-    GFElement.rshift_factor = int(gmpy2.invert(1 << f, p))
+    GFElement.rshift_factor = int(gmpy2.invert(1 << f, p)) # cache (1/2)^f mod p
     _field_cache[(p, f)] = GFElement
     return GFElement
 
@@ -92,7 +91,6 @@ class PrimeFieldElement():
     nth = None
     root = None
     frac_length = 0
-    lshift_factor = 1
     rshift_factor = 1
 
     def __init__(self, value):
@@ -260,6 +258,54 @@ class PrimeFieldElement():
         """Multiplicative inverse."""
         return type(self)(int(gmpy2.invert(self.value, self.modulus)))
 
+    def __lshift__(self, other):
+        """Left shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        return type(self)(self.value << other)
+
+    def __rlshift__(self, other):
+        """Left shift (with reflected arguments)."""
+        return NotImplemented
+
+    def __ilshift__(self, other):
+        """In-place left shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        self.value <<= other
+        self.value %= self.modulus
+        return self
+
+    def __rshift__(self, other):
+        """Right shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        if other == self.frac_length:
+            rsf = self.rshift_factor
+        else:
+            rsf = int(gmpy2.invert(1 << other, self.modulus))
+        return type(self)(self.value * rsf)
+
+    def __rrshift__(self, other):
+        """Right shift (with reflected arguments)."""
+        return NotImplemented
+
+    def __irshift__(self, other):
+        """In-place right shift."""
+        if not isinstance(other, int):
+            return NotImplemented
+
+        if other == self.frac_length:
+            rsf = self.rshift_factor
+        else:
+            rsf = int(gmpy2.invert(1 << other, self.modulus))
+        self.value *= rsf
+        self.value %= self.modulus
+        return self
+
     def is_sqr(self):
         """Test for quadratic residuosity (0 is also square)."""
         p = self.modulus
@@ -308,13 +354,13 @@ class PrimeFieldElement():
         if v > self.modulus >> 1:
             v -= self.modulus
         if self.frac_length:
-            v = float(v / self.lshift_factor)
+            v = float(v * 2**-self.frac_length)
         return v
 
     def unsigned(self):
         """Return unsigned integer representation."""
         if self.frac_length:
-            return float(self.value / self.lshift_factor)
+            return float(self.value * 2**-self.frac_length)
 
         return self.value
 
