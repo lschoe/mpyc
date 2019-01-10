@@ -155,7 +155,9 @@ class PRF:
         """
         self.key = int(key, 16).to_bytes(16, byteorder='little') #128-bit key
         self.max = bound
-        self.byte_length = len(self.key) + ((bound-1).bit_length() + 7) // 8
+        self.byte_length = ((bound-1).bit_length() + 7) // 8
+        if bound & (bound - 1): # no power of 2
+            self.byte_length += len(self.key)
 
     def __call__(self, s, n=None):
         """Return a number or length-n list of numbers in range(self.max) for input bytes s."""

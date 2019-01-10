@@ -13,6 +13,7 @@ import logging
 import math
 import secrets
 import itertools
+import functools
 import configparser
 import argparse
 import asyncio
@@ -983,7 +984,7 @@ class Runtime:
         if bound is None:
             bound = field.order
         else:
-            bound = (bound - 1) // self._bincoef + 1
+            bound = (bound - 1) // self._bincoef + 1 # TODO: round to power of 2
         m = len(self.parties)
         prfs = self.parties[self.pid].prfs(bound)
         shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
@@ -1153,20 +1154,17 @@ class _Party:
         self.host = host
         self.port = port
         self.keys = keys
-        self._prfs = {}
 
+    @functools.lru_cache(maxsize=None)
     def prfs(self, bound):
         """PRFs with codomain range(bound) for pseudorandom secret sharing.
 
         Return a mapping from sets of parties to PRFs.
         """
-        try:
-            return self._prfs[bound]
-        except KeyError:
-            self._prfs[bound] = {}
-            for subset, key in self.keys.items():
-                self._prfs[bound][subset] = thresha.PRF(key, bound)
-            return self._prfs[bound]
+        f = {}
+        for subset, key in self.keys.items():
+            f[subset] = thresha.PRF(key, bound)
+        return f
 
     def __repr__(self):
         """String representation of the party."""
