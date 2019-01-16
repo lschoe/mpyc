@@ -89,6 +89,9 @@ class Runtime:
 
     async def barrier(self):
         """Barrier for runtime."""
+        if self.options.no_barrier:
+            return
+            
         logging.info(f'Barrier {asyncoro.pc_level} '
                      f'{len(self._program_counter)} '
                      f'{self._program_counter[::-1]}'
@@ -1252,12 +1255,14 @@ def setup():
                        help='maximum bit length L (for comparisons etc.)')
     group.add_argument('-k', '--security-parameter', type=int, metavar='K',
                        help='security parameter K for leakage probability 1/2**K')
-    group.add_argument('--no-log', action='store_true',
-                       default=False, help='disable logging')
     group.add_argument('--ssl', action='store_true',
                        default=False, help='enable SSL connections')
+    group.add_argument('--no-log', action='store_true',
+                       default=False, help='disable logging')
     group.add_argument('--no-async', action='store_true',
                        default=False, help='disable asynchronous evaluation')
+    group.add_argument('--no-barrier', action='store_true',
+                       default=False, help='disable barriers')
     group.add_argument('-f', type=str,
                        default='', help='consume IPython string')
     parser.set_defaults(bit_length=32, security_parameter=30)

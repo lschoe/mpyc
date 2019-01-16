@@ -41,6 +41,8 @@ run 1 cnnmnist.py 1.5 0
 
 python bnnmnist.py --HELP
 
+run 1 bnnminist.py --no-barrier
+
 python -m cProfile -s time bnnmnist.py | more
 
 python -m cProfile -s cumtime sort.py 64 | more
