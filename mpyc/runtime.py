@@ -1291,14 +1291,14 @@ def setup():
         options.threshold = (m - 1) // 2
     assert 2 * options.threshold < m
 
-    rt = Runtime(pid, parties, options)
-    sectypes.runtime = rt
-    asyncoro.runtime = rt
-    import mpyc.random
-    mpyc.random.runtime = rt
-    rt.version = mpyc.__version__
     global mpc
-    mpc = rt
+    mpc = Runtime(pid, parties, options)
+    sectypes.runtime = mpc
+    asyncoro.runtime = mpc
+    import mpyc.random
+    mpyc.random.runtime = mpc
+    mpc.random = mpyc.random
+    mpc.version = mpyc.__version__
 
 mpc = None
 try: # suppress exceptions for pydoc etc.
