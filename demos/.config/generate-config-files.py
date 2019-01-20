@@ -12,9 +12,8 @@ Each party has its own configuration file. The parties are numbered
 in the order listed, so Party 0 is on host foo and has configuration
 file party3_0.ini. Similarly for Party 1 and Party 2.
 
-Each configuration file contains information about the other parties and
-keys used for pseudorandom secret sharing (PRSS). To keep the key material
-secret, the configuration files should be distributed securely.
+The party owning a configuration file is the one for which the hostname
+is not specified.
 """
 
 import argparse

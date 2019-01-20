@@ -43,10 +43,11 @@ class Runtime:
 
     version = None
 
-    def __init__(self, pid, parties, options):
+    def __init__(self, pid, parties, prss_keys, options):
         """Initialize runtime."""
         self.pid = pid
         self.parties = parties
+        self._prss_keys = prss_keys
         self.options = options
         self.threshold = options.threshold
         self._logging_enabled = not options.no_log
@@ -57,6 +58,18 @@ class Runtime:
         self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
         self._loop = asyncio.get_event_loop() # cache running loop
         self.start_time = None
+
+    @functools.lru_cache(maxsize=None) # TODO: clear cache if threshold changes
+    def prfs(self, bound):
+        """PRFs with codomain range(bound) for pseudorandom secret sharing.
+
+        Return a mapping from sets of parties to PRFs.
+        """
+        f = {}
+        for subset, key in self._prss_keys.items():
+            if len(subset) == len(self.parties) - self.threshold:
+                f[subset] = thresha.PRF(key, bound)
+        return f
 
     def _increment_pc(self):
         """Increment the program counter."""
@@ -91,7 +104,7 @@ class Runtime:
         """Barrier for runtime."""
         if self.options.no_barrier:
             return
-            
+
         logging.info(f'Barrier {asyncoro.pc_level} '
                      f'{len(self._program_counter)} '
                      f'{self._program_counter[::-1]}'
@@ -140,7 +153,6 @@ class Runtime:
         # m > 1
         for peer in self.parties:
             peer.protocol = Future(loop=self._loop) if peer.pid == self.pid else None
-        factory = asyncoro.SharesExchanger
         if self.options.ssl:
             crtfile = os.path.join('.config', f'party_{self.pid}.crt')
             keyfile = os.path.join('.config', f'party_{self.pid}.key')
@@ -157,6 +169,7 @@ class Runtime:
                 context.verify_mode = ssl.CERT_REQUIRED
             else:
                 context = None
+            factory = asyncoro.SharesExchanger
             server = await loop.create_server(factory, port=listen_port, ssl=context)
             logging.debug(f'Listening on port {listen_port}')
 
@@ -173,6 +186,7 @@ class Runtime:
                     else:
                         context = None
                         server_hostname = None
+                    factory = lambda: asyncoro.SharesExchanger(peer.pid)
                     await loop.create_connection(factory, peer.host, peer.port, ssl=context,
                                                  server_hostname=server_hostname)
                     break
@@ -410,7 +424,7 @@ class Runtime:
         m = len(self.parties)
         t = self.threshold
         if issubclass(stype, SecureFiniteField):
-            prfs = self.parties[self.pid].prfs(field.order)
+            prfs = self.prfs(field.order)
             while True:
                 r, s = self._randoms(field, 2)
                 z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
@@ -989,7 +1003,7 @@ class Runtime:
         else:
             bound = (bound - 1) // self._bincoef + 1 # TODO: round to power of 2
         m = len(self.parties)
-        prfs = self.parties[self.pid].prfs(bound)
+        prfs = self.prfs(bound)
         shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
         if issubclass(sftype, Share):
             shares = [sftype(s) for s in shares]
@@ -1017,7 +1031,7 @@ class Runtime:
         m = len(self.parties)
 
         if not isinstance(field.modulus, int):
-            prfs = self.parties[self.pid].prfs(2)
+            prfs = self.prfs(2)
             bits = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
             return bits
 
@@ -1025,7 +1039,7 @@ class Runtime:
         p = field.modulus
         if not signed:
             q = (p + 1) >> 1 # q = 1/2 mod p
-        prfs = self.parties[self.pid].prfs(p)
+        prfs = self.prfs(p)
         t = self.threshold
         h = n
         while h > 0:
@@ -1151,23 +1165,11 @@ class Runtime:
 class _Party:
     """Information about a party in the MPC protocol."""
 
-    def __init__(self, pid, host=None, port=None, keys=None):
+    def __init__(self, pid, host=None, port=None):
         """Initialize a party with given party identity pid."""
         self.pid = pid
         self.host = host
         self.port = port
-        self.keys = keys
-
-    @functools.lru_cache(maxsize=None)
-    def prfs(self, bound):
-        """PRFs with codomain range(bound) for pseudorandom secret sharing.
-
-        Return a mapping from sets of parties to PRFs.
-        """
-        f = {}
-        for subset, key in self.keys.items():
-            f[subset] = thresha.PRF(key, bound)
-        return f
 
     def __repr__(self):
         """String representation of the party."""
@@ -1179,17 +1181,16 @@ class _Party:
 def generate_configs(m, addresses):
     """Generate party configurations.
 
-    Generates m party configurations with thresholds 0 up to (m-1)//2.
-    addresses is a list of '(host, port)' pairs, specifying the
-    hostnames and port numbers for each party. Moreover, the keys
-    used in pseudorandom secret sharing (PRSS) are generated.
+    Generates m-party configurations from the addresses given as
+    a list of '(host, port)' pairs, specifying the hostnames and
+    port numbers for each party.
 
-    The m party configurations are returned as a list of ConfigParser
-    instances, which be saved in m separate INI-files.
+    Returns a list of ConfigParser instances, which be saved in m
+    separate INI-files. The party owning an INI-file is indicated
+    by not setting its host.
     """
-    parties = range(m)
-    configs = [configparser.ConfigParser() for _ in parties]
-    for p in parties:
+    configs = [configparser.ConfigParser() for _ in range(m)]
+    for p in range(m):
         host, port = addresses[p]
         if host == '':
             host = 'localhost'
@@ -1197,48 +1198,32 @@ def generate_configs(m, addresses):
             config.add_section(f'Party {p}')
             config.set(f'Party {p}', 'host', host)
             config.set(f'Party {p}', 'port', port)
-
-    for t in range((m + 1) // 2):
-        for subset in itertools.combinations(parties, m - t):
-            key = hex(secrets.randbits(128)) # 128-bit key
-            subset_str = ' '.join(map(str, subset))
-            for p in subset:
-                configs[p].set(f'Party {p}', subset_str, key)
+        configs[p].set(f'Party {p}', 'host', '') # empty host string for owner
     return configs
 
-def _load_config(filename, t=None):
-    """Load m-party configuration file using threshold t (default (m-1) // 2).
+def _load_config(filename):
+    """Load m-party configuration file.
 
     Configuration files are simple INI-files containing information
     (hostname and port number) about the other parties in the protocol.
 
     One of the parties owns the configuration file and for this party
-    additional information on PRSS keys is available.
+    no hostname is specified.
 
     Returns the pid of the owning party and a list of _Party objects.
     """
     config = configparser.ConfigParser()
     config.read_file(open(filename, 'r'))
     m = len(config.sections())
-    if t is None:
-        t = (m - 1) // 2
+    my_pid = None
     parties = [None] * m
     for party in config.sections():
         pid = int(party[6:]) # strip 'Party ' prefix
         host = config.get(party, 'host')
         port = config.getint(party, 'port')
-        if len(config.options(party)) > 2:
-            # read PRSS keys
+        if host == '':
             my_pid = pid
-            keys = {}
-            for option in config.options(party):
-                if not option in ['host', 'port']:
-                    subset = frozenset(map(int, option.split()))
-                    if len(subset) == m - t:
-                        keys[subset] = config.get(party, option)
-            parties[my_pid] = _Party(my_pid, host, port, keys)
-        else:
-            parties[pid] = _Party(pid, host, port)
+        parties[pid] = _Party(pid, host, port)
     return my_pid, parties
 
 def setup():
@@ -1282,17 +1267,24 @@ def setup():
     if not options.config:
         options.no_async = True
         pid = 0
-        parties = [_Party(pid, keys={frozenset([pid]): hex(secrets.randbits(128))})]
+        parties = [_Party(pid)]
+        m = 1
+        prss_keys = {(pid,): secrets.token_bytes(16)} # 128-bit key
     else:
         options.config = os.path.join('.config', options.config)
-        pid, parties = _load_config(options.config, options.threshold)
-    m = len(parties)
+        pid, parties = _load_config(options.config)
+        m = len(parties)
+        prss_keys = {}
+        for t in range((m + 1) // 2): # all possible thresholds
+            for subset in itertools.combinations(range(m), m - t):
+                if pid == min(subset):
+                    prss_keys[subset] = secrets.token_bytes(16) # 128-bit key
     if options.threshold is None:
         options.threshold = (m - 1) // 2
     assert 2 * options.threshold < m
 
     global mpc
-    mpc = Runtime(pid, parties, options)
+    mpc = Runtime(pid, parties, prss_keys, options)
     sectypes.runtime = mpc
     asyncoro.runtime = mpc
     import mpyc.random

@@ -3,6 +3,7 @@ computation of secret-shared values.
 """
 
 import struct
+import itertools
 import functools
 import typing
 from asyncio import Protocol, Future
@@ -16,19 +17,33 @@ class SharesExchanger(Protocol):
     Bidirectional connection with one of the other parties (peers).
     """
 
-    def __init__(self):
-        self.peer_pid = None
+    def __init__(self, peer_pid=None):
+        self.peer_pid = peer_pid
         self.bytes = bytearray()
         self.buffers = {}
         self.transport = None
 
+    def _key_transport_done(self):
+        runtime.parties[self.peer_pid].protocol = self
+        if all(p.protocol is not None for p in runtime.parties):
+            runtime.parties[runtime.pid].protocol.set_result(runtime)
+
     def connection_made(self, transport):
         """Called when a connection is made.
 
-        The party first sends its identity to the peer.
+        If the party is a client for this connection, it sends its identity
+        to the peer as well as any PRSS keys.
         """
         self.transport = transport
-        transport.write(str(runtime.pid).encode())
+        if self.peer_pid is not None: # party is client (peer is server)
+            m = len(runtime.parties)
+            t = runtime.threshold
+            pid_keys = str(runtime.pid).encode() # send pid
+            for subset in itertools.combinations(range(m), m - t):
+                if self.peer_pid in subset and runtime.pid == min(subset):
+                    pid_keys += runtime._prss_keys[subset] # send PRSS keys
+            transport.write(pid_keys)
+            self._key_transport_done()
 
     def send_data(self, pc, payload):
         """Send payload labeled with pc to the peer.
@@ -49,15 +64,31 @@ class SharesExchanger(Protocol):
 
         Received bytes are unpacked as a program counter and the payload
         (actual data). The payload is passed to the appropriate Future, if any.
+
+        First message from peer is processed differently if peer is a client.
         """
         self.bytes.extend(data)
-        if self.peer_pid is None:
+        if self.peer_pid is None: # peer is client (party is server)
+            peer_pid = int(self.bytes[:1])
+            len_packet = 1
+            m = len(runtime.parties)
+            t = runtime.threshold
+            for subset in itertools.combinations(range(m), m - t):
+                if runtime.pid in subset and peer_pid == min(subset):
+                    len_packet += 16
+            if len(self.bytes) < len_packet:
+                return
             # record new protocol peer
-            self.peer_pid = int(self.bytes[:1])
-            del self.bytes[:1]
-            runtime.parties[self.peer_pid].protocol = self
-            if all(p.protocol is not None for p in runtime.parties):
-                runtime.parties[runtime.pid].protocol.set_result(runtime)
+            self.peer_pid = peer_pid
+            # store keys received from peer
+            len_packet = 1
+            for subset in itertools.combinations(range(m), m - t):
+                if runtime.pid in subset and peer_pid == min(subset):
+                    runtime._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
+                    len_packet += 16
+            del self.bytes[:len_packet]
+            self._key_transport_done()
+
         while self.bytes:
             if len(self.bytes) < 6:
                 return

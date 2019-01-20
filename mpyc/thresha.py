@@ -92,8 +92,7 @@ def _f_S_i(field, m, i, S):
     """Compute and store polynomial f_S evaluated for party i.
 
     Polynomial f_S is 1 at 0 and 0 for all parties j outside S."""
-    complement = frozenset(range(m)) - S
-    points = [(0, [1])] + [(x + 1, [0]) for x in complement]
+    points = [(0, [1])] + [(x + 1, [0]) for x in range(m) if x not in S]
     return recombine(field, points, i + 1)[0].value
 
 
@@ -142,7 +141,7 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
     return sums
 
 class PRF:
-    """A pseudorandom function (PRF) with 128-bit keys.
+    """A pseudorandom function (PRF).
 
     A PRF is determined by a secret key and a public maximum.
     """
@@ -150,10 +149,10 @@ class PRF:
     def __init__(self, key, bound):
         """Create a PRF determined by the given key and (upper) bound.
 
-        The key is a hex string, whereas bound is a number.
+        The key is given as a byte string.
         Output values will be in range(bound).
         """
-        self.key = int(key, 16).to_bytes(16, byteorder='little') #128-bit key
+        self.key = key
         self.max = bound
         self.byte_length = ((bound-1).bit_length() + 7) // 8
         if bound & (bound - 1): # no power of 2
