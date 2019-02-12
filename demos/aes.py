@@ -15,8 +15,6 @@ from mpyc.runtime import mpc
 secfld = mpc.SecFld(2**8) # Secure AES field GF(2^8) for secret values.
 f256 = secfld.field       # Plain AES field GF(2^8) for public values.
 
-print('AES polynomial:', f256.modulus) # x^8 + x^4 + x^3 + x + 1
-
 def circulant_matrix(r):
     """Circulant matrix with first row r."""
     r = list(map(f256, r))
@@ -98,6 +96,8 @@ async def main():
         full = True
         print('AES-128 en/decryption and AES-256 en/decryption.')
 
+    print('AES polynomial:', f256.modulus) # x^8 + x^4 + x^3 + x + 1
+    
     await mpc.start()
 
     p = [[secfld(17*(4 * j + i))  for j in range(4)] for i in range(4)]

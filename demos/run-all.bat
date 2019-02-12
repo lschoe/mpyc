@@ -7,3 +7,4 @@ call run %1 id3gini.py %2 %3 %4 %5 %6 %7 %8 %9
 call run %1 lpsolver.py %2 %3 %4 %5 %6 %7 %8 %9
 call run %1 lpsolverfxp.py %2 %3 %4 %5 %6 %7 %8 %9
 call run %1 aes.py -1 %2 %3 %4 %5 %6 %7 %8 %9
+call run %1 onewayhashchains.py --no-barrier %2 %3 %4 %5 %6 %7 %8 %9
