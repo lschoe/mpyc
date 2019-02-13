@@ -16,6 +16,7 @@ import functools
 import hashlib
 import secrets
 
+
 def random_split(s, t, m):
     """Split each secret given in s into m random Shamir shares.
 
@@ -25,7 +26,7 @@ def random_split(s, t, m):
     field = type(s[0])
     p = field.modulus
     order = field.order
-    T = type(p) # T is int or gf2x.Polynomial
+    T = type(p)  # T is int or gf2x.Polynomial
     n = len(s)
     shares = [[None] * n for _ in range(m)]
     for h in range(n):
@@ -38,6 +39,7 @@ def random_split(s, t, m):
                 y *= i + 1
             shares[i][h] = (y + s[h].value) % p
     return shares
+
 
 @functools.lru_cache(maxsize=None)
 def _recombination_vector(field, xs, x_r):
@@ -57,6 +59,7 @@ def _recombination_vector(field, xs, x_r):
         vector.append(coefficient.value)
     return vector
 
+
 def recombine(field, points, x_rs=0):
     """Recombine shares given by points into secrets.
 
@@ -68,7 +71,7 @@ def recombine(field, points, x_rs=0):
     m = len(shares)
     n = len(shares[0])
     width = len(x_rs)
-    T_is_field = isinstance(shares[0][0], field) # all elts assumed of same type
+    T_is_field = isinstance(shares[0][0], field)  # all elts assumed of same type
     vector = [_recombination_vector(field, xs, x_r) for x_r in x_rs]
     sums = [[0] * n for _ in range(width)]
     for i in range(m):
@@ -86,6 +89,7 @@ def recombine(field, points, x_rs=0):
         return sums[0]
 
     return sums
+
 
 @functools.lru_cache(maxsize=None)
 def _f_S_i(field, m, i, S):
@@ -115,6 +119,7 @@ def pseudorandom_share(field, m, i, prfs, uci, n):
         sums[h] = field(sums[h])
     return sums
 
+
 def pseudorandom_share_zero(field, m, i, prfs, uci, n):
     """Return pseudorandom Shamir shares for party i for n sharings of 0.
 
@@ -122,7 +127,7 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
     given in prfs, which maps subsets of parties to PRF instances.
     Input uci is used to evaluate the PRFs on a unique common input.
     """
-    T = type(field.modulus) # T is int or T is gf2x.Polynomial
+    T = type(field.modulus)  # T is int or T is gf2x.Polynomial
     uci = str(uci).encode()
     sums = [0] * n
     # iterate over (m-1 choose t) subsets for degree t.
@@ -140,6 +145,7 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
         sums[h] = field(sums[h])
     return sums
 
+
 class PRF:
     """A pseudorandom function (PRF).
 
@@ -155,7 +161,7 @@ class PRF:
         self.key = key
         self.max = bound
         self.byte_length = ((bound-1).bit_length() + 7) // 8
-        if bound & (bound - 1): # no power of 2
+        if bound & (bound - 1):  # no power of 2
             self.byte_length += len(self.key)
 
     def __call__(self, s, n=None):

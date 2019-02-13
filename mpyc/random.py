@@ -28,10 +28,12 @@ from mpyc import asyncoro
 
 runtime = None
 
+
 def getrandbits(sectype, k):
     """Uniformly random nonnegative k-bit integer value."""
     x = runtime.random_bits(sectype, k)
     return runtime.from_bits(x)
+
 
 @asyncoro.mpc_coro
 async def _randbelow(sectype, n):
@@ -58,7 +60,7 @@ async def _randbelow(sectype, n):
             h -= h * (1 - x[i])
             i -= 1
         else:
-            if await runtime.output(h * x[i]): # TODO: mul_public
+            if await runtime.output(h * x[i]):  # TODO: mul_public
                 # restart, keeping unused secret random bits x[:i]
                 x = x[:i] + runtime.random_bits(sectype, k - i)
                 i = k - 1
@@ -66,9 +68,10 @@ async def _randbelow(sectype, n):
                 i -= 1
     return runtime.from_bits(x)
 
+
 @asyncoro.mpc_coro
 async def random_unit_vector(sectype, n):
-    """Uniformly random secret permutation of [1] + [0]*(n-1).
+    """Uniformly random secret rotation of [1] + [0]*(n-1).
 
     Expected number of secret random bits needed is log_2 n + c,
     with c a small constant, c < 3.
@@ -85,7 +88,7 @@ async def random_unit_vector(sectype, n):
             u = v + runtime.vector_sub(u, v)
             i -= 1
         else:
-            if await runtime.output(u[0] * x[i]): # TODO: mul_public
+            if await runtime.output(u[0] * x[i]):  # TODO: mul_public
                 # restart, keeping unused secret random bits x[:i]
                 x = x[:i] + runtime.random_bits(sectype, k - i)
                 u = [sectype(1)]
@@ -95,6 +98,7 @@ async def random_unit_vector(sectype, n):
                 u = u[:1] + v + runtime.vector_sub(u[1:], v)
                 i -= 1
     return u
+
 
 def randrange(sectype, start, stop=None, step=1):
     """Uniformly random secret integer in range(start, stop[, step])."""
@@ -106,9 +110,11 @@ def randrange(sectype, start, stop=None, step=1):
         raise ValueError('empty range for randrange()')
     return start + _randbelow(sectype, n) * step
 
+
 def randint(sectype, a, b):
     """Uniformly random secret integer between a and b, incl. both endpoints."""
     return randrange(sectype, a, b + 1)
+
 
 def choice(sectype, seq):
     """Uniformly random secret element chosen from seq.
@@ -124,6 +130,7 @@ def choice(sectype, seq):
     for i in range(len(seq)):
         s += u[i] * seq[i]
     return s
+
 
 def choices(sectype, population, weights=None, *, cum_weights=None, k=1):
     """List of k uniformly random secret elements chosen from population.
@@ -157,13 +164,14 @@ def choices(sectype, population, weights=None, *, cum_weights=None, k=1):
         z.append(s)
     return z
 
+
 def shuffle(sectype, x):
     """Shuffle list x secretly in place, and return None.
 
     Given list x may contain public or secret elements.
     """
     n = len(x)
-    if not isinstance(x[0], sectype): # assume same type for all elts of x
+    if not isinstance(x[0], sectype):  # assume same type for all elts of x
         for i in range(len(x)):
             x[i] = sectype(x[i])
     for i in range(n - 1):
@@ -173,6 +181,7 @@ def shuffle(sectype, x):
         x[i] = x_u
         x[i:] = runtime.vector_add(x[i:], d)
 
+
 def random_permutation(sectype, x):
     """Uniformly random permutation of given sequence x or range(x)."""
     if isinstance(x, int):
@@ -180,6 +189,7 @@ def random_permutation(sectype, x):
     x = list(x)
     shuffle(sectype, x)
     return x
+
 
 @asyncoro.mpc_coro
 async def random_derangement(sectype, x):
@@ -200,13 +210,14 @@ async def random_derangement(sectype, x):
         await runtime.returnType((sectype, x_integral), len(x))
     else:
         await runtime.returnType(sectype, len(x))
-    y = x[:] # NB: x is assumed to be free of duplicates
+    y = x[:]  # NB: x is assumed to be free of duplicates
     while True:
         shuffle(sectype, y)
         t = runtime.prod([y[i] - x[i] for i in range(len(x))])
         if not await runtime.is_zero_public(t):
             break
     return y
+
 
 @asyncoro.mpc_coro
 async def sample(sectype, population, k):
@@ -229,7 +240,7 @@ async def sample(sectype, population, k):
         raise ValueError('sample larger than population or size is negative')
     elif not isinstance(population, range):
         x = list(population)
-        if not isinstance(x[0], sectype): # assume same type for all elts of x
+        if not isinstance(x[0], sectype):  # assume same type for all elts of x
             for i in range(len(x)):
                 x[i] = sectype(x[i])
         for i in range(k):
@@ -250,6 +261,7 @@ async def sample(sectype, population, k):
             x.append(r)
         return x
 
+
 def random(sectype):
     """Uniformly random secret fixed-point number in the range [0.0, 1.0)."""
     f = sectype.field.frac_length
@@ -257,6 +269,7 @@ def random(sectype):
         raise TypeError('secure fixed-point type required')
     x = runtime.random_bits(sectype, f)
     return runtime.from_bits(x) * (2 ** -f)
+
 
 def uniform(sectype, a, b):
     """Uniformly random secret fixed-point number N such that

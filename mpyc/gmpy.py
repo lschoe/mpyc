@@ -8,6 +8,7 @@ try:
     from gmpy2 import is_prime, next_prime, powmod, invert, legendre
 except ImportError:
     import random
+
     def is_prime(x, n=25):
         """Return True if x is probably prime, else False if x is
         definitely composite, performing up to n Miller-Rabin
@@ -65,6 +66,6 @@ except ImportError:
     def legendre(x, y):
         """Return the Legendre symbol (x|y), assuming y is an odd prime."""
         z = pow(x, (y - 1) // 2, y)
-        if z > 1: # z == y - 1
+        if z > 1:  # z == y - 1
             z = -1
         return z
