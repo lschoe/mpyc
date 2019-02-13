@@ -57,7 +57,7 @@ async def _randbelow(sectype, n):
     i = k - 1
     while i >= 0:
         if (b >> i) & 1:
-            h -= h * (1 - x[i])
+            h *= x[i]
             i -= 1
         else:
             if await runtime.output(h * x[i]):  # TODO: mul_public
