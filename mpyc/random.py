@@ -54,18 +54,16 @@ async def _randbelow(sectype, n):
     k = b.bit_length()
     x = runtime.random_bits(sectype, k)
     h = 1
-    i = k - 1
-    while i >= 0:
+    i = k
+    t = (n & -n).bit_length()  # 1 + number of times 2 divides n
+    while i >= t:
+        i -= 1
         if (b >> i) & 1:
             h *= x[i]
-            i -= 1
-        else:
-            if await runtime.output(h * x[i]):  # TODO: mul_public
-                # restart, keeping unused secret random bits x[:i]
-                x = x[:i] + runtime.random_bits(sectype, k - i)
-                i = k - 1
-            else:
-                i -= 1
+        elif await runtime.output(h * x[i]):  # TODO: mul_public
+            # restart, keeping unused secret random bits x[:i]
+            x = x[:i] + runtime.random_bits(sectype, k - i)
+            i = k
     return runtime.from_bits(x)
 
 
@@ -81,22 +79,21 @@ async def random_unit_vector(sectype, n):
     k = b.bit_length()
     x = runtime.random_bits(sectype, k)
     u = [sectype(1)]
-    i = k - 1
-    while i >= 0:
+    i = k
+    while i:
+        i -= 1
         if (b >> i) & 1:
             v = runtime.scalar_mul(x[i], u)
             u = v + runtime.vector_sub(u, v)
-            i -= 1
         else:
             if await runtime.output(u[0] * x[i]):  # TODO: mul_public
                 # restart, keeping unused secret random bits x[:i]
                 x = x[:i] + runtime.random_bits(sectype, k - i)
                 u = [sectype(1)]
-                i = k - 1
+                i = k
             else:
                 v = runtime.scalar_mul(x[i], u[1:])
                 u = u[:1] + v + runtime.vector_sub(u[1:], v)
-                i -= 1
     return u
 
 
