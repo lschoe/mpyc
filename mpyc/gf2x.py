@@ -14,6 +14,7 @@ A simple irreducibility test is provided as well as a basic
 routine to find the next largest irreducible polynomial.
 """
 
+
 def add(a, b):
     """Add polynomials a and b."""
     if isinstance(a, Polynomial):
@@ -22,6 +23,7 @@ def add(a, b):
         b = b.value
     return Polynomial(a ^ b)
 
+
 def mul(a, b):
     """Multiply polynomials a and b."""
     if isinstance(a, Polynomial):
@@ -29,6 +31,7 @@ def mul(a, b):
     if isinstance(b, Polynomial):
         b = b.value
     return Polynomial(_mul(a, b))
+
 
 def _mul(a, b):
     if a < b:
@@ -42,6 +45,7 @@ def _mul(a, b):
         b >>= 1
     return c
 
+
 def mod(a, b):
     """Reduce polynomial a modulo polynomial b, for nonzero b."""
     if isinstance(a, Polynomial):
@@ -50,8 +54,9 @@ def mod(a, b):
         b = b.value
     return Polynomial(_mod(a, b))
 
+
 def _mod(a, b):
-    if b is None: # see _powmod()
+    if b is None:  # see _powmod()
         return a
 
     if b == 0:
@@ -68,6 +73,7 @@ def _mod(a, b):
         b >>= 1
     return a
 
+
 def divmod_(a, b):
     """Divide polynomial a by polynomial b with remainder, for nonzero b."""
     if isinstance(a, Polynomial):
@@ -76,6 +82,7 @@ def divmod_(a, b):
         b = b.value
     q, r = _divmod(a, b)
     return Polynomial(q), Polynomial(r)
+
 
 def _divmod(a, b):
     if b == 0:
@@ -95,6 +102,7 @@ def _divmod(a, b):
         b >>= 1
     return q, a
 
+
 def gcd(a, b):
     """Greatest common divisor of polynomials a and b."""
     if isinstance(a, Polynomial):
@@ -103,10 +111,12 @@ def gcd(a, b):
         b = b.value
     return Polynomial(_gcd(a, b))
 
+
 def _gcd(a, b):
     while b:
         a, b = b, _mod(a, b)
     return a
+
 
 def gcdext(a, b):
     """Extended GCD for polynomials a and b.
@@ -120,15 +130,16 @@ def gcdext(a, b):
     d, s, t = _gcdext(a, b)
     return Polynomial(d), Polynomial(s), Polynomial(t)
 
+
 def _gcdext(a, b):
     s, s1 = 1, 0
     t, t1 = 0, 1
     while b:
-        q, r = _divmod(a, b)
-        a, b = b, r
+        a, (q, b) = b, _divmod(a, b)
         s, s1 = s1, s ^ _mul(q, s1)
         t, t1 = t1, t ^ _mul(q, t1)
     return a, s, t
+
 
 def invert(a, b):
     """Inverse of polynomial a modulo polynomial b, for nonzero b."""
@@ -138,23 +149,25 @@ def invert(a, b):
         b = b.value
     return Polynomial(_invert(a, b))
 
+
 def _invert(a, b):
     if b == 0:
         raise ZeroDivisionError('division by zero polynomial')
     s, s1 = 1, 0
     while b:
-        q, r = _divmod(a, b)
-        a, b = b, r
+        a, (q, b) = b, _divmod(a, b)
         s, s1 = s1, s ^ _mul(q, s1)
     if a != 1:
         raise ZeroDivisionError('inverse does not exist')
     return s
+
 
 def to_terms(a, x='x'):
     """Convert polynomial a to a string with sum of powers of x."""
     if isinstance(a, Polynomial):
         a = a.value
     return _to_terms(a, x)
+
 
 def _to_terms(a, x='x'):
     if a == 0:
@@ -164,36 +177,39 @@ def _to_terms(a, x='x'):
     for i in range(a.bit_length(), -1, -1):
         if (a >> i) & 1:
             if i == 0:
-                p += '+1'    # x^0 = 1
+                p += '+1'     # x^0 = 1
             elif i == 1:
-                p += f'+{x}' # x^1 = x
+                p += f'+{x}'  # x^1 = x
             else:
                 p += f'+{x}^{i}'
     return p[1:]
+
 
 def from_terms(s, x='x'):
     """Convert string s with sum of powers of x to a polynomial."""
     return Polynomial(_from_terms(s, x))
 
+
 def _from_terms(s, x='x'):
-    s = "".join(s.split()) # remove all whitespace
+    s = "".join(s.split())  # remove all whitespace
     a = 0
     for term in s.split('+'):
         if term == '0':
             t = 0
         elif term == '1':
-            t = 1 # 2^0
+            t = 1  # 2^0
         elif term == x:
-            t = 2 # 2^1
+            t = 2  # 2^1
         elif term.startswith(f'{x}^'):
             t = 1 << int(term[2:], base=0)
-        else: # illegal term
+        else:  # illegal term
             raise ValueError('ill formatted polynomial')
-        if a & t: # repeated term
+        if a & t:  # repeated term
             raise ValueError('ill formatted polynomial')
         else:
             a ^= t
     return a
+
 
 def degree(a):
     """Degree of polynomial a (-1 if a is zero)."""
@@ -201,16 +217,19 @@ def degree(a):
         a = a.value
     return _degree(a)
 
+
 def _degree(a):
     return a.bit_length() - 1
 
+
 def powmod(a, n, b):
-    """Raise polynomial a to the power of n modulo polynomial b, for nonzero b."""
+    """Polynomial a to the power of n modulo polynomial b, for nonzero b."""
     if isinstance(a, Polynomial):
         a = a.value
     if isinstance(b, Polynomial):
         b = b.value
     return Polynomial(_powmod(a, n, b))
+
 
 def _powmod(a, n, b=None):
     if n == 0:
@@ -234,11 +253,13 @@ def _powmod(a, n, b=None):
     c = _mod(c, b)
     return c
 
+
 def is_irreducible(a):
     """Test polynomial a for irreducibility."""
     if isinstance(a, Polynomial):
         a = a.value
     return _is_irreducible(a)
+
 
 def _is_irreducible(a):
     if a <= 1:
@@ -253,6 +274,7 @@ def _is_irreducible(a):
 
     return True
 
+
 def next_irreducible(a):
     """Return next irreducible polynomial > a.
 
@@ -262,6 +284,7 @@ def next_irreducible(a):
         a = a.value
     return Polynomial(_next_irreducible(a))
 
+
 def _next_irreducible(a):
     if a <= 2:
         a += 1
@@ -270,6 +293,7 @@ def _next_irreducible(a):
         while not _is_irreducible(a):
             a += 2
     return a
+
 
 class Polynomial:
     """Polynomials over GF(2) represented as nonnegative integers."""
