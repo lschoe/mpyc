@@ -261,15 +261,15 @@ class _ProgramCounterWrapper:
     def __init__(self, coro):
         self.coro = coro
         runtime._increment_pc()
-        self.pc = [0] + runtime._program_counter  # fork
+        self.pc = (0,) + runtime._program_counter  # fork
 
     def __await__(self):
         while True:
-            pc = runtime._program_counter[:]
+            pc = runtime._program_counter
             runtime._program_counter = self.pc
             try:
                 val = self.coro.send(None)
-                self.pc = runtime._program_counter[:]
+                self.pc = runtime._program_counter
             except StopIteration as exc:
                 return exc.value  # NB: required for Python 3.7
             finally:

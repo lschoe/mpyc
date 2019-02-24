@@ -54,7 +54,7 @@ class Runtime:
         self.options = options
         self.threshold = options.threshold
         self._logging_enabled = not options.no_log
-        self._program_counter = [0]
+        self._program_counter = (0,)
         m = len(self.parties)
         t = self.threshold
         # caching (m choose t):
@@ -76,14 +76,15 @@ class Runtime:
 
     def _increment_pc(self):
         """Increment the program counter."""
-        self._program_counter[0] += 1
+        pc = list(self._program_counter)
+        pc[0] += 1
+        self._program_counter = tuple(pc)
 
     def _send_shares(self, peer_pid, data):
-        pc = tuple(self._program_counter)
-        self.parties[peer_pid].protocol.send_data(pc, data)
+        self.parties[peer_pid].protocol.send_data(self._program_counter, data)
 
     def _receive_shares(self, peer_pid):
-        pc = tuple(self._program_counter)
+        pc = self._program_counter
         if pc in self.parties[peer_pid].protocol.buffers:
             # Data already received from peer.
             data = self.parties[peer_pid].protocol.buffers.pop(pc)
@@ -110,7 +111,7 @@ class Runtime:
 
         logging.info(f'Barrier {asyncoro.pc_level} '
                      f'{len(self._program_counter)} '
-                     f'{self._program_counter[::-1]}'
+                     f'{list(reversed(self._program_counter))}'
                      )
         if not self.options.no_async:
             while asyncoro.pc_level >= len(self._program_counter):
