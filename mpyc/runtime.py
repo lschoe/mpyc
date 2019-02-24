@@ -76,9 +76,8 @@ class Runtime:
 
     def _increment_pc(self):
         """Increment the program counter."""
-        pc = list(self._program_counter)
-        pc[0] += 1
-        self._program_counter = tuple(pc)
+        pc = self._program_counter
+        self._program_counter = (pc[0] + 1,) + pc[1:]
 
     def _send_shares(self, peer_pid, data):
         self.parties[peer_pid].protocol.send_data(self._program_counter, data)
