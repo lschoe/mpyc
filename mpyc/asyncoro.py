@@ -11,6 +11,7 @@ from mpyc.sectypes import Share
 
 runtime = None
 
+
 class SharesExchanger(Protocol):
     """Send and receive shares.
 
@@ -35,13 +36,13 @@ class SharesExchanger(Protocol):
         to the peer as well as any PRSS keys.
         """
         self.transport = transport
-        if self.peer_pid is not None: # party is client (peer is server)
+        if self.peer_pid is not None:  # party is client (peer is server)
             m = len(runtime.parties)
             t = runtime.threshold
-            pid_keys = str(runtime.pid).encode() # send pid
+            pid_keys = str(runtime.pid).encode()  # send pid
             for subset in itertools.combinations(range(m), m - t):
                 if self.peer_pid in subset and runtime.pid == min(subset):
-                    pid_keys += runtime._prss_keys[subset] # send PRSS keys
+                    pid_keys += runtime._prss_keys[subset]  # send PRSS keys
             transport.write(pid_keys)
             self._key_transport_done()
 
@@ -68,7 +69,7 @@ class SharesExchanger(Protocol):
         First message from peer is processed differently if peer is a client.
         """
         self.bytes.extend(data)
-        if self.peer_pid is None: # peer is client (party is server)
+        if self.peer_pid is None:  # peer is client (party is server)
             peer_pid = int(self.bytes[:1])
             len_packet = 1
             m = len(runtime.parties)
@@ -115,6 +116,7 @@ class SharesExchanger(Protocol):
         """Close connection with the peer."""
         self.transport.close()
 
+
 class _AwaitableFuture:
     """Cheap replacement of a Future."""
 
@@ -125,7 +127,8 @@ class _AwaitableFuture:
 
     def __await__(self):
         return self.value
-        yield # NB: makes __await__ iterable
+        yield  # NB: makes __await__ iterable
+
 
 class _SharesCounter(Future):
     """Count and gather all futures (shared values) in an object."""
@@ -161,6 +164,7 @@ class _SharesCounter(Future):
             for x in obj:
                 self._add_callbacks(x)
 
+
 def _get_results(obj):
     if isinstance(obj, Share):
         if isinstance(obj.df, Future):
@@ -175,6 +179,7 @@ def _get_results(obj):
         return type(obj)(map(_get_results, obj))
 
     return obj
+
 
 def gather_shares(*obj):
     """Gather all results for the given futures (shared values)."""
@@ -198,6 +203,7 @@ def gather_shares(*obj):
 
     return _AwaitableFuture(_get_results(obj))
 
+
 class _Awaitable:
 
     __slots__ = 'value'
@@ -208,6 +214,7 @@ class _Awaitable:
     def __await__(self):
         yield self.value
 
+
 def _nested_list(rt, n, dims):
     if dims:
         n0 = dims[0]
@@ -217,13 +224,14 @@ def _nested_list(rt, n, dims):
         s = [rt() for _ in range(n)]
     return s
 
+
 def returnType(*args, wrap=True):
     """Define return type for MPyC coroutines.
 
     Used in first await expression in an MPyC coroutine.
     """
     rettype, *dims = args
-    if rettype is type(None):
+    if isinstance(rettype, type(None)):
         rettype = None
     if rettype is not None:
         if isinstance(rettype, tuple):
@@ -245,6 +253,7 @@ def returnType(*args, wrap=True):
         rettype = _Awaitable(rettype)
     return rettype
 
+
 class _ProgramCounterWrapper:
 
     __slots__ = 'coro', 'pc'
@@ -252,7 +261,7 @@ class _ProgramCounterWrapper:
     def __init__(self, coro):
         self.coro = coro
         runtime._increment_pc()
-        self.pc = [0] + runtime._program_counter # fork
+        self.pc = [0] + runtime._program_counter  # fork
 
     def __await__(self):
         while True:
@@ -262,16 +271,18 @@ class _ProgramCounterWrapper:
                 val = self.coro.send(None)
                 self.pc = runtime._program_counter[:]
             except StopIteration as exc:
-                return exc.value # NB: required for Python 3.7
+                return exc.value  # NB: required for Python 3.7
             finally:
                 runtime._program_counter = pc
             yield val
+
 
 async def _wrap(coro):
     return await coro
 
 pc_level = 0
 """Tracks (length of) program counter to implement barriers."""
+
 
 def _reconcile(decl, givn):
     global pc_level
@@ -280,6 +291,7 @@ def _reconcile(decl, givn):
         return
 
     __reconcile(decl, givn)
+
 
 def __reconcile(decl, givn):
     if isinstance(decl, Share):
@@ -301,8 +313,9 @@ def __reconcile(decl, givn):
     elif isinstance(decl, list):
         for d, g in zip(decl, givn):
             __reconcile(d, g)
-    else: # isinstance(decl, Future)
+    else:  # isinstance(decl, Future)
         decl.set_result(givn)
+
 
 def _ncopy(nested_list):
     if isinstance(nested_list, list):
@@ -310,8 +323,10 @@ def _ncopy(nested_list):
 
     return nested_list
 
+
 def _mpc_coro_no_pc(func):
     return mpc_coro(func, pc=False)
+
 
 def mpc_coro(func, pc=True):
     """Decorator turning coroutine func into an MPyC coroutine.
@@ -343,7 +358,7 @@ def mpc_coro(func, pc=True):
 
         if pc:
             coro = _wrap(_ProgramCounterWrapper(coro))
-        d = runtime._loop.create_task(coro) # ensure_future
+        d = runtime._loop.create_task(coro)  # ensure_future
         d.add_done_callback(lambda v: _reconcile(decl, v.result()))
         return _ncopy(decl)
 

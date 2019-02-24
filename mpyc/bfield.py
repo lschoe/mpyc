@@ -9,6 +9,7 @@ In-place versions of the field operators are also provided.
 
 from mpyc import gf2x
 
+
 def find_irreducible(d):
     """Find smallest irreducible polynomial of degree d satisfying given constraints.
 
@@ -16,8 +17,11 @@ def find_irreducible(d):
     """
     return gf2x.next_irreducible(2**d - 1)
 
+
 # Calls to GF with identical modulus return the same class.
 _field_cache = {}
+
+
 def GF(modulus):
     """Create a Galois (finite) field for given irreducible polynomial."""
     poly = gf2x.Polynomial(modulus)
@@ -28,12 +32,13 @@ def GF(modulus):
     if not gf2x.is_irreducible(poly):
         raise ValueError(f'{poly} is not irreducible')
 
-    GFElement = type(f'GF(2^{poly.degree()})', (BinaryFieldElement,), {'__slots__':()})
+    GFElement = type(f'GF(2^{poly.degree()})', (BinaryFieldElement,), {'__slots__': ()})
     GFElement.modulus = poly
     GFElement.ext_deg = poly.degree()
     GFElement.order = 2**poly.degree()
     _field_cache[poly] = GFElement
     return GFElement
+
 
 class BinaryFieldElement():
     """Common base class for binary field elements.

@@ -21,6 +21,7 @@ import ssl
 from mpyc import thresha
 from mpyc import sectypes
 from mpyc import asyncoro
+import mpyc.random
 
 Future = asyncio.Future
 Share = sectypes.Share
@@ -29,6 +30,7 @@ gather_shares = asyncoro.gather_shares
 mpc_coro = asyncoro.mpc_coro
 mpc_coro_no_pc = asyncoro._mpc_coro_no_pc
 returnType = asyncoro.returnType
+
 
 class Runtime:
     """MPyC runtime secure against passive attacks.
@@ -41,7 +43,8 @@ class Runtime:
     to enable distributed computation (without secret sharing).
     """
 
-    version = None
+    version = mpyc.__version__
+    random = mpyc.random
 
     def __init__(self, pid, parties, prss_keys, options):
         """Initialize runtime."""
@@ -54,12 +57,12 @@ class Runtime:
         self._program_counter = [0]
         m = len(self.parties)
         t = self.threshold
-        #caching (m choose t):
+        # caching (m choose t):
         self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
-        self._loop = asyncio.get_event_loop() # cache running loop
+        self._loop = asyncio.get_event_loop()  # cache running loop
         self.start_time = None
 
-    @functools.lru_cache(maxsize=None) # TODO: clear cache if threshold changes
+    @functools.lru_cache(maxsize=None)  # TODO: clear cache if threshold changes
     def prfs(self, bound):
         """PRFs with codomain range(bound) for pseudorandom secret sharing.
 
@@ -108,7 +111,7 @@ class Runtime:
         logging.info(f'Barrier {asyncoro.pc_level} '
                      f'{len(self._program_counter)} '
                      f'{self._program_counter[::-1]}'
-                    )
+                     )
         if not self.options.no_async:
             while asyncoro.pc_level >= len(self._program_counter):
                 await asyncio.sleep(0)
@@ -267,7 +270,7 @@ class Runtime:
         assert value is None or self.pid in senders
         m = len(self.parties)
         t = self.threshold
-        x = [a.df for a in x] # Extract values from all elements of x.
+        x = [a.df for a in x]  # Extract values from all elements of x.
         shares = [None] * len(senders)
         for i, peer_pid in enumerate(senders):
             if peer_pid == self.pid:
@@ -345,7 +348,7 @@ class Runtime:
         x_is_list = isinstance(x, list)
         if not x_is_list:
             x = [x]
-        sftype = type(x[0]) # all elts assumed of same type
+        sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
             field = sftype.field
             if not field.frac_length:
@@ -382,7 +385,7 @@ class Runtime:
         if not x_is_list:
             x = [x]
         n = len(x)
-        sftype = type(x[0]) # all elts assumed of same type
+        sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
             if x_is_list:
                 await returnType(sftype, n)
@@ -431,7 +434,7 @@ class Runtime:
                 if await self.output(r * s + z[0], threshold=2 * t):
                     break
         else:
-            r = self._random(field) #failure shared r is 0 with prob. 1/p
+            r = self._random(field)  # NB: failure r=0 with probability 1/p
         a = await gather_shares(a)
         if issubclass(stype, SecureFiniteField):
             z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
@@ -498,7 +501,7 @@ class Runtime:
         if field.frac_length and b_integral:
             a, b = b, a
         if field.frac_length and (a_integral or b_integral) and not isinstance(a, int):
-            a = a >> field.frac_length # NB: no inplace a >>=
+            a = a >> field.frac_length  # NB: no inplace a >>=
         c = a * b
         if shb:
             c = self._reshare(c)
@@ -599,7 +602,7 @@ class Runtime:
         if isinstance(a, SecureFiniteField):
             return 1 - self.pow(a, a.field.order - 1)
 
-        if (a.bit_length/2 > self.options.security_parameter >= 8 and a.field.order%4 == 3):
+        if (a.bit_length/2 > self.options.security_parameter >= 8 and a.field.order % 4 == 3):
             return self._is_zero(a)
 
         return self.sgn(a, EQ=True)
@@ -648,10 +651,10 @@ class Runtime:
         a_rmodl = a + ((1<<l) + r_modl)
         k = self.options.security_parameter
         r_divl = self._random(Zp, 1<<k)
-        c = await self.output(a_rmodl + (r_divl.value << l)) # pylint: disable=E1101
+        c = await self.output(a_rmodl + (r_divl.value << l))  # pylint: disable=E1101
         c = c.value % (1<<l)
 
-        if not EQ: # a la Toft
+        if not EQ:  # a la Toft
             s_sign = (await self.random_bits(Zp, 1, signed=True))[0].value
             e = [None] * (l + 1)
             sumXors = 0
@@ -705,7 +708,7 @@ class Runtime:
 
     @mpc_coro
     async def lsb(self, a):
-        """Secure least significant bit of a.""" # a la [ST06]
+        """Secure least significant bit of a."""  # a la [ST06]
         stype = type(a)
         await returnType((stype, True))
         Zp = stype.field
@@ -715,8 +718,8 @@ class Runtime:
         a, b = await gather_shares(a, b)
         b >>= Zp.frac_length
         r = self._random(Zp, 1 << (l + k - 1))
-        c = await self.output(a + ((1<<l) + (r.value << 1) + b.value)) # pylint: disable=E1101
-        x = 1 - b if c.value & 1 else b # xor
+        c = await self.output(a + ((1<<l) + (r.value << 1) + b.value))  # pylint: disable=E1101
+        x = 1 - b if c.value & 1 else b  # xor
         x <<= Zp.frac_length
         return x
 
@@ -789,7 +792,7 @@ class Runtime:
             h = [None] * (len(x)//2)
             for i in range(len(h)):
                 h[i] = x[2*i] * x[2*i+1]
-            h = await self._reshare(h) # TODO: handle trunc
+            h = await self._reshare(h)  # TODO: handle trunc
             x = x[2*len(h):] + h
         return x[0]
 
@@ -857,7 +860,7 @@ class Runtime:
 
         a, x = await gather_shares(a, x)
         if field.frac_length and a_integral:
-            a = a >> field.frac_length # NB: no inplace a >>=
+            a = a >> field.frac_length  # NB: no inplace a >>=
         for i in range(len(x)):
             x[i] = x[i] * a
         x = await self._reshare(x)
@@ -881,7 +884,7 @@ class Runtime:
 
         a, x, y = await gather_shares(a, x, y)
         if field.frac_length:
-            a = a >> field.frac_length # NB: no inplace a >>=
+            a = a >> field.frac_length  # NB: no inplace a >>=
         for i in range(len(x)):
             x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
         x = await self._reshare(x)
@@ -1001,7 +1004,7 @@ class Runtime:
         if bound is None:
             bound = field.order
         else:
-            bound = (bound - 1) // self._bincoef + 1 # TODO: round to power of 2
+            bound = (bound - 1) // self._bincoef + 1  # TODO: round to power of 2
         m = len(self.parties)
         prfs = self.prfs(bound)
         shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
@@ -1038,7 +1041,7 @@ class Runtime:
         bits = [None] * n
         p = field.modulus
         if not signed:
-            q = (p + 1) >> 1 # q = 1/2 mod p
+            q = (p + 1) >> 1  # q = 1/2 mod p
         prfs = self.prfs(p)
         t = self.threshold
         h = n
@@ -1065,6 +1068,7 @@ class Runtime:
     def add_bits(self, x, y):
         """Secure binary addition of bit vectors x and y."""
         x, y = x[:], y[:]
+
         def f(i, j, high=False):
             n = j - i
             if n == 1:
@@ -1090,7 +1094,7 @@ class Runtime:
 
     @mpc_coro
     async def to_bits(self, a, l=None):
-        """Secure extraction of l (or all) least significant bits of a.""" # a la [ST06].
+        """Secure extraction of l (or all) least significant bits of a."""  # a la [ST06].
         stype = type(a)
         if l is None:
             l = stype.bit_length
@@ -1107,7 +1111,7 @@ class Runtime:
             k = self.options.security_parameter
             r_divl = self._random(field, 1<<k)
             a = await gather_shares(a)
-            c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl)) # pylint: disable=E1101
+            c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))  # pylint: disable=E1101
             c = c.value % (1<<l)
             c_bits = [(c >> i) & 1 for i in range(l)]
             r_bits = [stype(r.value) for r in r_bits]
@@ -1131,36 +1135,38 @@ class Runtime:
             s += x[i].value << i
         return field(s)
 
-    def _norm(self, a): # signed normalization factor
-        x = self.to_bits(a) # low to high bits
-        b = x[-1] # sign bit
-        s = 1 - b * 2 # sign s = (-1)^b
+    def _norm(self, a):  # signed normalization factor
+        x = self.to_bits(a)  # low to high bits
+        b = x[-1]  # sign bit
+        s = 1 - b * 2  # sign s = (-1)^b
         x = x[:-1]
         _1 = type(a)(1)
+
         def __norm(x):
             n = len(x)
             if n == 1:
-                t = s * x[0] + b # self.xor(b, x[0])
+                t = s * x[0] + b  # self.xor(b, x[0])
                 return 2 - t, t
 
-            i0, nz0 = __norm(x[:n//2]) # low bits
-            i1, nz1 = __norm(x[n//2:]) # high bits
+            i0, nz0 = __norm(x[:n//2])  # low bits
+            i1, nz1 = __norm(x[n//2:])  # high bits
             i0 *= (1 << ((n + 1) // 2))
-            return self.if_else(nz1, [i1, _1], [i0, nz0]) # self.or_(nz0, nz1)
+            return self.if_else(nz1, [i1, _1], [i0, nz0])  # self.or_(nz0, nz1)
 
         l = type(a).bit_length
         f = type(a).field.frac_length
-        return s * __norm(x)[0] * (2 ** (f - (l - 1))) # NB: f <= l
+        return s * __norm(x)[0] * (2 ** (f - (l - 1)))  # NB: f <= l
 
-    def _rec(self, a): # enhance performance by reducing no. of truncs
+    def _rec(self, a):  # enhance performance by reducing no. of truncs
         f = type(a).field.frac_length
         v = self._norm(a)
-        b = a * v # 1/2 <= b <= 1
+        b = a * v  # 1/2 <= b <= 1
         theta = int(math.ceil(math.log((2 * f + 1) / 3.5, 2)))
         c = 2.9142 - b * 2
         for _ in range(theta):
             c *= 2 - c * b
         return c * v
+
 
 class _Party:
     """Information about a party in the MPC protocol."""
@@ -1177,6 +1183,7 @@ class _Party:
             return f'<_Party {self.pid}>'
 
         return f'<_Party {self.pid}: {self.host}:{self.port}>'
+
 
 def generate_configs(m, addresses):
     """Generate party configurations.
@@ -1198,8 +1205,9 @@ def generate_configs(m, addresses):
             config.add_section(f'Party {p}')
             config.set(f'Party {p}', 'host', host)
             config.set(f'Party {p}', 'port', port)
-        configs[p].set(f'Party {p}', 'host', '') # empty host string for owner
+        configs[p].set(f'Party {p}', 'host', '')  # empty host string for owner
     return configs
+
 
 def _load_config(filename):
     """Load m-party configuration file.
@@ -1218,13 +1226,14 @@ def _load_config(filename):
     my_pid = None
     parties = [None] * m
     for party in config.sections():
-        pid = int(party[6:]) # strip 'Party ' prefix
+        pid = int(party[6:])  # strip 'Party ' prefix
         host = config.get(party, 'host')
         port = config.getint(party, 'port')
         if host == '':
             my_pid = pid
         parties[pid] = _Party(pid, host, port)
     return my_pid, parties
+
 
 def setup():
     """Setup a runtime."""
@@ -1269,16 +1278,16 @@ def setup():
         pid = 0
         parties = [_Party(pid)]
         m = 1
-        prss_keys = {(pid,): secrets.token_bytes(16)} # 128-bit key
+        prss_keys = {(pid,): secrets.token_bytes(16)}  # 128-bit key
     else:
         options.config = os.path.join('.config', options.config)
         pid, parties = _load_config(options.config)
         m = len(parties)
         prss_keys = {}
-        for t in range((m + 1) // 2): # all possible thresholds
+        for t in range((m + 1) // 2):  # all possible thresholds
             for subset in itertools.combinations(range(m), m - t):
                 if pid == min(subset):
-                    prss_keys[subset] = secrets.token_bytes(16) # 128-bit key
+                    prss_keys[subset] = secrets.token_bytes(16)  # 128-bit key
     if options.threshold is None:
         options.threshold = (m - 1) // 2
     assert 2 * options.threshold < m
@@ -1287,13 +1296,11 @@ def setup():
     mpc = Runtime(pid, parties, prss_keys, options)
     sectypes.runtime = mpc
     asyncoro.runtime = mpc
-    import mpyc.random
     mpyc.random.runtime = mpc
-    mpc.random = mpyc.random
-    mpc.version = mpyc.__version__
+
 
 mpc = None
-try: # suppress exceptions for pydoc etc.
+try:  # suppress exceptions for pydoc etc.
     setup()
 except Exception as exc:
     print('MPyC runtime.setup() exception:', exc)

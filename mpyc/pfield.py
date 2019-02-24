@@ -10,6 +10,7 @@ Modular square roots and quadratic residuosity tests supported as well.
 
 import mpyc.gmpy as gmpy2
 
+
 def find_prime_root(l, blum=True, n=1):
     """Find smallest prime of bit length at least l satisfying given constraints.
 
@@ -47,8 +48,11 @@ def find_prime_root(l, blum=True, n=1):
         p, w = int(p), int(w)
     return p, n, w
 
+
 # Calls to GF with identical modulus and frac_length return the same class.
 _field_cache = {}
+
+
 def GF(modulus, f=0):
     """Create a Galois (finite) field for given prime modulus."""
     if isinstance(modulus, tuple):
@@ -66,16 +70,17 @@ def GF(modulus, f=0):
     if not gmpy2.is_prime(p):
         raise ValueError(f'{p} is not a prime')
 
-    GFElement = type(f'GF({p})', (PrimeFieldElement,), {'__slots__':()})
+    GFElement = type(f'GF({p})', (PrimeFieldElement,), {'__slots__': ()})
     GFElement.modulus = p
     GFElement.order = p
     GFElement.is_signed = True
     GFElement.nth = n
     GFElement.root = w % p
     GFElement.frac_length = f
-    GFElement.rshift_factor = int(gmpy2.invert(1 << f, p)) # cache (1/2)^f mod p
+    GFElement.rshift_factor = int(gmpy2.invert(1 << f, p))  # cache (1/2)^f mod p
     _field_cache[(p, f)] = GFElement
     return GFElement
+
 
 class PrimeFieldElement():
     """Common base class for prime field elements.
@@ -323,7 +328,7 @@ class PrimeFieldElement():
 
         if p & 3 == 3:
             if INV:
-                q = (p * 3 - 5) >> 2 # a**q == a**(-1/2) == 1/sqrt(a) mod p
+                q = (p * 3 - 5) >> 2  # a**q == a**(-1/2) == 1/sqrt(a) mod p
             else:
                 q = (p + 1) >> 2
             return type(self)(int(gmpy2.powmod(a, q, p)))

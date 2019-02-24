@@ -13,6 +13,7 @@ from mpyc import pfield
 
 runtime = None
 
+
 class Share:
     """A secret-shared value.
 
@@ -154,7 +155,7 @@ class Share:
         r = self.__mod__(other)
         if r is NotImplemented:
             return NotImplemented
-        other = self._coerce(other) # avoid coercing twice
+        other = self._coerce(other)  # avoid coercing twice
         if other is NotImplemented:
             return NotImplemented
         q = (self - r) / other.df
@@ -165,7 +166,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        r = other.__mod__(self) # avoid coercing twice
+        r = other.__mod__(self)  # avoid coercing twice
         if r is NotImplemented:
             return NotImplemented
         q = (other - r) / self.df
@@ -176,7 +177,7 @@ class Share:
         r = self.__mod__(other)
         if r is NotImplemented:
             return NotImplemented
-        other = self._coerce(other) # avoid coercing twice
+        other = self._coerce(other)  # avoid coercing twice
         if other is NotImplemented:
             return NotImplemented
         q = (self - r) / other.df
@@ -187,7 +188,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
-        r = other.__mod__(self) # avoid coercing twice
+        r = other.__mod__(self)  # avoid coercing twice
         if r is NotImplemented:
             return NotImplemented
         q = (other - r) / self.df
@@ -281,6 +282,7 @@ class Share:
         c = self - other
         return 1 - runtime.is_zero(c)
 
+
 class SecureFiniteField(Share):
     """Base class for secret-shared finite field values.
 
@@ -341,17 +343,21 @@ class SecureFiniteField(Share):
         """Currently no support at all."""
         return NotImplemented
 
+
 class SecureInteger(Share):
     """Base class for secret-shared integer values."""
 
     __slots__ = ()
+
 
 class SecureFixedPoint(Share):
     """Base class for secret-shared fixed-point values."""
 
     __slots__ = ()
 
+
 _sectypes = {}
+
 
 def SecFld(order=None, modulus=None, char2=None, l=None):
     """Secure prime or binary field of (l+1)-bit order.
@@ -364,7 +370,7 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
         modulus = gf2x.Polynomial(modulus)
     if isinstance(modulus, gf2x.Polynomial):
         char2 = char2 or (char2 is None)
-        assert char2 # binary field
+        assert char2  # binary field
         modulus = int(modulus)
     if order is not None:
         if order == 2:
@@ -374,16 +380,16 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
                 char2 = char2 or False
             else:
                 char2 = char2 or (char2 is None)
-                assert char2 # binary field
+                assert char2  # binary field
         elif gmpy.is_prime(order):
             modulus = modulus or order
             assert modulus == order
             char2 = char2 or False
-            assert not char2 # prime field
+            assert not char2  # prime field
         elif order % 2 == 0:
             assert modulus is None or modulus.bit_length() == order.bit_length()
             char2 = char2 or (char2 is None)
-            assert char2 # binary field
+            assert char2  # binary field
         else:
             raise ValueError('only prime fields and binary fields supported')
         l = l or order.bit_length() - 1
@@ -400,17 +406,19 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
     else:
         field = pfield.GF(modulus)
     assert runtime.threshold == 0 or field.order > len(runtime.parties), \
-            'Field order must exceed number of parties, unless threshold is 0.'
+        'Field order must exceed number of parties, unless threshold is 0.'
     # field.order >= number of parties for MDS
     field.is_signed = False
     return _SecFld(l, field)
 
+
 @functools.lru_cache(maxsize=None)
 def _SecFld(l, field):
-    sectype = type(f'SecFld{l}({field})', (SecureFiniteField,), {'__slots__':()})
+    sectype = type(f'SecFld{l}({field})', (SecureFiniteField,), {'__slots__': ()})
     sectype.field = field
     sectype.bit_length = l
     return sectype
+
 
 def _pfield(l, f, p, n):
     k = runtime.options.security_parameter
@@ -420,11 +428,13 @@ def _pfield(l, f, p, n):
         assert p.bit_length() > l + max(f, k + 1), f'Prime {p} too small.'
     return pfield.GF(p, f)
 
+
 def SecInt(l=None, p=None, n=2):
     """Secure l-bit integers."""
     if l is None:
         l = runtime.options.bit_length
     return _SecInt(l, p, n)
+
 
 @functools.lru_cache(maxsize=None)
 def _SecInt(l, p, n):
@@ -432,10 +442,11 @@ def _SecInt(l, p, n):
         name = f'SecInt{l}'
     else:
         name = f'SecInt{l}({p})'
-    sectype = type(name, (SecureInteger,), {'__slots__':()})
+    sectype = type(name, (SecureInteger,), {'__slots__': ()})
     sectype.field = _pfield(l, 0, p, n)
     sectype.bit_length = l
     return sectype
+
 
 def SecFxp(l=None, f=None, p=None, n=2):
     """Secure l-bit fixed-point numbers with f-bit fractional part.
@@ -445,9 +456,10 @@ def SecFxp(l=None, f=None, p=None, n=2):
     if l is None:
         l = runtime.options.bit_length
     if f is None:
-        f = l // 2 # l =~ 2f enables division such that x =~ 1/(1/x)
+        f = l // 2  # l =~ 2f enables division such that x =~ 1/(1/x)
 
     return _SecFxp(l, f, p, n)
+
 
 @functools.lru_cache(maxsize=None)
 def _SecFxp(l, f, p, n):
@@ -455,6 +467,7 @@ def _SecFxp(l, f, p, n):
         name = f'SecFxp{l}:{f}'
     else:
         name = f'SecFxp{l}:{f}({p})'
+
     def init(self, value=None, integral=False):
         if value is not None:
             if isinstance(value, int):
@@ -469,7 +482,7 @@ def _SecFxp(l, f, p, n):
             self.integral = integral
         super(sectype, self).__init__(value)
     sectype = type(name, (SecureFixedPoint,),
-                   {'__slots__':'integral', '__init__':init})
+                   {'__slots__': 'integral', '__init__': init})
     sectype.field = _pfield(l, f, p, n)
     sectype.bit_length = l
     return sectype
