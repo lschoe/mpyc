@@ -30,9 +30,9 @@ Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish i
 3. A few simple Windows batch files are provided in the `demos` directory. Also note the Windows batch files
 in the `docs` and `tests` directories.
 
-4. Directory `demos\.config` contains configuration info and key material needed to run MPyC with
-multiple parties. Windows batch file 'gen.bat' shows how to generate fresh key material for pseudorandom
-secret sharing and SSL. OpenSSL is required to generate SSL key material of your own, use `pip install pyOpenSSL`.
+4. Directory `demos\.config` contains configuration info needed to run MPyC with multiple parties. Also, 
+Windows batch file 'gen.bat' shows how to generate fresh key material for SSL. OpenSSL is required to generate 
+SSL key material of your own, use `pip install pyOpenSSL`.
 
 5. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, you need to have Jupyter installed,
 e.g., using `pip install jupyter`. The latest version of Jupyter will come with IPython 7.0+, which supports
