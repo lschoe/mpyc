@@ -400,17 +400,20 @@ class Runtime:
             f = Zp.frac_length
         k = self.options.security_parameter
         r_bits = await self.random_bits(Zp, f * n)
-        r_modf = [0] * n
+        r_modf = [None] * n
         for j in range(n):
+            s = 0
             for i in range(f - 1, -1, -1):
-                r_modf[j] <<= 1
-                r_modf[j] += r_bits[f*j + i]
+                s <<= 1
+                s += r_bits[f*j + i].value
+            r_modf[j] = Zp(s)
         r_divf = self._randoms(Zp, n, 1<<(k + l - f))
         if issubclass(sftype, Share):
             x = await gather_shares(x)
-        c = await mpc.output([a + ((1<<f) + (b.value << f) + c) for a, b, c in zip(x, r_divf, r_modf)])
+        c = await mpc.output([a + ((1<<f) + (q.value << f) + r.value)
+                              for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
-        y = [(b - c + a) >> f for a, b, c in zip(x, r_modf, c)]
+        y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
         if not x_is_list:
             y = y[0]
         return y
@@ -482,13 +485,14 @@ class Runtime:
         """Secure multiplication of a and b."""
         stype = type(a)
         field = stype.field
-        if not field.frac_length:
+        f = field.frac_length
+        if not f:
             await returnType(stype)
         else:
             a_integral = a.integral
             b_integral = isinstance(b, int) or isinstance(b, Share) and b.integral
             if isinstance(b, float):
-                b = round(b * 2**field.frac_length)
+                b = round(b * 2**f)
             await returnType((stype, a_integral and b_integral))
 
         shb = isinstance(b, Share)
@@ -498,14 +502,14 @@ class Runtime:
             a = b = await gather_shares(a)
         else:
             a, b = await gather_shares(a, b)
-        if field.frac_length and b_integral:
+        if f and b_integral:
             a, b = b, a
-        if field.frac_length and (a_integral or b_integral) and not isinstance(a, int):
-            a = a >> field.frac_length  # NB: no inplace a >>=
+        if f and (a_integral or b_integral) and not isinstance(a, int):
+            a = a >> f  # NB: no inplace a >>=
         c = a * b
         if shb:
             c = self._reshare(c)
-        if field.frac_length and not (a_integral or b_integral):
+        if f and not (a_integral or b_integral):
             c = self.trunc(stype(c))
         return c
 
@@ -559,7 +563,7 @@ class Runtime:
         c = 1
         for i in range(b.bit_length() - 1):
             # d = a ** (1 << i) holds
-            if b & (1 << i):
+            if (b >> i) & 1:
                 c = c * d
             d = d * d
         c = c * d
@@ -567,11 +571,7 @@ class Runtime:
 
     def and_(self, a, b):
         """Secure bitwise and of a and b."""
-        field = type(a).field
-        a2 = self.to_bits(a)
-        b2 = self.to_bits(b)
-        c2 = [a2[i] * b2[i] for i in range(len(a2))]
-        return sum(c2[i] * field(1 << i) for i in range(len(c2)))
+        return self.from_bits(self.schur_prod(self.to_bits(a), self.to_bits(b)))
 
     def xor(self, a, b):
         """Secure bitwise xor of a and b."""
@@ -583,11 +583,7 @@ class Runtime:
 
     def or_(self, a, b):
         """Secure bitwise or of a and b."""
-        field = type(a).field
-        a2 = self.to_bits(a)
-        b2 = self.to_bits(b)
-        c2 = [a2[i] + b2[i] + a2[i] * b2[i] for i in range(len(a2))]
-        return sum(c2[i] * field(1 << i) for i in range(len(c2)))
+        return a + b + self.and_(a, b)
 
     def eq(self, a, b):
         """Secure comparison a == b."""
@@ -602,7 +598,7 @@ class Runtime:
         if isinstance(a, SecureFiniteField):
             return 1 - self.pow(a, a.field.order - 1)
 
-        if (a.bit_length/2 > self.options.security_parameter >= 8 and a.field.order % 4 == 3):
+        if (a.bit_length / 2 > self.options.security_parameter >= 8 and a.field.order % 4 == 3):
             return self._is_zero(a)
 
         return self.sgn(a, EQ=True)
@@ -644,14 +640,14 @@ class Runtime:
         l = stype.bit_length
         r_bits = await self.random_bits(Zp, l)
         r_modl = 0
-        for i in range(l - 1, -1, -1):
+        for r_i in reversed(r_bits):
             r_modl <<= 1
-            r_modl += r_bits[i].value
+            r_modl += r_i.value
         a = await gather_shares(a)
         a_rmodl = a + ((1<<l) + r_modl)
         k = self.options.security_parameter
         r_divl = self._random(Zp, 1<<k)
-        c = await self.output(a_rmodl + (r_divl.value << l))  # pylint: disable=E1101
+        c = await self.output(a_rmodl + (r_divl.value << l))
         c = c.value % (1<<l)
 
         if not EQ:  # a la Toft
@@ -660,8 +656,9 @@ class Runtime:
             sumXors = 0
             for i in range(l - 1, -1, -1):
                 c_i = (c >> i) & 1
-                e[i] = Zp(s_sign + r_bits[i].value - c_i + 3 * sumXors)
-                sumXors += 1 - r_bits[i].value if c_i else r_bits[i].value
+                r_i = r_bits[i].value
+                e[i] = Zp(s_sign + r_i - c_i + 3 * sumXors)
+                sumXors += 1 - r_i if c_i else r_i
             e[l] = Zp(s_sign - 1 + 3 * sumXors)
             e = await self.prod(e)
             g = await self.is_zero_public(stype(e))
@@ -718,10 +715,47 @@ class Runtime:
         a, b = await gather_shares(a, b)
         b >>= Zp.frac_length
         r = self._random(Zp, 1 << (l + k - 1))
-        c = await self.output(a + ((1<<l) + (r.value << 1) + b.value))  # pylint: disable=E1101
+        c = await self.output(a + ((1<<l) + (r.value << 1) + b.value))
         x = 1 - b if c.value & 1 else b  # xor
         x <<= Zp.frac_length
         return x
+
+    def mod(self, a, b):
+        """Secure modulo reduction."""
+        if b == 2:
+            r = self.lsb(a)
+        elif not b & (b - 1):
+            r = self.from_bits(self.to_bits(a, b.bit_length() - 1))
+        else:
+            r = self._mod(a, b)
+        return r
+
+    @mpc_coro
+    async def _mod(self, a, b):
+        """Secure modulo reduction, for public b."""  # a la [GMS10]
+        stype = type(a)
+        await returnType(stype)
+        Zp = stype.field
+        l = stype.bit_length
+        k = self.options.security_parameter
+        f = Zp.frac_length
+        r_bits = self.random._randbelow(stype, b, bits=True)
+        a, r_bits = await gather_shares(a, r_bits)
+        r_bits = [(r >> f).value for r in r_bits]
+        r_modb = 0
+        for r_i in reversed(r_bits):
+            r_modb <<= 1
+            r_modb += r_i
+        r_modb = Zp(r_modb)
+        r_divb = self._random(Zp, 1 << k)
+        c = await self.output(a + ((1<<l) - ((1<<l) % b) + b * r_divb.value - r_modb.value))
+        c = c.value % b
+        c_bits = [(c >> i) & 1 for i in range(len(r_bits))]
+        c_bits.append(0)
+        r_bits = [stype(r) for r in r_bits]
+        r_bits.append(stype(0))
+        z = stype(r_modb - (b - c)) >= 0  # TODO: avoid full comparison (use r_bits)
+        return (self.from_bits(self.add_bits(r_bits, c_bits)) - z * b) * 2**-f
 
     @mpc_coro_no_pc
     async def sum(self, x):
@@ -758,7 +792,8 @@ class Runtime:
             x, y = x[:], y[:]
         stype = type(x[0])
         field = stype.field
-        if not field.frac_length:
+        f = field.frac_length
+        if not f:
             await returnType(stype)
         else:
             x_integral = x[0].integral
@@ -771,10 +806,10 @@ class Runtime:
         for i in range(len(x)):
             s += x[i].value * y[i].value
         s = field(s)
-        if field.frac_length and x_integral:
-            s >>= field.frac_length
+        if f and x_integral:
+            s >>= f
         s = self._reshare(s)
-        if field.frac_length and not x_integral:
+        if f and not x_integral:
             s = self.trunc(stype(s))
         return s
 
@@ -852,19 +887,20 @@ class Runtime:
         x = x[:]
         stype = type(a)
         field = stype.field
-        if not field.frac_length:
+        f = field.frac_length
+        if not f:
             await returnType(stype, len(x))
         else:
             a_integral = a.integral
             await returnType((stype, a_integral and x[0].integral), len(x))
 
         a, x = await gather_shares(a, x)
-        if field.frac_length and a_integral:
-            a = a >> field.frac_length  # NB: no inplace a >>=
+        if f and a_integral:
+            a = a >> f  # NB: no inplace a >>=
         for i in range(len(x)):
             x[i] = x[i] * a
         x = await self._reshare(x)
-        if field.frac_length and not a_integral:
+        if f and not a_integral:
             x = self.trunc(x, l=stype.bit_length)
             x = await gather_shares(x)
         return x
@@ -874,7 +910,8 @@ class Runtime:
         x, y = x[:], y[:]
         stype = type(a)
         field = stype.field
-        if not field.frac_length:
+        f = field.frac_length
+        if not f:
             await returnType(stype, len(x))
         else:
             a_integral = a.integral
@@ -883,8 +920,8 @@ class Runtime:
             await returnType((stype, a_integral and x[0].integral and y[0].integral), len(x))
 
         a, x, y = await gather_shares(a, x, y)
-        if field.frac_length:
-            a = a >> field.frac_length  # NB: no inplace a >>=
+        if f:
+            a = a >> f  # NB: no inplace a >>=
         for i in range(len(x)):
             x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
         x = await self._reshare(x)
@@ -1104,14 +1141,14 @@ class Runtime:
 
         r_bits = await self.random_bits(field, l)
         r_modl = 0
-        for i in range(l - 1, -1, -1):
+        for r_i in reversed(r_bits):
             r_modl <<= 1
-            r_modl += r_bits[i].value
+            r_modl += r_i.value
         if isinstance(field.modulus, int):
             k = self.options.security_parameter
             r_divl = self._random(field, 1<<k)
             a = await gather_shares(a)
-            c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))  # pylint: disable=E1101
+            c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))
             c = c.value % (1<<l)
             c_bits = [(c >> i) & 1 for i in range(l)]
             r_bits = [stype(r.value) for r in r_bits]
@@ -1127,13 +1164,14 @@ class Runtime:
         """Recover secure number from its binary representation x."""
         # TODO: also handle negative numbers with sign bit (NB: from_bits() in random.py)
         x = x[:]
-        await returnType((type(x[0]), True))
+        stype = type(x[0])
+        await returnType((stype, True))
         x = await gather_shares(x)
-        field = type(x[0])
         s = 0
-        for i in range(len(x)):
-            s += x[i].value << i
-        return field(s)
+        for a in reversed(x):
+            s <<= 1
+            s += a.value
+        return stype.field(s)
 
     def _norm(self, a):  # signed normalization factor
         x = self.to_bits(a)  # low to high bits

@@ -3,6 +3,7 @@ from mpyc import bfield
 from mpyc import pfield
 from mpyc import thresha
 
+
 class Arithmetic(unittest.TestCase):
 
     def setUp(self):
@@ -48,7 +49,7 @@ class Arithmetic(unittest.TestCase):
     def test_prss(self):
         field = self.f256
         key = int('0x00112233445566778899aabbccddeeff', 16).to_bytes(16, byteorder='little')
-        bound = 256 #field.modulus
+        bound = 256  # field.modulus
         F = thresha.PRF(key, bound)
         m = 1
         pid = 0

@@ -29,15 +29,23 @@ from mpyc import asyncoro
 runtime = None
 
 
-def getrandbits(sectype, k):
-    """Uniformly random nonnegative k-bit integer value."""
+def getrandbits(sectype, k, bits=False):
+    """Uniformly random nonnegative k-bit integer value.
+
+    Return bits (instead of number) if requested.
+    """
     x = runtime.random_bits(sectype, k)
+    if bits:
+        return x
+
     return runtime.from_bits(x)
 
 
 @asyncoro.mpc_coro
-async def _randbelow(sectype, n):
+async def _randbelow(sectype, n, bits=False):
     """Uniformly random secret integer in range(n).
+
+    Return bits (instead of number) if requested.
 
     Expected number of secret random bits needed is log_2 n + c,
     with c a small constant, c < 3.
@@ -45,13 +53,19 @@ async def _randbelow(sectype, n):
     Special case: if sectype is a secure finite field and
     n is equal to the order of the finite field, then the
     uniformly random output can be generated directly.
+    In this case, a number is returned always.
     """
-    await runtime.returnType((sectype, True))
     if issubclass(sectype, sectypes.SecureFiniteField) and n == sectype.field.order:
+        assert not bits, 'bits not available'
+        await runtime.returnType((sectype, True))
         return runtime._random(sectype)
 
     b = n - 1
     k = b.bit_length()
+    if bits:
+        await runtime.returnType((sectype, True), k)
+    else:
+        await runtime.returnType((sectype, True))
     x = runtime.random_bits(sectype, k)
     h = 1
     i = k
@@ -64,6 +78,9 @@ async def _randbelow(sectype, n):
             # restart, keeping unused secret random bits x[:i]
             x = x[:i] + runtime.random_bits(sectype, k - i)
             i = k
+    if bits:
+        return x
+
     return runtime.from_bits(x)
 
 

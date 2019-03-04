@@ -3,6 +3,7 @@ from mpyc import gf2x
 from mpyc import sectypes
 from mpyc.runtime import mpc
 
+
 class Arithmetic(unittest.TestCase):
 
     @classmethod
@@ -51,17 +52,17 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(secfld.field.modulus, 7)
         self.assertEqual(secfld.field.order, 4)
         secfld = SecFld(modulus='1+x^8+x^4+x^3+x')
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
+        self.assertEqual(secfld.field.modulus, 283)  # AES polynomial
         self.assertEqual(secfld.field.order, 256)
         secfld = SecFld(order=256)
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
+        self.assertEqual(secfld.field.modulus, 283)  # AES polynomial
         self.assertEqual(secfld.field.order, 256)
         secfld = SecFld(order=256, modulus=283)
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
+        self.assertEqual(secfld.field.modulus, 283)  # AES polynomial
         self.assertEqual(secfld.field.order, 256)
         secfld = SecFld(modulus=283, char2=True)
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
+        self.assertEqual(secfld.field.modulus, 283)  # AES polynomial
         self.assertEqual(secfld.field.order, 256)
         secfld = SecFld(modulus=gf2x.Polynomial(283))
-        self.assertEqual(secfld.field.modulus, 283) # AES polynomial
+        self.assertEqual(secfld.field.modulus, 283)  # AES polynomial
         self.assertEqual(secfld.field.order, 256)

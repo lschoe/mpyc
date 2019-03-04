@@ -1,11 +1,12 @@
 import unittest
 from mpyc import bfield
 
+
 class Arithmetic(unittest.TestCase):
 
     def setUp(self):
         self.f2 = bfield.GF(2)
-        self.f256 = bfield.GF(283) # AES polynomial (283)_2 = x^8 + x^4 + x^3 + x + 1
+        self.f256 = bfield.GF(283)  # AES polynomial (283)_2 = x^8 + x^4 + x^3 + x + 1
 
     def test_field_caching(self):
         f2_cached = bfield.GF(2)
@@ -88,13 +89,13 @@ class Arithmetic(unittest.TestCase):
         a >>= 2
         self.assertEqual(a, f256(1))
 
-        a = f256(3) # generator x + 1
+        a = f256(3)  # generator x + 1
         s = [int((a**i).value) for i in range(255)]
         self.assertListEqual(sorted(s), list(range(1, 256)))
         s = [int((a**i).value) for i in range(-255, 0)]
         self.assertListEqual(sorted(s), list(range(1, 256)))
 
-        f256 = bfield.GF(391) # primitive polynomial x^8 + x^7 + x^2 + x + 1
-        a = f256(2) # generator x
+        f256 = bfield.GF(391)  # primitive polynomial x^8 + x^7 + x^2 + x + 1
+        a = f256(2)  # generator x
         s = [int((a**i).value) for i in range(255)]
         self.assertListEqual(sorted(s), list(range(1, 256)))

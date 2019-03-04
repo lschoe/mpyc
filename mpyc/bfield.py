@@ -234,10 +234,6 @@ class BinaryFieldElement():
 
         return NotImplemented
 
-    def __hash__(self):
-        """Hash value."""
-        return hash((type(self), self.value))
-
     def __bool__(self):
         """Truth value testing.
 

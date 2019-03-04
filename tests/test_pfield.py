@@ -1,12 +1,15 @@
 import unittest
 from mpyc import pfield
 
+
 class Arithmetic(unittest.TestCase):
 
     def setUp(self):
         self.f2 = pfield.GF(2)
-        self.f19 = pfield.GF(19)   # 19 % 4 = 3
-        self.f101 = pfield.GF(101) # 101 % 4 = 1
+        self.f19 = pfield.GF(19)    # 19 % 4 = 3
+        self.f101 = pfield.GF(101)  # 101 % 4 = 1
+        self.f19.is_signed = False
+        self.f101.is_signed = False
 
     def test_field_caching(self):
         f2_cached = pfield.GF(2)
@@ -45,7 +48,6 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, 1)
         a /= b
         self.assertEqual(a, 1)
-
 
     def test_f19(self):
         f19 = self.f19

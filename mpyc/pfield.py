@@ -381,13 +381,16 @@ class PrimeFieldElement():
             return self.value == other.value
 
         if isinstance(other, int):
+            if self.frac_length:
+                other <<= self.frac_length
             return self.value == type(self)(other).value
 
-        return NotImplemented
+        if self.frac_length:
+            if isinstance(other, float):
+                other = round(other * (1 << self.frac_length))
+                return self.value == type(self)(other).value
 
-    def __hash__(self):
-        """Hash value."""
-        return hash((type(self), self.value))
+        return NotImplemented
 
     def __bool__(self):
         """Truth value testing.

@@ -1,6 +1,7 @@
 import unittest
 from mpyc import gf2x
 
+
 class Arithmetic(unittest.TestCase):
 
     def setUp(self):

@@ -1,8 +1,9 @@
 import unittest
 from mpyc.runtime import mpc
-from mpyc.random import getrandbits, randrange, random_unit_vector, randint, \
-                        shuffle, random_permutation, random_derangement, \
-                        choice, choices, sample, random, uniform
+from mpyc.random import (getrandbits, randrange, random_unit_vector, randint,
+                         shuffle, random_permutation, random_derangement,
+                         choice, choices, sample, random, uniform)
+
 
 class Arithmetic(unittest.TestCase):
 
@@ -19,18 +20,18 @@ class Arithmetic(unittest.TestCase):
         secint = mpc.SecInt()
         a = mpc.run(mpc.output(getrandbits(secint, 10)))
         self.assertGreaterEqual(int(a), 0)
-        self.assertLessEqual(int(a), 2**10 -  1)
+        self.assertLessEqual(int(a), 2**10 - 1)
 
         x = mpc.run(mpc.output(random_unit_vector(secint, 6)))
         self.assertEqual(sum(x), 1)
 
-        a = mpc.run(mpc.output(randrange(secint, 37))) # French roulette
+        a = mpc.run(mpc.output(randrange(secint, 37)))  # French roulette
         self.assertGreaterEqual(int(a), 0)
         self.assertLessEqual(int(a), 36)
-        a = mpc.run(mpc.output(randrange(secint, 1, 7))) # one die
+        a = mpc.run(mpc.output(randrange(secint, 1, 7)))  # one die
         self.assertGreaterEqual(int(a), 1)
         self.assertLessEqual(int(a), 6)
-        a = mpc.run(mpc.output(randrange(secint, 1, 7) + randrange(secint, 1, 7))) # two dice
+        a = mpc.run(mpc.output(randrange(secint, 1, 7) + randrange(secint, 1, 7)))  # two dice
         self.assertGreaterEqual(int(a), 2)
         self.assertLessEqual(int(a), 12)
         a = mpc.run(mpc.output(randrange(secint, 1, 32, 2)))
@@ -56,10 +57,10 @@ class Arithmetic(unittest.TestCase):
         self.assertIn(x, [1, 2, 3, 4, 5])
         x = mpc.run(mpc.output(choice(secint, [secint(-100), secint(200), secint(-300)])))
         self.assertIn(x, [-100, 200, -300])
-        x = mpc.run(mpc.output(mpc.sum(choices(secint, [0, 1], [25, 75])))) # Bernoulli
+        x = mpc.run(mpc.output(mpc.sum(choices(secint, [0, 1], [25, 75]))))  # Bernoulli
         self.assertGreaterEqual(int(x), 0)
         self.assertLessEqual(int(x), 1)
-        x = mpc.run(mpc.output(mpc.sum(choices(secint, [0, 1], [25, 75], k=10)))) # binomial
+        x = mpc.run(mpc.output(mpc.sum(choices(secint, [0, 1], [25, 75], k=10))))  # binomial
         self.assertGreaterEqual(int(x), 0)
         self.assertLessEqual(int(x), 10)
 
@@ -81,7 +82,7 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(a.integral)
         a = mpc.run(mpc.output(a))
         self.assertGreaterEqual(int(a), 0)
-        self.assertLessEqual(int(a), 2**10 -  1)
+        self.assertLessEqual(int(a), 2**10 - 1)
 
         x = mpc.run(mpc.output(random_unit_vector(secfxp, 6)))
         self.assertEqual(int(sum(x)), 1)
@@ -126,10 +127,10 @@ class Arithmetic(unittest.TestCase):
         a = getrandbits(secfld, 8)
         a = mpc.run(mpc.output(a))
         self.assertGreaterEqual(int(a), 0)
-        self.assertLessEqual(int(a), 2**8 -  1)
+        self.assertLessEqual(int(a), 2**8 - 1)
         a = mpc.run(mpc.output(randrange(secfld, 256)))
         self.assertGreaterEqual(int(a), 0)
-        self.assertLessEqual(int(a), 2**8 -  1)
+        self.assertLessEqual(int(a), 2**8 - 1)
         a = mpc.run(mpc.output(randint(secfld, 0, 2)))
         self.assertIn(a, [0, 1, 2])
         x = mpc.run(mpc.output(random_unit_vector(secfld, 6)))
@@ -143,7 +144,7 @@ class Arithmetic(unittest.TestCase):
         a = getrandbits(secfld, 8)
         a = mpc.run(mpc.output(a))
         self.assertGreaterEqual(int(a), 0)
-        self.assertLessEqual(int(a), 2**8 -  1)
+        self.assertLessEqual(int(a), 2**8 - 1)
         a = mpc.run(mpc.output(randrange(secfld, 257)))
         self.assertGreaterEqual(int(a), 0)
         self.assertLessEqual(int(a), 2**8)

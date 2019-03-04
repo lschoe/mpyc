@@ -206,8 +206,7 @@ def _from_terms(s, x='x'):
             raise ValueError('ill formatted polynomial')
         if a & t:  # repeated term
             raise ValueError('ill formatted polynomial')
-        else:
-            a ^= t
+        a ^= t
     return a
 
 
@@ -244,7 +243,7 @@ def _powmod(a, n, b=None):
     c = 1
     for i in range(n.bit_length() - 1):
         # d = a ** (1 << i) holds
-        if n & (1 << i):
+        if (n >> i) & 1:
             c = _mul(c, d)
             c = _mod(c, b)
         d = _mul(d, d)
