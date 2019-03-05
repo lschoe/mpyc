@@ -553,6 +553,19 @@ class Runtime:
 
     def pow(self, a, b):
         """Secure exponentation a raised to the power of b, for public integer b."""
+        if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
+            d = a
+            c = self.mul(d, d)
+            c = self.mul(c, c)
+            c = self.mul(c, c)
+            c = self.mul(c, d)
+            c = self.mul(c, c)
+            c, d = self.scalar_mul(c, [c, d])
+            c, d = self.scalar_mul(c, [c, d])
+            c = self.mul(c, d)
+            c = self.mul(c, c)
+            return c
+            
         if b == 0:
             return type(a)(1)
 
