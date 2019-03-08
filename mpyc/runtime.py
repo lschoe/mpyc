@@ -1374,20 +1374,21 @@ def setup():
         else:
             import platform
             import subprocess
-            prog, args = argv[0], ' '.join(argv[1:])
+            prog, args = argv[0], argv[1:]
             for i in range(options.M - 1, 0, -1):
                 if options.output_windows and platform.platform().startswith('Windows'):
-                    os.system(f'start python {prog} -I{i} {args}')
+                    os.system(f'start python {prog} -I{i} {" ".join(args)}')
                 elif options.output_file:
                     with open(f'party{options.M}_{i}.log', 'a') as f:
+                        cmd_line = ['python', prog, '-I', str(i)] + args
                         f.write('\n')
-                        f.write(f'$> python {prog} -I{i} {args}' + '\n')
-                        subprocess.Popen(f'python {prog} -I{i} {args}',
-                                         stdout=f, stderr=subprocess.STDOUT)
+                        f.write(f'$> {" ".join(cmd_line)}\n')
+                        subprocess.Popen(cmd_line, stdout=f, stderr=subprocess.STDOUT)
                 else:
-                    subprocess.Popen(f'python {prog} -I{i} {args}',
-                                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-            subprocess.run(f'python {prog} -I0 {args}')
+                    cmd_line = ['python', prog, '-I', str(i)] + args
+                    subprocess.Popen(cmd_line, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            cmd_line = ['python', prog, '-I', str(0)] + args
+            subprocess.run(cmd_line)
             sys.exit()
 
     m = len(parties)
