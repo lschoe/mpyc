@@ -15,12 +15,16 @@ import itertools
 from mpyc.runtime import mpc
 import aes  # MPyC AES demo operating on 4x4 arrays over GF(256).
 
+f = None  # one-way function
+
+
 def tS(k, r):
     """Optimal schedule for binary pebbling."""
     if r < 2**(k-1):
         return 0
 
-    return ((k+r)%2 + k+1 - ((2*r)%(2**(2**k-r).bit_length())).bit_length()) // 2
+    return ((k+r) % 2 + k+1 - ((2*r) % (2**(2**k-r).bit_length())).bit_length()) // 2
+
 
 def P(k, x):
     """Recursive optimal binary pebbler outputs {f^i(x)}_{i=0}^{n-1} in reverse, n=2^k."""
@@ -41,6 +45,7 @@ def P(k, x):
     yield y[0]
     for v in itertools.zip_longest(*(P(i-1, y[i]) for i in range(1, k+1))):
         yield next(filter(None, v))
+
 
 def p(k, x):
     """Iterative optimal binary pebbler generating {f^i(x)}_{i=0}^{n-1} in reverse, n=2^k."""
@@ -93,18 +98,18 @@ def p(k, x):
                 w += 1
                 c >>= 1
 
-async def main():
 
+async def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--order-k', type=int, metavar='O',
-                        help='k=O=order of hash chain, length n=2^k')
+    parser.add_argument('-k', '--order', type=int, metavar='K',
+                        help='order K of hash chain, length n=2**K')
     parser.add_argument('--recursive', action='store_true',
                         help='use recursive pebbler')
     parser.add_argument('--no-one-way', action='store_true',
-                        default=False, help='use dummy one-way f')
+                        default=False, help='use dummy one-way function')
     parser.add_argument('--no-random-seed', action='store_true',
                         default=False, help='use fixed seed')
-    parser.set_defaults(order_k=1)
+    parser.set_defaults(order=1)
     args = parser.parse_args()
 
     await mpc.start()
@@ -128,7 +133,7 @@ async def main():
     else:
         x0 = [[mpc.random.getrandbits(aes.secfld, 8) for _ in range(4)] for _ in range(4)]
 
-    k = args.order_k
+    k = args.order
     print(f'Hash chain of length {2**k}:')
     r = 1
     for v in Pebbler(k, x0):

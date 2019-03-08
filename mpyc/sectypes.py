@@ -412,7 +412,7 @@ def _SecFld(l, field):
 
 
 def _pfield(l, f, p, n):
-    k = runtime.options.security_parameter
+    k = runtime.options.sec_param
     if p is None:
         p = pfield.find_prime_root(l + max(f, k + 1) + 1, n=n)
     else:

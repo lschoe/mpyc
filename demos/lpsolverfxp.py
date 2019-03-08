@@ -11,6 +11,7 @@ from mpyc.runtime import mpc
 
 assert StrictVersion(mpc.version) >= StrictVersion('0.3.1')
 
+
 def load_tableau(filename):
     T = []
     comment_sign = '#'
@@ -23,6 +24,7 @@ def load_tableau(filename):
     T[-1].append(0)
     return T
 
+
 def argmin(x, arg_le):
     n = len(x)
     if n == 1:
@@ -34,16 +36,17 @@ def argmin(x, arg_le):
     m2 = [None] * ((n+1)//2)
     for i in range(n//2):
         b2[i], m2[i] = arg_le(x[2*i], x[2*i+1])
-    if n%2 == 1:
+    if n % 2 == 1:
         m2[-1] = x[-1]
     a2, m = argmin(m2, arg_le)
     a = [None] * n
-    if n%2 == 1:
+    if n % 2 == 1:
         a[-1] = a2.pop()
     for i in range(n//2):
         a[2*i+1] = b2[i] * a2[i]
         a[2*i] = a2[i] - a[2*i+1]
     return a, m
+
 
 def argmin_int(xs):
     def arg_le_int(x0, x1):
@@ -51,6 +54,7 @@ def argmin_int(xs):
         m = mpc.if_else(a, x1, x0)
         return a, m
     return argmin(xs, arg_le_int)
+
 
 def argmin_rat(xs):
     def arg_le_rat(x0, x1):
@@ -60,6 +64,7 @@ def argmin_rat(xs):
         m = mpc.if_else(a, [n1, d1], [n0, d0])
         return a, m
     return argmin(xs, arg_le_rat)
+
 
 @mpc.coroutine
 async def index_matrix_prod(x, A, tr=False):
@@ -82,6 +87,7 @@ async def index_matrix_prod(x, A, tr=False):
     y = await mpc.gather(mpc._reshare(y))
     return y
 
+
 def unit_vector(a, n):
     """Return a-th unit vector of length n, assuming 0 <= a < n."""
     stype = type(a)
@@ -98,10 +104,11 @@ def unit_vector(a, n):
             b = mpc.lsb(a / 2**stype.field.frac_length)
             z = si1((a - b) / 2, (n + 1) // 2)
             y = mpc.scalar_mul(b, z)
-            x = [b - sum(y)] + [z[i//2] - y[i//2] if i%2 == 0 else y[i//2] for i in range(n-2)]
+            x = [b - sum(y)] + [z[i//2] - y[i//2] if i % 2 == 0 else y[i//2] for i in range(n-2)]
         return x
     x = si1(a, n)
     return [stype(1) - sum(x)] + x
+
 
 async def main():
     parser = argparse.ArgumentParser()
@@ -149,7 +156,7 @@ async def main():
         for i in range(m + 1):
             T[i] = mpc.vector_add(T[i], mpc.scalar_mul(h[i], v))
 
-        #swap basis entries
+        # swap basis entries
         delta = mpc.in_prod(basis, p_row_index) - mpc.in_prod(cobasis, p_col_index)
         p_row_index = mpc.scalar_mul(delta, p_row_index)
         basis = mpc.vector_sub(basis, p_row_index)
@@ -185,7 +192,7 @@ async def main():
     with open(os.path.join('data', 'lp', certificate_filename), 'w') as f:
         f.write('# tableau = \n' + args.data + '\n')
         f.write('# bit-length = \n' + str(mpc.options.bit_length) + '\n')
-        f.write('# security parameter = \n' + str(mpc.options.security_parameter) + '\n')
+        f.write('# security parameter = \n' + str(mpc.options.sec_param) + '\n')
         f.write('# threshold = \n' + str(mpc.threshold) + '\n')
         f.write('# solution = \n')
         f.write('\t'.join(x.__repr__() for x in solution) + '\n')

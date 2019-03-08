@@ -1,10 +1,10 @@
-call run %1 ot.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 parallelsort.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 sort.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 indextounitvector.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 secretsanta.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 id3gini.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 lpsolver.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 lpsolverfxp.py %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 aes.py -1 %2 %3 %4 %5 %6 %7 %8 %9
-call run %1 onewayhashchains.py --no-barrier %2 %3 %4 %5 %6 %7 %8 %9
+python ot.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python parallelsort.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python sort.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python indextounitvector.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python secretsanta.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python id3gini.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python lpsolver.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python lpsolverfxp.py -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python aes.py -1 -M%1 %2 %3 %4 %5 %6 %7 %8 %9
+python onewayhashchains.py --no-barrier -M%1 %2 %3 %4 %5 %6 %7 %8 %9

@@ -1,51 +1,108 @@
-Usage examples (Windows command prompt).
+# How to run the demos
 
-First argument (absolute value) sets number of parties (output to .log files if negative).
+## Use help messages
+
+Use `-H`, `--HELP` option with any demo to see the MPyC help message.
+
+`python secretsanta.py -H`
 
 ```
-python secretsanta.py
+usage: secretsanta.py [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t] [-B b]
+                      [--ssl] [-L l] [-K k] [--no-log] [--no-async]
+                      [--no-barrier] [--output-windows] [--output-file] [-f F]
 
-run 1 secretsanta.py
+optional arguments:
+  -H, --HELP            show this help message for MPyC and exit
+  -h, --help            show secretsanta.py help message (if any)
 
-run 5 secretsanta.py
+MPyC configuration:
+  -C ini, --config ini  use ini file, defining all m parties
+  -P addr               use addr=host:port per party (repeat m times)
+  -M m                  use m local parties (and run all m, if i is not set)
+  -I i, --index i       set index of this local party to i, 0<=i<m
+  -T t, --threshold t   threshold t, 0<=t<m/2
+  -B b, --base-port b   use port number b+i for party i
+  --ssl                 enable SSL connections
 
-run -1 secretsanta.py
+MPyC parameters:
+  -L l, --bit-length l  default bit length l for secure numbers
+  -K k, --sec-param k   security parameter k, leakage probability 2**-k
+  --no-log              disable logging messages
+  --no-async            disable asynchronous evaluation
+  --no-barrier          disable barriers
 
-run -2 secretsanta.py
-
-run 1 id3gini.py -h
-
-run 1 id3gini.py -H
-
-run-all 1
-
-run-all 2
-
-run-all 2 --ssl
-
-run-all 3
-
-run-all 3 -t0 --ssl
-
-run-all 4
-
-run-all 5
-
-python cnnmnist.py
-
-python cnnmnist.py 1 0
-
-python cnnmnist.py 3
-
-run 1 cnnmnist.py 1.5 0
-
-python bnnmnist.py --HELP
-
-run 1 bnnminist.py --no-barrier
-
-python -m cProfile -s time bnnmnist.py | more
-
-python -m cProfile -s cumtime sort.py 64 | more
-
-python -m cProfile -s time aes.py | more
+MPyC misc:
+  --output-windows      screen output for parties i>0 (only on Windows)
+  --output-file         append output for parties i>0 to party{m}_{i}.log
+  -f F                  consume IPython's -f argument F
 ```
+
+Use `-h`, `--help` option to see help message for demo (if available).
+
+`python onewayhashchains.py -h`
+
+```
+Showing help message for onewayhashchains.py, if available:
+
+usage: onewayhashchains.py [-h] [-k K] [--recursive] [--no-one-way]
+                           [--no-random-seed]
+
+optional arguments:
+  -h, --help        show this help message and exit
+  -k K, --order K   order K of hash chain, length n=2**K
+  --recursive       use recursive pebbler
+  --no-one-way      use dummy one-way function
+  --no-random-seed  use fixed seed
+```
+
+## Examples
+
+`python secretsanta.py`
+
+`python secretsanta.py -M1`
+
+`python secretsanta.py -M 5`
+
+`python secretsanta.py -M2 --output-file`
+
+`python lpsolver.py -h`
+
+`python id3gini.py -H`
+
+`run-all.bat 1 --no-async`
+
+`run-all.bat 2 --ssl`
+
+`run-all.bat 3 --output-file > party3_0.log`
+
+`run-all.bat 4 --threshold 0 --ssl`
+
+`run-all.bat 5 --output-windows`
+
+`run-all.bat 7`
+
+`python cnnmnist.py > party1_0.log`
+
+`python cnnmnist.py 1 0`
+
+`python cnnmnist.py 3`
+
+`python cnnmnist.py -M1 1.5 0`
+
+`python bnnminist.py -M1 --no-barrier`
+
+`python -m cProfile -s time bnnmnist.py | more`
+
+`python -m cProfile -s cumtime sort.py 64 | more`
+
+`python -m cProfile -s time aes.py | more`
+
+## Jupyter notebooks
+
+Notebook [SecretSantaExplained](SecretSantaExplained.ipynb) provides a quick intro to MPyC.
+
+Notebook [SecureSortingNetsExplained](SecureSortingNetsExplained.ipynb) shows how to convert some existing Python programs to MPyC programs.
+
+Notebook [4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, cnnmnist.py.
+ 
+Notebook [OneWayHashChainsExplained](OneWayHashChainsExplained.ipynb) shows a more advanced MPyC program.

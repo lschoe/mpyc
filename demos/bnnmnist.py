@@ -57,17 +57,19 @@ import mpyc.gmpy as gmpy2
 
 secint = None
 
+
 def load_W(name):
     """Load signed binary weights for fully connected layer 'name'."""
     W = np.load(os.path.join('data', 'bnn', 'W_' + name + '.npy'))
     W = np.unpackbits(W, axis=0).tolist()
+    # representations neg_one and pos_one of -1 and 1 shared to avoid overhead.
     neg_one, pos_one = secint(-1), secint(1)
     for w in W:
         for j in range(len(w)):
-# representations neg_one and pos_one of -1 and 1 shared to avoid overhead.
-            w[j] = neg_one if w[j] == 0 else pos_one # shared sharings
-#            w[j] = secint(-1) if w[j] == 0 else secint(1) # fresh sharings
+            w[j] = neg_one if w[j] == 0 else pos_one  # shared sharings
+#            w[j] = secint(-1) if w[j] == 0 else secint(1)  # fresh sharings
     return W
+
 
 def load_b(name):
     """Load signed integer bias values for fully connected layer 'name'."""
@@ -75,6 +77,7 @@ def load_b(name):
     for i in range(len(b)):
         b[i] = secint(int(b[i]))
     return b
+
 
 @mpc.coroutine
 async def bsgn_0(a):
@@ -92,13 +95,14 @@ async def bsgn_0(a):
     p = Zp.modulus
     legendre_p = lambda a: gmpy2.legendre(a.value, p)
 
-    s = mpc.random_bits(Zp, 1, signed=True) # random sign
+    s = mpc.random_bits(Zp, 1, signed=True)  # random sign
     r = mpc._random(Zp)
-    r = mpc.prod([r, r]) # random square modulo p
+    r = mpc.prod([r, r])  # random square modulo p
     a, s, r = await mpc.gather(a, s, r)
     b = await mpc.prod([2 * a + 1, s[0], r])
     b = await mpc.output(b)
     return s[0] * legendre_p(b)
+
 
 @mpc.coroutine
 async def vector_bsgn_0(x):
@@ -110,15 +114,16 @@ async def vector_bsgn_0(x):
     p = Zp.modulus
     legendre_p = lambda a: gmpy2.legendre(a.value, p)
 
-    s = mpc.random_bits(Zp, n, signed=True) # n random signs
+    s = mpc.random_bits(Zp, n, signed=True)  # n random signs
     r = mpc._randoms(Zp, n)
-    r = mpc.schur_prod(r, r) # n random squares modulo p
+    r = mpc.schur_prod(r, r)  # n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
     y = [2 * a + 1 for a in x]
     y = await mpc.schur_prod(y, s)
     y = await mpc.schur_prod(y, r)
     y = await mpc.output(y)
     return [s[j] * legendre_p(y[j]) for j in range(n)]
+
 
 @mpc.coroutine
 async def bsgn_1(a):
@@ -133,9 +138,9 @@ async def bsgn_1(a):
     p = Zp.modulus
     legendre_p = lambda a: gmpy2.legendre(a.value, p)
 
-    s = mpc.random_bits(Zp, 3, signed=True) # 3 random signs
+    s = mpc.random_bits(Zp, 3, signed=True)  # 3 random signs
     r = mpc._randoms(Zp, 3)
-    r = mpc.schur_prod(r, r) # 3 random squares modulo p
+    r = mpc.schur_prod(r, r)  # 3 random squares modulo p
     a, s, r = await mpc.gather(a, s, r)
     y = [b + 2 * i for b in (2 * a + 1,) for i in (-1, 0, 1)]
     y.append(s[0])
@@ -149,6 +154,7 @@ async def bsgn_1(a):
     uvw = h[0] * h[1] * h[2] * y[3]
     return (u + v + w - uvw) / 2
 
+
 @mpc.coroutine
 async def vector_bsgn_1(x):
     """Compute bsgn_1(a) for all elements a of x in parallel."""
@@ -159,9 +165,9 @@ async def vector_bsgn_1(x):
     p = Zp.modulus
     legendre_p = lambda a: gmpy2.legendre(a.value, p)
 
-    s = mpc.random_bits(Zp, 3*n, signed=True) # 3n random signs
+    s = mpc.random_bits(Zp, 3*n, signed=True)  # 3n random signs
     r = mpc._randoms(Zp, 3*n)
-    r = mpc.schur_prod(r, r) # 3n random squares modulo p
+    r = mpc.schur_prod(r, r)  # 3n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
     y = [b + 2 * i for b in (2 * a + 1 for a in x) for i in (-1, 0, 1)]
     y.extend(s[:n])
@@ -173,8 +179,10 @@ async def vector_bsgn_1(x):
     h = [legendre_p(y[j]) for j in range(3*n)]
     t = [s[j] * h[j] for j in range(3*n)]
     z = [h[3*j] * h[3*j+1] * h[3*j+2] * y[3*n + j] for j in range(n)]
-    q = (p + 1) >> 1 # q = 1/2 mod p
-    return [Zp((u.value + v.value + w.value - uvw.value)*q) for u, v, w, uvw in zip(*[iter(t)] * 3, z)]
+    q = (p + 1) >> 1  # q = 1/2 mod p
+    return [Zp((u.value + v.value + w.value - uvw.value)*q)
+            for u, v, w, uvw in zip(*[iter(t)]*3, z)]
+
 
 @mpc.coroutine
 async def bsgn_2(a):
@@ -189,9 +197,9 @@ async def bsgn_2(a):
     p = Zp.modulus
     legendre_p = lambda a: gmpy2.legendre(a.value, p)
 
-    s = mpc.random_bits(Zp, 6, signed=True) # 6 random signs
+    s = mpc.random_bits(Zp, 6, signed=True)  # 6 random signs
     r = mpc._randoms(Zp, 6)
-    r = mpc.schur_prod(r, r) # 6 random squares modulo p
+    r = mpc.schur_prod(r, r)  # 6 random squares modulo p
     a, s, r = await mpc.gather(a, s, r)
     y = [b + 2 * i for b in (2 * a + 1,) for i in (-2, -1, 0, 1, 2)]
     y = await mpc.schur_prod(y, s[:-1])
@@ -201,6 +209,7 @@ async def bsgn_2(a):
     t = sum(s[i] * legendre_p(y[i]) for i in range(5))
     t = await mpc.output(t * y[-1])
     return s[-1] * legendre_p(t)
+
 
 @mpc.coroutine
 async def vector_bsgn_2(x):
@@ -212,9 +221,9 @@ async def vector_bsgn_2(x):
     p = Zp.modulus
     legendre_p = lambda a: gmpy2.legendre(a.value, p)
 
-    s = mpc.random_bits(Zp, 6*n, signed=True) # 6n random signs
+    s = mpc.random_bits(Zp, 6*n, signed=True)  # 6n random signs
     r = mpc._randoms(Zp, 6*n)
-    r = mpc.schur_prod(r, r) # 6n random squares modulo p
+    r = mpc.schur_prod(r, r)  # 6n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
     y = [b + 2 * i for b in (2 * a + 1 for a in x) for i in (-2, -1, 0, 1, 2)]
     y = await mpc.schur_prod(y, s[:-n])
@@ -224,6 +233,7 @@ async def vector_bsgn_2(x):
     t = [sum(s[5*j + i] * legendre_p(y[5*j + i]) for i in range(5)) for j in range(n)]
     t = await mpc.output(await mpc.schur_prod(t, y[-n:]))
     return [c * legendre_p(d) for c, d in zip(s[-n:], t)]
+
 
 @mpc.coroutine
 async def vector_sge(x):
@@ -239,7 +249,7 @@ async def vector_sge(x):
     await mpc.returnType(stype, n)
     Zp = stype.field
     l = stype.bit_length
-    k = mpc.options.security_parameter
+    k = mpc.options.sec_param
 
     r_bits = await mpc.random_bits(Zp, (l + 1) * n)
     r_bits = [b.value for b in r_bits]
@@ -269,6 +279,7 @@ async def vector_sge(x):
     z = [(a - (c + (b << l))) / (1 << l - 1) - 1 for a, b, c in zip(x_r, UF, c)]
     return z
 
+
 def argmax(x):
     a = type(x[0])(0)
     m = x[0]
@@ -277,6 +288,7 @@ def argmax(x):
         a = b * (a - i) + i
         m = b * (m - x[i]) + x[i]
     return a
+
 
 async def main():
     global secint
@@ -298,18 +310,18 @@ async def main():
     batch_size = args.batch_size
     offset = args.offset
     if args.no_legendre:
-        secint = mpc.SecInt(14) # using vectorized MPyC integer comparison
+        secint = mpc.SecInt(14)  # using vectorized MPyC integer comparison
     else:
         if args.d_k_star == 0:
-            secint = mpc.SecInt(14, p=3546374752298322551) # Legendre-0 range [-134, 134]
+            secint = mpc.SecInt(14, p=3546374752298322551)  # Legendre-0 range [-134, 134]
             bsgn = bsgn_0
             vector_bsgn = vector_bsgn_0
         elif args.d_k_star == 1:
-            secint = mpc.SecInt(14, p=9409569905028393239) # Legendre-1 range [-383, 383]
+            secint = mpc.SecInt(14, p=9409569905028393239)  # Legendre-1 range [-383, 383]
             bsgn = bsgn_1
             vector_bsgn = vector_bsgn_1
         else:
-            secint = mpc.SecInt(14, p=15569949805843283171) # Legendre-2 range [-594, 594]
+            secint = mpc.SecInt(14, p=15569949805843283171)  # Legendre-2 range [-594, 594]
             bsgn = bsgn_2
             vector_bsgn = vector_bsgn_2
 

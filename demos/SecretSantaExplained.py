@@ -8,7 +8,7 @@
 # Mathematically, the Secret Santa problem is about generating so-called [derangements](https://en.wikipedia.org/wiki/Derangement), which are permutations without fixed points. A permutation is a one-to-one mapping on a set of numbers, and a fixed-point is a number that is mapped to itself. 
 # 
 # We present an MPyC program (a Python program using the `mpyc` package) for generating uniformly random derangements. 
-# In this notebook, the MPyC program is run by a single party only. However, this very same MPyC program can be run between multiple parties to generate secret-shared random derangements. These random derangements will remain secret *forever* unless a majority of these parties collude.
+# In this notebook, the MPyC program is run by a single party only. However, this very same MPyC program can be run between multiple parties to generate secret-shared random derangements, as will be shown at the end. These random derangements will remain secret *forever* unless a majority of these parties collude.
 # 
 # ## MPyC setup
 # 
@@ -160,7 +160,7 @@ def random_permutation(n):                     # returns list of n secint elemen
 # 
 # This leaves us with the case $n=1$, which is handled by simply returning $[1]$, the only unit vector of length $1$.
 
-# In[8]:
+# In[7]:
 
 
 @mpc.coroutine                                      # turn coroutine into an MPyC coroutine
@@ -194,13 +194,13 @@ async def random_unit_vector(n):                    # returns list of n secint e
 # 
 # Let's now check what the results look like. We check the first few cases for each function.
 
-# In[9]:
+# In[8]:
 
 
 N = 7
 
 
-# In[10]:
+# In[9]:
 
 
 print('Random unit vectors:')
@@ -209,7 +209,7 @@ for n in range(1, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[11]:
+# In[10]:
 
 
 print('Random permutations:')
@@ -218,7 +218,7 @@ for n in range(1, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[12]:
+# In[11]:
 
 
 print('Random derangements:')
@@ -227,10 +227,16 @@ for n in range(2, N + 1):
     print(f'{n:2} {s}')
 
 
-# In[13]:
+# In[12]:
 
 
 mpc.run(mpc.shutdown())   # required only when run with multiple parties  
+
+
+# In[ ]:
+
+
+import sys; sys.exit()    # stop execution here when this notebook is run as a Python script, see below
 
 
 # ## Deploying the Python code with multiple parties
@@ -239,32 +245,38 @@ mpc.run(mpc.shutdown())   # required only when run with multiple parties
 # 
 # We have done so and the resulting file [SecretSantaExplained.py](SecretSantaExplained.py) is stored in the same directory as the present notebook. Now we can run the Python script, as shown below. 
 # 
-# First we show a run with one party only. However, this time the code runs outside the Jupyter notebook, using its own Python interpreter. 
+# First we show a run with one party only. However, this time the code runs outside the Jupyter notebook, using its own Python interpreter. Once the run is completed, the screen output is displayed in the output area below the cell:
+# 
+# 
+
+# In[13]:
+
+
+get_ipython().system('python SecretSantaExplained.py')
+
+
+# Any MPyC program comes with several built-in command line options. So, let's take a look at the help message for [SecretSantaExplained.py](SecretSantaExplained.py).
 
 # In[14]:
 
 
-get_ipython().system('run 1 SecretSantaExplained.py')
+get_ipython().system('python SecretSantaExplained.py -H')
 
 
-# The error can be safely ignored.
-# 
-# Next, for the "real thing", we show a run with three parties, in which three processes are launched communicating via local tcp-connections.
+# Now for the "real thing". Let's do a run with three parties, in which three processes will be launched communicating via local tcp-connections. Let's set a few options as well. We enable SSL for the occasion, and we enforce that tcp port numbers will be used starting from 11443 (arbitrary choice). We also set the default bit length to $l=10$, which is large enough for our examples anyway. The default length of $l=10$ is now used because we use secure integers of type `mpc.SecInt()`; for secure integers of type `mpc.SecInt(32)`, say, changing $l$ has no effect.
 
 # In[15]:
 
 
-get_ipython().system('run 3 SecretSantaExplained.py')
+get_ipython().system('python SecretSantaExplained.py -M3 --ssl -B 11443 -L10')
 
 
-# As a final test, we show a run with five parties.
+# The code can be run with any number of parties $m=1,2,3,4,5,6,7,...$ of which no more than $t$ are assumed to be corrupt, with $0\leq t\leq \lfloor (m-1)/2 \rfloor$. As a final example, we show a run with $m=8$ parties, with the treshold set to $t=2$.
 
 # In[16]:
 
 
-get_ipython().system('run 5 SecretSantaExplained.py')
+get_ipython().system('python SecretSantaExplained.py -M8 -T2')
 
 
-# If desired, the code can also be run with two or four parties. The included test setup supports up to $m=5$ parties, of which at most $t$ can be corrupt, with $0\leq t\leq \lfloor (m-1)/2 \rfloor$.
-# 
 # This concludes the explanation of our MPyC protocol for the Secret Santa problem. The Python script [secretsanta.py](secretsanta.py) contains a slightly more extensive demo, showing how secure fixed-point arithmetic or secure finite fields can be used instead of secure integers.

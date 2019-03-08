@@ -22,6 +22,7 @@ import logging
 import argparse
 from mpyc.runtime import mpc
 
+
 def load_tableau(filename):
     T = []
     comment_sign = '#'
@@ -35,20 +36,22 @@ def load_tableau(filename):
     T[-1].append(0)
     return T
 
+
 def pow_list(a, x, n):
     if n == 1:
         return [a]
     even = pow_list(a, x**2, (n+1)//2)
-    if n%2 == 1:
+    if n % 2 == 1:
         d = even.pop()
     odd = mpc.scalar_mul(x, even)
     xs = [None] * n
     for i in range(n//2):
         xs[2*i] = even[i]
         xs[2*i+1] = odd[i]
-    if n%2 == 1:
+    if n % 2 == 1:
         xs[-1] = d
     return xs
+
 
 def argmin(x, arg_le):
     n = len(x)
@@ -61,11 +64,11 @@ def argmin(x, arg_le):
     m2 = [None] * ((n+1)//2)
     for i in range(n//2):
         b2[i], m2[i] = arg_le(x[2*i], x[2*i+1])
-    if n%2 == 1:
+    if n % 2 == 1:
         m2[-1] = x[-1]
     a2, m = argmin(m2, arg_le)
     a = [None] * n
-    if n%2 == 1:
+    if n % 2 == 1:
         a[-1] = a2.pop()
     b2 = mpc.schur_prod(b2, a2)
     for i in range(n//2):
@@ -73,12 +76,14 @@ def argmin(x, arg_le):
         a[2*i+1] = b2[i]
     return a, m
 
+
 def argmin_int(xs):
     def arg_le_int(x0, x1):
         a = x0 >= x1
         m = mpc.if_else(a, x1, x0)
         return a, m
     return argmin(xs, arg_le_int)
+
 
 def argmin_rat(xs):
     def arg_le_rat(x0, x1):
@@ -88,6 +93,7 @@ def argmin_rat(xs):
         m = mpc.if_else(a, [n1, d1], [n0, d0])
         return a, m
     return argmin(xs, arg_le_rat)
+
 
 async def main():
     parser = argparse.ArgumentParser()
@@ -169,7 +175,7 @@ async def main():
         sum_x_powers = mpc.vector_add(sum_x_powers, x_powers)
     solution = [None] * n
     for j in range(n):
-        coefs = [w_powers[(j*k)%N] for k in range(N)]
+        coefs = [w_powers[(j*k) % N] for k in range(N)]
         solution[j] = mpc.lin_comb(coefs, sum_x_powers)
     solution = await mpc.output(solution)
 
@@ -180,7 +186,7 @@ async def main():
         sum_x_powers = mpc.vector_add(sum_x_powers, x_powers)
     dual_solution = [None] * m
     for i in range(m):
-        coefs = [w_powers[((n+i)*k)%N] for k in range(N)]
+        coefs = [w_powers[((n+i)*k) % N] for k in range(N)]
         dual_solution[i] = mpc.lin_comb(coefs, sum_x_powers)
     dual_solution = await mpc.output(dual_solution)
 
@@ -190,7 +196,7 @@ async def main():
     with open(os.path.join('data', 'lp', certificate_filename), 'w') as f:
         f.write('# tableau = \n' + args.data + '\n')
         f.write('# bit-length = \n' + str(mpc.options.bit_length) + '\n')
-        f.write('# security parameter = \n' + str(mpc.options.security_parameter) + '\n')
+        f.write('# security parameter = \n' + str(mpc.options.sec_param) + '\n')
         f.write('# threshold = \n' + str(mpc.threshold) + '\n')
         f.write('# common denominator = \n' + str(cd.value) + '\n')
         f.write('# solution = \n')

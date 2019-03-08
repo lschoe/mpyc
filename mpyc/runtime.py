@@ -46,21 +46,26 @@ class Runtime:
     version = mpyc.__version__
     random = mpyc.random
 
-    def __init__(self, pid, parties, prss_keys, options):
+    def __init__(self, pid, parties, options):
         """Initialize runtime."""
         self.pid = pid
         self.parties = parties
-        self._prss_keys = prss_keys
         self.options = options
         self.threshold = options.threshold
         self._logging_enabled = not options.no_log
         self._program_counter = (0,)
-        m = len(self.parties)
-        t = self.threshold
-        # caching (m choose t):
-        self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
         self._loop = asyncio.get_event_loop()  # cache running loop
         self.start_time = None
+        m = len(self.parties)
+        t = self.threshold
+        keys = {}
+        for t in range((m + 1) // 2):  # all possible thresholds
+            for subset in itertools.combinations(range(m), m - t):
+                if pid == min(subset):
+                    keys[subset] = secrets.token_bytes(16)  # 128-bit key
+        self._prss_keys = keys
+        # caching (m choose t):
+        self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
 
     @functools.lru_cache(maxsize=None)  # TODO: clear cache if threshold changes
     def prfs(self, bound):
@@ -195,13 +200,13 @@ class Runtime:
                     break
                 except Exception as exc:
                     logging.debug(exc)
-                time.sleep(1)
+                time.sleep(0.1)
 
         await self.parties[self.pid].protocol
         if self.options.ssl:
-            logging.info('SSL connections to all parties.')
+            logging.info(f'All {m} parties connected via SSL.')
         else:
-            logging.info('Connected to all parties.')
+            logging.info(f'All {m} parties connected.')
         if self.pid:
             server.close()
 
@@ -398,7 +403,7 @@ class Runtime:
             Zp = sftype
         if f is None:
             f = Zp.frac_length
-        k = self.options.security_parameter
+        k = self.options.sec_param
         r_bits = await self.random_bits(Zp, f * n)
         r_modf = [None] * n
         for j in range(n):
@@ -565,7 +570,7 @@ class Runtime:
             c = self.mul(c, d)
             c = self.mul(c, c)
             return c
-            
+
         if b == 0:
             return type(a)(1)
 
@@ -611,7 +616,7 @@ class Runtime:
         if isinstance(a, SecureFiniteField):
             return 1 - self.pow(a, a.field.order - 1)
 
-        if (a.bit_length / 2 > self.options.security_parameter >= 8 and a.field.order % 4 == 3):
+        if (a.bit_length / 2 > self.options.sec_param >= 8 and a.field.order % 4 == 3):
             return self._is_zero(a)
 
         return self.sgn(a, EQ=True)
@@ -623,7 +628,7 @@ class Runtime:
         await returnType((stype, True))
         Zp = stype.field
 
-        k = self.options.security_parameter
+        k = self.options.sec_param
         z = self.random_bits(Zp, k)
         u = self._randoms(Zp, k)
         u2 = self.schur_prod(u, u)
@@ -658,7 +663,7 @@ class Runtime:
             r_modl += r_i.value
         a = await gather_shares(a)
         a_rmodl = a + ((1<<l) + r_modl)
-        k = self.options.security_parameter
+        k = self.options.sec_param
         r_divl = self._random(Zp, 1<<k)
         c = await self.output(a_rmodl + (r_divl.value << l))
         c = c.value % (1<<l)
@@ -723,7 +728,7 @@ class Runtime:
         await returnType((stype, True))
         Zp = stype.field
         l = stype.bit_length
-        k = self.options.security_parameter
+        k = self.options.sec_param
         b = self.random_bit(stype)
         a, b = await gather_shares(a, b)
         b >>= Zp.frac_length
@@ -750,7 +755,7 @@ class Runtime:
         await returnType(stype)
         Zp = stype.field
         l = stype.bit_length
-        k = self.options.security_parameter
+        k = self.options.sec_param
         f = Zp.frac_length
         r_bits = self.random._randbelow(stype, b, bits=True)
         a, r_bits = await gather_shares(a, r_bits)
@@ -1158,7 +1163,7 @@ class Runtime:
             r_modl <<= 1
             r_modl += r_i.value
         if isinstance(field.modulus, int):
-            k = self.options.security_parameter
+            k = self.options.sec_param
             r_divl = self._random(field, 1<<k)
             a = await gather_shares(a)
             c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))
@@ -1243,78 +1248,77 @@ def generate_configs(m, addresses):
     a list of '(host, port)' pairs, specifying the hostnames and
     port numbers for each party.
 
-    Returns a list of ConfigParser instances, which be saved in m
-    separate INI-files. The party owning an INI-file is indicated
-    by not setting its host.
+    Returns a list of ConfigParser instances, which can be saved
+    in m separate INI-files. The party owning an INI-file is
+    indicated by not specifying its hostname (host='').
     """
     configs = [configparser.ConfigParser() for _ in range(m)]
-    for p in range(m):
-        host, port = addresses[p]
+    for i in range(m):
+        host, port = addresses[i]
         if host == '':
             host = 'localhost'
         for config in configs:
-            config.add_section(f'Party {p}')
-            config.set(f'Party {p}', 'host', host)
-            config.set(f'Party {p}', 'port', port)
-        configs[p].set(f'Party {p}', 'host', '')  # empty host string for owner
+            config.add_section(f'Party {i}')
+            config.set(f'Party {i}', 'host', host)
+            config.set(f'Party {i}', 'port', port)
+        configs[i].set(f'Party {i}', 'host', '')  # empty host string for owner
     return configs
-
-
-def _load_config(filename):
-    """Load m-party configuration file.
-
-    Configuration files are simple INI-files containing information
-    (hostname and port number) about the other parties in the protocol.
-
-    One of the parties owns the configuration file and for this party
-    no hostname is specified.
-
-    Returns the pid of the owning party and a list of _Party objects.
-    """
-    config = configparser.ConfigParser()
-    config.read_file(open(filename, 'r'))
-    m = len(config.sections())
-    my_pid = None
-    parties = [None] * m
-    for party in config.sections():
-        pid = int(party[6:])  # strip 'Party ' prefix
-        host = config.get(party, 'host')
-        port = config.getint(party, 'port')
-        if host == '':
-            my_pid = pid
-        parties[pid] = _Party(pid, host, port)
-    return my_pid, parties
 
 
 def setup():
     """Setup a runtime."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('-H', '--HELP', action='store_true', default=False,
-                        help=f'show -h help message for {sys.argv[0]}, if any')
-    group = parser.add_argument_group('MPyC')
-    group.add_argument('-c', '--config', metavar='C',
-                       help='party configuration file C, which defines M')
-    group.add_argument('-t', '--threshold', type=int, metavar='T',
-                       help='threshold T, 2T+1<=M')
-    group.add_argument('-l', '--bit-length', type=int, metavar='L',
-                       help='maximum bit length L (for comparisons etc.)')
-    group.add_argument('-k', '--security-parameter', type=int, metavar='K',
-                       help='security parameter K for leakage probability 1/2**K')
+                        help=f'show this help message for MPyC and exit')
+    parser.add_argument('-h', '--help', action='store_true', default=False,
+                        help=f'show {sys.argv[0]} help message (if any)')
+
+    group = parser.add_argument_group('MPyC configuration')
+    group.add_argument('-C', '--config', metavar='ini',
+                       help='use ini file, defining all m parties')
+    group.add_argument('-P', type=str, dest='parties', metavar='addr', action='append',
+                       help='use addr=host:port per party (repeat m times)')
+    group.add_argument('-M', type=int, metavar='m',
+                       help='use m local parties (and run all m, if i is not set)')
+    group.add_argument('-I', '--index', type=int, metavar='i',
+                       help='set index of this local party to i, 0<=i<m')
+    group.add_argument('-T', '--threshold', type=int, metavar='t',
+                       help='threshold t, 0<=t<m/2')
+    group.add_argument('-B', '--base-port', type=int, metavar='b',
+                       help='use port number b+i for party i')
     group.add_argument('--ssl', action='store_true',
                        default=False, help='enable SSL connections')
+
+    group = parser.add_argument_group('MPyC parameters')
+    group.add_argument('-L', '--bit-length', type=int, metavar='l',
+                       help='default bit length l for secure numbers')
+    group.add_argument('-K', '--sec-param', type=int, metavar='k',
+                       help='security parameter k, leakage probability 2**-k')
     group.add_argument('--no-log', action='store_true',
-                       default=False, help='disable logging')
+                       default=False, help='disable logging messages')
     group.add_argument('--no-async', action='store_true',
                        default=False, help='disable asynchronous evaluation')
     group.add_argument('--no-barrier', action='store_true',
                        default=False, help='disable barriers')
+
+    group = parser.add_argument_group('MPyC misc')
+    group.add_argument('--output-windows', action='store_true',
+                       default=False, help='screen output for parties i>0 (only on Windows)')
+    group.add_argument('--output-file', action='store_true',
+                       default=False, help='append output for parties i>0 to party{m}_{i}.log')
     group.add_argument('-f', type=str,
-                       default='', help='consume IPython string')
-    parser.set_defaults(bit_length=32, security_parameter=30)
+                       default='', help='consume IPython\'s -f argument F')
+    parser.set_defaults(bit_length=32, sec_param=30)
+
+    argv = sys.argv  # keep raw args
     options, args = parser.parse_known_args()
     if options.HELP:
+        parser.print_help()
+        sys.exit()
+
+    if options.help:
         args += ['-h']
-        print(f'Showing -h help message for {sys.argv[0]}, if available:')
+        print(f'Showing help message for {sys.argv[0]}, if available:')
         print()
     sys.argv = [sys.argv[0]] + args
     if options.no_log:
@@ -1324,34 +1328,81 @@ def setup():
                             level=logging.INFO, stream=sys.stdout)
     if 'gmpy2' not in sys.modules:
         logging.info('Install package gmpy2 for better performance.')
-    if not options.config:
-        options.no_async = True
-        pid = 0
-        parties = [_Party(pid)]
-        m = 1
-        prss_keys = {(pid,): secrets.token_bytes(16)}  # 128-bit key
+
+    if options.config or options.parties:
+        # use host:port for each local or remote party
+        addresses = []
+        if options.config:
+            # from ini configuration file
+            config = configparser.ConfigParser()
+            config.read_file(open(os.path.join('.config', options.config), 'r'))
+            for party in config.sections():
+                host = config.get(party, 'host')
+                port = config.get(party, 'port')
+                addresses.append((host, port))
+        else:
+            # from command-line -P args
+            for party in options.parties:
+                host, *port_suffix = party.rsplit(':', maxsplit=1)
+                port = ' '.join(port_suffix)
+                addresses.append((host, port))
+        parties = []
+        pid = None
+        for i, (host, port) in enumerate(addresses):
+            if not host:
+                pid = i  # empty host string for owner
+                host = 'localhost'
+            if options.base_port:
+                port = options.base_port + i
+            elif not port:
+                port = 11365 + i
+            else:
+                port = int(port)
+            parties.append(_Party(i, host, port))
+        if pid is None:
+            pid = options.index
     else:
-        options.config = os.path.join('.config', options.config)
-        pid, parties = _load_config(options.config)
-        m = len(parties)
-        prss_keys = {}
-        for t in range((m + 1) // 2):  # all possible thresholds
-            for subset in itertools.combinations(range(m), m - t):
-                if pid == min(subset):
-                    prss_keys[subset] = secrets.token_bytes(16)  # 128-bit key
+        # use default port for each local party
+        if options.M is None:
+            options.no_async = True
+            pid = 0
+            parties = [_Party(pid)]
+        elif options.M == 1 or options.index is not None:
+            pid = options.index or 0
+            base_port = options.base_port if options.base_port else 11365
+            parties = [_Party(i, 'localhost', base_port + i) for i in range(options.M)]
+        else:
+            import platform
+            import subprocess
+            prog, args = argv[0], ' '.join(argv[1:])
+            for i in range(options.M - 1, 0, -1):
+                if options.output_windows and platform.platform().startswith('Windows'):
+                    os.system(f'start python {prog} -I{i} {args}')
+                elif options.output_file:
+                    with open(f'party{options.M}_{i}.log', 'a') as f:
+                        f.write('\n')
+                        f.write(f'$> python {prog} -I{i} {args}' + '\n')
+                        subprocess.Popen(f'python {prog} -I{i} {args}',
+                                         stdout=f, stderr=subprocess.STDOUT)
+                else:
+                    subprocess.Popen(f'python {prog} -I{i} {args}',
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+            subprocess.run(f'python {prog} -I0 {args}')
+            sys.exit()
+
+    m = len(parties)
     if options.threshold is None:
         options.threshold = (m - 1) // 2
-    assert 2 * options.threshold < m
+    assert 2 * options.threshold < m, f'threshold {options.threshold} too large for {m} parties'
 
-    global mpc
-    mpc = Runtime(pid, parties, prss_keys, options)
-    sectypes.runtime = mpc
-    asyncoro.runtime = mpc
-    mpyc.random.runtime = mpc
+    rt = Runtime(pid, parties, options)
+    sectypes.runtime = rt
+    asyncoro.runtime = rt
+    mpyc.random.runtime = rt
+    return rt
 
 
-mpc = None
 try:  # suppress exceptions for pydoc etc.
-    setup()
+    mpc = setup()
 except Exception as exc:
     print('MPyC runtime.setup() exception:', exc)

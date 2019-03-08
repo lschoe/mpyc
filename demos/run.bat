@@ -1,1 +1,1 @@
-python run.py %*
+python %2 -M%1 %3 %4 %5 %6 %7 %8 %9
