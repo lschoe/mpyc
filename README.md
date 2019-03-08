@@ -30,7 +30,7 @@ Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish i
 3. A few simple Windows batch files are provided in the `demos` directory. Also note the Windows batch files
 in the `docs` and `tests` directories.
 
-4. Directory `demos\.config` contains configuration info needed to run MPyC with multiple parties. Also, 
+4. Directory `demos\.config` contains configuration info used to run MPyC with multiple parties. Also, 
 Windows batch file 'gen.bat' shows how to generate fresh key material for SSL. OpenSSL is required to generate 
 SSL key material of your own, use `pip install pyOpenSSL`.
 
