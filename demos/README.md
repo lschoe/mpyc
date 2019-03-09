@@ -69,17 +69,17 @@ optional arguments:
 
 `python id3gini.py -H`
 
-`run-all.bat 1 --no-async`
+`run-all.bat --no-async`
 
-`run-all.bat 2 --ssl`
+`run-all.sh -M2 --ssl`
 
-`run-all.bat 3 --output-file > party3_0.log`
+`run-all.bat -M3 --output-file > party3_0.log`
 
-`run-all.bat 4 --threshold 0 --ssl`
+`run-all.sh -M4 --threshold 0 --ssl`
 
-`run-all.bat 5 --output-windows`
+`run-all.bat -M5 --output-windows`
 
-`run-all.bat 7`
+`run-all.sh -M7`
 
 `python cnnmnist.py > party1_0.log`
 
@@ -99,10 +99,10 @@ optional arguments:
 
 ## Jupyter notebooks
 
-Notebook [SecretSantaExplained](SecretSantaExplained.ipynb) provides a quick intro to MPyC.
+[SecretSantaExplained](SecretSantaExplained.ipynb) provides a quick intro to MPyC.
 
-Notebook [SecureSortingNetsExplained](SecureSortingNetsExplained.ipynb) shows how to convert some existing Python programs to MPyC programs.
+[SecureSortingNetsExplained](SecureSortingNetsExplained.ipynb) shows how to convert some existing Python programs to MPyC programs.
 
-Notebook [4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, cnnmnist.py.
+[4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, cnnmnist.py.
  
-Notebook [OneWayHashChainsExplained](OneWayHashChainsExplained.ipynb) shows a more advanced MPyC program.
+[OneWayHashChainsExplained](OneWayHashChainsExplained.ipynb) shows a more advanced MPyC program.
