@@ -7,7 +7,7 @@ fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
 combined with asynchronous evaluation of the associated protocols.
 
-See [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background.
+See [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background, and quick links to try MPyC without any install.
 
 ## Example installs:
 
@@ -27,8 +27,8 @@ Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christ
 [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/) webpage.
 Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish installation.
 
-3. A few simple Windows batch files are provided in the `demos` directory. Also note the Windows batch files
-in the `docs` and `tests` directories.
+3. Use `run-all.sh` or `run-all.bat` in the `demos` directory to have a quick look at some demos. 
+Also note the example Windows batch files in the `docs` and `tests` directories.
 
 4. Directory `demos\.config` contains configuration info used to run MPyC with multiple parties. Also, 
 Windows batch file 'gen.bat' shows how to generate fresh key material for SSL. OpenSSL is required to generate 
