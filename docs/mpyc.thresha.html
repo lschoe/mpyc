@@ -25,9 +25,10 @@ function&nbsp;(<a href="#PRF">PRF</a>).</tt></p>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="hashlib.html">hashlib</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="functools.html">functools</a><br>
+</td><td width="25%" valign=top><a href="hashlib.html">hashlib</a><br>
 </td><td width="25%" valign=top><a href="secrets.html">secrets</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -49,16 +50,18 @@ function&nbsp;(<a href="#PRF">PRF</a>).</tt></p>
 <font color="#000000" face="helvetica, arial"><a name="PRF">class <strong>PRF</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>A&nbsp;pseudorandom&nbsp;function&nbsp;(<a href="#PRF">PRF</a>)&nbsp;with&nbsp;128-bit&nbsp;keys.<br>
+<td colspan=2><tt><a href="#PRF">PRF</a>(key,&nbsp;bound)<br>
+&nbsp;<br>
+A&nbsp;pseudorandom&nbsp;function&nbsp;(<a href="#PRF">PRF</a>).<br>
 &nbsp;<br>
 A&nbsp;<a href="#PRF">PRF</a>&nbsp;is&nbsp;determined&nbsp;by&nbsp;a&nbsp;secret&nbsp;key&nbsp;and&nbsp;a&nbsp;public&nbsp;maximum.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="PRF-__call__"><strong>__call__</strong></a>(self, s, n=None)</dt><dd><tt>Return&nbsp;a&nbsp;number&nbsp;or&nbsp;list&nbsp;of&nbsp;numbers&nbsp;in&nbsp;range(self.<strong>max</strong>)&nbsp;for&nbsp;input&nbsp;string&nbsp;s.</tt></dd></dl>
+<dl><dt><a name="PRF-__call__"><strong>__call__</strong></a>(self, s, n=None)</dt><dd><tt>Return&nbsp;a&nbsp;number&nbsp;or&nbsp;length-n&nbsp;list&nbsp;of&nbsp;numbers&nbsp;in&nbsp;range(self.<strong>max</strong>)&nbsp;for&nbsp;input&nbsp;bytes&nbsp;s.</tt></dd></dl>
 
 <dl><dt><a name="PRF-__init__"><strong>__init__</strong></a>(self, key, bound)</dt><dd><tt>Create&nbsp;a&nbsp;<a href="#PRF">PRF</a>&nbsp;determined&nbsp;by&nbsp;the&nbsp;given&nbsp;key&nbsp;and&nbsp;(upper)&nbsp;bound.<br>
 &nbsp;<br>
-The&nbsp;key&nbsp;is&nbsp;a&nbsp;hex&nbsp;string,&nbsp;whereas&nbsp;bound&nbsp;is&nbsp;a&nbsp;number.<br>
+The&nbsp;key&nbsp;is&nbsp;given&nbsp;as&nbsp;a&nbsp;byte&nbsp;string.<br>
 Output&nbsp;values&nbsp;will&nbsp;be&nbsp;in&nbsp;range(bound).</tt></dd></dl>
 
 <hr>

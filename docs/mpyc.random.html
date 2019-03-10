@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.random</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.random</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5Crandom.py">c:\users\berry\documents\github\mympyc\mpyc\random.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;several&nbsp;functions&nbsp;for<br>
+generating&nbsp;pseudorandom&nbsp;numbers,&nbsp;cf.&nbsp;the&nbsp;random&nbsp;module&nbsp;of&nbsp;Python's<br>
+standard&nbsp;library.&nbsp;Each&nbsp;function&nbsp;behaves&nbsp;like&nbsp;its&nbsp;Python&nbsp;counterpart,<br>
+except&nbsp;that&nbsp;a&nbsp;secure&nbsp;type&nbsp;is&nbsp;required&nbsp;as&nbsp;additional&nbsp;(first)&nbsp;argument.<br>
+&nbsp;<br>
+Additionally,&nbsp;<a href="#-random_unit_vector">random_unit_vector</a>()&nbsp;generates&nbsp;a&nbsp;random&nbsp;bit&nbsp;vector<br>
+with&nbsp;exactly&nbsp;one&nbsp;bit&nbsp;set&nbsp;to&nbsp;1,&nbsp;using&nbsp;approximately&nbsp;log_2&nbsp;n&nbsp;secure<br>
+random&nbsp;bits&nbsp;for&nbsp;a&nbsp;bit&nbsp;vector&nbsp;of&nbsp;length&nbsp;n.<br>
+&nbsp;<br>
+Also,&nbsp;<a href="#-random_permutation">random_permutation</a>()&nbsp;and&nbsp;<a href="#-random_derangement">random_derangement</a>()&nbsp;are&nbsp;provided&nbsp;as<br>
+convenience&nbsp;functions.<br>
+&nbsp;<br>
+Main&nbsp;concern&nbsp;for&nbsp;the&nbsp;implementations&nbsp;is&nbsp;to&nbsp;minimize&nbsp;the&nbsp;randomness<br>
+complexity,&nbsp;that&nbsp;is,&nbsp;to&nbsp;limit&nbsp;the&nbsp;usage&nbsp;of&nbsp;secure&nbsp;random&nbsp;bits&nbsp;as<br>
+provided&nbsp;by&nbsp;runtime.random_bits().&nbsp;Other&nbsp;than&nbsp;this,&nbsp;the&nbsp;code&nbsp;is<br>
+relatively&nbsp;simple&nbsp;for&nbsp;now.<br>
+&nbsp;<br>
+NB:&nbsp;runtime._random(sectype,&nbsp;n)&nbsp;cannot&nbsp;be&nbsp;used&nbsp;as&nbsp;an&nbsp;alternative&nbsp;to<br>
+_randbelow(sectype,&nbsp;n)&nbsp;as&nbsp;its&nbsp;output&nbsp;is&nbsp;not&nbsp;uniformly&nbsp;random,&nbsp;except<br>
+when&nbsp;n&nbsp;is&nbsp;equal&nbsp;to&nbsp;the&nbsp;order&nbsp;of&nbsp;sectype's&nbsp;finite&nbsp;field.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="mpyc.asyncoro.html">mpyc.asyncoro</a><br>
+<a href="functools.html">functools</a><br>
+</td><td width="25%" valign=top><a href="itertools.html">itertools</a><br>
+<a href="math.html">math</a><br>
+</td><td width="25%" valign=top><a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-choice"><strong>choice</strong></a>(sectype, seq)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;element&nbsp;chosen&nbsp;from&nbsp;seq.<br>
+&nbsp;<br>
+Given&nbsp;seq&nbsp;may&nbsp;contain&nbsp;public&nbsp;and/or&nbsp;secret&nbsp;elements.<br>
+&nbsp;<br>
+If&nbsp;seq&nbsp;is&nbsp;empty,&nbsp;raises&nbsp;IndexError.</tt></dd></dl>
+ <dl><dt><a name="-choices"><strong>choices</strong></a>(sectype, population, weights=None, *, cum_weights=None, k=1)</dt><dd><tt>List&nbsp;of&nbsp;k&nbsp;uniformly&nbsp;random&nbsp;secret&nbsp;elements&nbsp;chosen&nbsp;from&nbsp;population.<br>
+&nbsp;<br>
+Choices&nbsp;are&nbsp;made&nbsp;with&nbsp;replacement.<br>
+&nbsp;<br>
+Given&nbsp;population&nbsp;may&nbsp;contain&nbsp;public&nbsp;and/or&nbsp;secret&nbsp;elements.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;relative&nbsp;weights&nbsp;or&nbsp;cumulative&nbsp;weights&nbsp;are&nbsp;not&nbsp;specified,<br>
+the&nbsp;choices&nbsp;are&nbsp;made&nbsp;with&nbsp;equal&nbsp;probability.</tt></dd></dl>
+ <dl><dt><a name="-getrandbits"><strong>getrandbits</strong></a>(sectype, k, bits=False)</dt><dd><tt>Uniformly&nbsp;random&nbsp;nonnegative&nbsp;k-bit&nbsp;integer&nbsp;value.<br>
+&nbsp;<br>
+Return&nbsp;bits&nbsp;(instead&nbsp;of&nbsp;number)&nbsp;if&nbsp;requested.</tt></dd></dl>
+ <dl><dt><a name="-randint"><strong>randint</strong></a>(sectype, a, b)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;integer&nbsp;between&nbsp;a&nbsp;and&nbsp;b,&nbsp;incl.&nbsp;both&nbsp;endpoints.</tt></dd></dl>
+ <dl><dt><a name="-random"><strong>random</strong></a>(sectype)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;fixed-point&nbsp;number&nbsp;in&nbsp;the&nbsp;range&nbsp;[0.0,&nbsp;1.0).</tt></dd></dl>
+ <dl><dt><a name="-random_derangement"><strong>random_derangement</strong></a>(sectype, x)</dt><dd><tt>Uniformly&nbsp;random&nbsp;derangement&nbsp;of&nbsp;given&nbsp;sequence&nbsp;x&nbsp;or&nbsp;range(x).<br>
+&nbsp;<br>
+A&nbsp;derangement&nbsp;is&nbsp;a&nbsp;permutation&nbsp;without&nbsp;fixed&nbsp;points.</tt></dd></dl>
+ <dl><dt><a name="-random_permutation"><strong>random_permutation</strong></a>(sectype, x)</dt><dd><tt>Uniformly&nbsp;random&nbsp;permutation&nbsp;of&nbsp;given&nbsp;sequence&nbsp;x&nbsp;or&nbsp;range(x).</tt></dd></dl>
+ <dl><dt><a name="-random_unit_vector"><strong>random_unit_vector</strong></a>(sectype, n)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;rotation&nbsp;of&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1).<br>
+&nbsp;<br>
+Expected&nbsp;number&nbsp;of&nbsp;secret&nbsp;random&nbsp;bits&nbsp;needed&nbsp;is&nbsp;log_2&nbsp;n&nbsp;+&nbsp;c,<br>
+with&nbsp;c&nbsp;a&nbsp;small&nbsp;constant,&nbsp;c&nbsp;&lt;&nbsp;3.</tt></dd></dl>
+ <dl><dt><a name="-randrange"><strong>randrange</strong></a>(sectype, start, stop=None, step=1)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;integer&nbsp;in&nbsp;range(start,&nbsp;stop[,&nbsp;step]).</tt></dd></dl>
+ <dl><dt><a name="-sample"><strong>sample</strong></a>(sectype, population, k)</dt><dd><tt>List&nbsp;of&nbsp;k&nbsp;uniformly&nbsp;random&nbsp;secret&nbsp;elements&nbsp;chosen&nbsp;from&nbsp;population.<br>
+&nbsp;<br>
+Choices&nbsp;are&nbsp;made&nbsp;without&nbsp;replacement.<br>
+&nbsp;<br>
+Given&nbsp;population&nbsp;may&nbsp;contain&nbsp;public&nbsp;and/or&nbsp;secret&nbsp;elements.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;population&nbsp;contains&nbsp;repeats,&nbsp;then&nbsp;each&nbsp;occurrence&nbsp;is&nbsp;a<br>
+possible&nbsp;selection&nbsp;in&nbsp;the&nbsp;sample.<br>
+&nbsp;<br>
+To&nbsp;choose&nbsp;a&nbsp;sample&nbsp;in&nbsp;a&nbsp;range&nbsp;of&nbsp;integers,&nbsp;use&nbsp;range&nbsp;as&nbsp;an&nbsp;argument.<br>
+This&nbsp;is&nbsp;especially&nbsp;fast&nbsp;and&nbsp;space&nbsp;efficient&nbsp;for&nbsp;sampling&nbsp;from&nbsp;a<br>
+large&nbsp;population,&nbsp;e.g.:&nbsp;<a href="#-sample">sample</a>(sectype,&nbsp;range(10000000),&nbsp;60).</tt></dd></dl>
+ <dl><dt><a name="-shuffle"><strong>shuffle</strong></a>(sectype, x)</dt><dd><tt>Shuffle&nbsp;list&nbsp;x&nbsp;secretly&nbsp;in&nbsp;place,&nbsp;and&nbsp;return&nbsp;None.<br>
+&nbsp;<br>
+Given&nbsp;list&nbsp;x&nbsp;may&nbsp;contain&nbsp;public&nbsp;or&nbsp;secret&nbsp;elements.</tt></dd></dl>
+ <dl><dt><a name="-uniform"><strong>uniform</strong></a>(sectype, a, b)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;fixed-point&nbsp;number&nbsp;N&nbsp;such&nbsp;that<br>
+a&nbsp;&lt;=&nbsp;N&nbsp;&lt;=&nbsp;b&nbsp;for&nbsp;a&nbsp;&lt;=&nbsp;b&nbsp;and&nbsp;b&nbsp;&lt;=&nbsp;N&nbsp;&lt;=&nbsp;a&nbsp;for&nbsp;b&nbsp;&lt;&nbsp;a.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>runtime</strong> = None</td></tr></table>
+</body></html>

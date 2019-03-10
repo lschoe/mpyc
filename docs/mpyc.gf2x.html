@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.gf2x</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.gf2x</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5Cgf2x.py">c:\users\berry\documents\github\mympyc\mpyc\gf2x.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;supports&nbsp;arithmetic&nbsp;with&nbsp;polynomials&nbsp;over&nbsp;GF(2).<br>
+&nbsp;<br>
+Polynomials&nbsp;over&nbsp;GF(2)&nbsp;are&nbsp;represented&nbsp;as&nbsp;nonnegative&nbsp;integers.<br>
+The&nbsp;polynomial&nbsp;b_n&nbsp;x^n&nbsp;+&nbsp;...&nbsp;+&nbsp;b_1&nbsp;x&nbsp;+&nbsp;b_0&nbsp;corresponds<br>
+to&nbsp;the&nbsp;integer&nbsp;b_n&nbsp;2^n&nbsp;+&nbsp;...&nbsp;+&nbsp;b_1&nbsp;2&nbsp;+&nbsp;b_0,&nbsp;for&nbsp;bits&nbsp;b_n,...,b_0.<br>
+&nbsp;<br>
+The&nbsp;operators&nbsp;+,&nbsp;-,&nbsp;*,&nbsp;&lt;&lt;,&nbsp;//,&nbsp;%,&nbsp;and&nbsp;function&nbsp;divmod&nbsp;are&nbsp;overloaded.<br>
+Using&nbsp;the&nbsp;direct&nbsp;correspondence&nbsp;between&nbsp;polynomials&nbsp;and&nbsp;integers,<br>
+the&nbsp;operators&nbsp;&lt;,&nbsp;&lt;=,&nbsp;&gt;,&nbsp;&gt;=,&nbsp;==,&nbsp;!=&nbsp;are&nbsp;overloaded&nbsp;as&nbsp;well,&nbsp;where<br>
+the&nbsp;zero&nbsp;polynomial&nbsp;is&nbsp;the&nbsp;smallest&nbsp;polynomial.<br>
+&nbsp;<br>
+GCD,&nbsp;extended&nbsp;GCD,&nbsp;modular&nbsp;inverse&nbsp;and&nbsp;powers&nbsp;are&nbsp;all&nbsp;supported.<br>
+A&nbsp;simple&nbsp;irreducibility&nbsp;test&nbsp;is&nbsp;provided&nbsp;as&nbsp;well&nbsp;as&nbsp;a&nbsp;basic<br>
+routine&nbsp;to&nbsp;find&nbsp;the&nbsp;next&nbsp;largest&nbsp;irreducible&nbsp;polynomial.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.gf2x.html#Polynomial">Polynomial</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Polynomial">class <strong>Polynomial</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Polynomial">Polynomial</a>(value,&nbsp;x='x')<br>
+&nbsp;<br>
+Polynomials&nbsp;over&nbsp;GF(2)&nbsp;represented&nbsp;as&nbsp;nonnegative&nbsp;integers.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Polynomial-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Truth&nbsp;value&nbsp;testing.<br>
+&nbsp;<br>
+Return&nbsp;False&nbsp;if&nbsp;this&nbsp;field&nbsp;element&nbsp;is&nbsp;zero,&nbsp;True&nbsp;otherwise.<br>
+Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&nbsp;Boolean&nbsp;formulas.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__divmod__"><strong>__divmod__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Equality&nbsp;test.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__floordiv__"><strong>__floordiv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__ge__"><strong>__ge__</strong></a>(self, other)</dt><dd><tt>Greater-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__gt__"><strong>__gt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;greater-than&nbsp;comparison.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Hash&nbsp;value.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__iadd__"><strong>__iadd__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__ifloordiv__"><strong>__ifloordiv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__ilshift__"><strong>__ilshift__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__imod__"><strong>__imod__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__imul__"><strong>__imul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__init__"><strong>__init__</strong></a>(self, value, x='x')</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__int__"><strong>__int__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Polynomial-__isub__"><strong>__isub__</strong></a> = <a href="#Polynomial-__iadd__">__iadd__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__le__"><strong>__le__</strong></a>(self, other)</dt><dd><tt>Less-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__lshift__"><strong>__lshift__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__lt__"><strong>__lt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;less-than&nbsp;comparison.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__mod__"><strong>__mod__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><tt>Negated&nbsp;equality&nbsp;testing.</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__pow__"><strong>__pow__</strong></a>(self, exponent)</dt></dl>
+
+<dl><dt><a name="Polynomial-__radd__"><strong>__radd__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__rdivmod__"><strong>__rdivmod__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-__rfloordiv__"><strong>__rfloordiv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__rmod__"><strong>__rmod__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__rsub__"><strong>__rsub__</strong></a> = <a href="#Polynomial-__radd__">__radd__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-__sub__"><strong>__sub__</strong></a> = <a href="#Polynomial-__add__">__add__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="Polynomial-degree"><strong>degree</strong></a>(self)</dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;(-1&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-is_irreducible"><strong>is_irreducible</strong></a>(self)</dt><dd><tt>Test&nbsp;polynomial&nbsp;for&nbsp;irreducibility.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-add"><strong>add</strong></a>(a, b)</dt><dd><tt>Add&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-degree"><strong>degree</strong></a>(a)</dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;(-1&nbsp;if&nbsp;a&nbsp;is&nbsp;zero).</tt></dd></dl>
+ <dl><dt><a name="-divmod_"><strong>divmod_</strong></a>(a, b)</dt><dd><tt>Divide&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;polynomial&nbsp;b&nbsp;with&nbsp;remainder,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-from_terms"><strong>from_terms</strong></a>(s, x='x')</dt><dd><tt>Convert&nbsp;string&nbsp;s&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x&nbsp;to&nbsp;a&nbsp;polynomial.</tt></dd></dl>
+ <dl><dt><a name="-gcd"><strong>gcd</strong></a>(a, b)</dt><dd><tt>Greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-gcdext"><strong>gcdext</strong></a>(a, b)</dt><dd><tt>Extended&nbsp;GCD&nbsp;for&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.<br>
+&nbsp;<br>
+Return&nbsp;d,&nbsp;s,&nbsp;t&nbsp;satisfying&nbsp;s&nbsp;a&nbsp;+&nbsp;t&nbsp;b&nbsp;=&nbsp;d&nbsp;=&nbsp;<a href="#-gcd">gcd</a>(a,b).</tt></dd></dl>
+ <dl><dt><a name="-invert"><strong>invert</strong></a>(a, b)</dt><dd><tt>Inverse&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-is_irreducible"><strong>is_irreducible</strong></a>(a)</dt><dd><tt>Test&nbsp;polynomial&nbsp;a&nbsp;for&nbsp;irreducibility.</tt></dd></dl>
+ <dl><dt><a name="-mod"><strong>mod</strong></a>(a, b)</dt><dd><tt>Reduce&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-mul"><strong>mul</strong></a>(a, b)</dt><dd><tt>Multiply&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-next_irreducible"><strong>next_irreducible</strong></a>(a)</dt><dd><tt>Return&nbsp;next&nbsp;irreducible&nbsp;polynomial&nbsp;&gt;&nbsp;a.<br>
+&nbsp;<br>
+NB:&nbsp;'x'&nbsp;&lt;&nbsp;'x+1'&nbsp;&lt;&nbsp;'x^2+x+1'&nbsp;&lt;&nbsp;'x^3+x+1'&nbsp;&lt;&nbsp;'x^3+x^2+1'&nbsp;&lt;&nbsp;...</tt></dd></dl>
+ <dl><dt><a name="-powmod"><strong>powmod</strong></a>(a, n, b)</dt><dd><tt><a href="#Polynomial">Polynomial</a>&nbsp;a&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;n&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+ <dl><dt><a name="-to_terms"><strong>to_terms</strong></a>(a, x='x')</dt><dd><tt>Convert&nbsp;polynomial&nbsp;a&nbsp;to&nbsp;a&nbsp;string&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x.</tt></dd></dl>
+</td></tr></table>
+</body></html>
