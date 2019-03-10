@@ -9,16 +9,19 @@ set up an SSL/TLS connection. Similarly, for the remaining parties.
 import argparse
 from OpenSSL import crypto
 
+
 def create_key(bits):
     """Create a public/private key pair."""
     pkey = crypto.PKey()
     pkey.generate_key(crypto.TYPE_RSA, bits)
     return pkey
 
+
 def save_key(pkey, filename):
     """Save a key as a PEM file."""
     with open(filename, 'w') as f:
         f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey).decode())
+
 
 def create_request(pk, common_name):
     """Create a certificate request."""
@@ -28,6 +31,7 @@ def create_request(pk, common_name):
     rq.set_pubkey(pk)
     rq.sign(pk, 'sha256')
     return rq
+
 
 def create_certificate(rq, issuer_cert, issuer_sk, serial):
     """Generate a certificate given a certificate request."""
@@ -41,10 +45,12 @@ def create_certificate(rq, issuer_cert, issuer_sk, serial):
     crt.sign(issuer_sk, 'sha256')
     return crt
 
+
 def save_certificate(crt, filename):
     """Save a certificate as a PEM file."""
     with open(filename, 'w') as f:
         f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, crt).decode())
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

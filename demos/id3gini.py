@@ -16,6 +16,7 @@ import argparse
 import asyncio
 from mpyc.runtime import mpc
 
+
 def load(filename):
     attr_ranges = None
     attr_names = None
@@ -35,6 +36,7 @@ def load(filename):
                     transactions.append(list(map(int, line.split(sep))))
     return attr_ranges, attr_names, transactions
 
+
 def argmax(xs, arg_ge):
     n = len(xs)
     if n == 1:
@@ -44,12 +46,14 @@ def argmax(xs, arg_ge):
     a, m = arg_ge(max0, max1)
     return mpc.if_else(a, n//2 + i1, i0), m
 
+
 def argmax_int(xs):
     def arg_ge_int(x0, x1):
         a = x0 <= x1
         m = mpc.if_else(a, x1, x0)
         return a, m
     return argmax(xs, arg_ge_int)
+
 
 def max_rat(xs):
     def arg_ge_rat(x0, x1):
@@ -59,6 +63,7 @@ def max_rat(xs):
         m = mpc.if_else(a, [n1, d1], [n0, d0])
         return a, m
     return argmax(xs, arg_ge_rat)[0]
+
 
 @mpc.coroutine
 async def id3(T, R) -> asyncio.Future:
@@ -75,7 +80,7 @@ async def id3(T, R) -> asyncio.Future:
         gains = [GI(mpc.matrix_prod(T_A, S[C], True)) for T_A in T_R]
         k = (await mpc.output(max_rat(gains))).value
         T_Rk = T_R[k]
-        del T_R, gains # release memory
+        del T_R, gains  # release memory
         A = list(R)[k]
         logging.info(f'Attribute node {attr_names[A]}')
 #        trees = await mpc.gather([id3(t, R.difference([A])) for t in T_Rk])
@@ -83,11 +88,13 @@ async def id3(T, R) -> asyncio.Future:
         tree = attr_names[A], trees
     return tree
 
+
 def GI(x):
-    y = [8 * s + 1 for s in map(mpc.sum, x)] #s + (s == 0)
+    y = [8 * s + 1 for s in map(mpc.sum, x)]  # s + (s == 0)
     D = mpc.prod(y)
     G = mpc.in_prod(list(map(mpc.in_prod, x, x)), list(map(lambda x: 1/x, y)))
     return (D * G, D)
+
 
 async def main():
     global secint, S, C, attr_names

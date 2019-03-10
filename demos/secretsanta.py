@@ -9,6 +9,7 @@ fixed points are also called 'derangements'.
 import sys
 from mpyc.runtime import mpc
 
+
 @mpc.coroutine
 async def random_unit_vector(n, sectype):
     """Random permutation of [sectype(1)] + [sectype(0) for i in range(n-1)]."""
@@ -28,6 +29,7 @@ async def random_unit_vector(n, sectype):
 
     return random_unit_vector(n, sectype)
 
+
 def random_permutation(n, sectype):
     """Random permutation of [sectype(i) for i in range(n)]. """
     p = [sectype(i) for i in range(n)]
@@ -40,6 +42,7 @@ def random_permutation(n, sectype):
             p[i + j] += d_r[j]
     return p
 
+
 @mpc.coroutine
 async def random_derangement(n, sectype):
     """Random permutation of [sectype(i) for i in range(n)] without fixed point."""
@@ -49,6 +52,7 @@ async def random_derangement(n, sectype):
     if await mpc.is_zero_public(t):
         p = random_derangement(n, sectype)
     return p
+
 
 async def main():
     if sys.argv[1:]:

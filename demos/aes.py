@@ -12,19 +12,22 @@ done by using GF(2) as a subfield of GF(2^8).
 import sys
 from mpyc.runtime import mpc
 
-secfld = mpc.SecFld(2**8) # Secure AES field GF(2^8) for secret values.
-f256 = secfld.field       # Plain AES field GF(2^8) for public values.
+secfld = mpc.SecFld(2**8)  # Secure AES field GF(2^8) for secret values.
+f256 = secfld.field        # Plain AES field GF(2^8) for public values.
+
 
 def circulant_matrix(r):
     """Circulant matrix with first row r."""
     r = list(map(f256, r))
     return [r[-i:] + r[:-i] for i in range(len(r))]
 
-A  = circulant_matrix([1, 0, 0, 0, 1, 1, 1, 1])  # 8x8 matrix A over GF(2)
+
+A = circulant_matrix([1, 0, 0, 0, 1, 1, 1, 1])   # 8x8 matrix A over GF(2)
 A1 = circulant_matrix([0, 0, 1, 0, 0, 1, 0, 1])  # inverse of A
 B = list(map(f256, [1, 1, 0, 0, 0, 1, 1, 0]))    # vector B over GF(2)
-C  = circulant_matrix([2, 3, 1, 1])              # 4x4 matrix C over GF(2^8)
+C = circulant_matrix([2, 3, 1, 1])               # 4x4 matrix C over GF(2^8)
 C1 = circulant_matrix([14, 11, 13, 9])           # inverse of C
+
 
 def sbox(x):
     """AES S-Box."""
@@ -34,6 +37,7 @@ def sbox(x):
     v = mpc.from_bits(w)
     return v
 
+
 def sbox1(v):
     """AES inverse S-Box."""
     w = mpc.to_bits(v)
@@ -42,10 +46,11 @@ def sbox1(v):
     x = mpc.from_bits(y)**254
     return x
 
+
 def key_expansion(k):
     """AES key expansion for 128/256-bit keys."""
     w = list(map(list, zip(*k)))
-    Nk = len(w) # Nk is 4 or 8
+    Nk = len(w)  # Nk is 4 or 8
     Nr = 10 if Nk == 4 else 14
     for i in range(Nk, 4 * (Nr + 1)):
         t = w[-1]
@@ -58,9 +63,10 @@ def key_expansion(k):
     K = [list(zip(*_)) for _ in zip(*[iter(w)]*4)]
     return K
 
+
 def encrypt(K, s):
     """AES encryption of s given key schedule K."""
-    Nr = len(K) - 1 # Nr is 10 or 14
+    Nr = len(K) - 1  # Nr is 10 or 14
     s = mpc.matrix_add(s, K[0])
     for i in range(1, Nr + 1):
         s = [[sbox(x) for x in _] for _ in s]
@@ -70,9 +76,10 @@ def encrypt(K, s):
         s = mpc.matrix_add(s, K[i])
     return s
 
+
 def decrypt(K, s):
     """AES decryption of s given key schedule K."""
-    Nr = len(K) - 1 # Nr is 10 or 14
+    Nr = len(K) - 1  # Nr is 10 or 14
     for i in range(Nr, 0, -1):
         s = mpc.matrix_add(s, K[i])
         if i < Nr:
@@ -82,11 +89,13 @@ def decrypt(K, s):
     s = mpc.matrix_add(s, K[0])
     return s
 
+
 async def xprint(text, s):
     """Print matrix s transposed and flattened as hex string."""
     s = list(map(list, zip(*s)))
     s = await mpc.output(sum(s, []))
     print(f'{text} {bytes(map(int, s)).hex()}')
+
 
 async def main():
     if sys.argv[1:]:
@@ -96,14 +105,14 @@ async def main():
         full = True
         print('AES-128 en/decryption and AES-256 en/decryption.')
 
-    print('AES polynomial:', f256.modulus) # x^8 + x^4 + x^3 + x + 1
-    
+    print('AES polynomial:', f256.modulus)  # x^8 + x^4 + x^3 + x + 1
+
     await mpc.start()
 
-    p = [[secfld(17*(4 * j + i))  for j in range(4)] for i in range(4)]
+    p = [[secfld(17*(4 * j + i)) for j in range(4)] for i in range(4)]
     await xprint('Plaintext:  ', p)
 
-    k128 = [[secfld(4 * j + i)  for j in range(4)] for i in range(4)]
+    k128 = [[secfld(4 * j + i) for j in range(4)] for i in range(4)]
     await xprint('AES-128 key:', k128)
     K = key_expansion(k128)
     c = encrypt(K, p)

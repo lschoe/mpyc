@@ -1,6 +1,7 @@
 import sys
 from mpyc.runtime import mpc
 
+
 def secret_index(a, n):
     """Return a-th unit vector of length n, assuming 0 <= a < n."""
 
@@ -16,10 +17,11 @@ def secret_index(a, n):
             a2, b = divmod(a, 2)
             z = si1(a2, (n + 1) // 2)
             y = mpc.scalar_mul(b, z)
-            x = [b-sum(y)] + [z[i//2]-y[i//2] if i%2 == 0 else y[i//2] for i in range(n-2)]
+            x = [b-sum(y)] + [z[i//2]-y[i//2] if i % 2 == 0 else y[i//2] for i in range(n-2)]
         return x
     x = si1(a, n)
     return [secint(1) - sum(x)] + x
+
 
 secint = mpc.SecInt()
 

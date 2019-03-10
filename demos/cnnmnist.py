@@ -20,12 +20,14 @@ from mpyc.runtime import mpc
 
 secnum = None
 
+
 def scale_to_int(f):
     if secnum.field.frac_length == 0:
         scale = lambda a: secnum(round(a * f))
     else:
         scale = secnum
     return np.vectorize(scale)
+
 
 def load(name, f, a=2):
     W = np.load(os.path.join('data', 'cnn', 'W_' + name + '.npy'))
@@ -34,7 +36,8 @@ def load(name, f, a=2):
     b = scale_to_int(1 << (a * f))(b)
     return W, b
 
-def dim(x): # dimensions of tensor x
+
+def dim(x):  # dimensions of tensor x
     if isinstance(x, np.ndarray):
         s = list(x.shape)
     else:
@@ -43,6 +46,7 @@ def dim(x): # dimensions of tensor x
             s.append(len(x))
             x = x[0]
     return s
+
 
 @mpc.coroutine
 async def convolvetensor(x, W, b):
@@ -78,9 +82,10 @@ async def convolvetensor(x, W, b):
     return Y
     # k, v, m, n = dim(Y)
 
+
 def inprod2D(X, W):
     m, n = dim(X)
-    s = len(W) # s * s filter W
+    s = len(W)  # s * s filter W
     s2 = (s - 1) // 2
     Y = [None] * m
     for i in range(m):
@@ -99,10 +104,12 @@ def inprod2D(X, W):
             Y[i][j] = t
     return Y
 
+
 def tensormatrix_prod(x, W, b):
     logging.info('- - - - - - - - fc      - - - - - - -')
     W, b = W.tolist(), b.tolist()
     return [mpc.vector_add(mpc.matrix_prod([z.tolist()], W)[0], b) for z in x]
+
 
 def maxpool(x):
     logging.info('- - - - - - - - maxpool - - - - - - -')
@@ -113,9 +120,11 @@ def maxpool(x):
           for y in z] for z in x]
     return np.array(Y)
 
+
 def ReLU(x):
     logging.info('- - - - - - - - ReLU    - - - - - - -')
     return np.vectorize(lambda a: (a >= 0) * a)(x)
+
 
 def argmax(x):
     a = type(x[0])(0)
@@ -125,6 +134,7 @@ def argmax(x):
         a = b * (a - i) + i
         m = b * (m - x[i]) + x[i]
     return a
+
 
 async def main():
     global secnum

@@ -1,6 +1,7 @@
 import sys
 from mpyc.runtime import mpc
 
+
 def bsort(x):
 
     def bitonic_sort(lo, n, up=True):
@@ -26,6 +27,7 @@ def bsort(x):
 
     bitonic_sort(0, len(x))
     return x
+
 
 async def main():
     if sys.argv[1:]:

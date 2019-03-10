@@ -56,18 +56,28 @@ class Runtime:
         self._program_counter = (0,)
         self._loop = asyncio.get_event_loop()  # cache running loop
         self.start_time = None
-        m = len(self.parties)
-        t = self.threshold
+
+    @property
+    def threshold(self):
+        """Threshold for MPC."""
+        return self._threshold
+
+    @threshold.setter
+    def threshold(self, t):
+        self._threshold = t
+        # generate new PRSS keys
+        self.prfs.cache_clear()
         keys = {}
+        m = len(self.parties)
         for t in range((m + 1) // 2):  # all possible thresholds
             for subset in itertools.combinations(range(m), m - t):
-                if pid == min(subset):
+                if self.pid == min(subset):
                     keys[subset] = secrets.token_bytes(16)  # 128-bit key
         self._prss_keys = keys
         # caching (m choose t):
         self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
 
-    @functools.lru_cache(maxsize=None)  # TODO: clear cache if threshold changes
+    @functools.lru_cache(maxsize=None)
     def prfs(self, bound):
         """PRFs with codomain range(bound) for pseudorandom secret sharing.
 
@@ -1224,7 +1234,7 @@ class Runtime:
         return c * v
 
 
-class _Party:
+class Party:
     """Information about a party in the MPC protocol."""
 
     def __init__(self, pid, host=None, port=None):
@@ -1236,9 +1246,9 @@ class _Party:
     def __repr__(self):
         """String representation of the party."""
         if self.host is None:
-            return f'<_Party {self.pid}>'
+            return f'<Party {self.pid}>'
 
-        return f'<_Party {self.pid}: {self.host}:{self.port}>'
+        return f'<Party {self.pid}: {self.host}:{self.port}>'
 
 
 def generate_configs(m, addresses):
@@ -1358,7 +1368,7 @@ def setup():
                 port = 11365 + i
             else:
                 port = int(port)
-            parties.append(_Party(i, host, port))
+            parties.append(Party(i, host, port))
         if pid is None:
             pid = options.index
     else:
@@ -1366,11 +1376,11 @@ def setup():
         if options.M is None:
             options.no_async = True
             pid = 0
-            parties = [_Party(pid)]
+            parties = [Party(pid)]
         elif options.M == 1 or options.index is not None:
             pid = options.index or 0
             base_port = options.base_port if options.base_port else 11365
-            parties = [_Party(i, 'localhost', base_port + i) for i in range(options.M)]
+            parties = [Party(i, 'localhost', base_port + i) for i in range(options.M)]
         else:
             import platform
             import subprocess

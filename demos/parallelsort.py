@@ -20,6 +20,7 @@ import random
 import itertools
 from mpyc.runtime import mpc
 
+
 def quickselect(x, k, l=None):
     """Stub for efficient selection of kth smallest element of x
     up to (k+l-1)st smallest element of x, in arbitrary order.
@@ -32,7 +33,8 @@ def quickselect(x, k, l=None):
         y = sorted(x)[k]
     return y
 
-mpc.threshold = 0 # No secret sharing.
+
+mpc.threshold = 0  # No secret sharing.
 m = len(mpc.parties)
 
 mpc.run(mpc.start())
