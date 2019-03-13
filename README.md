@@ -1,3 +1,5 @@
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lschoe\mpyc/master)
+
 # MPyC <img align="center" width=40 src="images/MPyC_Logo.png"> Secure Multiparty Computation in Python
 
 MPyC supports secure *m*-party computation tolerating a dishonest minority of up to *t* passively corrupt parties,
@@ -7,7 +9,7 @@ fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
 combined with asynchronous evaluation of the associated protocols.
 
-See [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background, and quick links to try MPyC without any install.
+See the [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background. Click the "launch binder" badge above to view the entire repository and try out its notebooks in the `demos` directory without any install. 
 
 ## Example installs:
 
