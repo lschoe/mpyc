@@ -425,7 +425,7 @@ class Runtime:
         r_divf = self._randoms(Zp, n, 1<<(k + l - f))
         if issubclass(sftype, Share):
             x = await gather_shares(x)
-        c = await mpc.output([a + ((1<<f) + (q.value << f) + r.value)
+        c = await self.output([a + ((1<<f) + (q.value << f) + r.value)
                               for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
         y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]

@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lschoe\mpyc/master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lschoe/mpyc/master)
 
 # MPyC <img align="center" width=40 src="images/MPyC_Logo.png"> Secure Multiparty Computation in Python
 
