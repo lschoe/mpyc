@@ -1389,7 +1389,7 @@ def setup():
             prog, args = argv[0], argv[1:]
             for i in range(options.M - 1, 0, -1):
                 if options.output_windows and platform.platform().startswith('Windows'):
-                    os.system(f'start {sys.execu table} {prog} -I{i} {" ".join(args)}')
+                    os.system(f'start {sys.executable} {prog} -I{i} {" ".join(args)}')
                 elif options.output_file:
                     with open(f'party{options.M}_{i}.log', 'a') as f:
                         cmd_line = [sys.executable, prog, '-I', str(i)] + args
