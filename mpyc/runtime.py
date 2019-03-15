@@ -1389,17 +1389,17 @@ def setup():
             prog, args = argv[0], argv[1:]
             for i in range(options.M - 1, 0, -1):
                 if options.output_windows and platform.platform().startswith('Windows'):
-                    os.system(f'start python {prog} -I{i} {" ".join(args)}')
+                    os.system(f'start {sys.execu table} {prog} -I{i} {" ".join(args)}')
                 elif options.output_file:
                     with open(f'party{options.M}_{i}.log', 'a') as f:
-                        cmd_line = ['python', prog, '-I', str(i)] + args
+                        cmd_line = [sys.executable, prog, '-I', str(i)] + args
                         f.write('\n')
                         f.write(f'$> {" ".join(cmd_line)}\n')
                         subprocess.Popen(cmd_line, stdout=f, stderr=subprocess.STDOUT)
                 else:
-                    cmd_line = ['python', prog, '-I', str(i)] + args
+                    cmd_line = [sys.executable, prog, '-I', str(i)] + args
                     subprocess.Popen(cmd_line, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-            cmd_line = ['python', prog, '-I', str(0)] + args
+            cmd_line = [sys.executable, prog, '-I', str(0)] + args
             subprocess.run(cmd_line)
             sys.exit()
 
