@@ -76,7 +76,7 @@ async def _randbelow(sectype, n, bits=False):
             h *= x[i]
         elif await runtime.output(h * x[i]):  # TODO: mul_public
             # restart, keeping unused secret random bits x[:i]
-            x = x[:i] + runtime.random_bits(sectype, k - i)
+            x[i:] = runtime.random_bits(sectype, k - i)
             i = k
     if bits:
         return x
@@ -101,16 +101,17 @@ async def random_unit_vector(sectype, n):
         i -= 1
         if (b >> i) & 1:
             v = runtime.scalar_mul(x[i], u)
-            u = v + runtime.vector_sub(u, v)
+            v.extend(runtime.vector_sub(u, v))
+            u = v
+        elif await runtime.output(u[0] * x[i]):  # TODO: mul_public
+            # restart, keeping unused secret random bits x[:i]
+            x[i:] = runtime.random_bits(sectype, k - i)
+            u[1:] = []
+            i = k
         else:
-            if await runtime.output(u[0] * x[i]):  # TODO: mul_public
-                # restart, keeping unused secret random bits x[:i]
-                x = x[:i] + runtime.random_bits(sectype, k - i)
-                u = [sectype(1)]
-                i = k
-            else:
-                v = runtime.scalar_mul(x[i], u[1:])
-                u = u[:1] + v + runtime.vector_sub(u[1:], v)
+            v = runtime.scalar_mul(x[i], u[1:])
+            v.extend(runtime.vector_sub(u[1:], v))
+            u[1:] = v
     return u
 
 
@@ -227,7 +228,7 @@ async def random_derangement(sectype, x):
     y = x[:]  # NB: x is assumed to be free of duplicates
     while True:
         shuffle(sectype, y)
-        t = runtime.prod([y[i] - x[i] for i in range(len(x))])
+        t = runtime.prod(runtime.vector_sub(y, x))
         if not await runtime.is_zero_public(t):
             break
     return y

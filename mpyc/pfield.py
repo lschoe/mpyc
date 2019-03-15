@@ -128,25 +128,30 @@ class PrimeFieldElement():
     @classmethod
     def to_bytes(cls, x):
         """Return an array of bytes representing the given list of integers x."""
+        byteorder = 'little'
         r = (cls.modulus.bit_length() + 7) >> 3
         data = bytearray(2 + len(x) * r)
-        data[:2] = r.to_bytes(2, byteorder='little')
-        j = 2
+        data[:2] = r.to_bytes(2, byteorder)
+        i = 2
         for v in x:
-            data[j:j + r] = v.to_bytes(r, byteorder='little')
-            j += r
+            j = i + r
+            data[i:j] = v.to_bytes(r, byteorder)
+            i = j
         return data
 
     @staticmethod
     def from_bytes(data):
         """Return the list of integers represented by the given array of bytes."""
-        r = int.from_bytes(data[:2], byteorder='little')
+        byteorder = 'little'
+        from_bytes = int.from_bytes  # cache
+        r = from_bytes(data[:2], byteorder)
         n = (len(data) - 2) // r
         x = [None] * n
-        j = 2
-        for i in range(n):
-            x[i] = int.from_bytes(data[j:j + r], byteorder='little')
-            j += r
+        i = 2
+        for k in range(n):
+            j = i + r
+            x[k] = from_bytes(data[i:j], byteorder)
+            i = j
         return x
 
     def __add__(self, other):

@@ -171,6 +171,12 @@ class PRF:
 
         n_ = 1 if n is None else n
         l = self.byte_length
-        dk = hashlib.pbkdf2_hmac('sha1', self.key, s, 1, n_ * l) if l else []
-        x = [int.from_bytes(dk[i * l: (i+1) * l], byteorder='little') % self.max for i in range(n_)]
+        if not l:
+            x = [0] * n_
+        else:
+            dk = hashlib.pbkdf2_hmac('sha1', self.key, s, 1, n_ * l)
+            byteorder = 'little'
+            from_bytes = int.from_bytes  # cache
+            bound = self.max
+            x = [from_bytes(dk[i:i + l], byteorder) % bound for i in range(0, n_ * l, l)]
         return x[0] if n is None else x

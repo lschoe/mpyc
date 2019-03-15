@@ -314,6 +314,10 @@ class Polynomial:
     def __int__(self):
         return self.value
 
+    def to_bytes(self, length, byteorder):
+        """Return an array of bytes representing a polynomial."""
+        return self.value.to_bytes(length, byteorder)
+
     def __add__(self, other):
         if isinstance(other, Polynomial):
             other = other.value

@@ -426,7 +426,7 @@ class Runtime:
         if issubclass(sftype, Share):
             x = await gather_shares(x)
         c = await self.output([a + ((1<<f) + (q.value << f) + r.value)
-                              for a, q, r in zip(x, r_divf, r_modf)])
+                               for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
         y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
         if not x_is_list:
@@ -867,7 +867,8 @@ class Runtime:
         if not stype.field.frac_length:
             await returnType(stype, len(x))
         else:
-            await returnType((stype, x[0].integral and y[0].integral), len(x))
+            y0_integral = isinstance(y[0], int) or isinstance(y[0], Share) and y[0].integral
+            await returnType((stype, x[0].integral and y0_integral), len(x))
         x, y = await gather_shares(x, y)
         for i in range(len(x)):
             x[i] = x[i] + y[i]
@@ -881,7 +882,8 @@ class Runtime:
         if not stype.field.frac_length:
             await returnType(stype, len(x))
         else:
-            await returnType((stype, x[0].integral and y[0].integral), len(x))
+            y0_integral = isinstance(y[0], int) or isinstance(y[0], Share) and y[0].integral
+            await returnType((stype, x[0].integral and y0_integral), len(x))
         x, y = await gather_shares(x, y)
         for i in range(len(x)):
             x[i] = x[i] - y[i]
@@ -1069,7 +1071,7 @@ class Runtime:
         if bound is None:
             bound = field.order
         else:
-            bound = (bound - 1) // self._bincoef + 1  # TODO: round to power of 2
+            bound = 1 << max(0, (bound // self._bincoef).bit_length() - 1)  # NB: round to power of 2
         m = len(self.parties)
         prfs = self.prfs(bound)
         shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)

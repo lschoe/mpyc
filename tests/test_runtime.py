@@ -68,6 +68,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c.value.value, 137)
         c = mpc.run(mpc.output(c / a))
         self.assertEqual(c.value.value, 67)
+        c = mpc.run(mpc.output(a**254 * a))
+        self.assertEqual(c.value.value, 1)
         c = mpc.run(mpc.output(a & b))
         self.assertEqual(c.value.value, 1)
         c = mpc.run(mpc.output(a | b))
