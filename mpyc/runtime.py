@@ -1371,39 +1371,32 @@ def setup():
             else:
                 port = int(port)
             parties.append(Party(i, host, port))
+        m = len(parties)
         if pid is None:
             pid = options.index
     else:
         # use default port for each local party
-        if options.M is None:
-            options.no_async = True
-            pid = 0
-            parties = [Party(pid)]
-        elif options.M == 1 or options.index is not None:
-            pid = options.index or 0
-            base_port = options.base_port if options.base_port else 11365
-            parties = [Party(i, 'localhost', base_port + i) for i in range(options.M)]
-        else:
+        m = options.M or 1
+        if m > 1 and options.index is None:
             import platform
             import subprocess
             prog, args = argv[0], argv[1:]
-            for i in range(options.M - 1, 0, -1):
+            for i in range(m - 1, 0, -1):
+                cmd_line = [sys.executable, prog, '-I', str(i)] + args
                 if options.output_windows and platform.platform().startswith('Windows'):
-                    os.system(f'start {sys.executable} {prog} -I{i} {" ".join(args)}')
+                    subprocess.Popen(['start'] + cmd_line, shell=True)
                 elif options.output_file:
                     with open(f'party{options.M}_{i}.log', 'a') as f:
-                        cmd_line = [sys.executable, prog, '-I', str(i)] + args
                         f.write('\n')
                         f.write(f'$> {" ".join(cmd_line)}\n')
                         subprocess.Popen(cmd_line, stdout=f, stderr=subprocess.STDOUT)
                 else:
-                    cmd_line = [sys.executable, prog, '-I', str(i)] + args
                     subprocess.Popen(cmd_line, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-            cmd_line = [sys.executable, prog, '-I', str(0)] + args
-            subprocess.run(cmd_line)
-            sys.exit()
+        options.no_async = m == 1 and (options.no_async or not options.M)
+        pid = options.index or 0
+        base_port = options.base_port or 11365
+        parties = [Party(i, 'localhost', base_port + i) for i in range(m)]
 
-    m = len(parties)
     if options.threshold is None:
         options.threshold = (m - 1) // 2
     assert 2 * options.threshold < m, f'threshold {options.threshold} too large for {m} parties'
