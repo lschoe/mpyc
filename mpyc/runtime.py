@@ -63,8 +63,8 @@ class Runtime:
         return self._threshold
 
     @threshold.setter
-    def threshold(self, t):
-        self._threshold = t
+    def threshold(self, threshold):
+        self._threshold = threshold
         # generate new PRSS keys
         self.prfs.cache_clear()
         keys = {}
@@ -519,9 +519,9 @@ class Runtime:
             a, b = await gather_shares(a, b)
         if f and b_integral:
             a, b = b, a
-        if f and (a_integral or b_integral) and not isinstance(a, int):
-            a = a >> f  # NB: no inplace a >>=
         c = a * b
+        if f and (a_integral or b_integral) and not isinstance(a, int):
+            c >>= f  # NB: inplace rshift
         if shb:
             c = self._reshare(c)
         if f and not (a_integral or b_integral):
@@ -926,7 +926,7 @@ class Runtime:
 
         a, x = await gather_shares(a, x)
         if f and a_integral:
-            a = a >> f  # NB: no inplace a >>=
+            a = a >> f  # NB: no inplace rshift
         for i in range(len(x)):
             x[i] = x[i] * a
         x = await self._reshare(x)
@@ -951,7 +951,7 @@ class Runtime:
 
         a, x, y = await gather_shares(a, x, y)
         if f:
-            a = a >> f  # NB: no inplace a >>=
+            a = a >> f  # NB: no inplace rshift
         for i in range(len(x)):
             x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
         x = await self._reshare(x)
@@ -1071,7 +1071,7 @@ class Runtime:
         if bound is None:
             bound = field.order
         else:
-            bound = 1 << max(0, (bound // self._bincoef).bit_length() - 1)  # NB: round to power of 2
+            bound = 1 << max(0, (bound // self._bincoef).bit_length() - 1)  # NB: rounded power of 2
         m = len(self.parties)
         prfs = self.prfs(bound)
         shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
