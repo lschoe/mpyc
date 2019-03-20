@@ -54,6 +54,7 @@ class Runtime:
         self.threshold = options.threshold
         self._logging_enabled = not options.no_log
         self._program_counter = (0,)
+        self._pc_level = 0  # used for implementation of barriers
         self._loop = asyncio.get_event_loop()  # cache running loop
         self.start_time = None
 
@@ -123,12 +124,12 @@ class Runtime:
         if self.options.no_barrier:
             return
 
-        logging.info(f'Barrier {asyncoro.pc_level} '
+        logging.info(f'Barrier {self._pc_level} '
                      f'{len(self._program_counter)} '
                      f'{list(reversed(self._program_counter))}'
                      )
         if not self.options.no_async:
-            while asyncoro.pc_level >= len(self._program_counter):
+            while self._pc_level >= len(self._program_counter):
                 await asyncio.sleep(0)
 
     def run(self, f):
@@ -228,7 +229,7 @@ class Runtime:
         m = len(self.parties)
         if m > 1:
             # Wait for all parties after a barrier.
-            while asyncoro.pc_level >= len(self._program_counter):
+            while self._pc_level >= len(self._program_counter):
                 await asyncio.sleep(0)
             await self.output(self.input(sectypes.SecFld(101)(self.pid)), threshold=m-1)
             # Close connections to all parties.

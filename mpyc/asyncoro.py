@@ -280,13 +280,9 @@ class _ProgramCounterWrapper:
 async def _wrap(coro):
     return await coro
 
-pc_level = 0
-"""Tracks (length of) program counter to implement barriers."""
-
 
 def _reconcile(decl, givn):
-    global pc_level
-    pc_level -= 1
+    runtime._pc_level -= 1
     if decl is None:
         return
 
@@ -341,8 +337,7 @@ def mpc_coro(func, pc=True):
 
     @functools.wraps(func)
     def typed_asyncoro(*args, **kwargs):
-        global pc_level
-        pc_level += 1
+        runtime._pc_level += 1
         coro = func(*args, **kwargs)
         if rettype:
             decl = returnType(rettype, wrap=False)

@@ -391,7 +391,7 @@ def SecFld(order=None, modulus=None, char2=None, l=None):
         field = pfield.GF(modulus)
     assert runtime.threshold == 0 or field.order > len(runtime.parties), \
         'Field order must exceed number of parties, unless threshold is 0.'
-    # field.order >= number of parties for MDS
+    # TODO: field.order >= number of parties for MDS
     field.is_signed = False
     return _SecFld(l, field)
 
