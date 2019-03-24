@@ -798,20 +798,7 @@ class Runtime:
             s += x[i].value
         return field(s)
 
-    @mpc_coro_no_pc
-    async def lin_comb(self, a, x):
-        """Secure linear combination: dot product of public a and secret x."""
-        # TODO: merge with in_prod()
-        x = x[:]
-        field = x[0].field
-        await returnType(type(x[0]))
-        x = await gather_shares(x)
-        s = 0
-        for i in range(len(x)):
-            s += a[i].value * x[i].value
-        return field(s)
-
-    @mpc_coro
+    @mpc_coro  # no_pc possible if no reshare and no trunc
     async def in_prod(self, x, y):
         """Secure dot product of x and y (one resharing)."""
         if x is y:
@@ -819,7 +806,9 @@ class Runtime:
             y = x
         else:
             x, y = x[:], y[:]
-        stype = type(x[0])
+        shx = isinstance(x[0], Share)
+        shy = isinstance(y[0], Share)
+        stype = type(x[0]) if shx else type(y[0])
         field = stype.field
         f = field.frac_length
         if not f:
@@ -829,15 +818,20 @@ class Runtime:
             await returnType((stype, x_integral and y[0].integral))
         if x is y:
             x = y = await gather_shares(x)
-        else:
+        elif shx and shy:
             x, y = await gather_shares(x, y)
+        elif shx:
+            x = await gather_shares(x)
+        else:
+            y = await gather_shares(y)
         s = 0
         for i in range(len(x)):
             s += x[i].value * y[i].value
         s = field(s)
         if f and x_integral:
             s >>= f
-        s = self._reshare(s)
+        if shx and shy:
+            s = self._reshare(s)
         if f and not x_integral:
             s = self.trunc(stype(s))
         return s

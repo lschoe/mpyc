@@ -176,7 +176,7 @@ async def main():
     solution = [None] * n
     for j in range(n):
         coefs = [w_powers[(j*k) % N] for k in range(N)]
-        solution[j] = mpc.lin_comb(coefs, sum_x_powers)
+        solution[j] = mpc.in_prod(coefs, sum_x_powers)
     solution = await mpc.output(solution)
 
     logging.info('Computing dual solution...')
@@ -187,7 +187,7 @@ async def main():
     dual_solution = [None] * m
     for i in range(m):
         coefs = [w_powers[((n+i)*k) % N] for k in range(N)]
-        dual_solution[i] = mpc.lin_comb(coefs, sum_x_powers)
+        dual_solution[i] = mpc.in_prod(coefs, sum_x_powers)
     dual_solution = await mpc.output(dual_solution)
 
     await mpc.shutdown()
