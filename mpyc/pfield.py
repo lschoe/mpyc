@@ -73,6 +73,7 @@ def GF(modulus, f=0):
     GFElement = type(f'GF({p})', (PrimeFieldElement,), {'__slots__': ()})
     GFElement.modulus = p
     GFElement.order = p
+    GFElement.byte_length = (GFElement.order.bit_length() + 7) >> 3
     GFElement.is_signed = True
     GFElement.nth = n
     GFElement.root = w % p
@@ -92,6 +93,7 @@ class PrimeFieldElement():
 
     modulus = None
     order = None
+    byte_length = None
     is_signed = None
     nth = None
     root = None
@@ -128,31 +130,20 @@ class PrimeFieldElement():
     @classmethod
     def to_bytes(cls, x):
         """Return an array of bytes representing the given list of integers x."""
-        byteorder = 'little'
-        r = (cls.modulus.bit_length() + 7) >> 3
+        byte_order = 'little'
+        r = cls.byte_length
         data = bytearray(2 + len(x) * r)
-        data[:2] = r.to_bytes(2, byteorder)
-        i = 2
-        for v in x:
-            j = i + r
-            data[i:j] = v.to_bytes(r, byteorder)
-            i = j
+        data[:2] = r.to_bytes(2, byte_order)
+        data[2:] = bytearray(b'').join(v.to_bytes(r, byte_order) for v in x)
         return data
 
     @staticmethod
     def from_bytes(data):
         """Return the list of integers represented by the given array of bytes."""
-        byteorder = 'little'
+        byte_order = 'little'
         from_bytes = int.from_bytes  # cache
-        r = from_bytes(data[:2], byteorder)
-        n = (len(data) - 2) // r
-        x = [None] * n
-        i = 2
-        for k in range(n):
-            j = i + r
-            x[k] = from_bytes(data[i:j], byteorder)
-            i = j
-        return x
+        r = from_bytes(data[:2], byte_order)
+        return [from_bytes(data[i:i+r], byte_order) for i in range(2, len(data), r)]
 
     def __add__(self, other):
         """Addition."""
@@ -164,7 +155,12 @@ class PrimeFieldElement():
 
         return NotImplemented
 
-    __radd__ = __add__
+    def __radd__(self, other):
+        """Addition (with reflected arguments)."""
+        if isinstance(other, int):
+            return type(self)(self.value + other)
+
+        return NotImplemented
 
     def __iadd__(self, other):
         """In-place addition."""
@@ -215,7 +211,12 @@ class PrimeFieldElement():
 
         return NotImplemented
 
-    __rmul__ = __mul__
+    def __rmul__(self, other):
+        """Multiplication (with reflected arguments)."""
+        if isinstance(other, int):
+            return type(self)(self.value * other)
+
+        return NotImplemented
 
     def __imul__(self, other):
         """In-place multiplication."""
@@ -228,9 +229,12 @@ class PrimeFieldElement():
         self.value %= self.modulus
         return self
 
-    def __pow__(self, exponent):
+    def __pow__(self, other):
         """Exponentiation."""
-        return type(self)(int(gmpy2.powmod(self.value, exponent, self.modulus)))
+        if not isinstance(other, int):
+            return NotImplemented
+
+        return type(self)(int(gmpy2.powmod(self.value, other, self.modulus)))
 
     def __neg__(self):
         """Negation."""
@@ -403,4 +407,4 @@ class PrimeFieldElement():
         Return False if this field element is zero, True otherwise.
         Field elements can thus be used directly in Boolean formulas.
         """
-        return self.value != 0
+        return bool(self.value)

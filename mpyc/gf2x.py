@@ -380,7 +380,7 @@ class Polynomial:
         if not isinstance(other, int):
             return NotImplemented
 
-        return Polynomial(_divmod(self.value, other)[0])
+        return Polynomial(_divmod(other, self.value)[0])
 
     def __ifloordiv__(self, other):
         if isinstance(other, Polynomial):
@@ -403,7 +403,7 @@ class Polynomial:
         if not isinstance(other, int):
             return NotImplemented
 
-        return Polynomial(_mod(self.value, other))
+        return Polynomial(_mod(other, self.value))
 
     def __imod__(self, other):
         if isinstance(other, Polynomial):
@@ -420,16 +420,18 @@ class Polynomial:
         elif not isinstance(other, int):
             return NotImplemented
 
-        return Polynomial(_divmod(self.value, other))
+        q, r = _divmod(self.value, other)
+        return Polynomial(q), Polynomial(r)
 
     def __rdivmod__(self, other):
         if not isinstance(other, int):
             return NotImplemented
 
-        return Polynomial(_divmod(self.value, other))
+        q, r = _divmod(other, self.value)
+        return Polynomial(q), Polynomial(r)
 
-    def __pow__(self, exponent):
-        return Polynomial(_powmod(self.value, exponent))
+    def __pow__(self, other):
+        return Polynomial(_powmod(self.value, other))
 
     def __lshift__(self, other):
         if not isinstance(other, int):

@@ -34,8 +34,13 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly(15) << 2, poly(60))
         self.assertEqual(poly(32) // poly(8), poly(4))
         self.assertEqual(poly(32) % poly(8), 0)
-        self.assertEqual(poly(5) // poly(3), poly(3))
-        self.assertEqual(poly(5) % poly(3), 0)
+        self.assertEqual(divmod(poly(32), poly(8)), (poly(4), 0))
+        self.assertEqual(5 // poly(3), poly(3))
+        self.assertEqual(5 % poly(3), 0)
+        self.assertEqual(divmod(5, poly(3)), (poly(3), 0))
+        self.assertEqual(poly(31) // 5, poly(6))
+        self.assertEqual(poly(31) % 5, 1)
+        self.assertEqual(divmod(poly(31), 5), (poly(6), 1))
         self.assertEqual(poly(3) ** 16, 2**16 + 1)
         with self.assertRaises(ValueError):
             poly(3) ** -16

@@ -22,6 +22,12 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(self.f101(3), f101_cached(3))
         self.assertEqual(self.f101(3) * f101_cached(23), 69)
 
+    def test_to_from_bytes(self):
+        for F in [self.f2, self.f19, self.f101]:
+            self.assertEqual(F.from_bytes(F.to_bytes([])), [])
+            self.assertEqual(F.from_bytes(F.to_bytes([0, 1])), [0, 1])
+            self.assertEqual(F.from_bytes(F.to_bytes([F.order - 1])), [F.order -1])
+            
     def test_f2(self):
         f2 = self.f2
         self.assertEqual(f2.nth, 1)
