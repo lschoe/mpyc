@@ -1,1 +1,1 @@
-python -m pydoc -b mpyc
+python -m pydoc %*
