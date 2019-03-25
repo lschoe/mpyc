@@ -1,6 +1,6 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lschoe/mpyc/master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lschoe/mpyc/master) [![PyPI](https://img.shields.io/pypi/v/mpyc.svg)](https://pypi.org/project/mpyc/)
 
-# MPyC <img align="center" width=40 src="images/MPyC_Logo.png"> Secure Multiparty Computation in Python
+# MPyC <img align="center" width=40 src="https://github.com/lschoe/mpyc/blob/master/images/MPyC_Logo.png"> Secure Multiparty Computation in Python 
 
 MPyC supports secure *m*-party computation tolerating a dishonest minority of up to *t* passively corrupt parties,
 where *m &ge; 1* and *0 &le; t &le; (m-1)/2*. The underlying protocols are based on threshold secret sharing over finite
