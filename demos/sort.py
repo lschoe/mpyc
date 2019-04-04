@@ -38,23 +38,21 @@ async def main():
 
     s = [(-1)**i * (i + (n//2))**2 for i in range(n)]
 
-    await mpc.start()
-
     global secnum
 
     secnum = mpc.SecInt()
     print('Using secure integers:', secnum)
     x = list(map(secnum, s))
-    print('Array:', await mpc.output(x))
-    print('Sorted array:', await mpc.output(bsort(x)))
+    async with mpc:
+        print('Array:', await mpc.output(x))
+        print('Sorted array:', await mpc.output(bsort(x)))
 
     secnum = mpc.SecFxp()
     print('Using secure fixed-point numbers:', secnum)
     x = list(map(secnum, s))
-    print('Input array:', await mpc.output(x))
-    print('Sorted array:', await mpc.output(bsort(x)))
-
-    await mpc.shutdown()
+    async with mpc:
+        print('Input array:', await mpc.output(x))
+        print('Sorted array:', await mpc.output(bsort(x)))
 
 if __name__ == '__main__':
     mpc.run(main())

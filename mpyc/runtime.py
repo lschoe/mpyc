@@ -222,7 +222,7 @@ class Runtime:
             server.close()
 
     async def shutdown(self):
-        """Shutdown the MPC runtime.
+        """Shutdown the MPyC runtime.
 
         Close all connections, if any.
         """
@@ -240,6 +240,14 @@ class Runtime:
         elapsed = time.time() - self.start_time
         from datetime import timedelta
         logging.info(f'Stop MPyC runtime -- elapsed time: {timedelta(seconds=elapsed)}')
+
+    async def __aenter__(self):
+        """Start MPyC runtime when entering async with context."""
+        await self.start()
+
+    async def __aexit__(self, exc_type, exc, tb):
+        """Shutdown MPyC runtime when exiting async with context."""
+        await self.shutdown()
 
     SecFld = staticmethod(sectypes.SecFld)
     SecInt = staticmethod(sectypes.SecInt)
