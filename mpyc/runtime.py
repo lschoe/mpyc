@@ -226,11 +226,11 @@ class Runtime:
 
         Close all connections, if any.
         """
+        # Wait for all parties behind a barrier.
+        while self._pc_level >= len(self._program_counter):
+            await asyncio.sleep(0)
         m = len(self.parties)
         if m > 1:
-            # Wait for all parties after a barrier.
-            while self._pc_level >= len(self._program_counter):
-                await asyncio.sleep(0)
             await self.output(self.input(sectypes.SecFld(101)(self.pid)), threshold=m-1)
             # Close connections to all parties.
             for peer in self.parties:
@@ -244,6 +244,7 @@ class Runtime:
     async def __aenter__(self):
         """Start MPyC runtime when entering async with context."""
         await self.start()
+        return self
 
     async def __aexit__(self, exc_type, exc, tb):
         """Shutdown MPyC runtime when exiting async with context."""
