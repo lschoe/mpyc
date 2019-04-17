@@ -132,10 +132,7 @@ class PrimeFieldElement():
         """Return an array of bytes representing the given list of integers x."""
         byte_order = 'little'
         r = cls.byte_length
-        data = bytearray(2 + len(x) * r)
-        data[:2] = r.to_bytes(2, byte_order)
-        data[2:] = bytearray(b'').join(v.to_bytes(r, byte_order) for v in x)
-        return data
+        return r.to_bytes(2, byte_order) + b''.join(v.to_bytes(r, byte_order) for v in x)
 
     @staticmethod
     def from_bytes(data):
