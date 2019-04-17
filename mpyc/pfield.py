@@ -129,14 +129,14 @@ class PrimeFieldElement():
 
     @classmethod
     def to_bytes(cls, x):
-        """Return an array of bytes representing the given list of integers x."""
+        """Return byte string representing the given list of polynomials x."""
         byte_order = 'little'
         r = cls.byte_length
         return r.to_bytes(2, byte_order) + b''.join(v.to_bytes(r, byte_order) for v in x)
 
     @staticmethod
     def from_bytes(data):
-        """Return the list of integers represented by the given array of bytes."""
+        """Return the list of integers represented by the given byte string."""
         byte_order = 'little'
         from_bytes = int.from_bytes  # cache
         r = from_bytes(data[:2], byte_order)
