@@ -63,7 +63,7 @@ optional arguments:
 
 `python secretsanta.py -M 5`
 
-`python secretsanta.py -M2 --output-file`
+`python -OO secretsanta.py -M2 --output-file`
 
 `python lpsolver.py -h`
 
