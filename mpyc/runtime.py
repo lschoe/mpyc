@@ -26,7 +26,6 @@ import mpyc.random
 Future = asyncio.Future
 Share = sectypes.Share
 SecureFiniteField = sectypes.SecureFiniteField
-gather_shares = asyncoro.gather_shares
 mpc_coro = asyncoro.mpc_coro
 mpc_coro_no_pc = asyncoro._mpc_coro_no_pc
 returnType = asyncoro.returnType
@@ -119,6 +118,9 @@ class Runtime:
             out_shares[peer_pid] = d
         return out_shares
 
+    def gather(self, *obj):
+        return asyncoro.gather_shares(self, *obj)
+
     async def barrier(self):
         """Barrier for runtime."""
         if self.options.no_barrier:
@@ -188,7 +190,7 @@ class Runtime:
                 context.verify_mode = ssl.CERT_REQUIRED
             else:
                 context = None
-            factory = asyncoro.SharesExchanger
+            factory = lambda: asyncoro.SharesExchanger(self)
             server = await loop.create_server(factory, port=listen_port, ssl=context)
             logging.debug(f'Listening on port {listen_port}')
 
@@ -205,7 +207,7 @@ class Runtime:
                     else:
                         context = None
                         server_hostname = None
-                    factory = lambda: asyncoro.SharesExchanger(peer.pid)
+                    factory = lambda: asyncoro.SharesExchanger(self, peer.pid)
                     await loop.create_connection(factory, peer.host, peer.port, ssl=context,
                                                  server_hostname=server_hostname)
                     break
@@ -253,7 +255,6 @@ class Runtime:
     SecFld = staticmethod(sectypes.SecFld)
     SecInt = staticmethod(sectypes.SecInt)
     SecFxp = staticmethod(sectypes.SecFxp)
-    gather = staticmethod(gather_shares)
     coroutine = staticmethod(mpc_coro)
     returnType = staticmethod(returnType)
 
@@ -308,7 +309,7 @@ class Runtime:
                         self._send_shares(other_pid, data)
             else:
                 shares[i] = self._receive_shares(peer_pid)
-        shares = await gather_shares(shares)
+        shares = await self.gather(shares)
         return [[field(a) for a in field.from_bytes(r)] for r in shares]
 
     async def output(self, x, receivers=None, threshold=None):
@@ -333,7 +334,7 @@ class Runtime:
         y = self._recombine(x, receivers, threshold)
         if not x_is_list:
             y = y[0]
-        return await gather_shares(y)
+        return await self.gather(y)
 
     @mpc_coro
     async def _recombine(self, x, receivers, t):
@@ -345,7 +346,7 @@ class Runtime:
                 await returnType(sftype, len(x))
             else:
                 await returnType((sftype, x[0].integral), len(x))
-            x = await gather_shares(x)
+            x = await self.gather(x)
         else:
             field = sftype
             await returnType(Future, len(x))
@@ -361,7 +362,7 @@ class Runtime:
             shares = [None] * t
             for i in range(t):
                 shares[i] = self._receive_shares((self.pid - t + i) % m)
-            shares = await gather_shares(shares)
+            shares = await self.gather(shares)
             points = [((self.pid - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
             points.append((self.pid + 1, x))
             return thresha.recombine(field, points)
@@ -380,7 +381,7 @@ class Runtime:
                 await returnType(sftype, len(x))
             else:
                 await returnType((sftype, x[0].integral), len(x))
-            x = await gather_shares(x)
+            x = await self.gather(x)
         else:
             field = sftype
             await returnType(Future)
@@ -390,7 +391,7 @@ class Runtime:
         in_shares = thresha.random_split(x, t, m)
         in_shares = [field.to_bytes(elts) for elts in in_shares]
         # Recombine the first 2t+1 output_shares.
-        out_shares = await gather_shares(self._exchange_shares(in_shares)[:2 * t + 1])
+        out_shares = await self.gather(self._exchange_shares(in_shares)[:2 * t + 1])
         points = [(j + 1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))]
         y = thresha.recombine(field, points)
 
@@ -434,7 +435,7 @@ class Runtime:
             r_modf[j] = Zp(s)
         r_divf = self._randoms(Zp, n, 1<<(k + l - f))
         if issubclass(sftype, Share):
-            x = await gather_shares(x)
+            x = await self.gather(x)
         c = await self.output([a + ((1<<f) + (q.value << f) + r.value)
                                for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
@@ -463,7 +464,7 @@ class Runtime:
                     break
         else:
             r = self._random(field)  # NB: failure r=0 with probability 1/p
-        a = await gather_shares(a)
+        a = await self.gather(a)
         if issubclass(stype, SecureFiniteField):
             z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
             b = a * r + z[0]
@@ -480,7 +481,7 @@ class Runtime:
             await returnType(stype)
         else:
             await returnType((stype, a.integral))
-        a = await gather_shares(a)
+        a = await self.gather(a)
         return -a
 
     @mpc_coro_no_pc
@@ -491,7 +492,7 @@ class Runtime:
             await returnType(stype)
         else:
             await returnType((stype, a.integral and b.integral))
-        a, b = await gather_shares(a, b)
+        a, b = await self.gather(a, b)
         return a + b
 
     @mpc_coro_no_pc
@@ -502,7 +503,7 @@ class Runtime:
             await returnType(stype)
         else:
             await returnType((stype, a.integral and b.integral))
-        a, b = await gather_shares(a, b)
+        a, b = await self.gather(a, b)
         return a - b
 
     @mpc_coro
@@ -522,11 +523,11 @@ class Runtime:
 
         shb = isinstance(b, Share)
         if not shb:
-            a = await gather_shares(a)
+            a = await self.gather(a)
         elif a is b:
-            a = b = await gather_shares(a)
+            a = b = await self.gather(a)
         else:
-            a, b = await gather_shares(a, b)
+            a, b = await self.gather(a, b)
         if f and b_integral:
             a, b = b, a
         c = a * b
@@ -567,7 +568,7 @@ class Runtime:
         stype = type(a)
         field = stype.field
         await returnType(stype)
-        a = await gather_shares(a)
+        a = await self.gather(a)
         while True:
             r = self._random(field)
             ar = await self.output(a * r, threshold=2*self.threshold)
@@ -652,7 +653,7 @@ class Runtime:
         z = self.random_bits(Zp, k)
         u = self._randoms(Zp, k)
         u2 = self.schur_prod(u, u)
-        a, u2, z = await gather_shares(a, u2, z)
+        a, u2, z = await self.gather(a, u2, z)
         r = self._randoms(Zp, k)
         c = [Zp(a.value * r[i].value + (1 - (z[i].value << 1)) * u2[i].value) for i in range(k)]
         # -1 is nonsquare for Blum p, u_i !=0 w.v.h.p.
@@ -681,7 +682,7 @@ class Runtime:
         for r_i in reversed(r_bits):
             r_modl <<= 1
             r_modl += r_i.value
-        a = await gather_shares(a)
+        a = await self.gather(a)
         a_rmodl = a + ((1<<l) + r_modl)
         k = self.options.sec_param
         r_divl = self._random(Zp, 1<<k)
@@ -750,7 +751,7 @@ class Runtime:
         l = stype.bit_length
         k = self.options.sec_param
         b = self.random_bit(stype)
-        a, b = await gather_shares(a, b)
+        a, b = await self.gather(a, b)
         b >>= Zp.frac_length
         r = self._random(Zp, 1 << (l + k - 1))
         c = await self.output(a + ((1<<l) + (r.value << 1) + b.value))
@@ -778,7 +779,7 @@ class Runtime:
         k = self.options.sec_param
         f = Zp.frac_length
         r_bits = self.random._randbelow(stype, b, bits=True)
-        a, r_bits = await gather_shares(a, r_bits)
+        a, r_bits = await self.gather(a, r_bits)
         r_bits = [(r >> f).value for r in r_bits]
         r_modb = 0
         for r_i in reversed(r_bits):
@@ -801,7 +802,7 @@ class Runtime:
         x = x[:]
         field = x[0].field
         await returnType(type(x[0]))
-        x = await gather_shares(x)
+        x = await self.gather(x)
         s = 0
         for i in range(len(x)):
             s += x[i].value
@@ -826,13 +827,13 @@ class Runtime:
             x_integral = x[0].integral
             await returnType((stype, x_integral and y[0].integral))
         if x is y:
-            x = y = await gather_shares(x)
+            x = y = await self.gather(x)
         elif shx and shy:
-            x, y = await gather_shares(x, y)
+            x, y = await self.gather(x, y)
         elif shx:
-            x = await gather_shares(x)
+            x = await self.gather(x)
         else:
-            y = await gather_shares(y)
+            y = await self.gather(y)
         s = 0
         for i in range(len(x)):
             s += x[i].value * y[i].value
@@ -851,7 +852,7 @@ class Runtime:
         x = x[:]
         if isinstance(x[0], Share):
             await returnType(type(x[0]))
-            x = await gather_shares(x)
+            x = await self.gather(x)
         else:
             await returnType(Future)
 
@@ -873,7 +874,7 @@ class Runtime:
         else:
             y0_integral = isinstance(y[0], int) or isinstance(y[0], Share) and y[0].integral
             await returnType((stype, x[0].integral and y0_integral), len(x))
-        x, y = await gather_shares(x, y)
+        x, y = await self.gather(x, y)
         for i in range(len(x)):
             x[i] = x[i] + y[i]
         return x
@@ -888,7 +889,7 @@ class Runtime:
         else:
             y0_integral = isinstance(y[0], int) or isinstance(y[0], Share) and y[0].integral
             await returnType((stype, x[0].integral and y0_integral), len(x))
-        x, y = await gather_shares(x, y)
+        x, y = await self.gather(x, y)
         for i in range(len(x)):
             x[i] = x[i] - y[i]
         return x
@@ -898,7 +899,7 @@ class Runtime:
         """Secure addition of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
         await returnType(type(A[0][0]), len(A), len(A[0]))
-        A, B = await gather_shares(A, B)
+        A, B = await self.gather(A, B)
         for i in range(len(A)):
             for j in range(len(A[0])):
                 A[i][j] = A[i][j] + (B[j][i] if tr else B[i][j])
@@ -909,7 +910,7 @@ class Runtime:
         """Secure subtraction of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
         await returnType(type(A[0][0]), len(A), len(A[0]))
-        A, B = await gather_shares(A, B)
+        A, B = await self.gather(A, B)
         for i in range(len(A)):
             for j in range(len(A[0])):
                 A[i][j] = A[i][j] - (B[j][i] if tr else B[i][j])
@@ -928,7 +929,7 @@ class Runtime:
             a_integral = a.integral
             await returnType((stype, a_integral and x[0].integral), len(x))
 
-        a, x = await gather_shares(a, x)
+        a, x = await self.gather(a, x)
         if f and a_integral:
             a = a >> f  # NB: no inplace rshift
         for i in range(len(x)):
@@ -936,7 +937,7 @@ class Runtime:
         x = await self._reshare(x)
         if f and not a_integral:
             x = self.trunc(x, l=stype.bit_length)
-            x = await gather_shares(x)
+            x = await self.gather(x)
         return x
 
     @mpc_coro
@@ -953,7 +954,7 @@ class Runtime:
                 raise ValueError('condition must be integral')
             await returnType((stype, a_integral and x[0].integral and y[0].integral), len(x))
 
-        a, x, y = await gather_shares(a, x, y)
+        a, x, y = await self.gather(a, x, y)
         if f:
             a = a >> f  # NB: no inplace rshift
         for i in range(len(x)):
@@ -981,9 +982,9 @@ class Runtime:
             stype = type(x[0])
             await returnType(stype, len(x))
             if x is y:
-                x = y = await gather_shares(x)
+                x = y = await self.gather(x)
             else:
-                x, y = await gather_shares(x, y)
+                x, y = await self.gather(x, y)
             truncy = stype.field.frac_length
         else:
             await returnType(Future)
@@ -993,7 +994,7 @@ class Runtime:
         x = await self._reshare(x)
         if truncy:
             x = self.trunc(x, l=stype.bit_length)
-            x = await gather_shares(x)
+            x = await self.gather(x)
         return x
 
     @mpc_coro
@@ -1007,11 +1008,11 @@ class Runtime:
         n = len(B) if tr else len(B[0])
         await returnType(stype, len(A), n)
         if shA and shB:
-            A, B = await gather_shares(A, B)
+            A, B = await self.gather(A, B)
         elif shA:
-            A = await gather_shares(A)
+            A = await self.gather(A)
         else:
-            B = await gather_shares(B)
+            B = await self.gather(B)
 
         C = [None] * len(A)
         for ia in range(len(A)):
@@ -1024,11 +1025,11 @@ class Runtime:
             if shA and shB:
                 C[ia] = self._reshare(C[ia])
         if shA and shB:
-            C = await gather_shares(C)
+            C = await self.gather(C)
         if field.frac_length:
             l = stype.bit_length
             C = [self.trunc(c, l=l) for c in C]
-            C = await gather_shares(C)
+            C = await self.gather(C)
         return C
 
     @mpc_coro
@@ -1039,18 +1040,18 @@ class Runtime:
         field = stype.field
         n = len(A[0])
         await returnType(stype, len(A), n)
-        A, d, b, c = await gather_shares(A, d, b, c)
+        A, d, b, c = await self.gather(A, d, b, c)
         d = d.value
         for i in range(len(A)):
             b[i] = b[i].value
             for j in range(n):
                 A[i][j] = field(A[i][j].value * d - b[i] * c[j].value)
             A[i] = self._reshare(A[i])
-        A = await gather_shares(A)
+        A = await self.gather(A)
         if field.frac_length:
             l = stype.bit_length
             A = [self.trunc(a, l=l) for a in A]
-            A = await gather_shares(A)
+            A = await self.gather(A)
         return A
 
     def _prss_uci(self):
@@ -1181,14 +1182,14 @@ class Runtime:
         if isinstance(field.modulus, int):
             k = self.options.sec_param
             r_divl = self._random(field, 1<<k)
-            a = await gather_shares(a)
+            a = await self.gather(a)
             c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))
             c = c.value % (1<<l)
             c_bits = [(c >> i) & 1 for i in range(l)]
             r_bits = [stype(r.value) for r in r_bits]
             return self.add_bits(r_bits, c_bits)
 
-        a = await gather_shares(a)
+        a = await self.gather(a)
         c = await self.output(a + r_modl)
         c = int(c.value)
         return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
@@ -1200,7 +1201,7 @@ class Runtime:
         x = x[:]
         stype = type(x[0])
         await returnType((stype, True))
-        x = await gather_shares(x)
+        x = await self.gather(x)
         s = 0
         for a in reversed(x):
             s <<= 1
@@ -1384,9 +1385,21 @@ def setup():
         if m > 1 and options.index is None:
             import platform
             import subprocess
+            # convert sys.flags into command line arguments
+            flgmap = {'debug': 'd', 'inspect': 'i', 'interactive': 'i', 'optimize': 'O',
+                      'dont_write_bytecode': 'B', 'no_user_site': 's', 'no_site': 'S',
+                      'ignore_environment': 'E', 'verbose': 'v', 'bytes_warning': 'b',
+                      'quiet': 'q', 'isolated': 'I', 'dev_mode': 'X dev', 'utf8_mode': 'X utf8'}
+            if os.getenv('PYTHONHASHSEED') == '0':
+                # -R flag needed only if hash randomization is not enabled by default
+                flgmap['hash_randomization'] = 'R'
+            flg = lambda a: getattr(sys.flags, a, 0)
+            flags = ['-' + flg(a) * c for a, c in flgmap.items() if flg(a)]
+            # convert sys._xoptions into command line arguments
+            xopts = ['-X' + a + ('' if c is True else '=' + c) for a, c in sys._xoptions.items()]
             prog, args = argv[0], argv[1:]
             for i in range(m - 1, 0, -1):
-                cmd_line = [sys.executable, prog, '-I', str(i)] + args
+                cmd_line = [sys.executable] + flags + xopts + [prog, '-I', str(i)] + args
                 if options.output_windows and platform.platform().startswith('Windows'):
                     subprocess.Popen(['start'] + cmd_line, shell=True)
                 elif options.output_file:

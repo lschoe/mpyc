@@ -9,8 +9,6 @@ import typing
 from asyncio import Protocol, Future
 from mpyc.sectypes import Share
 
-runtime = None
-
 
 class SharesExchanger(Protocol):
     """Send and receive shares.
@@ -18,16 +16,17 @@ class SharesExchanger(Protocol):
     Bidirectional connection with one of the other parties (peers).
     """
 
-    def __init__(self, peer_pid=None):
+    def __init__(self, runtime, peer_pid=None):
+        self.runtime = runtime
         self.peer_pid = peer_pid
         self.bytes = bytearray()
         self.buffers = {}
         self.transport = None
 
     def _key_transport_done(self):
-        runtime.parties[self.peer_pid].protocol = self
-        if all(p.protocol is not None for p in runtime.parties):
-            runtime.parties[runtime.pid].protocol.set_result(runtime)
+        self.runtime.parties[self.peer_pid].protocol = self
+        if all(p.protocol is not None for p in self.runtime.parties):
+            self.runtime.parties[self.runtime.pid].protocol.set_result(self.runtime)
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -37,12 +36,12 @@ class SharesExchanger(Protocol):
         """
         self.transport = transport
         if self.peer_pid is not None:  # party is client (peer is server)
-            m = len(runtime.parties)
-            t = runtime.threshold
-            pid_keys = str(runtime.pid).encode()  # send pid
+            m = len(self.runtime.parties)
+            t = self.runtime.threshold
+            pid_keys = str(self.runtime.pid).encode()  # send pid
             for subset in itertools.combinations(range(m), m - t):
-                if self.peer_pid in subset and runtime.pid == min(subset):
-                    pid_keys += runtime._prss_keys[subset]  # send PRSS keys
+                if self.peer_pid in subset and self.runtime.pid == min(subset):
+                    pid_keys += self.runtime._prss_keys[subset]  # send PRSS keys
             transport.write(pid_keys)
             self._key_transport_done()
 
@@ -72,10 +71,10 @@ class SharesExchanger(Protocol):
         if self.peer_pid is None:  # peer is client (party is server)
             peer_pid = int(self.bytes[:1])
             len_packet = 1
-            m = len(runtime.parties)
-            t = runtime.threshold
+            m = len(self.runtime.parties)
+            t = self.runtime.threshold
             for subset in itertools.combinations(range(m), m - t):
-                if runtime.pid in subset and peer_pid == min(subset):
+                if self.runtime.pid in subset and peer_pid == min(subset):
                     len_packet += 16
             if len(self.bytes) < len_packet:
                 return
@@ -84,8 +83,8 @@ class SharesExchanger(Protocol):
             # store keys received from peer
             len_packet = 1
             for subset in itertools.combinations(range(m), m - t):
-                if runtime.pid in subset and peer_pid == min(subset):
-                    runtime._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
+                if self.runtime.pid in subset and peer_pid == min(subset):
+                    self.runtime._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
                     len_packet += 16
             del self.bytes[:len_packet]
             self._key_transport_done()
@@ -135,8 +134,8 @@ class _SharesCounter(Future):
 
     __slots__ = 'counter', 'obj'
 
-    def __init__(self, obj):
-        super().__init__(loop=runtime._loop)
+    def __init__(self, loop, obj):
+        super().__init__(loop=loop)
         self.counter = 0
         self._add_callbacks(obj)
         if not self.counter:
@@ -181,7 +180,7 @@ def _get_results(obj):
     return obj
 
 
-def gather_shares(*obj):
+def gather_shares(runtime, *obj):
     """Gather all results for the given futures (shared values)."""
     if len(obj) == 1:
         obj = obj[0]
@@ -199,9 +198,37 @@ def gather_shares(*obj):
 
     if not runtime.options.no_async:
         assert isinstance(obj, (list, tuple)), obj
-        return _SharesCounter(obj)
+        return _SharesCounter(runtime._loop, obj)
 
     return _AwaitableFuture(_get_results(obj))
+
+
+class _ProgramCounterWrapper:
+
+    __slots__ = 'runtime', 'coro', 'pc'
+
+    def __init__(self, runtime, coro):
+        self.runtime = runtime
+        self.coro = coro
+        runtime._increment_pc()
+        self.pc = (0,) + runtime._program_counter  # fork
+
+    def __await__(self):
+        while True:
+            pc = self.runtime._program_counter
+            self.runtime._program_counter = self.pc
+            try:
+                val = self.coro.send(None)
+                self.pc = self.runtime._program_counter
+            except StopIteration as exc:
+                return exc.value  # NB: required for Python 3.7
+            finally:
+                self.runtime._program_counter = pc
+            yield val
+
+
+async def _wrap(coro):
+    return await coro
 
 
 class _Awaitable:
@@ -223,6 +250,9 @@ def _nested_list(rt, n, dims):
     else:
         s = [rt() for _ in range(n)]
     return s
+
+
+runtime = None
 
 
 def returnType(*args, wrap=True):
@@ -252,33 +282,6 @@ def returnType(*args, wrap=True):
     if wrap:
         rettype = _Awaitable(rettype)
     return rettype
-
-
-class _ProgramCounterWrapper:
-
-    __slots__ = 'coro', 'pc'
-
-    def __init__(self, coro):
-        self.coro = coro
-        runtime._increment_pc()
-        self.pc = (0,) + runtime._program_counter  # fork
-
-    def __await__(self):
-        while True:
-            pc = runtime._program_counter
-            runtime._program_counter = self.pc
-            try:
-                val = self.coro.send(None)
-                self.pc = runtime._program_counter
-            except StopIteration as exc:
-                return exc.value  # NB: required for Python 3.7
-            finally:
-                runtime._program_counter = pc
-            yield val
-
-
-async def _wrap(coro):
-    return await coro
 
 
 def _reconcile(decl, givn):
@@ -352,7 +355,7 @@ def mpc_coro(func, pc=True):
                     return decl
 
         if pc:
-            coro = _wrap(_ProgramCounterWrapper(coro))
+            coro = _wrap(_ProgramCounterWrapper(runtime, coro))
         d = runtime._loop.create_task(coro)  # ensure_future
         d.add_done_callback(lambda v: _reconcile(decl, v.result()))
         return _ncopy(decl)

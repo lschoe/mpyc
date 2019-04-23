@@ -123,6 +123,7 @@ def randrange(sectype, start, stop=None, step=1):
     n = len(range(start, stop, step))
     if not n:
         raise ValueError('empty range for randrange()')
+
     return start + _randbelow(sectype, n) * step
 
 
@@ -140,6 +141,7 @@ def choice(sectype, seq):
     """
     if not seq:
         raise IndexError('cannot choose from an empty sequence')
+
     u = random_unit_vector(sectype, len(seq))
     s = 0
     for i in range(len(seq)):
@@ -160,11 +162,14 @@ def choices(sectype, population, weights=None, *, cum_weights=None, k=1):
     if cum_weights is None:
         if weights is None:
             return [choice(sectype, population) for _ in range(k)]
+
         cum_weights = list(itertools.accumulate(weights))
     elif weights is not None:
         raise TypeError('cannot specify both weights and cumulative weights')
+
     if len(cum_weights) != len(population):
         raise ValueError('number of weights does not match the population')
+
     # assume weights are integers
     g = functools.reduce(math.gcd, cum_weights)
     cum_weights = [a // g for a in cum_weights]
@@ -253,19 +258,8 @@ async def sample(sectype, population, k):
     n = len(population)
     if not 0 <= k <= n:
         raise ValueError('sample larger than population or size is negative')
-    elif not isinstance(population, range):
-        x = list(population)
-        if not isinstance(x[0], sectype):  # assume same type for all elts of x
-            for i in range(len(x)):
-                x[i] = sectype(x[i])
-        for i in range(k):
-            u = random_unit_vector(sectype, n - i)
-            x_u = runtime.in_prod(x[i:], u)
-            d = runtime.scalar_mul(x[i] - x_u, u)
-            x[i] = x_u
-            x[i:] = runtime.vector_add(x[i:], d)
-        return x[:k]
-    else:
+
+    if isinstance(population, range):
         x = []
         while len(x) < k:
             r = randrange(sectype, population.start, population.stop, population.step)
@@ -276,12 +270,25 @@ async def sample(sectype, population, k):
             x.append(r)
         return x
 
+    x = list(population)
+    if not isinstance(x[0], sectype):  # assume same type for all elts of x
+        for i in range(len(x)):
+            x[i] = sectype(x[i])
+    for i in range(k):
+        u = random_unit_vector(sectype, n - i)
+        x_u = runtime.in_prod(x[i:], u)
+        d = runtime.scalar_mul(x[i] - x_u, u)
+        x[i] = x_u
+        x[i:] = runtime.vector_add(x[i:], d)
+    return x[:k]
+
 
 def random(sectype):
     """Uniformly random secret fixed-point number in the range [0.0, 1.0)."""
     f = sectype.field.frac_length
     if not f:
         raise TypeError('secure fixed-point type required')
+
     x = runtime.random_bits(sectype, f)
     return runtime.from_bits(x) * (2 ** -f)
 
@@ -293,5 +300,6 @@ def uniform(sectype, a, b):
     f = sectype.field.frac_length
     if not f:
         raise TypeError('secure fixed-point type required')
+
     s = math.copysign(1, b - a)
     return a + _randbelow(sectype, round(abs(a - b) * 2**f)) * s * (2**-f)
