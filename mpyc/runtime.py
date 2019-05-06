@@ -761,13 +761,15 @@ class Runtime:
 
     def mod(self, a, b):
         """Secure modulo reduction."""
+        # TODO: optimize for integral a of type secfxp 
         if b == 2:
             r = self.lsb(a)
         elif not b & (b - 1):
             r = self.from_bits(self.to_bits(a, b.bit_length() - 1))
         else:
             r = self._mod(a, b)
-        return r
+        f = type(a).field.frac_length
+        return r * 2**-f
 
     @mpc_coro
     async def _mod(self, a, b):
@@ -794,7 +796,7 @@ class Runtime:
         r_bits = [stype(r) for r in r_bits]
         r_bits.append(stype(0))
         z = stype(r_modb - (b - c)) >= 0  # TODO: avoid full comparison (use r_bits)
-        return (self.from_bits(self.add_bits(r_bits, c_bits)) - z * b) * 2**-f
+        return self.from_bits(self.add_bits(r_bits, c_bits)) - z * b
 
     @mpc_coro_no_pc
     async def sum(self, x):
