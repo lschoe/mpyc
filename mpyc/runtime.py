@@ -63,16 +63,15 @@ class Runtime:
         return self._threshold
 
     @threshold.setter
-    def threshold(self, threshold):
-        self._threshold = threshold
+    def threshold(self, t):
+        self._threshold = t
         # generate new PRSS keys
         self.prfs.cache_clear()
         keys = {}
         m = len(self.parties)
-        for t in range((m + 1) // 2):  # all possible thresholds
-            for subset in itertools.combinations(range(m), m - t):
-                if self.pid == min(subset):
-                    keys[subset] = secrets.token_bytes(16)  # 128-bit key
+        for subset in itertools.combinations(range(m), m - t):
+            if self.pid == min(subset):
+                keys[subset] = secrets.token_bytes(16)  # 128-bit key
         self._prss_keys = keys
         # caching (m choose t):
         self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
@@ -233,7 +232,7 @@ class Runtime:
             await asyncio.sleep(0)
         m = len(self.parties)
         if m > 1:
-            await self.output(self.input(sectypes.SecFld(101)(self.pid)), threshold=m-1)
+            await self.output(self.input(sectypes.SecFld(257)(self.pid)), threshold=m-1)
             # Close connections to all parties.
             for peer in self.parties:
                 if peer.pid != self.pid:
@@ -761,7 +760,7 @@ class Runtime:
 
     def mod(self, a, b):
         """Secure modulo reduction."""
-        # TODO: optimize for integral a of type secfxp 
+        # TODO: optimize for integral a of type secfxp
         if b == 2:
             r = self.lsb(a)
         elif not b & (b - 1):
