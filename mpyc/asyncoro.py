@@ -38,7 +38,7 @@ class SharesExchanger(Protocol):
         if self.peer_pid is not None:  # party is client (peer is server)
             m = len(self.runtime.parties)
             t = self.runtime.threshold
-            pid_keys = str(self.runtime.pid).encode()  # send pid
+            pid_keys = self.runtime.pid.to_bytes(1, 'little')  # send pid
             for subset in itertools.combinations(range(m), m - t):
                 if self.peer_pid in subset and self.runtime.pid == min(subset):
                     pid_keys += self.runtime._prss_keys[subset]  # send PRSS keys
@@ -69,7 +69,7 @@ class SharesExchanger(Protocol):
         """
         self.bytes.extend(data)
         if self.peer_pid is None:  # peer is client (party is server)
-            peer_pid = int(self.bytes[:1])
+            peer_pid = int.from_bytes(self.bytes[:1], 'little')
             len_packet = 1
             m = len(self.runtime.parties)
             t = self.runtime.threshold
