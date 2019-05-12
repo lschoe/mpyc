@@ -1,15 +1,16 @@
 import unittest
-from mpyc import bfield
-from mpyc import pfield
+from mpyc import gfpx
+from mpyc import finfields
 from mpyc import thresha
 
 
 class Arithmetic(unittest.TestCase):
 
     def setUp(self):
-        self.f2 = pfield.GF(2)
-        self.f19 = pfield.GF(19)
-        self.f256 = bfield.GF(283)
+        self.f2 = finfields.GF(2)
+        self.f19 = finfields.GF(19)
+        self.f27 = finfields.GF(gfpx.GFpX(3)(46))
+        self.f256 = finfields.GF(gfpx.GFpX(2)(283))
 
     def test_secretsharing(self):
         for field in (self.f2, self.f256):
@@ -20,7 +21,8 @@ class Arithmetic(unittest.TestCase):
             b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
             self.assertEqual(a, b)
 
-        for field in (self.f19, self.f256):
+#        for field in (self.f19, self.f27, self.f256):
+        for field in (self.f27, self.f256):
             for t in range(8):
                 m = 2 * t + 1
                 for i in range(t):

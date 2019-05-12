@@ -4,12 +4,12 @@ Secure (secret-shared) number types all use a common base class, which
 ensures that operators such as +, *, >= are defined by operator overloading.
 """
 
+import math
 import functools
 import asyncio
-from mpyc import gmpy
-from mpyc import gf2x
-from mpyc import bfield
-from mpyc import pfield
+from mpyc import gmpy as gmpy2
+from mpyc import gfpx
+from mpyc import finfields
 
 runtime = None
 
@@ -285,28 +285,28 @@ class SecureFiniteField(Share):
 
     def __and__(self, other):
         """Bitwise and for binary fields (otherwise 1-bit only)."""
-        if not isinstance(self.field.modulus, int):
+        if self.field.characteristic == 2:
             return runtime.and_(self, other)
 
         return super().__and__(other)
 
     def __xor__(self, other):
         """Bitwise exclusive-or for binary fields (otherwise 1-bit only)."""
-        if not isinstance(self.field.modulus, int):
+        if self.field.characteristic == 2:
             return runtime.xor(self, other)
 
         return super().__xor__(other)
 
     def __invert__(self):
         """Bitwise not (inversion) for binary fields (otherwise 1-bit only)."""
-        if not isinstance(self.field.modulus, int):
+        if self.field.characteristic == 2:
             return runtime.invert(self)
 
         return super().__invert__()
 
     def __or__(self, other):
         """Bitwise or for binary fields (otherwise 1-bit only)."""
-        if not isinstance(self.field.modulus, int):
+        if self.field.characteristic == 2:
             return runtime.or_(self, other)
 
         return super().__or__(other)
@@ -340,71 +340,79 @@ class SecureFixedPoint(Share):
     __slots__ = ()
 
 
-_sectypes = {}
+def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None):
+    """Secure finite field of order q = p**d.
 
-
-def SecFld(order=None, modulus=None, char2=None, l=None):
-    """Secure prime or binary field of (l+1)-bit order.
-
-    Field is prime by default, and if order (or modulus) is prime.
-    Field is binary if order is a power of 2, if modulus is a
-    polynomial, or if char2 is True.
+    Order q >= min_order.
+    Field is prime (d = 1) by default and if modulus is prime.
+    Extension degree d > 1 if order is a prime power p**d with d > 1,
+    if modulus is a polynomial or a string or an integer > char,
+    or if ext_deg is an integer > 1, or if min_order > char.
     """
-    if isinstance(modulus, str):
-        modulus = gf2x.Polynomial(modulus)
-    if isinstance(modulus, gf2x.Polynomial):
-        char2 = char2 or (char2 is None)
-        assert char2  # binary field
-        modulus = int(modulus)
+    # TODO: raise errors instead of assert statements
     if order is not None:
-        if order == 2:
-            assert modulus is None or modulus == 2 or modulus == 3
-            if modulus is None or modulus == 2:
-                # default: prime field
-                char2 = char2 or False
-            else:
-                char2 = char2 or (char2 is None)
-                assert char2  # binary field
-        elif gmpy.is_prime(order):
-            modulus = modulus or order
-            assert modulus == order
-            char2 = char2 or False
-            assert not char2  # prime field
-        elif order % 2 == 0:
-            assert modulus is None or modulus.bit_length() == order.bit_length()
-            char2 = char2 or (char2 is None)
-            assert char2  # binary field
-        else:
-            raise ValueError('only prime fields and binary fields supported')
-        l = l or order.bit_length() - 1
-        assert l == order.bit_length() - 1
-    if modulus is None:
-        l = l or 1
-        if char2:
-            modulus = int(bfield.find_irreducible(l))
-        else:
-            modulus = pfield.find_prime_root(l + 1, blum=False)[0]
-    l = modulus.bit_length() - 1
-    if char2:
-        field = bfield.GF(modulus)
+        p, d = gmpy2.factor_prime_power(order)
+        char = char or p
+        assert char == p
+        ext_deg = ext_deg or d
+        assert ext_deg == d
+    # order now represented by (char, ext_deg)
+
+    if isinstance(modulus, str):
+        char = char or 2
+        modulus = gfpx.GFpX(char)(modulus)
+    if isinstance(modulus, int):
+        if char and modulus > char:
+            modulus = gfpx.GFpX(char)(modulus)
+    if isinstance(modulus, gfpx.Polynomial):
+        char = char or modulus.p
+        assert char == modulus.p
+        ext_deg = ext_deg or modulus.degree()
+    elif isinstance(modulus, int):
+        char = char or modulus
+        assert char == modulus
+        ext_deg = ext_deg or 1
+        assert ext_deg == 1
     else:
-        field = pfield.GF(modulus)
+        assert modulus is None
+        if min_order is None:
+            char = char or 2
+            ext_deg = ext_deg or 1
+            min_order = char**ext_deg
+        else:
+            if char is None:
+                ext_deg = ext_deg or 1
+                char = int(gmpy2.next_prime(math.ceil(min_order**(1/ext_deg)) - 1))
+            else:
+                if ext_deg is None:
+                    ext_deg = math.ceil(math.log(min_order, char))
+
+        if ext_deg == 1:
+            modulus = char
+        else:
+            modulus = finfields.find_irreducible(char, ext_deg)
+
+    order = order or char**ext_deg
+    min_order = min_order or order
+    assert min_order <= order
+    field = finfields.GF(modulus)
     assert runtime.threshold == 0 or field.order > len(runtime.parties), \
         'Field order must exceed number of parties, unless threshold is 0.'
     # TODO: field.order >= number of parties for MDS
     field.is_signed = False
-    return _SecFld(l, field)
+    return _SecFld(field)
 
 
 @functools.lru_cache(maxsize=None)
-def _SecFld(l, field):
+def _SecFld(field):
+    l = field.order.bit_length() - 1
 
     def init(self, value=None):
         if value is not None:
             if isinstance(value, int):
                 value = sectype.field(value)
         super(sectype, self).__init__(value)
-    sectype = type(f'SecFld{l}({field})', (SecureFiniteField,),
+    sectype = type(f'SecFld{l}({field.__name__})', (SecureFiniteField,),
                    {'__slots__': (), '__init__': init})
     sectype.field = field
     sectype.bit_length = l
@@ -414,10 +422,10 @@ def _SecFld(l, field):
 def _pfield(l, f, p, n):
     k = runtime.options.sec_param
     if p is None:
-        p = pfield.find_prime_root(l + max(f, k + 1) + 1, n=n)
+        p = finfields.find_prime_root(l + max(f, k + 1) + 1, n=n)
     else:
         assert p.bit_length() > l + max(f, k + 1), f'Prime {p} too small.'
-    return pfield.GF(p, f)
+    return finfields.GF(p, f)
 
 
 def SecInt(l=None, p=None, n=2):

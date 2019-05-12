@@ -1,7 +1,7 @@
 """Demo solution to the Secret Santa problem.
 
 The Secret Santa problem is about generating secret random permutations
-without fixed points. A fixed point of a permuation p is a point i for
+without fixed points. A fixed point of a permutation p is a point i for
 which p(i)=i, hence the point is mapped to itself. Permutations without
 fixed points are also called 'derangements'.
 """
@@ -54,6 +54,12 @@ async def random_derangement(n, sectype):
     return p
 
 
+async def xprint(N, text, sectype):
+    print(f'Using secure {text}: {sectype.__name__}')
+    for n in range(2, N + 1):
+        print(n, await mpc.output(random_derangement(n, sectype)))
+
+
 async def main():
     if sys.argv[1:]:
         N = int(sys.argv[1])
@@ -63,25 +69,14 @@ async def main():
 
     await mpc.start()
 
-    secint = mpc.SecInt()
-    print('Using secure integers:', secint)
-    for n in range(2, N + 1):
-        print(n, await mpc.output(random_derangement(n, secint)))
-
-    secfxp = mpc.SecFxp()
-    print('Using secure fixed-point numbers:', secfxp)
-    for n in range(2, N + 1):
-        print(n, await mpc.output(random_derangement(n, secfxp)))
-
-    secpfld = mpc.SecFld(l=max(len(mpc.parties), (N - 1)).bit_length())
-    print('Using secure prime fields:', secpfld)
-    for n in range(2, N + 1):
-        print(n, await mpc.output(random_derangement(n, secpfld)))
-
-    secbfld = mpc.SecFld(char2=True, l=max(len(mpc.parties), (N - 1)).bit_length())
-    print('Using secure binary fields:', secbfld)
-    for n in range(2, N + 1):
-        print(n, await mpc.output(random_derangement(n, secbfld)))
+    await xprint(N, 'integers', mpc.SecInt())
+    await xprint(N, 'fixed-point numbers:', mpc.SecFxp())
+    bound = max(len(mpc.parties) + 1, N)
+    await xprint(N, 'prime fields', mpc.SecFld(min_order=bound))
+    await xprint(N, 'binary fields', mpc.SecFld(char=2, min_order=bound))
+    await xprint(N, 'quinary fields', mpc.SecFld(char=5, min_order=bound))
+    await xprint(N, 'extension fields (medium prime)', mpc.SecFld(order=11**7))
+    await xprint(N, 'extension fields (larger prime)', mpc.SecFld(order=1031**3))
 
     await mpc.shutdown()
 

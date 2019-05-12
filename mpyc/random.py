@@ -186,7 +186,7 @@ def choices(sectype, population, weights=None, *, cum_weights=None, k=1):
 
 
 def shuffle(sectype, x):
-    """Shuffle list x secretly in place, and return None.
+    """Shuffle list x secretly in-place, and return None.
 
     Given list x may contain public or secret elements.
     """

@@ -108,7 +108,7 @@ class Arithmetic(unittest.TestCase):
         self.assertLessEqual(float(a), -13.13)
 
     def test_secfld(self):
-        secfld = mpc.SecFld(2, char2=True)
+        secfld = mpc.SecFld(2, char=2)
         a = getrandbits(secfld, 1)
         a = mpc.run(mpc.output(a))
         self.assertGreaterEqual(int(a), 0)

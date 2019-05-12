@@ -26,12 +26,12 @@ def random_split(s, t, m):
     field = type(s[0])
     p = field.modulus
     order = field.order
-    T = type(p)  # T is int or gf2x.Polynomial
+    T = type(p)  # T is int or gfpx.Polynomial
     n = len(s)
     shares = [[None] * n for _ in range(m)]
     for h in range(n):
         c = [secrets.randbelow(order) for _ in range(t)]
-        # polynomial f(x) = s[h] + c[t-1] x + c[t-2] x^2 + ... + c[0] x^t
+        # polynomial f(X) = s[h] + c[t-1] X + c[t-2] X^2 + ... + c[0] X^t
         for i in range(m):
             y = 0 if T is int else T(0)
             for c_j in c:
@@ -79,7 +79,7 @@ def recombine(field, points, x_rs=0):
             s = shares[i][h]
             if T_is_field:
                 s = s.value
-            # type(s) is int or gf2x.Polynomial
+            # type(s) is int or gfpx.Polynomial
             for r in range(width):
                 sums[r][h] += s * vector[r][i]
     for r in range(width):
@@ -127,7 +127,7 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
     given in prfs, which maps subsets of parties to PRF instances.
     Input uci is used to evaluate the PRFs on a unique common input.
     """
-    T = type(field.modulus)  # T is int or T is gf2x.Polynomial
+    T = type(field.modulus)  # T is int or T is gfpx.Polynomial
     uci = str(uci).encode()
     sums = [0] * n
     # iterate over (m-1 choose t) subsets for degree t.

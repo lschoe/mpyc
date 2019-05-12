@@ -1,8 +1,8 @@
 """The MPyC runtime module is used to execute secure multiparty computations.
 
 Parties perform computations on secret-shared values by exchanging messages.
-Shamir's threshold secret sharing scheme is used for fields of prime order and
-fields of characteristic two. MPyC provides secure number types and operations,
+Shamir's threshold secret sharing scheme is used for finite fields of any order
+exceeding the number of parties. MPyC provides secure number types and operations,
 many of which are available through Python's mechanism for operator overloading.
 """
 
@@ -531,7 +531,7 @@ class Runtime:
             a, b = b, a
         c = a * b
         if f and (a_integral or b_integral) and not isinstance(a, int):
-            c >>= f  # NB: inplace rshift
+            c >>= f  # NB: in-place rshift
         if shb:
             c = self._reshare(c)
         if f and not (a_integral or b_integral):
@@ -932,7 +932,7 @@ class Runtime:
 
         a, x = await self.gather(a, x)
         if f and a_integral:
-            a = a >> f  # NB: no inplace rshift
+            a = a >> f  # NB: no in-place rshift
         for i in range(len(x)):
             x[i] = x[i] * a
         x = await self._reshare(x)
@@ -957,7 +957,7 @@ class Runtime:
 
         a, x, y = await self.gather(a, x, y)
         if f:
-            a = a >> f  # NB: no inplace rshift
+            a = a >> f  # NB: no in-place rshift
         for i in range(len(x)):
             x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
         x = await self._reshare(x)
@@ -1106,16 +1106,17 @@ class Runtime:
 
         m = len(self.parties)
 
-        if not isinstance(field.modulus, int):
+        if field.characteristic == 2:
             prfs = self.prfs(2)
             bits = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
             return bits
 
         bits = [None] * n
-        p = field.modulus
+        p = field.characteristic
         if not signed:
+            modulus = field.modulus
             q = (p + 1) >> 1  # q = 1/2 mod p
-        prfs = self.prfs(p)
+        prfs = self.prfs(field.order)
         t = self.threshold
         h = n
         while h > 0:
@@ -1132,8 +1133,8 @@ class Runtime:
                     h -= 1
                     s = r.value * r2.sqrt(INV=True).value
                     if not signed:
+                        s %= modulus
                         s += 1
-                        s %= p
                         s *= q
                     bits[h] = field(s << f0)
         return bits
@@ -1180,7 +1181,7 @@ class Runtime:
         for r_i in reversed(r_bits):
             r_modl <<= 1
             r_modl += r_i.value
-        if isinstance(field.modulus, int):
+        if field.characteristic != 2:
             k = self.options.sec_param
             r_divl = self._random(field, 1<<k)
             a = await self.gather(a)

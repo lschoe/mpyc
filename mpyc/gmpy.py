@@ -1,11 +1,53 @@
 """This module collects all gmpy2 functions used by MPyC.
 
+Plus a function for factoring prime powers.
+
 Stubs of limited functionality and efficiency are provided
 in case the gmpy2 package is not available.
 """
 
+
+def factor_prime_power(x):  # TODO: move this to a separate math/number theory module
+    """Return p and d for a prime power x = p**d."""
+    if x <= 1:
+        raise ValueError('number not a prime power')
+
+    k = 10
+    # test whether p is below 2**k, for positive k
+    p = 2
+    while p < 1 << k:
+        if x % p == 0:
+            d = 0
+            while x > 1:
+                x, r = divmod(x, p)
+                if r:
+                    raise ValueError('number not a prime power')
+                d += 1
+
+            return int(p), d
+
+        p = next_prime(p)
+
+    # find prime factors of d
+    p, d = x, 1
+    while is_square(p):
+        p, d = isqrt(p), 2 * d
+    e = 3
+    while k * e <= p.bit_length():
+        w, b = iroot(p, e)
+        if b:
+            p, d = w, e * d
+        else:
+            e = next_prime(e)
+
+    if is_prime(p):
+        return int(p), int(d)
+
+    raise ValueError('number not a prime power')
+
+
 try:
-    from gmpy2 import is_prime, next_prime, powmod, invert, legendre
+    from gmpy2 import is_prime, next_prime, powmod, invert, legendre, is_square, isqrt, iroot
 except ImportError:
     import random
 
@@ -16,6 +58,7 @@ except ImportError:
         """
         if x <= 2 or x % 2 == 0:
             return x == 2
+
         # odd x >= 3
         r, s = 0, x - 1
         while s % 2 == 0:
@@ -31,9 +74,11 @@ except ImportError:
                     break
                 elif b == 1:
                     return False
+
                 b = (b * b) % x
             else:
                 return False
+
         return True
 
     def next_prime(x):
@@ -61,6 +106,7 @@ except ImportError:
             y = pow(x, m - 2, m)
         if y == 0:
             raise ZeroDivisionError
+
         return y
 
     def legendre(x, y):
@@ -69,3 +115,34 @@ except ImportError:
         if z > 1:  # z == y - 1
             z = -1
         return z
+
+    def is_square(x):
+        """Return True if x is a perfect square, False otherwise."""
+        y = isqrt(x)
+        return x == y**2
+
+    def isqrt(x):
+        """Return integer square root of nonnegative x."""
+        if x == 0:
+            return x
+
+        k = (x.bit_length() - 1) // 2
+        y = 1 << k
+        for i in range(k - 1, -1, -1):
+            z = y | (1 << i)
+            if z * z <= x:
+                y = z
+        return y
+
+    def iroot(x, n):
+        """Return (y, b) where y is the integer n-th root of x and b is True if y is exact."""
+        if x == 0:
+            return x, True
+
+        k = (x.bit_length() - 1) // n
+        y = 1 << k
+        for i in range(k - 1, -1, -1):
+            z = y | (1 << i)
+            if z**n <= x:
+                y = z
+        return y, x == y**n
