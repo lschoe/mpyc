@@ -21,8 +21,7 @@ class Arithmetic(unittest.TestCase):
             b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
             self.assertEqual(a, b)
 
-#        for field in (self.f19, self.f27, self.f256):
-        for field in (self.f27, self.f256):
+        for field in (self.f19, self.f27, self.f256):
             for t in range(8):
                 m = 2 * t + 1
                 for i in range(t):

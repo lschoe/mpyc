@@ -1,21 +1,11 @@
 import unittest
 from mpyc import gfpx
 from mpyc import sectypes
-from mpyc.runtime import mpc
 
 X = gfpx.X
 
 
 class Arithmetic(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        mpc.logging(False)
-        mpc.run(mpc.start())
-
-    @classmethod
-    def tearDownClass(cls):
-        mpc.run(mpc.shutdown())
 
     def test_typecaching(self):
         SecFld = sectypes.SecFld
