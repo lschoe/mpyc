@@ -382,7 +382,9 @@ def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None):
         else:
             if char is None:
                 ext_deg = ext_deg or 1
-                char = int(gmpy2.next_prime(math.ceil(min_order**(1/ext_deg)) - 1))
+                root, exact = gmpy2.iroot(min_order, ext_deg)
+                min_char = root + (not exact)   # ceiling of min_order^(1/ext_deg)
+                char = int(gmpy2.next_prime(min_char - 1))
             else:
                 if ext_deg is None:
                     ext_deg = math.ceil(math.log(min_order, char))
