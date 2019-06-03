@@ -39,6 +39,10 @@ class Arithmetic(unittest.TestCase):
 
     def test_prf(self):
         key = int('0x00112233445566778899aabbccddeeff', 16).to_bytes(16, byteorder='little')
+        bound = 1
+        F = thresha.PRF(key, bound)
+        y = F('test')
+        self.assertEqual(y, 0)
         bound = 100
         F = thresha.PRF(key, bound)
         x = ''

@@ -16,6 +16,7 @@ class Arithmetic(unittest.TestCase):
         self.f101.is_signed = False
 
         self.f27 = finfields.GF(gfpx.GFpX(3)(46))  # irreducible polynomial X^3 + 2X^2 + 1
+        self.f81 = finfields.GF(gfpx.GFpX(3)(115))  # irreducible polynomial X^4 + X^3 + 2X + 1
 
     def test_field_caching(self):
         self.assertNotEqual(self.f2(1), self.f2p(1))
@@ -42,6 +43,21 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(F.from_bytes(F.to_bytes([])), [])
             self.assertEqual(F.from_bytes(F.to_bytes([0, 1])), [0, 1])
             self.assertEqual(F.from_bytes(F.to_bytes([F.order - 1])), [F.order - 1])
+
+    def test_find_prime_root(self):
+        f = finfields.find_prime_root
+        pnw = f(2, False)
+        self.assertEqual(pnw, (2, 1, 1))
+        pnw = f(2)
+        self.assertEqual(pnw, (3, 2, -1))
+        pnw = f(5, n=1)
+        self.assertEqual(pnw, (19, 1, 1))
+        pnw = f(5, n=2)
+        self.assertEqual(pnw, (19, 2, -1))
+        p, n, w = f(5, n=3)
+        self.assertEqual((w**3) % p, 1)
+        p, n, w = f(10, n=4)
+        self.assertEqual((w**n) % p, 1)
 
     def test_f2_vs_f256(self):
         f2 = self.f2
@@ -247,7 +263,21 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, 19)
 
     def test_f27(self):
-        f27 = self.f27
+        f27 = self.f27  # 27 == 3 (mod 4)
         a = f27(10)
         self.assertTrue((a**2).is_sqr())
         self.assertFalse((-a**2).is_sqr())
+        b = (a**2).sqrt()
+        self.assertEqual(b**2, a**2)
+        b = (a**2).sqrt(INV=True)
+        self.assertEqual((a * b)**2, 1)
+
+    def test_f81(self):
+        f81 = self.f81  # 81 == 1 (mod 4)
+        a = f81(21)
+        self.assertTrue((a**2).is_sqr())
+        self.assertTrue((-a**2).is_sqr())
+        b = (a**2).sqrt()
+        self.assertEqual(b**2, a**2)
+        b = (a**2).sqrt(INV=True)
+        self.assertEqual((a * b)**2, 1)

@@ -7,7 +7,6 @@ In-place versions of the field operators are also provided.
 Taking square roots and quadratic residuosity tests supported as well.
 """
 
-import abc
 import functools
 from mpyc import gmpy as gmpy2
 from mpyc import gfpx
@@ -22,7 +21,7 @@ def GF(modulus, f=0):
     return xGF(modulus.p, modulus)
 
 
-class FiniteFieldElement(abc.ABC):
+class FiniteFieldElement:
     """Abstract base class for finite field elements.
 
     Invariant: attribute 'value' nonnegative and below modulus.
@@ -35,16 +34,16 @@ class FiniteFieldElement(abc.ABC):
     characteristic = None
     ext_deg = None
     byte_length = None
-    frac_length = None
+    frac_length = 0
     is_signed = None
     mix_types = None
 
     def __init__(self, value):
         self.value = value % self.modulus  # TODO: make this more direct for efficiency
 
-    @abc.abstractmethod
     def __int__(self):
         """Extract field element as an integer value."""
+        raise NotImplementedError('abstract method')
 
     @classmethod
     def to_bytes(cls, x):
@@ -177,9 +176,9 @@ class FiniteFieldElement(abc.ABC):
         self.value %= self.modulus
         return self
 
-    @abc.abstractmethod
     def reciprocal(self):
         """Multiplicative inverse."""
+        raise NotImplementedError('abstract method')
 
     def __lshift__(self, other):
         """Left shift."""
@@ -201,25 +200,25 @@ class FiniteFieldElement(abc.ABC):
         self.value %= self.modulus
         return self
 
-    @abc.abstractmethod
     def __rshift__(self, other):
         """Right shift."""
+        raise NotImplementedError('abstract method')
 
     def __rrshift__(self, other):
         """Right shift (with reflected arguments)."""
         return NotImplemented
 
-    @abc.abstractmethod
     def __irshift__(self, other):
         """In-place right shift."""
+        raise NotImplementedError('abstract method')
 
-    @abc.abstractmethod
     def is_sqr(self):
         """Test for quadratic residuosity (0 is also square)."""
+        raise NotImplementedError('abstract method')
 
-    @abc.abstractmethod
     def sqrt(self, INV=False):
         """Modular (inverse) square roots."""
+        raise NotImplementedError('abstract method')
 
     def __bool__(self):
         """Truth value testing.
@@ -245,7 +244,7 @@ def find_prime_root(l, blum=True, n=1):
             p = 3
             n, w = 2, -1
     elif n <= 2:
-        n, w = 2, -1
+        w = -1 if n == 2 else 1
         p = gmpy2.next_prime(1 << l - 1)
         if blum:
             while p % 4 != 3:
@@ -464,7 +463,6 @@ def xGF(p, modulus):
     GFElement.characteristic = p
     GFElement.ext_deg = d
     GFElement.byte_length = (GFElement.order.bit_length() + 7) >> 3
-    GFElement.frac_length = 0
     return GFElement
 
 
@@ -529,7 +527,7 @@ class ExtensionFieldElement(FiniteFieldElement):
         # Tonelli-Shanks
         n = q - 1
         s = (n & -n).bit_length() - 1  # number of times 2 divides n
-        t = (q - 1) // 2**s
+        t = n >> s
         # q - 1 = t 2^s, t odd
         z = self.least_qnr
         if z is None:
@@ -537,7 +535,7 @@ class ExtensionFieldElement(FiniteFieldElement):
             i = 2
             while c == 1:
                 z = cls.powmod(i, t, self.modulus)
-                c = cls.powmod(z, 2**(s - 1), self.modulus)
+                c = cls.powmod(z, 1 << s - 1, self.modulus)
                 i += 1
             type(self).least_qnr = z  # cache least QNR raised to power t
 
@@ -552,7 +550,7 @@ class ExtensionFieldElement(FiniteFieldElement):
             while b2 != 1:
                 b2 = b2 * b2 % self.modulus
                 k += 1
-            w = cls.powmod(z, 2**(v - k - 1), self.modulus)
+            w = cls.powmod(z, 1 << v - k - 1, self.modulus)
             z = w * w % self.modulus
             b = b * z % self.modulus
             x = x * w % self.modulus

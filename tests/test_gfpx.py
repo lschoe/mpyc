@@ -23,9 +23,11 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly.from_terms('0'), 0)
         self.assertEqual(poly.from_terms('1'), 1)
         self.assertEqual(poly.from_terms(f'{X}'), poly.p)
+        self.assertEqual(poly.from_terms(f'{X} + {X}^2'), poly.p + poly.p**2)
         self.assertEqual(poly.to_terms(poly(0)), '0')
         self.assertEqual(poly.to_terms(poly(1)), '1')
         self.assertEqual(poly.to_terms(poly(poly.p)), f'{X}')
+        self.assertEqual(poly.to_terms(poly(poly.p + poly.p**2)), f'{X}^2+{X}')
         self.assertEqual(poly.deg(poly(0)), -1)
         self.assertEqual(poly.deg(poly(1)), 0)
         self.assertEqual(poly.deg(poly(poly.p)), 1)
@@ -44,10 +46,12 @@ class Arithmetic(unittest.TestCase):
             self._test_mod2(poly)
 
     def _test_mod2(self, poly):
+        self.assertEqual(poly([0, 1, 1]), f'{X}^2+{X}')
+        self.assertEqual(poly._to_list(6), [0, 1, 1])
         self.assertEqual(poly.from_terms(f'{X}+{X}'), 0)
         self.assertEqual(poly.to_terms(poly(2)), f'{X}')
         self.assertEqual(poly.to_terms(poly(3)), f'{X}+1')
-        self.assertEqual(poly.to_terms(poly(7)), f'{X}^2+{X}+1')
+        self.assertEqual(poly.to_terms(poly(6)), f'{X}^2+{X}')
         self.assertEqual(poly.deg(poly(2)), 1)
         self.assertEqual(poly.deg(poly(3)), 1)
         self.assertEqual(poly.deg(poly(7)), 2)
@@ -88,6 +92,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, poly(1))
         a <<= 1
         self.assertEqual(a, poly(2))
+        a >>= 1
+        self.assertEqual(a, poly(1))
 
         self.assertEqual(poly.gcd(poly(2), poly(5)), poly(1))
         self.assertEqual(poly.gcd(poly(3), poly(5)), poly(3))
@@ -120,7 +126,10 @@ class Arithmetic(unittest.TestCase):
         self.assertFalse(poly.is_irreducible(621))
         self.assertFalse(poly.is_irreducible(1905))
 
+        self.assertTrue(poly(7) >= poly(5))
         self.assertTrue(poly(7) > poly(5))
+        self.assertTrue(poly(7) <= poly(8))
+        self.assertTrue(poly(7) < poly(8))
 
     def test_mod3(self):
         poly = gfpx.GFpX(3)
@@ -145,7 +154,10 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(poly.is_irreducible(99986))
         self.assertEqual(poly.next_irreducible(53), 86)
 
+        self.assertTrue(poly(7) >= poly(5))
         self.assertTrue(poly(7) > poly(5))
+        self.assertTrue(poly(7) <= poly(8))
+        self.assertTrue(poly(7) < poly(8))
 
     def test_mod11(self):
         poly = gfpx.GFpX(11)
@@ -160,9 +172,32 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(divmod(poly(14641), poly(121)), (poly(121), 0))
         self.assertEqual(divmod(poly(14643), poly(121)), (poly(121), poly(2)))
 
+        a = poly(5)
+        b = poly(6)
+        a += b
+        self.assertEqual(a, poly(0))
+        a -= b
+        self.assertEqual(a, poly(5))
+        a *= b
+        self.assertEqual(a, poly(8))
+        a //= b
+        self.assertEqual(a, poly(5))
+        a <<= 0
+        self.assertEqual(a, poly(5))
+        a <<= 1
+        self.assertEqual(a, poly(55))
+        a >>= 1
+        self.assertEqual(a, poly(5))
+
         self.assertEqual(poly.gcd(poly(2), poly(5)), poly(1))
         self.assertEqual(poly.gcd(poly(3), poly(5)), poly(1))
         self.assertEqual(poly.gcd(poly(455), poly(420)), poly(19))
+        a = poly('x + 10')  # x - 1
+        b = a**2 * (a - 1)**2
+        c = a * (a - 2)**2
+        d, s, t = poly.gcdext(b, c)
+        self.assertEqual(d, a)
+        self.assertEqual(b * s + c * t, a)
         with self.assertRaises(ZeroDivisionError):
             poly.invert(poly(283), poly(283))
 
@@ -171,4 +206,7 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(poly.is_irreducible(19488))
         self.assertEqual(poly.next_irreducible(53), 122)
 
+        self.assertTrue(poly(17) >= poly(15))
         self.assertTrue(poly(17) > poly(15))
+        self.assertTrue(poly(17) <= poly(18))
+        self.assertTrue(poly(17) < poly(18))
