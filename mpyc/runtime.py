@@ -825,8 +825,8 @@ class Runtime:
         if not f:
             await returnType(stype)
         else:
-            x_integral = x[0].integral
-            await returnType((stype, x_integral and y[0].integral))
+            x_integral = all(a.integral for a in x)
+            await returnType((stype, x_integral and all(a.integral for a in y)))
         if x is y:
             x = y = await self.gather(x)
         elif shx and shy:
@@ -869,7 +869,7 @@ class Runtime:
     async def vector_add(self, x, y):
         """Secure addition of vectors x and y."""
         x, y = x[:], y[:]
-        stype = type(x[0])
+        stype = type(x[0])  # all elts assumed of same type
         if not stype.field.frac_length:
             await returnType(stype, len(x))
         else:
@@ -884,7 +884,7 @@ class Runtime:
     async def vector_sub(self, x, y):
         """Secure subtraction of vectors x and y."""
         x, y = x[:], y[:]
-        stype = type(x[0])
+        stype = type(x[0])  # all elts assumed of same type
         if not stype.field.frac_length:
             await returnType(stype, len(x))
         else:
@@ -921,7 +921,7 @@ class Runtime:
     async def scalar_mul(self, a, x):
         """Secure scalar multiplication of scalar a with vector x."""
         x = x[:]
-        stype = type(a)
+        stype = type(a)  # all elts of x assumed of same type
         field = stype.field
         f = field.frac_length
         if not f:
@@ -944,7 +944,7 @@ class Runtime:
     @mpc_coro
     async def _if_else_list(self, a, x, y):
         x, y = x[:], y[:]
-        stype = type(a)
+        stype = type(a)  # all elts of x and y assumed of same type
         field = stype.field
         f = field.frac_length
         if not f:

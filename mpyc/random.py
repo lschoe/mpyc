@@ -221,7 +221,7 @@ async def random_derangement(sectype, x):
         x = range(x)
     x = list(x)
     if sectype.field.frac_length:
-        # assume same type for all elts of x
+        # all elts assumed of same type
         x_integral = True
         if isinstance(x[0], sectype):
             x_integral = x[0].integral
