@@ -400,6 +400,67 @@ class Runtime:
             y = y[0]
         return y
 
+    def convert(self, x, ttype):
+        """Secure conversion of (elements of) x to given ttype.
+
+        Value x is a secure number, or a list of secure numbers.
+        Converted values assumed to fit in target type.
+        """
+        x_is_list = isinstance(x, list)
+        if x_is_list:
+            x = x[:]
+        else:
+            x = [x]
+
+        if (isinstance(x[0], sectypes.SecureFiniteField)
+                and issubclass(ttype, sectypes.SecureFiniteField)):
+            # conversion via secure integers
+            stype = type(x[0])
+            size = max(stype.field.order, ttype.field.order)
+            l = max(32, size.bit_length())
+            secint = self.SecInt(l=l)
+            y = self._convert(self._convert(x, secint), ttype)
+        else:
+            y = self._convert(x, ttype)
+
+        if not x_is_list:
+            y = y[0]
+        return y
+
+    @mpc_coro
+    async def _convert(self, x, ttype):
+        stype = type(x[0])  # source type
+        await returnType(ttype, len(x))  # target type
+        m = len(self.parties)
+        k = self.options.sec_param
+        l = min(stype.bit_length, ttype.bit_length)
+        f = stype.field.frac_length  # TODO: use integral attribute for fxp
+        if issubclass(stype, sectypes.SecureFiniteField):
+            bound = stype.field.order
+        else:
+            bound = (1 << k + l) // self._bincoef + 1
+        prfs = self.prfs(bound)
+        uci = self._prss_uci()  # NB: same uci in both calls for r below
+        r = thresha.pseudorandom_share(stype.field, m, self.pid, prfs, uci, len(x))
+        x = await self.gather(x)
+        d = ttype.field.frac_length - f
+        if d < 0:
+            x = await self.trunc(x, -d, stype.bit_length)  # TODO: take minimum with ttype or so
+        offset = 1 << l - 1
+        for i in range(len(x)):
+            x[i] = x[i].value + offset + r[i]
+        x = await self.output(x)
+        r = thresha.pseudorandom_share(ttype.field, m, self.pid, prfs, uci, len(x))
+        for i in range(len(x)):
+            x[i] = x[i].value - offset - r[i]
+        if issubclass(stype, sectypes.SecureFiniteField):
+            for i in range(len(x)):
+                x[i] = self._mod(ttype(x[i]), stype.field.modulus)
+        if d > 0:
+            for i in range(len(x)):
+                x[i] <<= d
+        return x
+
     @mpc_coro
     async def trunc(self, x, f=None, l=None):
         """Secure truncation of f least significant bits of (elements of) x.

@@ -306,3 +306,38 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(1 - c, a, b)))), 1.0)
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(c, 0.0, 1.0)))), 0.0)
         self.assertEqual(float(mpc.run(mpc.output(mpc.if_else(1 - c, 0.0, 1.0)))), 1.0)
+
+    def test_convert(self):
+        secint = mpc.SecInt()
+        secint8 = mpc.SecInt(8)
+        secint16 = mpc.SecInt(16)
+        secfld257 = mpc.SecFld(257)
+        secfld263 = mpc.SecFld(263)
+        secfxp = mpc.SecFxp()
+        secfxp16 = mpc.SecFxp(16)
+
+        x = [secint8(-100), secint8(100)]
+        y = mpc.convert(x, secint)
+        self.assertEqual(mpc.run(mpc.output(y)), [-100, 100])
+        y = mpc.convert(y, secint8)
+        self.assertEqual(mpc.run(mpc.output(y)), [-100, 100])
+
+        x = [secint16(i) for i in range(10)]
+        y = mpc.convert(x, secfld257)
+        self.assertEqual(mpc.run(mpc.output(y)), list(range(10)))
+
+        x = [secfld257(i) for i in range(10)]
+        y = mpc.convert(x, secfld263)
+        self.assertEqual(mpc.run(mpc.output(y)), list(range(10)))
+
+        x = [secint(-100), secint(100)]
+        y = mpc.convert(x, secfxp)
+        self.assertEqual(mpc.run(mpc.output(y)), [-100, 100])
+        y = mpc.convert(y, secint)
+        self.assertEqual(mpc.run(mpc.output(y)), [-100, 100])
+
+        x = [secfxp16(-100.25), secfxp16(100.875)]
+        y = mpc.convert(x, secfxp)
+        self.assertEqual(mpc.run(mpc.output(y)), [-100.25, 100.875])
+        y = mpc.convert(y, secfxp16)
+        self.assertEqual(mpc.run(mpc.output(y)), [-100.25, 100.875])
