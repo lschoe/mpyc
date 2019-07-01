@@ -340,7 +340,7 @@ class SecureFixedPoint(Share):
     __slots__ = ()
 
 
-def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None):
+def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, signed=False):
     """Secure finite field of order q = p**d.
 
     Order q >= min_order.
@@ -401,7 +401,7 @@ def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None):
     assert runtime.threshold == 0 or field.order > len(runtime.parties), \
         'Field order must exceed number of parties, unless threshold is 0.'
     # TODO: field.order >= number of parties for MDS
-    field.is_signed = False
+    field.is_signed = signed
     return _SecFld(field)
 
 
