@@ -91,6 +91,10 @@ optional arguments:
 
 `python bnnminist.py -M1 --no-barrier`
 
+`python ridgeregression.py -i3 -a7`
+
+`python ridgeregression.py -M3`
+
 `python -m cProfile -s time bnnmnist.py | more`
 
 `python -m cProfile -s cumtime sort.py 64 | more`
