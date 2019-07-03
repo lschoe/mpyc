@@ -3,7 +3,7 @@
 MPyC demo accompanying the paper 'Efficient Secure Ridge Regression from
 Randomized Gaussian Elimination' by Frank Blom, Niek J. Bouman, Berry
 Schoenmakers, and Niels de Vreede, presented at TPMPC 2019 by Frank Blom.
-See https://eprint.iacr.org/2019/????.
+See https://eprint.iacr.org/2019/773 (or https://ia.cr/2019/773).
 
 The following datasets from the UCI Machine Learning Repository are used:
 
