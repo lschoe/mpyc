@@ -60,6 +60,10 @@ except ImportError:
             return x == 2
 
         # odd x >= 3
+        for p in (3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53):
+            if x % p == 0:
+                return x == p
+
         r, s = 0, x - 1
         while s % 2 == 0:
             r += 1
