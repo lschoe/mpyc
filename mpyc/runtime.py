@@ -290,7 +290,10 @@ class Runtime:
         """Distribute shares for each x provided by a sender."""
         stype = type(x[0])  # all elts assumed of same type
         field = stype.field
-        await returnType(stype, len(senders), len(x))
+        if not field.frac_length:
+            await returnType(stype, len(senders), len(x))
+        else:
+            await returnType((stype, x[0].integral), len(senders), len(x))
         value = x[0].df if not isinstance(x[0].df, Future) else None
         assert value is None or self.pid in senders
         m = len(self.parties)
