@@ -46,7 +46,7 @@ Which is equivalent to using the MPyC if_else() method:
 
     OT(x[0],x[1]; b) = mpc.if_else(b, x[1], x[0])
 
-In all cases, we get x[c] as output.
+In all cases, we get x[b] as output.
 
 In the demo we do this t times in parallel, when run with m = 2t+1 parties. Party P[0]
 is the only helper. Parties P[1] and P[t+1] run an OT-instance as sender and receiver,

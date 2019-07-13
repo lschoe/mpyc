@@ -341,3 +341,18 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(y)), [-100.25, 100.875])
         y = mpc.convert(y, secfxp16)
         self.assertEqual(mpc.run(mpc.output(y)), [-100.25, 100.875])
+
+    def test_empty_input(self):
+        secint = mpc.SecInt()
+        self.assertEqual(mpc.run(mpc.gather([])), [])
+        self.assertEqual(mpc.run(mpc.output([])), [])
+        self.assertEqual(mpc.run(mpc._reshare([])), [])
+        self.assertEqual(mpc.convert([], None), [])
+        self.assertEqual(mpc.run(mpc.sum([])), 0)
+        self.assertEqual(mpc.run(mpc.prod([])), 1)
+        self.assertEqual(mpc.run(mpc.in_prod([], [])), 0)
+        self.assertEqual(mpc.run(mpc.vector_add([], [])), [])
+        self.assertEqual(mpc.run(mpc.vector_sub([], [])), [])
+        self.assertEqual(mpc.run(mpc.scalar_mul(secint(0), [])), [])
+        self.assertEqual(mpc.run(mpc.schur_prod([], [])), [])
+        self.assertEqual(mpc.run(mpc.from_bits([])), 0)

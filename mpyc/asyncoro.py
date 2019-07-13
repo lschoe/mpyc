@@ -16,8 +16,8 @@ class SharesExchanger(Protocol):
     Bidirectional connection with one of the other parties (peers).
     """
 
-    def __init__(self, runtime, peer_pid=None):
-        self.runtime = runtime
+    def __init__(self, rt, peer_pid=None):
+        self.runtime = rt
         self.peer_pid = peer_pid
         self.bytes = bytearray()
         self.buffers = {}
@@ -180,7 +180,7 @@ def _get_results(obj):
     return obj
 
 
-def gather_shares(runtime, *obj):
+def gather_shares(rt, *obj):
     """Gather all results for the given futures (shared values)."""
     if len(obj) == 1:
         obj = obj[0]
@@ -196,9 +196,9 @@ def gather_shares(runtime, *obj):
 
         return _AwaitableFuture(obj.df)
 
-    if not runtime.options.no_async:
+    if not rt.options.no_async:
         assert isinstance(obj, (list, tuple)), obj
-        return _SharesCounter(runtime._loop, obj)
+        return _SharesCounter(rt._loop, obj)
 
     return _AwaitableFuture(_get_results(obj))
 
@@ -207,8 +207,8 @@ class _ProgramCounterWrapper:
 
     __slots__ = 'runtime', 'coro', 'pc'
 
-    def __init__(self, runtime, coro):
-        self.runtime = runtime
+    def __init__(self, rt, coro):
+        self.runtime = rt
         self.coro = coro
         runtime._increment_pc()
         self.pc = (0,) + runtime._program_counter  # fork
@@ -345,7 +345,12 @@ def mpc_coro(func, pc=True):
         if rettype:
             decl = returnType(rettype, wrap=False)
         else:
-            decl = coro.send(None)
+            try:
+                decl = coro.send(None)
+            except StopIteration as exc:
+                runtime._pc_level -= 1
+                return _AwaitableFuture(exc.value)
+
         if runtime.options.no_async:
             while True:
                 try:

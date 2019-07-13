@@ -326,6 +326,9 @@ class Runtime:
             x = x[:]
         else:
             x = [x]
+        if x == []:
+            return []
+
         if receivers is None:
             m = len(self.parties)
             receivers = list(range(m))
@@ -376,6 +379,9 @@ class Runtime:
         x_is_list = isinstance(x, list)
         if not x_is_list:
             x = [x]
+        if x == []:
+            return []
+
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, Share):
             field = sftype.field
@@ -414,6 +420,8 @@ class Runtime:
             x = x[:]
         else:
             x = [x]
+        if x == []:
+            return []
 
         if (isinstance(x[0], sectypes.SecureFiniteField)
                 and issubclass(ttype, sectypes.SecureFiniteField)):
@@ -864,6 +872,9 @@ class Runtime:
     @mpc_coro_no_pc
     async def sum(self, x):
         """Secure sum of all elements in x."""
+        if x == []:
+            return 0
+
         x = x[:]
         field = x[0].field
         await returnType(type(x[0]))
@@ -876,6 +887,9 @@ class Runtime:
     @mpc_coro  # no_pc possible if no reshare and no trunc
     async def in_prod(self, x, y):
         """Secure dot product of x and y (one resharing)."""
+        if x == []:
+            return 0
+
         if x is y:
             x = x[:]
             y = x
@@ -914,6 +928,9 @@ class Runtime:
     @mpc_coro
     async def prod(self, x):
         """Secure product of all elements in x (in log_2 len(x) rounds)."""
+        if x == []:
+            return 1
+
         x = x[:]
         if isinstance(x[0], Share):
             await returnType(type(x[0]))
@@ -932,6 +949,9 @@ class Runtime:
     @mpc_coro_no_pc
     async def vector_add(self, x, y):
         """Secure addition of vectors x and y."""
+        if x == []:
+            return []
+
         x, y = x[:], y[:]
         stype = type(x[0])  # all elts assumed of same type
         if not stype.field.frac_length:
@@ -947,6 +967,9 @@ class Runtime:
     @mpc_coro_no_pc
     async def vector_sub(self, x, y):
         """Secure subtraction of vectors x and y."""
+        if x == []:
+            return []
+
         x, y = x[:], y[:]
         stype = type(x[0])  # all elts assumed of same type
         if not stype.field.frac_length:
@@ -984,8 +1007,11 @@ class Runtime:
     @mpc_coro
     async def scalar_mul(self, a, x):
         """Secure scalar multiplication of scalar a with vector x."""
+        if x == []:
+            return []
+
         x = x[:]
-        stype = type(a)  # all elts of x assumed of same type
+        stype = type(a)  # a and all elts of x assumed of same type
         field = stype.field
         f = field.frac_length
         if not f:
@@ -1038,6 +1064,9 @@ class Runtime:
     @mpc_coro
     async def schur_prod(self, x, y):
         """Secure entrywise multiplication of vectors x and y."""
+        if x == []:
+            return []
+
         if x is y:
             x = x[:]
             y = x
@@ -1264,6 +1293,9 @@ class Runtime:
     async def from_bits(self, x):
         """Recover secure number from its binary representation x."""
         # TODO: also handle negative numbers with sign bit (NB: from_bits() in random.py)
+        if x == []:
+            return 0
+
         x = x[:]
         stype = type(x[0])
         await returnType((stype, True))
