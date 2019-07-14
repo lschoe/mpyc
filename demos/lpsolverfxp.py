@@ -6,10 +6,7 @@ See lpsolver.py.
 import os
 import logging
 import argparse
-from distutils.version import StrictVersion
 from mpyc.runtime import mpc
-
-assert StrictVersion(mpc.version) >= StrictVersion('0.3.1')
 
 
 def load_tableau(filename):
@@ -88,28 +85,6 @@ async def index_matrix_prod(x, A, tr=False):
     return y
 
 
-def unit_vector(a, n):
-    """Return a-th unit vector of length n, assuming 0 <= a < n."""
-    stype = type(a)
-
-    def si1(a, n):
-        """Return (a-1)-st unit vector of length n-1 (if 1 <= a < n)
-        or all-0 vector of length n-1 (if a=0).
-        """
-        if n == 1:
-            x = []
-        elif n == 2:
-            x = [a]
-        else:
-            b = mpc.lsb(a / 2**stype.field.frac_length)
-            z = si1((a - b) / 2, (n + 1) // 2)
-            y = mpc.scalar_mul(b, z)
-            x = [b - sum(y)] + [z[i//2] - y[i//2] if i % 2 == 0 else y[i//2] for i in range(n-2)]
-        return x
-    x = si1(a, n)
-    return [stype(1) - sum(x)] + x
-
-
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--data', help='filename for tableau')
@@ -150,7 +125,7 @@ async def main():
         pivot = mpc.in_prod(p_row_index, p_col)
 
         logging.info('%d Updating tableau...', iteration)
-        h = mpc.scalar_mul(1/pivot, [(p_row_index[i] if i < m else 0) - p_col[i] for i in range(m + 1)])
+        h = mpc.scalar_mul(1/pivot, mpc.vector_sub(p_row_index + [0], p_col))
         p_row = index_matrix_prod(p_row_index, T[:-1])
         v = mpc.vector_add(p_row, p_col_index + [0])
         for i in range(m + 1):
@@ -173,7 +148,7 @@ async def main():
     logging.info('Computing solution...')
     solution = [secfxp(0) for _ in range(n)]
     for i in range(m):
-        x = unit_vector(basis[i], m + n)[:n]
+        x = mpc.unit_vector(basis[i], m + n)[:n]
         y = mpc.scalar_mul(T[i][-1], x)
         solution = mpc.vector_add(solution, y)
     solution = await mpc.output(solution)
@@ -181,7 +156,7 @@ async def main():
     logging.info('Computing dual solution...')
     dual_solution = [secfxp(0) for _ in range(m)]
     for j in range(n):
-        x = unit_vector(cobasis[j], m + n)[n:]
+        x = mpc.unit_vector(cobasis[j], m + n)[n:]
         y = mpc.scalar_mul(T[-1][j], x)
         dual_solution = mpc.vector_add(dual_solution, y)
     dual_solution = await mpc.output(dual_solution)

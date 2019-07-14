@@ -349,7 +349,7 @@ def mpc_coro(func, pc=True):
                 decl = coro.send(None)
             except StopIteration as exc:
                 runtime._pc_level -= 1
-                return _AwaitableFuture(exc.value)
+                return exc.value
 
         if runtime.options.no_async:
             while True:

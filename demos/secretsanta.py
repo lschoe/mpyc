@@ -70,7 +70,7 @@ async def main():
     await mpc.start()
 
     await xprint(N, 'integers', mpc.SecInt())
-    await xprint(N, 'fixed-point numbers:', mpc.SecFxp())
+    await xprint(N, 'fixed-point numbers', mpc.SecFxp())
     bound = max(len(mpc.parties) + 1, N)
     await xprint(N, 'prime fields', mpc.SecFld(min_order=bound))
     await xprint(N, 'binary fields', mpc.SecFld(char=2, min_order=bound))

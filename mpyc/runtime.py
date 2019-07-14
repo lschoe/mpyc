@@ -1265,29 +1265,48 @@ class Runtime:
         stype = type(a)
         if l is None:
             l = stype.bit_length
-        assert l <= stype.bit_length, 'extracting too many bits'
+        # TODO: check l <= stype.bit_length (+1 for SecureFiniteField)
         await returnType((stype, True), l)
         field = stype.field
+        f = field.frac_length
+        rshift_f = f and a.integral  # optimization for integral fixed-point numbers
+        if rshift_f:
+            # f least significant bits of a are all 0
+            if f >= l:
+                return [field(0) for _ in range(l)]
+
+            l -= f
 
         r_bits = await self.random_bits(field, l)
         r_modl = 0
         for r_i in reversed(r_bits):
             r_modl <<= 1
             r_modl += r_i.value
-        if field.characteristic != 2:
-            k = self.options.sec_param
-            r_divl = self._random(field, 1<<k)
-            a = await self.gather(a)
-            c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))
-            c = c.value % (1<<l)
-            c_bits = [(c >> i) & 1 for i in range(l)]
-            r_bits = [stype(r.value) for r in r_bits]
-            return self.add_bits(r_bits, c_bits)
 
+        if issubclass(stype, sectypes.SecureFiniteField):
+            if field.characteristic == 2:
+                a = await self.gather(a)
+                c = await self.output(a + r_modl)
+                c = int(c.value)
+                return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
+
+            a = self.convert(a, self.SecInt())
+            a_bits = self.to_bits(a)
+            return self.convert(a_bits, stype)
+
+        k = self.options.sec_param
+        r_divl = self._random(field, 1<<k)
         a = await self.gather(a)
-        c = await self.output(a + r_modl)
-        c = int(c.value)
-        return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
+        if rshift_f:
+            a = a >> f
+        c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))
+        c = c.value % (1<<l)
+        c_bits = [(c >> i) & 1 for i in range(l)]
+        r_bits = [stype(r.value) for r in r_bits]
+        a_bits = self.add_bits(r_bits, c_bits)
+        if rshift_f:
+            a_bits = [field(0) for _ in range(f)] + a_bits
+        return a_bits
 
     @mpc_coro_no_pc
     async def from_bits(self, x):
@@ -1337,6 +1356,26 @@ class Runtime:
         for _ in range(theta):
             c *= 2 - c * b
         return c * v
+
+    def unit_vector(self, a, n):
+        """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n."""
+        b = n - 1
+        k = b.bit_length()
+        f = type(a).field.frac_length
+        if f and not a.integral:
+            raise ValueError('nonintegral fixed-point number')
+
+        x = self.to_bits(a, k + f)[f:]
+        u = []
+        for i in range(k - 1, -1, -1):
+            v = self.scalar_mul(x[i], u)  # v = x[i] * u
+            w = self.vector_sub(u, v)  # w = (1-x[i]) * u
+            u = [x[i] - self.sum(v)]
+            u.extend(c for _ in zip(w, v) for c in _)
+            if not (b >> i) & 1:
+                u.pop()
+        # u is (a-1)st unit vector of length n-1 (if 1<=a<n) or all-0 vector of length n-1 (if a=0).
+        return [type(a)(1) - self.sum(u)] + u
 
 
 class Party:
