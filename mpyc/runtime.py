@@ -795,10 +795,9 @@ class Runtime:
         if n == 1:
             return x[0]
 
-        m0 = self.min(x[:n // 2])
-        m1 = self.min(x[n // 2:])
-        d = m0 - m1
-        return m1 + (d <= 0) * d
+        m0 = self.min(x[:n//2])
+        m1 = self.min(x[n//2:])
+        return m0 + (m1 <= m0) * (m1 - m0)
 
     def max(self, *x):
         """Secure maximum of all given elements in x."""
@@ -808,10 +807,26 @@ class Runtime:
         if n == 1:
             return x[0]
 
-        m0 = self.max(x[:n // 2])
-        m1 = self.max(x[n // 2:])
-        d = m1 - m0
-        return m0 + (d >= 0) * d
+        m0 = self.max(x[:n//2])
+        m1 = self.max(x[n//2:])
+        return m0 + (m1 >= m0) * (m1 - m0)
+
+    def min_max(self, *x):
+        """Secure minimum and maximum of all given elements in x.
+
+        Total number of comparisons is only (3n-3)//2, compared to 2n-2 for the obvious approach.
+        This is optimal as shown by Ira Pohl in "A sorting problem and its complexity",
+        Communications of the ACM 15(6), pp. 462-464, 1972.
+        """
+        if len(x) == 1:
+            x = x[0]
+        x = list(x)
+        n = len(x)
+        for i in range(n//2):
+            a, b = x[i], x[-1-i]
+            d = (a >= b) * (b - a)
+            x[i], x[-1-i] = a + d, b - d
+        return mpc.min(x[:(n+1)//2]), mpc.max(x[n//2:])  # NB: middle element in both parts if n odd
 
     @mpc_coro
     async def lsb(self, a):

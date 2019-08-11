@@ -277,6 +277,7 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(mpc.max(a, b, c, d))), max(s))
             self.assertEqual(mpc.run(mpc.output(mpc.max(a, 0))), max(s[0], 0))
             self.assertEqual(mpc.run(mpc.output(mpc.max(0, b))), max(0, s[1]))
+            self.assertEqual(mpc.run(mpc.output(list(mpc.min_max(a, b, c, d)))), [min(s), max(s)])
 
             self.assertEqual(mpc.run(mpc.output(secfxp(5) % 2)), 1)
             self.assertEqual(mpc.run(mpc.output(secfxp(1) % 2**(1-f))), 0)
