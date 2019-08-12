@@ -826,7 +826,7 @@ class Runtime:
             a, b = x[i], x[-1-i]
             d = (a >= b) * (b - a)
             x[i], x[-1-i] = a + d, b - d
-        return mpc.min(x[:(n+1)//2]), mpc.max(x[n//2:])  # NB: middle element in both parts if n odd
+        return self.min(x[:(n+1)//2]), self.max(x[n//2:])  # NB: x[n//2] in both parts if n odd
 
     @mpc_coro
     async def lsb(self, a):
