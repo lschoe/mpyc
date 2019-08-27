@@ -139,10 +139,10 @@ async def main():
     for v in Pebbler(k, x0):
         if v is None:  # initial stage
             print(f'{r:4}', '-')
+            await mpc.throttler(0.1)  # raise barrier roughly every 10 AES calls
         else:  # output stage
             await aes.xprint(f'{r:4} x{2**(k+1) - 1 - r:<4} =', v)
         r += 1
-        await mpc.barrier()
 
     await mpc.shutdown()
 

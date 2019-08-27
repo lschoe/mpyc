@@ -56,6 +56,7 @@ class Runtime:
         self._pc_level = 0  # used for implementation of barriers
         self._loop = asyncio.get_event_loop()  # cache running loop
         self.start_time = None
+        self.aggregate_load = 0.0 * 10000  # unit: basis point 0.0001 = 0.01%
 
     @property
     def threshold(self):
@@ -132,6 +133,16 @@ class Runtime:
         if not self.options.no_async:
             while self._pc_level >= len(self._program_counter):
                 await asyncio.sleep(0)
+
+    async def throttler(self, load_percentage=1.0):
+        """Throttle runtime by given percentage (default 1.0)."""
+        assert 0.0 <= load_percentage <= 1.0, 'percentage as decimal fraction between 0.0 and 1.0'
+        self.aggregate_load += load_percentage * 10000
+        if self.aggregate_load < 10000:
+            return
+
+        self.aggregate_load -= 10000
+        await mpc.barrier()
 
     def run(self, f):
         """Run the given coroutine or future until it is done."""
@@ -891,8 +902,13 @@ class Runtime:
             return 0
 
         x = x[:]
-        field = x[0].field
-        await returnType(type(x[0]))
+        stype = type(x[0])
+        field = stype.field
+        f = field.frac_length
+        if not f:
+            await returnType(stype)
+        else:
+            await returnType((stype, all(a.integral for a in x)))
         x = await self.gather(x)
         s = 0
         for i in range(len(x)):

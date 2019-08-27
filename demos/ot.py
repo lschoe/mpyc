@@ -59,7 +59,7 @@ issue the following call:
     mpc.input(secnum(v), 1)
 
 where party P[1] sets v=V for this call, and all other parties set v=None. This way all
-parties will obtain the (secret-shared) value V of the same secure type .
+parties will obtain the (secret-shared) value V of the same secure type secnum.
 
 Similarly, to let party P[2] receive a secret-shared value s as private output, all
 parties issue the following call:
