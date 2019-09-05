@@ -9,7 +9,8 @@ fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
 combined with asynchronous evaluation of the associated protocols.
 
-See the [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background. Click the "launch binder" badge above to view the entire repository and try out its notebooks in the `demos` directory without any install. 
+See the [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background. Click the "launch binder" badge 
+above to view the entire repository and try out its notebooks in the `demos` directory without any install. 
 
 ## Example installs:
 
@@ -30,8 +31,9 @@ Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christ
 Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish installation.
 
 3. Use `run-all.sh` or `run-all.bat` in the `demos` directory to have a quick look at some demos. 
-The more advanced demos `bnnmnist.py` and `cnnmnist.py` require [Numpy](https://www.numpy.org/), and the demo 
-`ridgeregression.py` even requires [Scikit-learn](https://scikit-learn.org/). Also note the example Windows batch 
+The more advanced demos `bnnmnist.py` and `cnnmnist.py` require [Numpy](https://www.numpy.org/), the demo `kmsurvival.py` requires
+[pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), and [lifelines](https://pypi.org/project/lifelines/),
+and the demo `ridgeregression.py` even requires [Scikit-learn](https://scikit-learn.org/). Also note the example Windows batch 
 files in the `docs` and `tests` directories.
 
 4. Directory `demos\.config` contains configuration info used to run MPyC with multiple parties. Also, 

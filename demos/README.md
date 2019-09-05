@@ -95,6 +95,10 @@ optional arguments:
 
 `python ridgeregression.py -M3`
 
+`python kmsurvival.py --plot --no-log`
+
+`python kmsurvival.py -M3 -i4 --collapse --plot`
+
 `python -m cProfile -s time bnnmnist.py | more`
 
 `python -m cProfile -s cumtime sort.py 64 | more`
