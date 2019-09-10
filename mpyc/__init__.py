@@ -15,4 +15,4 @@ are provided as well (e.g., some matrix-vector operations).
 """
 
 __version__ = '0.5.9'
-__license__ = 'Apache License 2.0'
+__license__ = 'MIT License'

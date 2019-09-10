@@ -115,13 +115,13 @@ class Arithmetic(unittest.TestCase):
         c = mpc.run(mpc.output(a**(secint.field.modulus - 1)))
         self.assertEqual(c, 1)
         self.assertEqual(mpc.run(mpc.output(secint(12)**73)), 12**73)
-        c = mpc.to_bits(mpc.SecInt(0)(0))  # mpc.output() only works for non-empty lists
+        c = mpc.to_bits(mpc.SecInt(0)(0))  # mpc.output() only works for nonempty lists
         self.assertEqual(c, [])
         c = mpc.run(mpc.output(mpc.to_bits(mpc.SecInt(1)(0))))
         self.assertEqual(c, [0])
         c = mpc.run(mpc.output(mpc.to_bits(mpc.SecInt(1)(1))))
         self.assertEqual(c, [1])
-        c = mpc.to_bits(secint(0), 0)  # mpc.output() only works for non-empty lists
+        c = mpc.to_bits(secint(0), 0)  # mpc.output() only works for nonempty lists
         self.assertEqual(c, [])
         c = mpc.run(mpc.output(mpc.to_bits(secint(0))))
         self.assertEqual(c, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -185,7 +185,7 @@ class Arithmetic(unittest.TestCase):
 
     def test_secfxp(self):
         secfxp = mpc.SecFxp()
-        c = mpc.to_bits(secfxp(0), 0)  # mpc.output() only works for non-empty lists
+        c = mpc.to_bits(secfxp(0), 0)  # mpc.output() only works for nonempty lists
         self.assertEqual(c, [])
         c = mpc.run(mpc.output(mpc.to_bits(secfxp(0))))
         self.assertEqual(c, [0.0] * 32)
@@ -255,7 +255,7 @@ class Arithmetic(unittest.TestCase):
             t = round(t * (1 << f))
             self.assertAlmostEqual(mpc.run(mpc.output(d / c + a)), t, delta=1)
             t = ((s[0] + s[1])**2 + 3 * s[2]) / s[2]
-            self.assertAlmostEqual(mpc.run(mpc.output(((a + b)**2 + 3 * c) / c)).signed(), t, delta=2)
+            self.assertAlmostEqual(mpc.run(mpc.output(((a + b)**2 + 3*c) / c)).signed(), t, delta=2)
             t = 1 / s[3]
             self.assertAlmostEqual((mpc.run(mpc.output(1 / d))).signed(), t, delta=1)
             t = s[2] / s[3]

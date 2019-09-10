@@ -125,7 +125,7 @@ async def logrank_test(secfxp, d1, d2, n1, n2):
         n_j = n1[j] + n2[j]
         a = d_j * n1[j]
         b = n_j * (n_j-1)
-        c = 1 / (n_j * b)  # NB: using only one fixed-point division /
+        c = 1/(n_j * b)  # NB: using only one fixed-point division /
         detot += d1[j] - a * b * c
         vtot += a * n2[j] * (n_j - d_j) * c
         await mpc.throttler(0.01)
@@ -207,22 +207,22 @@ async def main():
         df = eval('lifelines.datasets.load_' + name)()
     if name == 'lung':
         df['status'] = df['status']-1  # 1-2 -> 0-1 = censored-death
-    if name == 'stanford_heart_transplants':
+    elif name == 'stanford_heart_transplants':
         df = df[(df['transplant'] == 1) | ~df['id'].isin(set(df[df['transplant'] == 1]['id']))]
         df['time'] = round(df['stop'] - df['start'] + 0.5)
-    if name == 'kidney_transplant':
+    elif name == 'kidney_transplant':
         df['sex'] = df['black_male'] + df['white_male']
     if args.stride:
         stride = args.stride
     if args.collapse:
         if unit_of_time == 'days':
             unit_of_time = 'weeks'
-            df[times] = (df[times] + 6) // 7  # convert days to weeks
-            stride = stride // 7
+            df[times] = (df[times]+6) // 7  # convert days to weeks
+            stride //= 7
         elif unit_of_time == 'months':
             unit_of_time = 'years'
-            df[times] = (df[times] + 11) // 12  # convert motnhs to years
-            stride = stride // 12
+            df[times] = (df[times]+11) // 12  # convert months to years
+            stride //= 12
     if args.accuracy:
         accuracy = args.accuracy
     secfxp = mpc.SecFxp(2*accuracy)
