@@ -221,6 +221,8 @@ class Runtime:
                     await loop.create_connection(factory, peer.host, peer.port, ssl=context,
                                                  server_hostname=server_hostname)
                     break
+                except asyncio.CancelledError:
+                    raise
                 except Exception as exc:
                     logging.debug(exc)
                 time.sleep(0.1)
