@@ -15,7 +15,7 @@ the first one, which is from the R package KMsurv (file btrial.csv included in M
 
   0=btrial: survival in months in breast cancer study (pos. vs neg. immunohistochemical response)
   1=waltons: survival in days of fruit flies (miR-137 vs control group)
-  2=lcd: survival in micrograms Cu per liter (alluvial fan vs basin-trough zone)
+  2=aml: no recurrence in weeks of acute myelogenous leukemia (maintenance chemo vs no maintenance)
   3=lung: survival in days in lung cancer study (male vs female)
   4=dd: survival in years of political regimes (democracy vs dictatorship)
   5=stanford_heart_transplants: survival in days of heart patients (no transplant vs transplant)
@@ -120,7 +120,7 @@ async def logrank_test(secfxp, d1, d2, n1, n2):
     vtot = secfxp(0)   # sum_j (d_j n1_j / n_j) (n2_j / n_j) (n_j - d_j) / (n_j - 1)
     maxT = len(d1)
     for j in range(maxT):
-        print(f'Progress ... {round(100*j/maxT)}%', end='\r')
+        print(f'Progress ... {round(100*(j+1)/maxT)}%', end='\r')
         d_j = d1[j] + d2[j]
         n_j = n1[j] + n2[j]
         a = d_j * n1[j]
@@ -169,7 +169,7 @@ def agg_logrank_test(secfxp, d1, d2, n1, n2, agg_d1, agg_d2, stride):
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--dataset', type=int, metavar='I',
-                        help=('dataset 0=btrial(default) 1=waltons 2=lcd 3=lung 4=dd'
+                        help=('dataset 0=btrial(default) 1=waltons 2=aml 3=lung 4=dd'
                               ' 5=stanford_heart_transplants 6=kidney_transplant'))
     parser.add_argument('-s', '--stride', type=int, metavar='S',
                         help='interval length for aggregated events')
@@ -188,13 +188,13 @@ async def main():
                  ('-ve immunohistochemical response', '+ve immunohistochemical response'), (1, 2)),
                 ('waltons', 10, 32, 'days', 'T', 'E', 'group',
                  ('miR-137', 'control'), ('miR-137', 'control')),
-                ('lcd', 4, 28, '', 'T', 'E', 'group',
-                 ('alluvial_fan', 'basin_trough'), ('alluvial_fan', 'basin_trough')),
+                ('aml.csv', 16, 32, 'weeks', 'time', 'cens', 'group',
+                 ('Maintained', 'Not maintained'), (1, 2)),
                 ('lung', 73, 32, 'days', 'time', 'status', 'sex',
                  ('Male', 'Female'), (1, 2)),
                 ('dd', 3, 48, 'years', 'duration', 'observed', 'democracy',
                  ('Democracy', 'Non-democracy'), ('Democracy', 'Non-democracy')),
-                ('stanford_heart_transplants', 50, 32, 'days', 'time', 'event', 'transplant',
+                ('stanford_heart_transplants', 90, 32, 'days', 'time', 'event', 'transplant',
                  ('no transplant', 'transplant'), (0, 1)),
                 ('kidney_transplant', 180, 40, 'days', 'time', 'death', 'sex',
                  ('male', 'female'), (1, 0))]
@@ -219,6 +219,10 @@ async def main():
             unit_of_time = 'weeks'
             df[times] = (df[times]+6) // 7  # convert days to weeks
             stride //= 7
+        elif unit_of_time == 'weeks':
+            unit_of_time = 'months'
+            df[times] = (df[times]+3) // 4  # convert weeks to months
+            stride //= 4
         elif unit_of_time == 'months':
             unit_of_time = 'years'
             df[times] = (df[times]+11) // 12  # convert months to years
