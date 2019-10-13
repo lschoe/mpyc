@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
-disable=single-string-used-for-slots,
-	logging-fstring-interpolation
+logging-format-style=fstr
+disable=single-string-used-for-slots
 
 [BASIC]
 argument-naming-style=any

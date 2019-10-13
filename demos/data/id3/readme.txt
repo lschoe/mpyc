@@ -1,19 +1,9 @@
-Arguments: -d tennis -L 32 (= <default>)
+Datasets (number of samples/attributes):
 
-(0, [(2, [1, 0]), 0, (3, [1, 0])])
-
-Arguments: -d balance-scale -L 77
-
-(4, [(2, [2, 2, 2, 2, 2]), (2, [1, 2, 2, 2, 2]), (2, [1, 1, 2, 2, 2]), (3, [2, 1, 1, 1, 1]), (3, [2, 1, 1, 1, 1])])
-
-Arguments: -d car -L 95
-
-(5, [0, (3, [0, (0, [1, 1, 0, 0]), (4, [0, 1, 1])]), (3, [0, (0, [3, 1, 1, 1]), (0, [3, 1, 1, 0])])])
-
-Arguments: -d SPECT -L 42
-
-(13, [(1, [(7, [(11, [(17, [(16, [(22, [(20, [(21, [(14, [(9, [(8, [(18, [(15, [(12, [(3, [(10, [(5, [(19, [(6, [(4, [(2, [0, 1]), 0]), 0]), 1]), 1]), 0]), 1]), 1]), 1]), 1]), 0]), 1]), 0]), 1]), 1]), 1]), 1]), 1]), 1]), 1]), (4, [(6, [(11, [(20, [(10, [0, (22, [1, 0])]), 1]), 0]), (7, [1, 1])]), 1])]), (22, [(10, [(8, [1, (5, [(21, [1, 1]), 1])]), (5, [1, 1])]), (8, [(14, [1, 1]), 1])])])
-
-Arguments: -d KRKPA7 -L 69
-
-(20, [(32, [(9, [(31, [(34, [(5, [(14, [1, 0, 0]), 0]), (14, [(22, [(11, [0, 0]), 0]), 0, 0])]), 1]), 1]), (17, [(6, [1, 1]), (33, [1, 1])])]), 0])
+  tennis (14/4): classic textbook example
+  balance-scale (625/4): balance scale weight & distance database
+  car (1728/6): car evaluation database
+  SPECT (267/22): Single Proton Emission Computed Tomography train+test heart images
+  KRKPA7 (3196/36): King+Rook versus King+Pawn-on-A7 chess endgame
+  tic-tac-toe (958/9): Tic-Tac-Toe endgame
+  house-votes-84 (435/16): 1984 US congressional voting records
