@@ -1,3 +1,5 @@
+python helloworld.py %*
+python oneliners.py %*
 python ot.py %*
 python parallelsort.py %*
 python sort.py %*
