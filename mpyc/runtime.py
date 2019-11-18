@@ -23,6 +23,7 @@ from mpyc import thresha
 from mpyc import sectypes
 from mpyc import asyncoro
 import mpyc.random
+import mpyc.statistics
 
 Future = asyncio.Future
 Share = sectypes.Share
@@ -1388,7 +1389,10 @@ class Runtime:
         return c * v
 
     def unit_vector(self, a, n):
-        """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n."""
+        """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n.
+
+        NB: If a = n, unit vector [1] + [0]*(n-1) is returned. See mpyc.statistics.
+        """
         b = n - 1
         k = b.bit_length()
         f = type(a).field.frac_length
@@ -1589,6 +1593,7 @@ def setup():
     sectypes.runtime = rt
     asyncoro.runtime = rt
     mpyc.random.runtime = rt
+    mpyc.statistics.runtime = rt
     return rt
 
 
