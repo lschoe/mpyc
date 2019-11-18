@@ -9,6 +9,7 @@ many of which are available through Python's mechanism for operator overloading.
 import os
 import sys
 import time
+import datetime
 import logging
 import math
 import secrets
@@ -99,23 +100,20 @@ class Runtime:
 
     def _receive_shares(self, peer_pid):
         pc = self._program_counter
-        if pc in self.parties[peer_pid].protocol.buffers:
-            # Data already received from peer.
-            data = self.parties[peer_pid].protocol.buffers.pop(pc)
-        else:
+        buffers = self.parties[peer_pid].protocol.buffers
+        data = buffers.pop(pc, None)
+        if data is None:
             # Data not yet received from peer.
-            data = self.parties[peer_pid].protocol.buffers[pc] = Future(loop=self._loop)
+            data = buffers[pc] = Future(loop=self._loop)
         return data
 
     def _exchange_shares(self, in_shares):
         out_shares = [None] * len(in_shares)
         for peer_pid, data in enumerate(in_shares):
-            if peer_pid == self.pid:
-                d = data
-            else:
+            if peer_pid != self.pid:
                 self._send_shares(peer_pid, data)
-                d = self._receive_shares(peer_pid)
-            out_shares[peer_pid] = d
+                data = self._receive_shares(peer_pid)
+            out_shares[peer_pid] = data
         return out_shares
 
     def gather(self, *obj):
@@ -182,13 +180,13 @@ class Runtime:
             return
 
         # m > 1
+        loop = self._loop
         for peer in self.parties:
-            peer.protocol = Future(loop=self._loop) if peer.pid == self.pid else None
+            peer.protocol = Future(loop=loop) if peer.pid == self.pid else None
         if self.options.ssl:
             crtfile = os.path.join('.config', f'party_{self.pid}.crt')
             keyfile = os.path.join('.config', f'party_{self.pid}.key')
             cafile = os.path.join('.config', 'mpyc_ca.crt')
-        loop = asyncio.get_event_loop()
 
         # Listen for all parties < self.pid.
         if self.pid:
@@ -252,8 +250,7 @@ class Runtime:
                     peer.protocol.close_connection()
 
         elapsed = time.time() - self.start_time
-        from datetime import timedelta
-        logging.info(f'Stop MPyC runtime -- elapsed time: {timedelta(seconds=elapsed)}')
+        logging.info(f'Stop MPyC runtime -- elapsed time: {datetime.timedelta(seconds=elapsed)}')
 
     async def __aenter__(self):
         """Start MPyC runtime when entering async with context."""
@@ -412,8 +409,8 @@ class Runtime:
         in_shares = thresha.random_split(x, t, m)
         in_shares = [field.to_bytes(elts) for elts in in_shares]
         # Recombine the first 2t+1 output_shares.
-        out_shares = await self.gather(self._exchange_shares(in_shares)[:2 * t + 1])
-        points = [(j + 1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))]
+        out_shares = await self.gather(self._exchange_shares(in_shares)[:2*t+1])
+        points = [(j+1, field.from_bytes(out_shares[j])) for j in range(len(out_shares))]
         y = thresha.recombine(field, points)
 
         if issubclass(sftype, Share):
@@ -470,7 +467,7 @@ class Runtime:
         d = ttype.field.frac_length - f
         if d < 0:
             x = await self.trunc(x, -d, stype.bit_length)  # TODO: take minimum with ttype or so
-        offset = 1 << l - 1
+        offset = 1 << l-1
         for i in range(len(x)):
             x[i] = x[i].value + offset + r[i]
         x = await self.output(x)
@@ -513,7 +510,7 @@ class Runtime:
         r_modf = [None] * n
         for j in range(n):
             s = 0
-            for i in range(f - 1, -1, -1):
+            for i in range(f-1, -1, -1):
                 s <<= 1
                 s += r_bits[f*j + i].value
             r_modf[j] = Zp(s)
@@ -544,7 +541,7 @@ class Runtime:
             while True:
                 r, s = self._randoms(field, 2)
                 z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
-                if await self.output(r * s + z[0], threshold=2 * t):
+                if await self.output(r * s + z[0], threshold=2*t):
                     break
         else:
             r = self._random(field)  # NB: failure r=0 with probability 1/p
@@ -554,7 +551,7 @@ class Runtime:
             b = a * r + z[0]
         else:
             b = a * r
-        c = await self.output(b, threshold=2 * t)
+        c = await self.output(b, threshold=2*t)
         return c == 0
 
     @mpc_coro_no_pc
@@ -775,18 +772,18 @@ class Runtime:
 
         if not EQ:  # a la Toft
             s_sign = (await self.random_bits(Zp, 1, signed=True))[0].value
-            e = [None] * (l + 1)
+            e = [None] * (l+1)
             sumXors = 0
-            for i in range(l - 1, -1, -1):
+            for i in range(l-1, -1, -1):
                 c_i = (c >> i) & 1
                 r_i = r_bits[i].value
-                e[i] = Zp(s_sign + r_i - c_i + 3 * sumXors)
+                e[i] = Zp(s_sign + r_i - c_i + 3*sumXors)
                 sumXors += 1 - r_i if c_i else r_i
-            e[l] = Zp(s_sign - 1 + 3 * sumXors)
+            e[l] = Zp(s_sign - 1 + 3*sumXors)
             e = await self.prod(e)
             g = await self.is_zero_public(stype(e))
             UF = 1 - s_sign if g else s_sign + 1
-            z = (a_rmodl - (c + (UF << l - 1))) / (1<<l)
+            z = (a_rmodl - (c + (UF << l-1))) / (1<<l)
 
         if not GE:
             h = self.prod([r_bits[i] if (c >> i) & 1 else 1 - r_bits[i] for i in range(l)])
@@ -794,7 +791,7 @@ class Runtime:
             if EQ:
                 z = h
             else:
-                z = (1 - h) * (2 * z - 1)
+                z = (1 - h) * (2*z - 1)
                 z = await self._reshare(z)
 
         z <<= Zp.frac_length
@@ -863,7 +860,7 @@ class Runtime:
         # TODO: optimize for integral a of type secfxp
         if b == 2:
             r = self.lsb(a)
-        elif not b & (b - 1):
+        elif not b & (b-1):
             r = self.from_bits(self.to_bits(a, b.bit_length() - 1))
         else:
             r = self._mod(a, b)
@@ -1241,7 +1238,7 @@ class Runtime:
         p = field.characteristic
         if not signed:
             modulus = field.modulus
-            q = (p + 1) >> 1  # q = 1/2 mod p
+            q = (p+1) >> 1  # q = 1/2 mod p
         prfs = self.prfs(field.order)
         t = self.threshold
         h = n
@@ -1253,7 +1250,7 @@ class Runtime:
                 z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), h)
                 for i in range(h):
                     r2s[i] += z[i]
-            r2s = await self.output(r2s, threshold=2 * t)
+            r2s = await self.output(r2s, threshold=2*t)
             for r, r2 in zip(rs, r2s):
                 if r2.value != 0:
                     h -= 1
@@ -1279,17 +1276,17 @@ class Runtime:
                 h = i + (n // 2)
                 f(i, h, high=high)
                 f(h, j, high=True)
-                c[h:j] = self.vector_add(c[h:j], self.scalar_mul(c[h - 1], d[h:j]))
+                c[h:j] = self.vector_add(c[h:j], self.scalar_mul(c[h-1], d[h:j]))
                 if high:
-                    d[h:j] = self.scalar_mul(d[h - 1], d[h:j])
+                    d[h:j] = self.scalar_mul(d[h-1], d[h:j])
         n = len(x)
         c = [None] * n
         if n >= 1:
             d = [None] * n
             f(0, n)
         # c = prefix carries for addition of x and y
-        for i in range(n - 1, -1, -1):
-            c[i] = x[i] + y[i] - c[i] * 2 + (c[i - 1] if i > 0 else 0)
+        for i in range(n-1, -1, -1):
+            c[i] = x[i] + y[i] - c[i] * 2 + (c[i-1] if i > 0 else 0)
         return c
 
     @mpc_coro
@@ -1373,19 +1370,19 @@ class Runtime:
 
             i0, nz0 = __norm(x[:n//2])  # low bits
             i1, nz1 = __norm(x[n//2:])  # high bits
-            i0 *= (1 << ((n + 1) // 2))
+            i0 *= (1 << ((n+1) // 2))
             return self.if_else(nz1, [i1, _1], [i0, nz0])  # self.or_(nz0, nz1)
 
         l = type(a).bit_length
         f = type(a).field.frac_length
-        return s * __norm(x)[0] * (2 ** (f - (l - 1)))  # NB: f <= l
+        return s * __norm(x)[0] * (2**(f - (l-1)))  # NB: f <= l
 
     def _rec(self, a):  # enhance performance by reducing no. of truncs
         f = type(a).field.frac_length
         v = self._norm(a)
         b = a * v  # 1/2 <= b <= 1
-        theta = int(math.ceil(math.log((2 * f + 1) / 3.5, 2)))
-        c = 2.9142 - b * 2
+        theta = int(math.ceil(math.log((2*f+1) / 3.5, 2)))
+        c = 2.9142 - b*2
         for _ in range(theta):
             c *= 2 - c * b
         return c * v
@@ -1400,7 +1397,7 @@ class Runtime:
 
         x = self.to_bits(a, k + f)[f:]
         u = []
-        for i in range(k - 1, -1, -1):
+        for i in range(k-1, -1, -1):
             v = self.scalar_mul(x[i], u)  # v = x[i] * u
             w = self.vector_sub(u, v)  # w = (1-x[i]) * u
             u = [x[i] - self.sum(v)]
@@ -1568,7 +1565,7 @@ def setup():
             # convert sys._xoptions into command line arguments
             xopts = ['-X' + a + ('' if c is True else '=' + c) for a, c in sys._xoptions.items()]
             prog, args = argv[0], argv[1:]
-            for i in range(m - 1, 0, -1):
+            for i in range(m-1, 0, -1):
                 cmd_line = [sys.executable] + flags + xopts + [prog, '-I', str(i)] + args
                 if options.output_windows and platform.platform().startswith('Windows'):
                     subprocess.Popen(['start'] + cmd_line, shell=True)
@@ -1585,8 +1582,8 @@ def setup():
         parties = [Party(i, 'localhost', base_port + i) for i in range(m)]
 
     if options.threshold is None:
-        options.threshold = (m - 1) // 2
-    assert 2 * options.threshold < m, f'threshold {options.threshold} too large for {m} parties'
+        options.threshold = (m-1) // 2
+    assert 2*options.threshold < m, f'threshold {options.threshold} too large for {m} parties'
 
     rt = Runtime(pid, parties, options)
     sectypes.runtime = rt

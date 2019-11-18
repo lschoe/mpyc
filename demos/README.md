@@ -111,6 +111,8 @@ optional arguments:
 
 [SecureSortingNetsExplained](SecureSortingNetsExplained.ipynb) shows how to convert some existing Python programs to MPyC programs.
 
+[KaplanMeierSurvivalExplained]{KaplanMeierSurvivalExplained.ipynb} presents privacy-preserving Kaplan-Meier survival analysis, featuring aggregate Kaplan-Meier curves and secure logrank tests.
+
 [4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, cnnmnist.py.
  
 [OneWayHashChainsExplained](OneWayHashChainsExplained.ipynb) shows a more advanced MPyC program.

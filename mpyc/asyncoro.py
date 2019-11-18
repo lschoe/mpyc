@@ -55,9 +55,8 @@ class SharesExchanger(Protocol):
          4. payload (byte string of length payload_size).
         """
         pc_size, payload_size = len(pc), len(payload)
-        fmt = f'!HI{pc_size}I{payload_size}s'
-        t = (pc_size, payload_size) + pc + (payload,)
-        self.transport.write(struct.pack(fmt, *t))
+        fmt = f'<HI{pc_size}I{payload_size}s'
+        self.transport.write(struct.pack(fmt, pc_size, payload_size, *pc, payload))
 
     def data_received(self, data):
         """Called when data is received from the peer.
@@ -93,16 +92,15 @@ class SharesExchanger(Protocol):
             if len(self.bytes) < 6:
                 return
 
-            pc_size, payload_size = struct.unpack('!HI', self.bytes[:6])
+            pc_size, payload_size = struct.unpack('<HI', self.bytes[:6])
             len_packet = 6 + pc_size * 4 + payload_size
             if len(self.bytes) < len_packet:
                 return
 
-            fmt = f'!{pc_size}I{payload_size}s'
-            unpacked = struct.unpack(fmt, self.bytes[6:len_packet])
+            fmt = f'<{pc_size}I{payload_size}s'
+            *pc, payload = struct.unpack_from(fmt, self.bytes, 6)
             del self.bytes[:len_packet]
-            pc = unpacked[:pc_size]
-            payload = unpacked[-1]
+            pc = tuple(pc)
             if pc in self.buffers:
                 self.buffers.pop(pc).set_result(payload)
             else:

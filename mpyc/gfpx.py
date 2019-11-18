@@ -963,7 +963,7 @@ class BinaryPolynomial(Polynomial):
         for _ in range(BinaryPolynomial._deg(a) // 2):
             b = BinaryPolynomial._mul(b, b)
             b = BinaryPolynomial._mod(b, a)
-            if BinaryPolynomial._gcd(b ^ 2, a) != 1:
+            if BinaryPolynomial._gcd(b^2, a) != 1:
                 return False
 
         return True
@@ -973,7 +973,7 @@ class BinaryPolynomial(Polynomial):
         if a <= 2:
             a += 1
         else:
-            a += 1 + (a % 2)
+            a += 1 + a%2
             while not BinaryPolynomial._is_irreducible(a):
                 a += 2
         return a

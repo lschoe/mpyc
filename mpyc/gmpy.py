@@ -31,7 +31,7 @@ def factor_prime_power(x):  # TODO: move this to a separate math/number theory m
     # find prime factors of d
     p, d = x, 1
     while is_square(p):
-        p, d = isqrt(p), 2 * d
+        p, d = isqrt(p), 2*d
     e = 3
     while k * e <= p.bit_length():
         w, b = iroot(p, e)
@@ -56,7 +56,7 @@ except ImportError:
         definitely composite, performing up to n Miller-Rabin
         primality tests.
         """
-        if x <= 2 or x % 2 == 0:
+        if x <= 2 or x%2 == 0:
             return x == 2
 
         # odd x >= 3
@@ -64,19 +64,19 @@ except ImportError:
             if x % p == 0:
                 return x == p
 
-        r, s = 0, x - 1
-        while s % 2 == 0:
+        r, s = 0, x-1
+        while s%2 == 0:
             r += 1
             s //= 2
         for _ in range(n):
-            a = random.randrange(1, x - 1)
+            a = random.randrange(1, x-1)
             b = pow(a, s, x)
             if b == 1:
                 continue
             for _ in range(r):
-                if b == x - 1:
+                if b == x-1:
                     break
-                elif b == 1:
+                if b == 1:
                     return False
 
                 b = (b * b) % x
@@ -90,7 +90,7 @@ except ImportError:
         if x <= 1:
             x = 2
         else:
-            x += 1 + (x % 2)
+            x += 1 + x%2
             while not is_prime(x):
                 x += 2
         return x
@@ -105,9 +105,9 @@ except ImportError:
         Raises ZeroDivisionError if no inverse exists.
         """
         if m == 2:
-            y = x % 2
+            y = x%2
         else:
-            y = pow(x, m - 2, m)
+            y = pow(x, m-2, m)
         if y == 0:
             raise ZeroDivisionError
 
@@ -115,8 +115,8 @@ except ImportError:
 
     def legendre(x, y):
         """Return the Legendre symbol (x|y), assuming y is an odd prime."""
-        z = pow(x, (y - 1) // 2, y)
-        if z > 1:  # z == y - 1
+        z = pow(x, (y-1) // 2, y)
+        if z > 1:  # z == y-1
             z = -1
         return z
 
@@ -132,7 +132,7 @@ except ImportError:
 
         k = (x.bit_length() - 1) // 2
         y = 1 << k
-        for i in range(k - 1, -1, -1):
+        for i in range(k-1, -1, -1):
             z = y | (1 << i)
             if z * z <= x:
                 y = z
@@ -145,7 +145,7 @@ except ImportError:
 
         k = (x.bit_length() - 1) // n
         y = 1 << k
-        for i in range(k - 1, -1, -1):
+        for i in range(k-1, -1, -1):
             z = y | (1 << i)
             if z**n <= x:
                 y = z
