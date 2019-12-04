@@ -95,6 +95,8 @@ def read_data(infofile):
                 coef_mul[j] = 2 / (M - m)
                 d += 1
             elif feature_type == 'categorical':
+                while not line[-1]:  # drop trailing empty columns
+                    line.pop()
                 categories[j] = line[1:]
                 d += len(categories[j])  # one hot encoding
             elif feature_type == 'exclude':
