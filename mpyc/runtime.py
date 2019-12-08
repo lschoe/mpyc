@@ -46,6 +46,7 @@ class Runtime:
 
     version = mpyc.__version__
     random = mpyc.random
+    statistics = mpyc.statistics
 
     def __init__(self, pid, parties, options):
         """Initialize runtime."""

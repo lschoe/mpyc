@@ -4,6 +4,37 @@ from mpyc import gmpy
 
 class Arithmetic(unittest.TestCase):
 
+    def test_basic(self):
+        self.assertFalse(gmpy.is_prime(1))
+        self.assertTrue(gmpy.is_prime(2))
+        self.assertTrue(gmpy.is_prime(101))
+        self.assertFalse(gmpy.is_prime(561))
+        self.assertTrue(gmpy.is_prime(2**16+1))
+        self.assertFalse(gmpy.is_prime(41041))
+
+        self.assertEqual(gmpy.next_prime(1), 2)
+        self.assertEqual(gmpy.next_prime(2), 3)
+        self.assertEqual(gmpy.next_prime(256), 257)
+
+        self.assertEqual(gmpy.powmod(3, 256, 257), 1)
+
+        self.assertEqual(gmpy.invert(3, 257), 86)
+
+        self.assertEqual(gmpy.legendre(0, 101), 0)
+        self.assertEqual(gmpy.legendre(42, 101), -1)
+        self.assertEqual(gmpy.legendre(54, 101), 1)
+
+        self.assertTrue(gmpy.is_square(625))
+        self.assertFalse(gmpy.is_square(652))
+
+        self.assertEqual(gmpy.isqrt(0), 0)
+        self.assertEqual(gmpy.isqrt(1225), 35)
+
+        self.assertTrue(gmpy.iroot(0, 10)[1])
+        self.assertFalse(gmpy.iroot(1226, 2)[1])
+        self.assertEqual(gmpy.iroot(1226, 2)[0], 35)
+        self.assertEqual(gmpy.iroot(3**10 + 42, 10)[0], 3)
+
     def test_fpp(self):
         fpp = gmpy.factor_prime_power
         for i in range(1, 10):

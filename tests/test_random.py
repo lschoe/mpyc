@@ -48,7 +48,7 @@ class Arithmetic(unittest.TestCase):
         self.assertSetEqual(set(range(8)), set(map(int, x)))
         x = mpc.run(mpc.output(random_permutation(secint, 8)))
         self.assertSetEqual(set(range(8)), set(map(int, x)))
-        x = mpc.run(mpc.output(random_derangement(secint, range(2))))
+        x = mpc.run(mpc.output(random_derangement(secint, 2)))
         self.assertListEqual([1, 0], list(map(int, x)))
         x = mpc.run(mpc.output(random_derangement(secint, range(1, 9))))
         self.assertSetEqual(set(range(1, 9)), set(map(int, x)))
@@ -89,7 +89,7 @@ class Arithmetic(unittest.TestCase):
 
         x = mpc.run(mpc.output(random_permutation(secfxp, range(1, 9))))
         self.assertSetEqual(set(range(1, 9)), set(map(int, x)))
-        x = mpc.run(mpc.output(random_derangement(secfxp, range(2))))
+        x = mpc.run(mpc.output(random_derangement(secfxp, [0.0, 1.0])))
         self.assertListEqual([1, 0], list(map(int, x)))
 
         a = mpc.run(mpc.output(choice(secfxp, [0.8, 0.9, 1.0, 1.1, 1.2])))
@@ -109,10 +109,10 @@ class Arithmetic(unittest.TestCase):
 
     def test_secfld(self):
         secfld = mpc.SecFld(2, char=2)
-        a = getrandbits(secfld, 1)
+        a = getrandbits(secfld, 1, True)
         a = mpc.run(mpc.output(a))
-        self.assertGreaterEqual(int(a), 0)
-        self.assertLessEqual(int(a), 1)
+        self.assertGreaterEqual(int(a[0]), 0)
+        self.assertLessEqual(int(a[0]), 1)
 
         secfld = mpc.SecFld(3)
         a = getrandbits(secfld, 1)

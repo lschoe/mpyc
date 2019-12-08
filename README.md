@@ -1,6 +1,6 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lschoe/mpyc/master)
-[![codecov](https://codecov.io/gh/lschoe/mpyc/branch/master/graph/badge.svg)](https://codecov.io/gh/lschoe/mpyc)
 [![Travis CI](https://travis-ci.com/lschoe/mpyc.svg)](https://travis-ci.com/lschoe/mpyc)
+[![codecov](https://codecov.io/gh/lschoe/mpyc/branch/master/graph/badge.svg)](https://codecov.io/gh/lschoe/mpyc)
 [![PyPI](https://img.shields.io/pypi/v/mpyc.svg)](https://pypi.org/project/mpyc/)
 
 # MPyC <img align="center" width=40 src="https://github.com/lschoe/mpyc/blob/master/images/MPyC_Logo.png"> Secure Multiparty Computation in Python
@@ -28,7 +28,9 @@ See `demos` for usage examples.
 1. Python 3.6+ (Python 3.5 or lower is not sufficient).
 
 2. Installing package `gmpy2` is optional, but will considerably enhance the performance of `mpyc`.
-On Linux, `pip install gmpy2` should do the job, but on Windows, this may fail with compiler errors.
+If you use the [conda](https://docs.conda.io/) package and environment manager, `conda install gmpy2` should do the job.
+Otherwise, `pip install gmpy2` can be used on Linux (first running `apt install libmpc-dev` may be necessary too),
+but on Windows, this may fail with compiler errors.
 Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christoph Gohlke's excellent
 [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/) webpage.
 Use, for example, `pip install gmpy2-2.0.8-cp36-cp36m-win_amd64.whl` to finish installation.

@@ -221,13 +221,10 @@ async def random_derangement(sectype, x):
         x = range(x)
     x = list(x)
     if sectype.field.frac_length:
-        # all elts assumed of same type
-        x_integral = True
-        if isinstance(x[0], sectype):
-            x_integral = x[0].integral
-        elif isinstance(x[0], float):
-            x_integral = x[0].is_integer()
-        await runtime.returnType((sectype, x_integral), len(x))
+        # all elts assumed of same type as x[0]
+        if not isinstance(x[0], sectype):
+            x = [sectype(a) for a in x]  # NB: original x is not modified
+        await runtime.returnType((sectype, x[0].integral), len(x))
     else:
         await runtime.returnType(sectype, len(x))
     y = x[:]  # NB: x is assumed to be free of duplicates
