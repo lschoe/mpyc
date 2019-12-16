@@ -69,6 +69,7 @@ import argparse
 from functools import reduce
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.stats
 import lifelines.datasets
 import lifelines.statistics
 import lifelines.plotting
@@ -130,7 +131,7 @@ async def logrank_test(secfxp, d1, d2, n1, n2):
         vtot += a * n2[j] * (n_j - d_j) * c
         await mpc.throttler(0.01)
     chi = float(await mpc.output(detot**2 / vtot))
-    p = lifelines.statistics.chisq_test(chi, 1)
+    p = scipy.stats.chi2.sf(chi, 1)
     return lifelines.statistics.StatisticalResult(p_value=p, test_statistic=chi)
 
 
