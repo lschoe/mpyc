@@ -753,13 +753,13 @@ class Runtime:
         return e
 
     @mpc_coro
-    async def sgn(self, a, EQ=False, GE=False):
+    async def sgn(self, a, EQ=False, GE=False, l=None):
         """Secure sign(um) of a, -1 if a < 0 else 0 if a == 0 else 1."""
         stype = type(a)
         await returnType((stype, True))
         Zp = stype.field
 
-        l = stype.bit_length
+        l = l or stype.bit_length
         r_bits = await self.random_bits(Zp, l)
         r_modl = 0
         for r_i in reversed(r_bits):
