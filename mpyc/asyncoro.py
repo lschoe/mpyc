@@ -107,7 +107,15 @@ class SharesExchanger(Protocol):
                 self.buffers[pc] = payload
 
     def connection_lost(self, exc):
-        pass
+        """Called when the connection with the peer is lost or closed.
+
+        If the connection is closed normally (during shutdown) then exc is None.
+        Otherwise, if the connection is lost unexpectedly, exc may indicate the
+        cause (but exc is None is still possible).
+        """
+        if exc:
+            raise exc
+        # TODO: also raise an exception if exc is None and no shutdown in progress
 
     def close_connection(self):
         """Close connection with the peer."""

@@ -245,7 +245,7 @@ class Runtime:
             await asyncio.sleep(0)
         m = len(self.parties)
         if m > 1:
-            await self.output(self.input(sectypes.SecFld(257)(self.pid)), threshold=m-1)
+            await self.gather(self.input(sectypes.SecFld(257)(self.pid)))
             # Close connections to all parties.
             for peer in self.parties:
                 if peer.pid != self.pid:
@@ -261,6 +261,13 @@ class Runtime:
 
     async def __aexit__(self, exc_type, exc, tb):
         """Shutdown MPyC runtime when exiting async with context."""
+        if exc:
+            # Limited shutdown: only close connections to all parties.
+            for peer in self.parties:
+                if peer.pid != self.pid:
+                    peer.protocol.close_connection()
+            return
+
         await self.shutdown()
 
     SecFld = staticmethod(sectypes.SecFld)
