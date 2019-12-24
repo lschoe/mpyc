@@ -2,7 +2,8 @@ import unittest
 import random
 import statistics
 from mpyc.runtime import mpc
-from mpyc.statistics import mean, variance, stdev, pvariance, pstdev, mode, median
+from mpyc.statistics import (mean, variance, stdev, pvariance, pstdev,
+                             mode, median, median_low, median_high)
 
 
 class Arithmetic(unittest.TestCase):
@@ -10,21 +11,46 @@ class Arithmetic(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         mpc.logging(False)
-        mpc.run(mpc.start())
-
-    @classmethod
-    def tearDownClass(cls):
-        mpc.run(mpc.shutdown())
 
     def test_plain(self):
-        x = [1.23, 2.34, 5.67, 5.67]
-        self.assertEqual(mean(x), statistics.mean(x))
-        self.assertEqual(variance(x), statistics.variance(x))
-        self.assertEqual(stdev(x), statistics.stdev(x))
-        self.assertEqual(pvariance(x), statistics.pvariance(x))
-        self.assertEqual(pstdev(x), statistics.pstdev(x))
-        self.assertEqual(mode(x), statistics.mode(x))
-        self.assertEqual(median(x), statistics.median(x))
+        f = lambda: (i * j for i in range(-1, 2, 1) for j in range(2, -2, -1))
+        self.assertEqual(mean(f()), statistics.mean(f()))
+        self.assertEqual(variance(f()), statistics.variance(f()))
+        self.assertEqual(stdev(f()), statistics.stdev(f()))
+        self.assertEqual(pvariance(f()), statistics.pvariance(f()))
+        self.assertEqual(pstdev(f()), statistics.pstdev(f()))
+        self.assertEqual(mode(f()), statistics.mode(f()))
+        self.assertEqual(median(f()), statistics.median(f()))
+
+    def test_statistics_error(self):
+        with self.assertRaises(statistics.StatisticsError):
+            mean([])
+        with self.assertRaises(statistics.StatisticsError):
+            variance([0])
+        with self.assertRaises(statistics.StatisticsError):
+            stdev([0])
+        with self.assertRaises(statistics.StatisticsError):
+            pvariance([])
+        with self.assertRaises(statistics.StatisticsError):
+            pstdev([])
+        with self.assertRaises(statistics.StatisticsError):
+            mode([])
+        with self.assertRaises(statistics.StatisticsError):
+            median([])
+
+    def test_secfld(self):
+        secfld = mpc.SecFld()
+        x = [secfld(0), secfld(0)]
+        with self.assertRaises(TypeError):
+            mean(x)
+        with self.assertRaises(TypeError):
+            variance(x)
+        with self.assertRaises(TypeError):
+            stdev(x)
+        with self.assertRaises(TypeError):
+            mode(x)
+        with self.assertRaises(TypeError):
+            median(x)
 
     def test_secint(self):
         secint = mpc.SecInt()
@@ -33,11 +59,14 @@ class Arithmetic(unittest.TestCase):
         x = list(map(secint, y))
         self.assertEqual(mpc.run(mpc.output(mean(x))), round(statistics.mean(y)))
         self.assertEqual(mpc.run(mpc.output(variance(x))), round(statistics.variance(y)))
+        self.assertEqual(mpc.run(mpc.output(variance(x, mean(x)))), round(statistics.variance(y)))
         self.assertEqual(mpc.run(mpc.output(stdev(x))), round(statistics.stdev(y)))
         self.assertEqual(mpc.run(mpc.output(pvariance(x))), round(statistics.pvariance(y)))
         self.assertEqual(mpc.run(mpc.output(pstdev(x))), round(statistics.pstdev(y)))
         self.assertEqual(mpc.run(mpc.output(mode(x))), round(statistics.mode(y)))
         self.assertEqual(mpc.run(mpc.output(median(x))), round(statistics.median(y)))
+        self.assertEqual(mpc.run(mpc.output(median_low(x))), round(statistics.median_low(y)))
+        self.assertEqual(mpc.run(mpc.output(median_high(x))), round(statistics.median_high(y)))
 
     def test_secfxp(self):
         secfxp = mpc.SecFxp()
@@ -54,7 +83,7 @@ class Arithmetic(unittest.TestCase):
         x = list(map(secfxp, x))
         self.assertAlmostEqual(mpc.run(mpc.output(mean(x))).signed(), (2**-4) * 10/3, delta=1)
 
-        y = [2.75, 1.75, 1.25, -0.25, 0.5, 1.25, -3.5] * 5
+        y = [1.75, 1.25, -0.25, 0.5, 1.25, -3.5] * 5
         random.shuffle(y)
         x = list(map(secfxp, y))
         self.assertAlmostEqual(float(mpc.run(mpc.output(mean(x)))), statistics.mean(y), 4)
@@ -64,7 +93,7 @@ class Arithmetic(unittest.TestCase):
         self.assertAlmostEqual(float(mpc.run(mpc.output(pstdev(x)))), statistics.pstdev(y), 3)
         self.assertAlmostEqual(float(mpc.run(mpc.output(median(x)))), statistics.median(y), 4)
 
-        x = list(map(secfxp, [1.0] * 10))
+        x = list(map(secfxp, [1.0]*10))
         self.assertAlmostEqual(mpc.run(mpc.output(mode(x))).signed(), 1)
         k = mpc.options.sec_param
         mpc.options.sec_param = 1  # force no privacy case

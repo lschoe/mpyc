@@ -24,9 +24,9 @@ def secret_index(a, n):
             x = [a]
         else:
             a2, b = divmod(a, 2)
-            z = si1(a2, (n + 1) // 2)
+            z = si1(a2, (n+1)//2)
             y = mpc.scalar_mul(b, z)
-            x = [b - sum(y)] + [z[i//2] - y[i//2] if i % 2 == 0 else y[i//2] for i in range(n - 2)]
+            x = [b - sum(y)] + [z[i//2] - y[i//2] if i%2 == 0 else y[i//2] for i in range(n-2)]
         return x
     x = si1(a, n)
     return [type(a)(1) - sum(x)] + x

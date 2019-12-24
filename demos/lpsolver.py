@@ -41,14 +41,14 @@ def pow_list(a, x, n):
     if n == 1:
         return [a]
     even = pow_list(a, x**2, (n+1)//2)
-    if n % 2 == 1:
+    if n%2 == 1:
         d = even.pop()
     odd = mpc.scalar_mul(x, even)
     xs = [None] * n
     for i in range(n//2):
         xs[2*i] = even[i]
         xs[2*i+1] = odd[i]
-    if n % 2 == 1:
+    if n%2 == 1:
         xs[-1] = d
     return xs
 
@@ -59,16 +59,16 @@ def argmin(x, arg_le):
         return ([1], x[0])
     if n == 2:
         b, m = arg_le(x[0], x[1])
-        return ([1 - b, b], m)
+        return ([1-b, b], m)
     b2 = [None] * (n//2)
     m2 = [None] * ((n+1)//2)
     for i in range(n//2):
         b2[i], m2[i] = arg_le(x[2*i], x[2*i+1])
-    if n % 2 == 1:
+    if n%2 == 1:
         m2[-1] = x[-1]
     a2, m = argmin(m2, arg_le)
     a = [None] * n
-    if n % 2 == 1:
+    if n%2 == 1:
         a[-1] = a2.pop()
     b2 = mpc.schur_prod(b2, a2)
     for i in range(n//2):
@@ -104,7 +104,7 @@ async def main():
 
     if not args.options:
         certificate_filename = f'c{mpc.pid}.cert'
-        logging.info('Setting certificate file to default = %s', certificate_filename)
+        logging.info(f'Setting certificate file to default = {certificate_filename}')
     else:
         certificate_filename = args.options[0]
     T = load_tableau(args.data)
@@ -112,36 +112,36 @@ async def main():
     m = len(T) - 1
     n = len(T[0]) - 1
     secint = mpc.SecInt(l, n=m + n)
-    for i in range(m + 1):
-        for j in range(n + 1):
+    for i in range(m+1):
+        for j in range(n+1):
             T[i][j] = secint(T[i][j])
 
     Zp = secint.field
     N = Zp.nth
     w = Zp.root
     w_powers = [Zp(1)]
-    for _ in range(N - 1):
+    for _ in range(N-1):
         w_powers.append(w_powers[-1] * w)
     assert w_powers[-1] * w == 1
 
-    basis = [secint(w_powers[-(i+n)]) for i in range(m)]
+    basis = [secint(w_powers[-(i + n)]) for i in range(m)]
     cobasis = [secint(w_powers[-j]) for j in range(n)]
     prev_pivot = secint(1)
 
     await mpc.start()
 
     iteration = 0
-    logging.info('%d Termination?...', iteration)
+    logging.info(f'{iteration} Termination?...')
     p_col_index, minimum = argmin_int(T[-1][:-1])
     while await mpc.output(minimum < 0):
         iteration += 1
 
-        logging.info('%d Determining pivot...', iteration)
+        logging.info(f'{iteration} Determining pivot...')
         p_col = mpc.matrix_prod([p_col_index], T, True)[0]
         constraints = [(T[i][-1] + (p_col[i] <= 0), p_col[i]) for i in range(m)]
         p_row_index, (_, pivot) = argmin_rat(constraints)
 
-        logging.info('%d Updating tableau...', iteration)
+        logging.info(f'{iteration} Updating tableau...')
         #  T[i,j] = T[i,j]*p/p' - (C[i]/p' - p_row_index[i])*(R[j] + p * p_col_index[j])
         p_row = mpc.matrix_prod([p_row_index], T)[0]
         delta_row = mpc.scalar_mul(prev_pivot, p_col_index)
@@ -160,13 +160,13 @@ async def main():
         p_col_index = mpc.scalar_mul(delta, p_col_index)
         cobasis = mpc.vector_add(cobasis, p_col_index)
 
-        logging.info('%d Termination?...', iteration)
+        logging.info(f'{iteration} Termination?...')
         p_col_index, minimum = argmin_int(T[-1][:-1])
 
     logging.info('Termination...')
     mx = await mpc.output(T[-1][-1])
     cd = await mpc.output(prev_pivot)
-    print(' max(f) = %d / %d = %f' % (mx.value, cd.value, float(mx.value)/cd.value))
+    print(' max(f) = %d / %d = %f' % (mx.value, cd.value, float(mx.value) / cd.value))
 
     logging.info('Computing solution...')
     sum_x_powers = [secint(0) for _ in range(N)]
@@ -175,7 +175,7 @@ async def main():
         sum_x_powers = mpc.vector_add(sum_x_powers, x_powers)
     solution = [None] * n
     for j in range(n):
-        coefs = [w_powers[(j*k) % N] for k in range(N)]
+        coefs = [w_powers[(j * k) % N] for k in range(N)]
         solution[j] = mpc.in_prod(coefs, sum_x_powers)
     solution = await mpc.output(solution)
 
@@ -186,23 +186,22 @@ async def main():
         sum_x_powers = mpc.vector_add(sum_x_powers, x_powers)
     dual_solution = [None] * m
     for i in range(m):
-        coefs = [w_powers[((n+i)*k) % N] for k in range(N)]
+        coefs = [w_powers[((n + i) * k) % N] for k in range(N)]
         dual_solution[i] = mpc.in_prod(coefs, sum_x_powers)
     dual_solution = await mpc.output(dual_solution)
 
     await mpc.shutdown()
 
-    logging.info('Writing output to %s.', certificate_filename)
+    logging.info(f'Writing output to {certificate_filename}')
+    tab = '\t'
     with open(os.path.join('data', 'lp', certificate_filename), 'w') as f:
-        f.write('# tableau = \n' + args.data + '\n')
-        f.write('# bit-length = \n' + str(mpc.options.bit_length) + '\n')
-        f.write('# security parameter = \n' + str(mpc.options.sec_param) + '\n')
-        f.write('# threshold = \n' + str(mpc.threshold) + '\n')
-        f.write('# common denominator = \n' + str(cd.value) + '\n')
-        f.write('# solution = \n')
-        f.write('\t'.join(str(x.value) for x in solution) + '\n')
-        f.write('# dual solution = \n')
-        f.write('\t'.join(str(x.value) for x in dual_solution) + '\n')
+        f.write(f'# tableau =\n{args.data}\n')
+        f.write(f'# bit-length =\n{mpc.options.bit_length}\n')
+        f.write(f'# security parameter =\n{mpc.options.sec_param}\n')
+        f.write(f'# threshold =\n{mpc.threshold}\n')
+        f.write(f'# common denominator=\n{cd.value}\n')
+        f.write(f'# solution =\n{tab.join(str(x.value) for x in solution)}\n')
+        f.write(f'# dual solution =\n{tab.join(str(x.value) for x in dual_solution)}\n')
 
 if __name__ == '__main__':
     mpc.run(main())

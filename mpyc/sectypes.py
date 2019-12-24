@@ -424,9 +424,9 @@ def _SecFld(field):
 def _pfield(l, f, p, n):
     k = runtime.options.sec_param
     if p is None:
-        p = finfields.find_prime_root(l + max(f, k + 1) + 1, n=n)
+        p = finfields.find_prime_root(l + max(f, k+1) + 1, n=n)
     else:
-        assert p.bit_length() > l + max(f, k + 1), f'Prime {p} too small.'
+        assert p.bit_length() > l + max(f, k+1), f'Prime {p} too small.'
     return finfields.GF(p, f)
 
 
@@ -464,7 +464,7 @@ def SecFxp(l=None, f=None, p=None, n=2):
     if l is None:
         l = runtime.options.bit_length
     if f is None:
-        f = l // 2  # l =~ 2f enables division such that x =~ 1/(1/x)
+        f = l//2  # l =~ 2f enables division such that x =~ 1/(1/x)
 
     return _SecFxp(l, f, p, n)
 
@@ -483,7 +483,7 @@ def _SecFxp(l, f, p, n):
                 value = sectype.field(value << f)
             elif isinstance(value, float):
                 self.integral = value.is_integer()
-                value = sectype.field(round(value * (1 << f)))
+                value = sectype.field(round(value * (1<<f)))
             else:
                 self.integral = integral
         else:

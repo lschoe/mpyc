@@ -1,7 +1,6 @@
 import unittest
 from mpyc import gfpx
 from mpyc import sectypes
-from mpyc import runtime
 
 X = gfpx.X
 

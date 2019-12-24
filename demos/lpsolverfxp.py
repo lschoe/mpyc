@@ -28,16 +28,16 @@ def argmin(x, arg_le):
         return ([type(x[0])(1)], x[0])
     if n == 2:
         b, m = arg_le(x[0], x[1])
-        return ([1 - b, b], m)
+        return ([1-b, b], m)
     b2 = [None] * (n//2)
     m2 = [None] * ((n+1)//2)
     for i in range(n//2):
         b2[i], m2[i] = arg_le(x[2*i], x[2*i+1])
-    if n % 2 == 1:
+    if n%2 == 1:
         m2[-1] = x[-1]
     a2, m = argmin(m2, arg_le)
     a = [None] * n
-    if n % 2 == 1:
+    if n%2 == 1:
         a[-1] = a2.pop()
     for i in range(n//2):
         a[2*i+1] = b2[i] * a2[i]
@@ -73,7 +73,7 @@ async def index_matrix_prod(x, A, tr=False):
     await mpc.returnType(stype, m)
     x, A = await mpc.gather(x, A)
     # avoid fxp truncation for integral x
-    f1 = 1 / stype.field(1<<stype.field.frac_length)
+    f1 = 1 / stype.field(1 << stype.field.frac_length)
     x = [a.value * f1 for a in x]
     y = [None] * m
     for i in range(m):
@@ -94,7 +94,7 @@ async def main():
 
     if not args.options:
         certificate_filename = f'c{mpc.pid}.cert'
-        logging.info('Setting certificate file to default = %s', certificate_filename)
+        logging.info(f'Setting certificate file to default = {certificate_filename}')
     else:
         certificate_filename = args.options[0]
     T = load_tableau(args.data)
@@ -102,8 +102,8 @@ async def main():
     n = len(T[0]) - 1
     l = mpc.options.bit_length
     secfxp = mpc.SecFxp(l)
-    for i in range(m + 1):
-        for j in range(n + 1):
+    for i in range(m+1):
+        for j in range(n+1):
             T[i][j] = secfxp(T[i][j])
 
     basis = [secfxp(i + n) for i in range(m)]
@@ -112,23 +112,23 @@ async def main():
     await mpc.start()
 
     iteration = 0
-    logging.info('%d Termination?...', iteration)
+    logging.info(f'{iteration} Termination?...')
     p_col_index, minimum = argmin_int(T[-1][:-1])
 
     while await mpc.output(minimum < 0):
         iteration += 1
 
-        logging.info('%d Determining pivot...', iteration)
+        logging.info(f'{iteration} Determining pivot...')
         p_col = index_matrix_prod(p_col_index + [secfxp(0)], T, True)
         constraints = [(T[i][-1] + (p_col[i] <= 0), p_col[i]) for i in range(m)]
         p_row_index, _ = argmin_rat(constraints)
         pivot = mpc.in_prod(p_row_index, p_col)
 
-        logging.info('%d Updating tableau...', iteration)
-        h = mpc.scalar_mul(1/pivot, mpc.vector_sub(p_row_index + [0], p_col))
+        logging.info(f'{iteration} Updating tableau...')
+        h = mpc.scalar_mul(1 / pivot, mpc.vector_sub(p_row_index + [0], p_col))
         p_row = index_matrix_prod(p_row_index, T[:-1])
         v = mpc.vector_add(p_row, p_col_index + [0])
-        for i in range(m + 1):
+        for i in range(m+1):
             T[i] = mpc.vector_add(T[i], mpc.scalar_mul(h[i], v))
 
         # swap basis entries
@@ -138,7 +138,7 @@ async def main():
         p_col_index = mpc.scalar_mul(delta, p_col_index)
         cobasis = mpc.vector_add(cobasis, p_col_index)
 
-        logging.info('%d Termination?...', iteration)
+        logging.info(f'{iteration} Termination?...')
         p_col_index, minimum = argmin_int(T[-1][:-1])
 
     logging.info('Termination...')
@@ -163,16 +163,16 @@ async def main():
 
     await mpc.shutdown()
 
-    logging.info('Writing output to %s.', certificate_filename)
+    logging.info(f'Writing output to {certificate_filename}')
+    tab = '\t'
     with open(os.path.join('data', 'lp', certificate_filename), 'w') as f:
-        f.write('# tableau = \n' + args.data + '\n')
-        f.write('# bit-length = \n' + str(mpc.options.bit_length) + '\n')
-        f.write('# security parameter = \n' + str(mpc.options.sec_param) + '\n')
-        f.write('# threshold = \n' + str(mpc.threshold) + '\n')
-        f.write('# solution = \n')
-        f.write('\t'.join(x.__repr__() for x in solution) + '\n')
-        f.write('# dual solution = \n')
-        f.write('\t'.join(x.__repr__() for x in dual_solution) + '\n')
+        f.write(f'# tableau =\n{args.data}\n')
+        f.write(f'# bit-length =\n{mpc.options.bit_length}\n')
+        f.write(f'# security parameter =\n{mpc.options.sec_param}\n')
+        f.write(f'# threshold =\n{mpc.threshold}\n')
+        f.write(f'# solution =\n{tab.join(x.__repr__() for x in solution)}\n')
+        f.write(f'# dual solution =\n{tab.join(x.__repr__() for x in dual_solution)}\n')
+
 
 if __name__ == '__main__':
     mpc.run(main())

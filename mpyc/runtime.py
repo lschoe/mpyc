@@ -468,7 +468,7 @@ class Runtime:
         if issubclass(stype, sectypes.SecureFiniteField):
             bound = stype.field.order
         else:
-            bound = (1 << k + l) // self._bincoef + 1
+            bound = (1<<(k + l)) // self._bincoef + 1
         prfs = self.prfs(bound)
         uci = self._prss_uci()  # NB: same uci in both calls for r below
         r = thresha.pseudorandom_share(stype.field, m, self.pid, prfs, uci, len(x))
@@ -521,7 +521,7 @@ class Runtime:
             s = 0
             for i in range(f-1, -1, -1):
                 s <<= 1
-                s += r_bits[f*j + i].value
+                s += r_bits[f * j + i].value
             r_modf[j] = Zp(s)
         r_divf = self._randoms(Zp, n, 1<<(k + l - f))
         if issubclass(sftype, Share):
@@ -641,7 +641,7 @@ class Runtime:
         # isinstance(a, Share) ensured
         if type(a).field.frac_length:
             if isinstance(b, (int, float)):
-                c = 1 / b
+                c = 1/b
                 if c.is_integer():
                     c = round(c)
             else:
@@ -668,7 +668,7 @@ class Runtime:
         return r / ar
 
     def pow(self, a, b):
-        """Secure exponentation a raised to the power of b, for public integer b."""
+        """Secure exponentiation a raised to the power of b, for public integer b."""
         if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
             d = a
             c = self.mul(d, d)
@@ -1280,9 +1280,9 @@ class Runtime:
             if n == 1:
                 c[i] = x[i] * y[i]
                 if high:
-                    d[i] = x[i] + y[i] - c[i] * 2
+                    d[i] = x[i] + y[i] - c[i]*2
             else:
-                h = i + (n // 2)
+                h = i + n//2
                 f(i, h, high=high)
                 f(h, j, high=True)
                 c[h:j] = self.vector_add(c[h:j], self.scalar_mul(c[h-1], d[h:j]))
@@ -1295,7 +1295,7 @@ class Runtime:
             f(0, n)
         # c = prefix carries for addition of x and y
         for i in range(n-1, -1, -1):
-            c[i] = x[i] + y[i] - c[i] * 2 + (c[i-1] if i > 0 else 0)
+            c[i] = x[i] + y[i] - c[i]*2 + (c[i-1] if i > 0 else 0)
         return c
 
     @mpc_coro
@@ -1367,7 +1367,7 @@ class Runtime:
     def _norm(self, a):  # signed normalization factor
         x = self.to_bits(a)  # low to high bits
         b = x[-1]  # sign bit
-        s = 1 - b * 2  # sign s = (-1)^b
+        s = 1 - b*2  # sign s = (-1)^b
         x = x[:-1]
         _1 = type(a)(1)
 
@@ -1379,7 +1379,7 @@ class Runtime:
 
             i0, nz0 = __norm(x[:n//2])  # low bits
             i1, nz1 = __norm(x[n//2:])  # high bits
-            i0 *= (1 << ((n+1) // 2))
+            i0 *= (1 << ((n+1)//2))
             return self.if_else(nz1, [i1, _1], [i0, nz0])  # self.or_(nz0, nz1)
 
         l = type(a).bit_length
@@ -1390,7 +1390,7 @@ class Runtime:
         f = type(a).field.frac_length
         v = self._norm(a)
         b = a * v  # 1/2 <= b <= 1
-        theta = int(math.ceil(math.log((2*f+1) / 3.5, 2)))
+        theta = int(math.ceil(math.log((2*f+1)/3.5, 2)))
         c = 2.9142 - b*2
         for _ in range(theta):
             c *= 2 - c * b
@@ -1594,7 +1594,7 @@ def setup():
         parties = [Party(i, 'localhost', base_port + i) for i in range(m)]
 
     if options.threshold is None:
-        options.threshold = (m-1) // 2
+        options.threshold = (m-1)//2
     assert 2*options.threshold < m, f'threshold {options.threshold} too large for {m} parties'
 
     rt = Runtime(pid, parties, options)

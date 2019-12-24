@@ -36,7 +36,7 @@ def random_split(s, t, m):
             y = 0 if T is int else T(0)
             for c_j in c:
                 y += c_j
-                y *= i + 1
+                y *= i+1
             shares[i][h] = (y + s[h].value) % p
     return shares
 
@@ -96,8 +96,8 @@ def _f_S_i(field, m, i, S):
     """Compute and store polynomial f_S evaluated for party i.
 
     Polynomial f_S is 1 at 0 and 0 for all parties j outside S."""
-    points = [(0, [1])] + [(x + 1, [0]) for x in range(m) if x not in S]
-    return recombine(field, points, i + 1)[0].value
+    points = [(0, [1])] + [(x+1, [0]) for x in range(m) if x not in S]
+    return recombine(field, points, i+1)[0].value
 
 
 def pseudorandom_share(field, m, i, prfs, uci, n):
@@ -139,7 +139,7 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
             y = 0 if T is int else T(0)
             for j in range(d):
                 y += prl[h * d + j]
-                y *= i + 1
+                y *= i+1
             sums[h] += y * f_S_i
     for h in range(n):
         sums[h] = field(sums[h])
@@ -160,7 +160,7 @@ class PRF:
         """
         self.key = key
         self.max = bound
-        self.byte_length = ((bound-1).bit_length() + 7) // 8
+        self.byte_length = ((bound - 1).bit_length() + 7) // 8
         if bound & (bound - 1):  # no power of 2
             self.byte_length += len(self.key)
 

@@ -166,26 +166,26 @@ def bareiss(Zp, A):
 
     # division-free Gaussian elimination
     for k in range(d):
-        for i in range(k + 1, d):
-            for j in range(k + 1, d_e):
+        for i in range(k+1, d):
+            for j in range(k+1, d_e):
                 A[i, j] = (A[k, k] * A[i, j] - A[k, j] * A[i, k]) % p
 
     # back substitution
-    for i in range(d - 1, -1, -1):
+    for i in range(d-1, -1, -1):
         inv = (1 / Zp(A[i, i])).value
-        if i < d - 2:
+        if i < d-2:
             A[i, i] = inv  # keep reciprocal for determinant
         for j in range(d, d_e):
             s = A[i, j]
-            for k in range(i + 1, d):
+            for k in range(i+1, d):
                 s -= A[i, k] * A[k, j]
             s %= p
             A[i, j] = (s * inv) % p
 
     # postponed division for determinant
     inv = 1
-    det = A[d - 1, d - 1]
-    for i in range(d - 2):
+    det = A[d-1, d-1]
+    for i in range(d-2):
         inv = (inv * A[i, i]) % p
         det = (det * inv) % p
 
@@ -193,7 +193,7 @@ def bareiss(Zp, A):
 
 
 def random_matrix_determinant(secfld, d):
-    d_2 = d * (d - 1) // 2
+    d_2 = d * (d-1) // 2
     L = np.diagflat([secfld(1)] * d)
     L[np.tril_indices(d, -1)] = mpc._randoms(secfld, d_2)
     L[np.triu_indices(d, 1)] = [secfld(0)] * d_2
@@ -316,8 +316,8 @@ async def main():
         secint = mpc.SecInt(gamma.bit_length() + 1)
         print(f'secint prime size: |q| = {secint.field.modulus.bit_length()} bits'
               f' (secint bit length: {secint.bit_length})')
-        bound = d * round((d - 1)**((d - 1) / 2)) * gamma**d
-        secfld = mpc.SecFld(min_order=2 * bound + 1, signed=True)
+        bound = d * round((d-1)**((d-1) / 2)) * gamma**d
+        secfld = mpc.SecFld(min_order=2*bound + 1, signed=True)
         print(f'secfld prime size: |p| = {secfld.field.modulus.bit_length()} bits')
 
         f2 = float(beta)
@@ -331,9 +331,9 @@ async def main():
         logging.info('Compute A = X^T X + lambda I and B = X^T Y')
 
         AB = []
-        for i in range(d - 1):
+        for i in range(d-1):
             xi = Xt[i]
-            for j in range(i, d - 1):
+            for j in range(i, d-1):
                 xj = Xt[j]
                 s = 0
                 for k in range(n1):
@@ -368,7 +368,7 @@ async def main():
         for i in range(d):
             A[i][i] = AB[index] + lambda_
             index += 1
-            for j in range(i + 1, d):
+            for j in range(i+1, d):
                 A[i][j] = A[j][i] = AB[index]
                 index += 1
             for j in range(e):

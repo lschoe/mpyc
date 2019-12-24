@@ -10,11 +10,6 @@ class Arithmetic(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         mpc.logging(False)
-        mpc.run(mpc.start())
-
-    @classmethod
-    def tearDownClass(cls):
-        mpc.run(mpc.shutdown())
 
     def test_secint(self):
         secint = mpc.SecInt()

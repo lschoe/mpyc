@@ -18,8 +18,8 @@ async def random_unit_vector(n, sectype):
         return [sectype(1)]
 
     b = mpc.random_bit(sectype)
-    x = random_unit_vector((n + 1) // 2, sectype)
-    if n % 2 == 0:
+    x = random_unit_vector((n+1)//2, sectype)
+    if n%2 == 0:
         y = mpc.scalar_mul(b, x)
         return y + mpc.vector_sub(x, y)
 
@@ -33,7 +33,7 @@ async def random_unit_vector(n, sectype):
 def random_permutation(n, sectype):
     """Random permutation of [sectype(i) for i in range(n)]. """
     p = [sectype(i) for i in range(n)]
-    for i in range(n - 1):
+    for i in range(n-1):
         x_r = random_unit_vector(n - i, sectype)
         p_r = mpc.in_prod(p[i:], x_r)
         d_r = mpc.scalar_mul(p[i] - p_r, x_r)
@@ -56,7 +56,7 @@ async def random_derangement(n, sectype):
 
 async def xprint(N, text, sectype):
     print(f'Using secure {text}: {sectype.__name__}')
-    for n in range(2, N + 1):
+    for n in range(2, N+1):
         print(n, await mpc.output(random_derangement(n, sectype)))
 
 

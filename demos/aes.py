@@ -52,13 +52,13 @@ def key_expansion(k):
     w = list(map(list, zip(*k)))
     Nk = len(w)  # Nk is 4 or 8
     Nr = 10 if Nk == 4 else 14
-    for i in range(Nk, 4 * (Nr + 1)):
+    for i in range(Nk, 4*(Nr+1)):
         t = w[-1]
         if i % Nk in {0, 4}:
             t = [sbox(x) for x in t]
         if i % Nk == 0:
             a, b, c, d = t
-            t = [b + (f256(1) << (i // Nk) - 1), c, d, a]
+            t = [b + (f256(1) << i // Nk - 1), c, d, a]
         w.append(mpc.vector_add(w[-Nk], t))
     K = [list(zip(*_)) for _ in zip(*[iter(w)]*4)]
     return K
@@ -68,7 +68,7 @@ def encrypt(K, s):
     """AES encryption of s given key schedule K."""
     Nr = len(K) - 1  # Nr is 10 or 14
     s = mpc.matrix_add(s, K[0])
-    for i in range(1, Nr + 1):
+    for i in range(1, Nr+1):
         s = [[sbox(x) for x in _] for _ in s]
         s = [s[j][j:] + s[j][:j] for j in range(4)]
         if i < Nr:
@@ -109,10 +109,10 @@ async def main():
 
     await mpc.start()
 
-    p = [[secfld(17*(4 * j + i)) for j in range(4)] for i in range(4)]
+    p = [[secfld(17 * (4*j + i)) for j in range(4)] for i in range(4)]
     await xprint('Plaintext:  ', p)
 
-    k128 = [[secfld(4 * j + i) for j in range(4)] for i in range(4)]
+    k128 = [[secfld(4*j + i) for j in range(4)] for i in range(4)]
     await xprint('AES-128 key:', k128)
     K = key_expansion(k128)
     c = encrypt(K, p)
@@ -121,7 +121,7 @@ async def main():
         p = decrypt(K, c)
         await xprint('Plaintext:  ', p)
 
-        k256 = [[secfld(4 * j + i) for j in range(8)] for i in range(4)]
+        k256 = [[secfld(4*j + i) for j in range(8)] for i in range(4)]
         await xprint('AES-256 key:', k256)
         K = key_expansion(k256)
         c = encrypt(K, p)

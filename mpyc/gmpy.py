@@ -15,14 +15,15 @@ def factor_prime_power(x):  # TODO: move this to a separate math/number theory m
     k = 10
     # test whether p is below 2**k, for positive k
     p = 2
-    while p < 1 << k:
+    while p < 1<<k:
         if x % p == 0:
             d = 0
             while x > 1:
                 x, r = divmod(x, p)
-                if r:
+                if r == 0:
+                    d += 1
+                else:
                     raise ValueError('number not a prime power')
-                d += 1
 
             return int(p), d
 
@@ -115,7 +116,7 @@ except ImportError:
 
     def legendre(x, y):
         """Return the Legendre symbol (x|y), assuming y is an odd prime."""
-        z = pow(x, (y-1) // 2, y)
+        z = pow(x, (y-1)//2, y)
         if z > 1:  # z == y-1
             z = -1
         return z
@@ -131,22 +132,22 @@ except ImportError:
             return x
 
         k = (x.bit_length() - 1) // 2
-        y = 1 << k
+        y = 1<<k
         for i in range(k-1, -1, -1):
-            z = y | (1 << i)
-            if z * z <= x:
+            z = y | 1<<i
+            if z**2 <= x:
                 y = z
         return y
 
     def iroot(x, n):
-        """Return (y, b) where y is the integer n-th root of x and b is True if y is exact."""
+        """Return (y, b) where y is the integer nth root of x and b is True if y is exact."""
         if x == 0:
             return x, True
 
         k = (x.bit_length() - 1) // n
-        y = 1 << k
+        y = 1<<k
         for i in range(k-1, -1, -1):
-            z = y | (1 << i)
+            z = y | 1<<i
             if z**n <= x:
                 y = z
         return y, x == y**n

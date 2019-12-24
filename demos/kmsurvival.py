@@ -125,7 +125,7 @@ async def logrank_test(secfxp, d1, d2, n1, n2):
         d_j = d1[j] + d2[j]
         n_j = n1[j] + n2[j]
         a = d_j * n1[j]
-        b = n_j * (n_j-1)
+        b = n_j * (n_j - 1)
         c = 1/(n_j * b)  # NB: using only one fixed-point division /
         detot += d1[j] - a * b * c
         vtot += a * n2[j] * (n_j - d_j) * c
@@ -158,7 +158,7 @@ def agg_logrank_test(secfxp, d1, d2, n1, n2, agg_d1, agg_d2, stride):
         ix = [secfxp(0)] * msn
         for j in range(start, stop):
             is_active = d1[j] + d2[j] != 0
-            ix = mpc.if_else(is_active, [1-mpc.sum(ix)] + ix[:-1], ix)
+            ix = mpc.if_else(is_active, [1 - mpc.sum(ix)] + ix[:-1], ix)
             select = mpc.scalar_mul(is_active, ix)
             new = [d1[j], d2[j], n1[j], n2[j]]
             for i in range(msn):
@@ -207,7 +207,7 @@ async def main():
     else:
         df = eval('lifelines.datasets.load_' + name)()
     if name == 'lung':
-        df['status'] = df['status']-1  # 1-2 -> 0-1 = censored-death
+        df['status'] = df['status'] - 1  # 1-2 -> 0-1 = censored-death
     elif name == 'stanford_heart_transplants':
         df = df[(df['transplant'] == 1) | ~df['id'].isin(set(df[df['transplant'] == 1]['id']))]
         df['time'] = round(df['stop'] - df['start'] + 0.5)

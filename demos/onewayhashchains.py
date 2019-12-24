@@ -23,7 +23,7 @@ def tS(k, r):
     if r < 2**(k-1):
         return 0
 
-    return ((k+r) % 2 + k+1 - ((2*r) % (2**(2**k-r).bit_length())).bit_length()) // 2
+    return ((k + r)%2 + k+1 - ((2*r) % (2**(2**k - r).bit_length())).bit_length()) // 2
 
 
 def P(k, x):
@@ -75,14 +75,14 @@ def p(k, x):
             a[v] = (i, 0)
             v += 1
         u = v
-        w = (r&1) + i + 1
+        w = (r&1) + i+1
         while c:
             while ~c&1:
                 w += 1
                 c >>= 1
             u -= 1
             q, g = a[u]
-            for _ in range(w // 2):
+            for _ in range(w//2):
                 y = z[q]
                 if not g:
                     q -= 1

@@ -245,24 +245,24 @@ def find_prime_root(l, blum=True, n=1):
             n, w = 2, -1
     elif n <= 2:
         w = -1 if n == 2 else 1
-        p = gmpy2.next_prime(1 << l - 1)
+        p = gmpy2.next_prime(1 << l-1)
         if blum:
-            while p % 4 != 3:
+            while p%4 != 3:
                 p = gmpy2.next_prime(p)
         p = int(p)
     else:
         assert blum
         if not gmpy2.is_prime(n):
             n = int(gmpy2.next_prime(n))
-        p = 1 + n * (1 + (n**2) % 4 + 4 * ((1 << l - 2) // n))
+        p = 1 + n * (1 + (n**2)%4 + 4*((1 << l-2) // n))
         while not gmpy2.is_prime(p):
-            p += 4 * n
+            p += 4*n
 
         a = 1
         w = 1
         while w == 1:
             a += 1
-            w = gmpy2.powmod(a, (p - 1) // n, p)
+            w = gmpy2.powmod(a, (p-1) // n, p)
         p, w = int(p), int(w)
     return p, n, w
 
@@ -287,7 +287,7 @@ def pGF(modulus, f=0):
     GFElement.ext_deg = 1
     GFElement.byte_length = (GFElement.order.bit_length() + 7) >> 3
     GFElement.frac_length = f
-    GFElement.rshift_factor = int(gmpy2.invert(1 << f, p))  # cache (1/2)^f mod p
+    GFElement.rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
     GFElement.is_signed = True
     GFElement.nth = n
     GFElement.root = w % p
@@ -376,25 +376,25 @@ class PrimeFieldElement(FiniteFieldElement):
         if p == 2:
             return type(self)(a)
 
-        if p & 3 == 3:
+        if p&3 == 3:
             if INV:
-                p4 = (p * 3 - 5) >> 2  # a**p4 == a**(-1/2) == 1/sqrt(a) mod p
+                p4 = (p*3 - 5) >> 2  # a**p4 == a**(-1/2) == 1/sqrt(a) mod p
             else:
-                p4 = (p + 1) >> 2
+                p4 = (p+1) >> 2
             return type(self)(int(gmpy2.powmod(a, p4, p)))
 
         # 1 (mod 4) primes are covered using Cipolla-Lehmer's algorithm.
         # find b s.t. b^2 - 4*a is not a square
         b = 1
-        while gmpy2.legendre(b * b - 4 * a, p) != -1:
+        while gmpy2.legendre(b * b - 4*a, p) != -1:
             b += 1
 
         # compute u*X + v = X^{(p+1)/2} mod f, for f = X^2 - b*X + a
         u, v = 0, 1
-        e = (p + 1) >> 1
+        e = (p+1) >> 1
         for i in range(e.bit_length() - 1, -1, -1):
             u2 = (u * u) % p
-            u = ((u << 1) * v + b * u2) % p
+            u = ((u<<1) * v + b * u2) % p
             v = (v * v - a * u2) % p
             if (e >> i) & 1:
                 u, v = (v + b * u) % p, (-a * u) % p
@@ -505,27 +505,27 @@ class ExtensionFieldElement(FiniteFieldElement):
     def is_sqr(self):
         cls = type(self.value)
         q = self.order
-        if q % 2 == 0:
+        if q%2 == 0:
             return True
 
-        return cls.powmod(self.value, (q - 1) >> 1, self.modulus) != [cls.p - 1]
+        return cls.powmod(self.value, (q-1) >> 1, self.modulus) != [cls.p - 1]
 
     def sqrt(self, INV=False):
         cls = type(self.value)
         a = self.value
         q = self.order
-        if q % 2 == 0:
-            return type(self)(cls.powmod(a, q >> 1, self.modulus))
+        if q%2 == 0:
+            return type(self)(cls.powmod(a, q>>1, self.modulus))
 
-        if q & 3 == 3:
+        if q&3 == 3:
             if INV:
-                q4 = (q * 3 - 5) >> 2  # a**q4 == a**(-1/2) == 1/sqrt(a) in GF(q)
+                q4 = (q*3 - 5) >> 2  # a**q4 == a**(-1/2) == 1/sqrt(a) in GF(q)
             else:
-                q4 = (q + 1) >> 2
+                q4 = (q+1) >> 2
             return type(self)(cls.powmod(a, q4, self.modulus))
 
         # Tonelli-Shanks
-        n = q - 1
+        n = q-1
         s = (n & -n).bit_length() - 1  # number of times 2 divides n
         t = n >> s
         # q - 1 = t 2^s, t odd
@@ -535,12 +535,12 @@ class ExtensionFieldElement(FiniteFieldElement):
             i = 2
             while c == 1:
                 z = cls.powmod(i, t, self.modulus)
-                c = cls.powmod(z, 1 << s - 1, self.modulus)
+                c = cls.powmod(z, 1 << s-1, self.modulus)
                 i += 1
             type(self).least_qnr = z  # cache least QNR raised to power t
 
         # TODO: improve following code a bit
-        w = cls.powmod(a, t >> 1, self.modulus)
+        w = cls.powmod(a, t>>1, self.modulus)
         x = a * w % self.modulus
         b = x * w % self.modulus
         v = s
@@ -589,4 +589,4 @@ class BinaryFieldElement(ExtensionFieldElement):
     def sqrt(self, INV=False):
         cls = type(self.value)
         q = self.order
-        return type(self)(cls.powmod(self.value, q >> 1, self.modulus))
+        return type(self)(cls.powmod(self.value, q>>1, self.modulus))

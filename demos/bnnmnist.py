@@ -99,7 +99,7 @@ async def bsgn_0(a):
     r = mpc._random(Zp)
     r = mpc.prod([r, r])  # random square modulo p
     a, s, r = await mpc.gather(a, s, r)
-    b = await mpc.prod([2 * a + 1, s[0], r])
+    b = await mpc.prod([2*a+1, s[0], r])
     b = await mpc.output(b)
     return s[0] * legendre_p(b)
 
@@ -118,7 +118,7 @@ async def vector_bsgn_0(x):
     r = mpc._randoms(Zp, n)
     r = mpc.schur_prod(r, r)  # n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
-    y = [2 * a + 1 for a in x]
+    y = [2*a+1 for a in x]
     y = await mpc.schur_prod(y, s)
     y = await mpc.schur_prod(y, r)
     y = await mpc.output(y)
@@ -142,7 +142,7 @@ async def bsgn_1(a):
     r = mpc._randoms(Zp, 3)
     r = mpc.schur_prod(r, r)  # 3 random squares modulo p
     a, s, r = await mpc.gather(a, s, r)
-    y = [b + 2 * i for b in (2 * a + 1,) for i in (-1, 0, 1)]
+    y = [b + 2*i for b in (2*a+1,) for i in (-1, 0, 1)]
     y.append(s[0])
     s.append(s[1])
     r.append(s[2])
@@ -169,7 +169,7 @@ async def vector_bsgn_1(x):
     r = mpc._randoms(Zp, 3*n)
     r = mpc.schur_prod(r, r)  # 3n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
-    y = [b + 2 * i for b in (2 * a + 1 for a in x) for i in (-1, 0, 1)]
+    y = [b + 2*i for b in (2*a+1 for a in x) for i in (-1, 0, 1)]
     y.extend(s[:n])
     s.extend(s[n:2*n])
     r.extend(s[-n:])
@@ -179,7 +179,7 @@ async def vector_bsgn_1(x):
     h = [legendre_p(y[j]) for j in range(3*n)]
     t = [s[j] * h[j] for j in range(3*n)]
     z = [h[3*j] * h[3*j+1] * h[3*j+2] * y[3*n + j] for j in range(n)]
-    q = (p + 1) >> 1  # q = 1/2 mod p
+    q = (p+1) >> 1  # q = 1/2 mod p
     return [Zp((u.value + v.value + w.value - uvw.value)*q)
             for u, v, w, uvw in zip(*[iter(t)]*3, z)]
 
@@ -201,7 +201,7 @@ async def bsgn_2(a):
     r = mpc._randoms(Zp, 6)
     r = mpc.schur_prod(r, r)  # 6 random squares modulo p
     a, s, r = await mpc.gather(a, s, r)
-    y = [b + 2 * i for b in (2 * a + 1,) for i in (-2, -1, 0, 1, 2)]
+    y = [b + 2*i for b in (2*a+1,) for i in (-2, -1, 0, 1, 2)]
     y = await mpc.schur_prod(y, s[:-1])
     y.append(s[-1])
     y = await mpc.schur_prod(y, r)
@@ -225,7 +225,7 @@ async def vector_bsgn_2(x):
     r = mpc._randoms(Zp, 6*n)
     r = mpc.schur_prod(r, r)  # 6n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
-    y = [b + 2 * i for b in (2 * a + 1 for a in x) for i in (-2, -1, 0, 1, 2)]
+    y = [b + 2*i for b in (2*a+1 for a in x) for i in (-2, -1, 0, 1, 2)]
     y = await mpc.schur_prod(y, s[:-n])
     y.extend(s[-n:])
     y = await mpc.schur_prod(y, r)
@@ -251,32 +251,32 @@ async def vector_sge(x):
     l = stype.bit_length
     k = mpc.options.sec_param
 
-    r_bits = await mpc.random_bits(Zp, (l + 1) * n)
+    r_bits = await mpc.random_bits(Zp, (l+1) * n)
     r_bits = [b.value for b in r_bits]
     r_modl = [0] * n
     for j in range(n):
-        for i in range(l - 1, -1, -1):
+        for i in range(l-1, -1, -1):
             r_modl[j] <<= 1
-            r_modl[j] += r_bits[l*j + i]
+            r_modl[j] += r_bits[l * j + i]
     r_divl = mpc._randoms(Zp, n, 1<<k)
     x = await mpc.gather(x)
     x_r = [a + ((1<<l) + b) for a, b in zip(x, r_modl)]
     c = await mpc.output([a + (b.value << l) for a, b in zip(x_r, r_divl)])
 
     c = [c.value % (1<<l) for c in c]
-    e = [[None] * (l + 1) for _ in range(n)]
+    e = [[None] * (l+1) for _ in range(n)]
     for j in range(n):
-        s_sign = (r_bits[l*n + j] << 1) - 1
+        s_sign = (r_bits[l * n + j] << 1) - 1
         sumXors = 0
-        for i in range(l - 1, -1, -1):
+        for i in range(l-1, -1, -1):
             c_i = (c[j] >> i) & 1
-            e[j][i] = Zp(s_sign + r_bits[l*j + i] - c_i + 3 * sumXors)
-            sumXors += 1 - r_bits[l*j + i] if c_i else r_bits[l*j + i]
-        e[j][l] = Zp(s_sign - 1 + 3 * sumXors)
+            e[j][i] = Zp(s_sign + r_bits[l * j + i] - c_i + 3*sumXors)
+            sumXors += 1 - r_bits[l * j + i] if c_i else r_bits[l*j + i]
+        e[j][l] = Zp(s_sign - 1 + 3*sumXors)
     e = await mpc.gather([mpc.prod(_) for _ in e])
     g = await mpc.gather([mpc.is_zero_public(stype(_)) for _ in e])
     UF = [1 - b if g else b for b, g in zip(r_bits[-n:], g)]
-    z = [(a - (c + (b << l))) / (1 << l - 1) - 1 for a, b, c in zip(x_r, UF, c)]
+    z = [(a - (c + (b << l))) / (1 << l-1) - 1 for a, b, c in zip(x_r, UF, c)]
     return z
 
 
@@ -345,7 +345,7 @@ async def main():
     L = np.array(list(d)).reshape(batch_size, 28**2)
     if batch_size == 1:
         x = np.array(L[0]).reshape(28, 28)
-        print(np.vectorize(lambda a: int(bool(a / 255)))(x))
+        print(np.vectorize(lambda a: int(bool(a/255)))(x))
 
     L = np.vectorize(lambda a: secint(int(a)))(L).tolist()
 

@@ -40,7 +40,7 @@ def GFpX(p):
 class Polynomial:
     """Polynomials over GF(p) represented as lists of integers in {0, ... , p-1}.
 
-    List a of length n represents
+    Invariant: last element of attribute 'value' is a nonzero integer (if 'value' nonempty).
     """
 
     __slots__ = 'value'
@@ -145,7 +145,7 @@ class Polynomial:
             d[i] = d.get(i, 0) + c
 
         m = max(d.keys())
-        a = [0] * (m + 1)
+        a = [0] * (m+1)
         for i, c in d.items():
             a[i] = c % p
         while a and not a[-1]:

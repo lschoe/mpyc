@@ -58,7 +58,7 @@ def mean(data):
         e = n.bit_length()-1  # 1/2 < 2**e / n <= 1
         return s * (2**e / n) * 2**-e
 
-    return statistics.mean(data)
+    return statistics.mean(x)
 
 
 def variance(data, xbar=None):
@@ -112,8 +112,12 @@ def _var(data, m, correction):
     else:
         x = data
     n = len(x)
-    if n < 2:
-        raise statistics.StatisticsError('variance requires at least two data points')
+    if n < 1 + correction:
+        if correction:
+            e = 'variance requires at least two data points'
+        else:
+            e = 'pvariance requires at least one data point'
+        raise statistics.StatisticsError(e)
 
     stype = type(x[0])  # all elts of x assumed of same type
     if issubclass(stype, sectypes.SecureFiniteField):
@@ -142,7 +146,19 @@ def _var(data, m, correction):
     return statistics.pvariance(x, m)
 
 
-def _std(x, m, correction):
+def _std(data, m, correction):
+    if iter(data) is data:
+        x = list(data)
+    else:
+        x = data
+    n = len(x)
+    if n < 1 + correction:
+        if correction:
+            e = 'stdev requires at least two data points'
+        else:
+            e = 'pstdev requires at least one data point'
+        raise statistics.StatisticsError(e)
+
     stype = type(x[0])  # all elts of x assumed of same type
     if issubclass(stype, sectypes.SecureFiniteField):
         raise TypeError('secure fixed-point or integer type required')
@@ -185,7 +201,7 @@ def _fsqrt(a):
     stype = type(a)
     field = stype.field
     f = field.frac_length
-    e = (stype.bit_length + f - 1) // 2  # (l+f)/2 - f = (l-f)/2 in [0..l/2]
+    e = (stype.bit_length + f-1) // 2  # (l+f)/2 - f = (l-f)/2 in [0..l/2]
     r = stype(0)
     j = 2**(e - f)
     for _ in range(e+1):

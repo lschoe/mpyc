@@ -93,7 +93,7 @@ class SharesExchanger(Protocol):
                 return
 
             pc_size, payload_size = struct.unpack('<HI', self.bytes[:6])
-            len_packet = 6 + pc_size * 4 + payload_size
+            len_packet = 6 + pc_size*4 + payload_size
             if len(self.bytes) < len_packet:
                 return
 
@@ -336,7 +336,7 @@ def _mpc_coro_no_pc(func):
 def mpc_coro(func, pc=True):
     """Decorator turning coroutine func into an MPyC coroutine.
 
-    An MPyC coroutine is evaluated asychronously, returning empty placeholders.
+    An MPyC coroutine is evaluated asynchronously, returning empty placeholders.
     The type of the placeholders is defined either by a return annotation
     of the form "-> expression" or by the first await expression in func.
     Return annotations can only be used for static types.

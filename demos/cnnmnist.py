@@ -86,7 +86,7 @@ async def convolvetensor(x, W, b):
 def inprod2D(X, W):
     m, n = dim(X)
     s = len(W)  # s * s filter W
-    s2 = (s - 1) // 2
+    s2 = (s-1) // 2
     Y = [None] * m
     for i in range(m):
         Y[i] = [None] * n
@@ -166,7 +166,7 @@ async def main():
     print('Labels:', labels)
     df = gzip.open(os.path.join('data', 'cnn', 't10k-images-idx3-ubyte.gz'))
     d = df.read()[16 + offset * 28**2: 16 + (offset + batch_size) * 28**2]
-    x = list(map(lambda a: a / 255, d))
+    x = list(map(lambda a: a/255, d))
     x = np.array(x).reshape(batch_size, 1, 28, 28)
     if batch_size == 1:
         print(np.vectorize(lambda a: int(bool(a)))(x[0, 0]))

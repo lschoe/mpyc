@@ -60,7 +60,7 @@ async def _randbelow(sectype, n, bits=False):
         await runtime.returnType((sectype, True))
         return runtime._random(sectype)
 
-    b = n - 1
+    b = n-1
     k = b.bit_length()
     if bits:
         await runtime.returnType((sectype, True), k)
@@ -92,7 +92,7 @@ async def random_unit_vector(sectype, n):
     with c a small constant, c < 3.
     """
     await runtime.returnType((sectype, True), n)
-    b = n - 1
+    b = n-1
     k = b.bit_length()
     x = runtime.random_bits(sectype, k)
     u = [sectype(1)]
@@ -129,7 +129,7 @@ def randrange(sectype, start, stop=None, step=1):
 
 def randint(sectype, a, b):
     """Uniformly random secret integer between a and b, incl. both endpoints."""
-    return randrange(sectype, a, b + 1)
+    return randrange(sectype, a, b+1)
 
 
 def choice(sectype, seq):
@@ -194,7 +194,7 @@ def shuffle(sectype, x):
     if not isinstance(x[0], sectype):  # assume same type for all elts of x
         for i in range(len(x)):
             x[i] = sectype(x[i])
-    for i in range(n - 1):
+    for i in range(n-1):
         u = random_unit_vector(sectype, n - i)
         x_u = runtime.in_prod(x[i:], u)
         d = runtime.scalar_mul(x[i] - x_u, u)
@@ -287,7 +287,7 @@ def random(sectype):
         raise TypeError('secure fixed-point type required')
 
     x = runtime.random_bits(sectype, f)
-    return runtime.from_bits(x) * (2 ** -f)
+    return runtime.from_bits(x) * 2**-f
 
 
 def uniform(sectype, a, b):
@@ -299,4 +299,4 @@ def uniform(sectype, a, b):
         raise TypeError('secure fixed-point type required')
 
     s = math.copysign(1, b - a)
-    return a + _randbelow(sectype, round(abs(a - b) * 2**f)) * s * (2**-f)
+    return a + _randbelow(sectype, round(abs(a - b) * 2**f)) * s * 2**-f

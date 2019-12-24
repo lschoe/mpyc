@@ -14,7 +14,7 @@ from mpyc.runtime import mpc
 
 mpc.run(mpc.start())
 print('m    =', mpc.run(mpc.output(mpc.sum(mpc.input(mpc.SecInt(9)(1))))))
-print('m**2 =', mpc.run(mpc.output(mpc.sum(mpc.input(mpc.SecInt(17)(2*mpc.pid+1))))))
+print('m**2 =', mpc.run(mpc.output(mpc.sum(mpc.input(mpc.SecInt(17)(2*mpc.pid + 1))))))
 print('2**m =', mpc.run(mpc.output(mpc.prod(mpc.input(mpc.SecInt(257)(2))))))
-print('m!   =', mpc.run(mpc.output(mpc.prod(mpc.input(mpc.SecInt(1685)(mpc.pid+1))))))
+print('m!   =', mpc.run(mpc.output(mpc.prod(mpc.input(mpc.SecInt(1685)(mpc.pid + 1))))))
 mpc.run(mpc.shutdown())
