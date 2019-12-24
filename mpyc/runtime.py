@@ -1390,8 +1390,8 @@ class Runtime:
         f = type(a).field.frac_length
         v = self._norm(a)
         b = a * v  # 1/2 <= b <= 1
-        theta = int(math.ceil(math.log((2*f+1)/3.5, 2)))
-        c = 2.9142 - b*2
+        theta = int(math.ceil(math.log2((f+1)/3.54)))
+        c = 2.9142135623731 - b*2
         for _ in range(theta):
             c *= 2 - c * b
         return c * v
