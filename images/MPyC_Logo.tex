@@ -1,0 +1,44 @@
+\documentclass{minimal}
+
+\usepackage{ifpdf}
+\ifpdf
+\pdfinfo{
+   /Author (Berry Schoenmakers)
+   /Title  (MPyC Logo)
+}
+\fi
+
+\usepackage{tikz}
+
+\begin{document}
+
+\definecolor{mpycyellow}{rgb}{1,1,0.55}
+\definecolor{mpycblue}{rgb}{0,0.55,1}
+
+\begin{tikzpicture}
+% Yellow disk
+\fill[mpycyellow] (0,0) circle (3);
+% Blue winking eye on the left
+\fill[mpycblue] (-1.93,1.17) -- (-0.58,1.26) .. controls (0.12,2.11) and (-1.23,1.91) .. cycle;
+% Blue top part eye on the right
+\fill[mpycblue, rotate=144] (0,-2.43) arc[x radius=0.7315, y radius=0.665, start angle=270, end angle=450];
+% Blue bottom part eye on the right
+\fill[mpycblue, rotate=144] (0,-1.1) arc[x radius=0.7315, y radius=0.665, start angle=90, end angle=270];
+% Blue mouth corner on the right
+\fill[mpycblue, rotate=72] (0,-2.43) arc[x radius=0.7315, y radius=0.665, start angle=-90, end angle=90];
+% Blue mouth corner on the left
+\fill[mpycblue, rotate=-72] (0,-1.1) arc[x radius=0.7315, y radius=0.665, start angle=90, end angle=270];
+% Blue mouth
+\fill[mpycblue] (-1.45,0) -- (-2.05, 0) arc[x radius=2.05, y radius=2.13, start angle=180, end angle=360]
+              -- (1.45,0) arc[x radius=1.45, y radius=1.60, start angle=360, end angle=180];
+% Yellow stroke through eye on the right
+\draw[mpycyellow, line width=0.28cm, rotate=144] (0,0) -- (0,-3);
+% Yellow stroke through mouth on the right
+\draw[mpycyellow, line width=0.28cm, rotate=72] (0,0) -- (0,-3);
+% Yellow stroke through mouth in the middle
+\draw[mpycyellow, line width=0.28cm] (0,0) -- (0,-3);
+% Yellow stroke through mouth on the left
+\draw[mpycyellow, line width=0.28cm, rotate=-72] (0,0) -- (0,-3);
+\end{tikzpicture}
+
+\end{document}
