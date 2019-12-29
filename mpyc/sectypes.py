@@ -68,6 +68,14 @@ class Share:
         """Negation."""
         return runtime.neg(self)
 
+    def __pos__(self):
+        """Unary +."""
+        return runtime.pos(self)
+
+    def __abs__(self):
+        """Absolute value."""
+        return runtime.abs(self)
+
     def __add__(self, other):
         """Addition."""
         other = self._coerce(other)
@@ -200,38 +208,32 @@ class Share:
     def __ge__(self, other):
         """Greater-than or equal comparison."""
         # self >= other
-        c = self - other
-        return runtime.sgn(c, GE=True)
+        return runtime.ge(self, other)
 
     def __gt__(self, other):
         """Strictly greater-than comparison."""
         # self > other <=> not (self <= other)
-        c = other - self
-        return 1 - runtime.sgn(c, GE=True)
+        return 1 - runtime.ge(other, self)
 
     def __le__(self, other):
         """Less-than or equal comparison."""
         # self <= other <=> other >= self
-        c = other - self
-        return runtime.sgn(c, GE=True)
+        return runtime.ge(other, self)
 
     def __lt__(self, other):
         """Strictly less-than comparison."""
         # self < other <=> not (self >= other)
-        c = self - other
-        return 1 - runtime.sgn(c, GE=True)
+        return 1 - runtime.ge(self, other)
 
     def __eq__(self, other):
         """Equality testing."""
         # self == other
-        c = self - other
-        return runtime.is_zero(c)
+        return runtime.eq(self, other)
 
     def __ne__(self, other):
         """Negated equality testing."""
         # self != other <=> not (self == other)
-        c = self - other
-        return 1 - runtime.is_zero(c)
+        return 1 - runtime.eq(self, other)
 
 
 class SecureFiniteField(Share):
@@ -242,6 +244,10 @@ class SecureFiniteField(Share):
 
     __slots__ = ()
     field = None
+
+    def __abs__(self):
+        """Currently no support at all."""
+        raise TypeError(f"bad operand type for abs(): '{type(self).__name__}'")
 
     def __mod__(self, other):
         """Currently no support at all."""
@@ -425,8 +431,9 @@ def _pfield(l, f, p, n):
     k = runtime.options.sec_param
     if p is None:
         p = finfields.find_prime_root(l + max(f, k+1) + 1, n=n)
-    else:
-        assert p.bit_length() > l + max(f, k+1), f'Prime {p} too small.'
+    elif p.bit_length() <= l + max(f, k+1):
+        raise ValueError(f'Prime {p} too small.')
+
     return finfields.GF(p, f)
 
 

@@ -44,9 +44,6 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(fpp(101**7), (101, 7))
         self.assertEqual(fpp((2**31 - 1)**3), (2**31 - 1, 3))  # 8th Mersenne prime
 
-        with self.assertRaises(ValueError):
-            fpp(2*3)
-        with self.assertRaises(ValueError):
-            fpp(2**6 * 3)
-        with self.assertRaises(ValueError):
-            fpp(2**6 * 3**7)
+        self.assertRaises(ValueError, fpp, 2*3)
+        self.assertRaises(ValueError, fpp, 2**6 * 3)
+        self.assertRaises(ValueError, fpp, 2**6 * 3**7)

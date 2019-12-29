@@ -1,3 +1,4 @@
+import operator
 import unittest
 from mpyc import gfpx
 from mpyc import sectypes
@@ -17,6 +18,11 @@ class Arithmetic(unittest.TestCase):
         SecFxp = sectypes.SecFxp
         self.assertEqual(SecFxp(), SecFxp(l=32))
         self.assertEqual(SecFxp(), SecFxp(l=32, f=16))
+
+    def test_bool(self):
+        self.assertRaises(TypeError, bool, sectypes.SecFld()(0))
+        self.assertRaises(TypeError, bool, sectypes.SecInt()(0))
+        self.assertRaises(TypeError, bool, sectypes.SecFxp()(0))
 
     def test_SecFld(self):
         SecFld = sectypes.SecFld
@@ -59,3 +65,24 @@ class Arithmetic(unittest.TestCase):
         secfld = SecFld(modulus=gfpx.GFpX(2)(283))
         self.assertEqual(secfld.field.modulus, 283)  # AES polynomial
         self.assertEqual(secfld.field.order, 256)
+
+        a = secfld(1)
+        self.assertRaises(TypeError, abs, a)
+        self.assertRaises(TypeError, operator.floordiv, a, a)
+        self.assertRaises(TypeError, operator.floordiv, 1, a)  # tests __rfloordiv__
+        self.assertRaises(TypeError, operator.mod, a, a)
+        self.assertRaises(TypeError, operator.mod, 1, a)  # tests __rmod__
+        self.assertRaises(TypeError, divmod, a, a)
+        self.assertRaises(TypeError, divmod, 1, a)  # tests __rdivmod__
+        self.assertRaises(TypeError, operator.lshift, a, a)
+        self.assertRaises(TypeError, operator.lshift, 1, a)  # tests __rlshift__
+        self.assertRaises(TypeError, operator.rshift, a, a)
+        self.assertRaises(TypeError, operator.rshift, 1, a)  # tests __rrshift__
+        self.assertRaises(TypeError, operator.ge, a, a)  # NB: also tests <=
+        self.assertRaises(TypeError, operator.gt, a, a)  # NB: also tests <
+
+    def test_SecNum(self):
+        sectypes.SecInt(p=2**89 - 1)
+        self.assertRaises(ValueError, sectypes.SecInt, p=2**61 - 1)
+        sectypes.SecFxp(p=2**89 - 1)
+        self.assertRaises(ValueError, sectypes.SecFxp, f=58, p=2**89 - 1)

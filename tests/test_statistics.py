@@ -23,34 +23,22 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(median(f()), statistics.median(f()))
 
     def test_statistics_error(self):
-        with self.assertRaises(statistics.StatisticsError):
-            mean([])
-        with self.assertRaises(statistics.StatisticsError):
-            variance([0])
-        with self.assertRaises(statistics.StatisticsError):
-            stdev([0])
-        with self.assertRaises(statistics.StatisticsError):
-            pvariance([])
-        with self.assertRaises(statistics.StatisticsError):
-            pstdev([])
-        with self.assertRaises(statistics.StatisticsError):
-            mode([])
-        with self.assertRaises(statistics.StatisticsError):
-            median([])
+        self.assertRaises(statistics.StatisticsError, mean, [])
+        self.assertRaises(statistics.StatisticsError, variance, [0])
+        self.assertRaises(statistics.StatisticsError, stdev, [0])
+        self.assertRaises(statistics.StatisticsError, pvariance, [])
+        self.assertRaises(statistics.StatisticsError, pstdev, [])
+        self.assertRaises(statistics.StatisticsError, mode, [])
+        self.assertRaises(statistics.StatisticsError, median, [])
 
     def test_secfld(self):
         secfld = mpc.SecFld()
         x = [secfld(0), secfld(0)]
-        with self.assertRaises(TypeError):
-            mean(x)
-        with self.assertRaises(TypeError):
-            variance(x)
-        with self.assertRaises(TypeError):
-            stdev(x)
-        with self.assertRaises(TypeError):
-            mode(x)
-        with self.assertRaises(TypeError):
-            median(x)
+        self.assertRaises(TypeError, mean, x)
+        self.assertRaises(TypeError, variance, x)
+        self.assertRaises(TypeError, stdev, x)
+        self.assertRaises(TypeError, mode, x)
+        self.assertRaises(TypeError, median, x)
 
     def test_secint(self):
         secint = mpc.SecInt()

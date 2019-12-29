@@ -179,6 +179,10 @@ class Polynomial:
         return [0 if a_i == 0 else p - a_i for a_i in a]
 
     @classmethod
+    def _pos(cls, a):
+        return a[:]  # NB: return a copy
+
+    @classmethod
     def _add(cls, a, b):
         p = cls.p
         if len(a) < len(b):
@@ -438,6 +442,10 @@ class Polynomial:
         cls = type(self)
         return cls(cls._neg(self.value))
 
+    def __pos__(self):
+        cls = type(self)
+        return cls(cls._pos(self.value))
+
     @classmethod
     def add(cls, a, b):
         """Add polynomials a and b."""
@@ -525,6 +533,8 @@ class Polynomial:
     @classmethod
     def lshift(cls, a, n):
         """Multiply polynomial a by X^n."""
+        a = cls._intern(a)
+        return cls(cls._lshift(a, n))
 
     def __lshift__(self, other):
         if not isinstance(other, int):
@@ -545,7 +555,9 @@ class Polynomial:
 
     @classmethod
     def rshift(cls, a, n):
-        """Quotient for polynomial a divided by X^n."""
+        """Quotient for polynomial a divided by X^n, assuming a is multiple of X^n."""
+        a = cls._intern(a)
+        return cls(cls._rshift(a, n))
 
     def __rshift__(self, other):
         if not isinstance(other, int):
@@ -743,7 +755,7 @@ class Polynomial:
         cls = type(self)
         other = cls._coerce(other)
         if other is NotImplemented:
-            return NotImplemented
+            return False
 
         return self.value == other
 
@@ -752,7 +764,7 @@ class Polynomial:
         cls = type(self)
         other = cls._coerce(other)
         if other is NotImplemented:
-            return NotImplemented
+            return True
 
         return self.value != other
 
@@ -847,6 +859,10 @@ class BinaryPolynomial(Polynomial):
 
     @staticmethod
     def _neg(a):
+        return a
+
+    @staticmethod
+    def _pos(a):
         return a
 
     @staticmethod
@@ -970,8 +986,8 @@ class BinaryPolynomial(Polynomial):
 
     @staticmethod
     def _next_irreducible(a):
-        if a <= 2:
-            a += 1
+        if a <= 1:
+            a = 2
         else:
             a += 1 + a%2
             while not BinaryPolynomial._is_irreducible(a):

@@ -575,6 +575,17 @@ class Runtime:
         return -a
 
     @mpc_coro_no_pc
+    async def pos(self, a):
+        """Secure unary + applied to a."""
+        stype = type(a)
+        if not stype.field.frac_length:
+            await returnType(stype)
+        else:
+            await returnType((stype, a.integral))
+        a = await self.gather(a)
+        return +a
+
+    @mpc_coro_no_pc
     async def add(self, a, b):
         """Secure addition of a and b."""
         stype = type(a)
@@ -721,6 +732,10 @@ class Runtime:
     def ge(self, a, b):
         """Secure comparison a >= b."""
         return self.sgn(a - b, GE=True)
+
+    def abs(self, a):
+        """Secure absolute value of a."""
+        return (self.sgn(a, GE=True)*2-1) * a
 
     def is_zero(self, a):
         """Secure zero test a == 0."""

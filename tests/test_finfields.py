@@ -1,3 +1,4 @@
+import operator
 import unittest
 from mpyc import gfpx
 from mpyc import finfields
@@ -62,14 +63,10 @@ class Arithmetic(unittest.TestCase):
     def test_f2_vs_f256(self):
         f2 = self.f2
         f256 = self.f256
-        with self.assertRaises(TypeError):
-            f2(1) + f256(2)
-        with self.assertRaises(TypeError):
-            f2(1) - f256(2)
-        with self.assertRaises(TypeError):
-            f2(1) * f256(2)
-        with self.assertRaises(TypeError):
-            f2(1) / f256(2)
+        self.assertRaises(TypeError, operator.add, f2(1), f256(2))
+        self.assertRaises(TypeError, operator.sub, f2(1), f256(2))
+        self.assertRaises(TypeError, operator.mul, f2(1), f256(2))
+        self.assertRaises(TypeError, operator.truediv, f2(1), f256(2))
 
     def test_f2(self):
         f2 = self.f2
@@ -143,6 +140,7 @@ class Arithmetic(unittest.TestCase):
         self.assertListEqual(sorted(s), list(range(1, 256)))
 
         a = f256(177)
+        self.assertTrue(a.is_sqr())
         self.assertEqual(a.sqrt()**2, a)
         a = f256(255)
         self.assertEqual(a.sqrt()**2, a)
@@ -219,14 +217,10 @@ class Arithmetic(unittest.TestCase):
     def test_f2_vs_f19(self):
         f2 = self.f2p
         f19 = self.f19
-        with self.assertRaises(TypeError):
-            f2(1) + f19(2)
-        with self.assertRaises(TypeError):
-            f2(1) - f19(2)
-        with self.assertRaises(TypeError):
-            f2(1) * f19(2)
-        with self.assertRaises(TypeError):
-            f2(1) / f19(2)
+        self.assertRaises(TypeError, operator.add, f2(1), f19(2))
+        self.assertRaises(TypeError, operator.sub, f2(1), f19(2))
+        self.assertRaises(TypeError, operator.mul, f2(1), f19(2))
+        self.assertRaises(TypeError, operator.truediv, f2(1), f19(2))
 
     def test_f101(self):
         f101 = self.f101

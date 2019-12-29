@@ -120,6 +120,10 @@ class FiniteFieldElement:
         """Negation."""
         return type(self)(-self.value)
 
+    def __pos__(self):
+        """Unary +."""
+        return type(self)(+self.value)
+
     def __mul__(self, other):
         """Multiplication."""
         if isinstance(other, type(self)):
