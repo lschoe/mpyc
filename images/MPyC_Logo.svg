@@ -1,24 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 -300 600 600">
-<!-- Yellow disk -->  
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+<g transform="translate(15 15) scale(0.05)">
+<!-- Yellow disk -->
 <circle style="fill:rgb(100%,100%,55%)" r="300"/>
 <!-- Blue winking eye on the left -->
 <path style="fill:rgb(0%,55%,100%)" d="M -193 -117 L -58 -126 C 12 -211 -123 -191 -193 -117"/>
-<!-- Blue top part eye on the right -->  
+<!-- Blue top part eye on the right -->
 <path style="fill:rgb(0%,55%,100%)" d="M 0 110 a 11 10 0 0 1 0 133" transform="rotate(-144)"/>
-<!-- Blue bottom part eye on the right -->  
+<!-- Blue bottom part eye on the right -->
 <path style="fill:rgb(0%,55%,100%)" d="M 0 110 a 11 10 0 0 0 0 133" transform="rotate(-144)"/>
-<!-- Blue mouth corner on the right-->  
+<!-- Blue mouth corner on the right-->
 <path style="fill:rgb(0%,55%,100%)" d="M 0 110 a 11 10 0 0 1 0 133" transform="rotate(-72)"/>
-<!-- Blue mouth corner on the left-->  
+<!-- Blue mouth corner on the left-->
 <path style="fill:rgb(0%,55%,100%)" d="M 0 110 a 11 10 0 0 0 0 133" transform="rotate(72)"/>
-<!-- Blue mouth -->  
+<!-- Blue mouth -->
 <path style="fill:rgb(0%,55%,100%)" d="M -145 0 L -205 0 A 27 28 0 0 0 205 0 L 145 0 A 27 28 0 0 1 -145 0"/>
-<!-- Yellow stroke through eye on the right -->  
+<!-- Yellow stroke through eye on the right -->
 <line stroke="rgb(100%,100%,55%)" stroke-width="28" y2="300" transform="rotate(-144)"/>
-<!-- Yellow stroke through mouth on the right -->  
+<!-- Yellow stroke through mouth on the right -->
 <line stroke="rgb(100%,100%,55%)" stroke-width="28" y2="300" transform="rotate(-72)"/>
-<!-- Yellow stroke through mouth in the middle -->  
+<!-- Yellow stroke through mouth in the middle -->
 <line stroke="rgb(100%,100%,55%)" stroke-width="28" y2="300"/>
-<!-- Yellow stroke through mouth on the left -->  
+<!-- Yellow stroke through mouth on the left -->
 <line stroke="rgb(100%,100%,55%)" stroke-width="28" y2="300" transform="rotate(72)"/>
- </svg>
+</g>
+</svg>
