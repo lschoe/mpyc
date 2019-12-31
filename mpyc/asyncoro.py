@@ -295,6 +295,12 @@ def _reconcile(decl, givn):
     if decl is None:
         return
 
+    try:
+        givn = givn.result()
+    except Exception:
+        runtime._loop.stop()  # TODO: stop loop for other exceptions in callbacks
+        raise
+
     __reconcile(decl, givn)
 
 
@@ -357,18 +363,28 @@ def mpc_coro(func, pc=True):
                 runtime._pc_level -= 1
                 return exc.value
 
+            except Exception:
+                runtime._pc_level -= 1
+                raise
+
         if runtime.options.no_async:
             while True:
                 try:
                     coro.send(None)
                 except StopIteration as exc:
-                    _reconcile(decl, exc.value)
+                    runtime._pc_level -= 1
+                    if decl is not None:
+                        __reconcile(decl, exc.value)
                     return decl
+
+                except Exception:
+                    runtime._pc_level -= 1
+                    raise
 
         if pc:
             coro = _wrap(_ProgramCounterWrapper(runtime, coro))
         d = runtime._loop.create_task(coro)  # ensure_future
-        d.add_done_callback(lambda v: _reconcile(decl, v.result()))
+        d.add_done_callback(lambda v: _reconcile(decl, v))
         return _ncopy(decl)
 
     return typed_asyncoro

@@ -14,5 +14,5 @@ Some operations for container datatypes holding secret-shared data items
 are provided as well (e.g., some matrix-vector operations).
 """
 
-__version__ = '0.5.13'
+__version__ = '0.6'
 __license__ = 'MIT License'

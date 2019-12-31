@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>mpyc</strong></big></big> (version 0.5)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>mpyc</strong></big></big> (version 0.6)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5C__init__.py">c:\users\berry\documents\github\mympyc\mpyc\__init__.py</a></font></td></tr></table>
     <p><tt>MPyC&nbsp;is&nbsp;a&nbsp;Python&nbsp;package&nbsp;for&nbsp;secure&nbsp;multi-party&nbsp;computation&nbsp;(MPC).<br>
@@ -16,9 +16,9 @@ where&nbsp;parties&nbsp;interact&nbsp;by&nbsp;exchanging&nbsp;messages&nbsp;via&
 The&nbsp;MPC&nbsp;protocols&nbsp;are&nbsp;based&nbsp;on&nbsp;Shamir's&nbsp;threshold&nbsp;secret&nbsp;sharing&nbsp;scheme<br>
 and&nbsp;withstand&nbsp;passive&nbsp;adversaries&nbsp;controlling&nbsp;less&nbsp;than&nbsp;half&nbsp;of&nbsp;the&nbsp;parties.<br>
 &nbsp;<br>
-Secure&nbsp;finite&nbsp;field&nbsp;arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;fields&nbsp;of&nbsp;prime&nbsp;order<br>
-and&nbsp;fields&nbsp;of&nbsp;characteristic&nbsp;two.&nbsp;Secure&nbsp;integer&nbsp;and&nbsp;fixed-point&nbsp;arithmetic<br>
-is&nbsp;supported&nbsp;for&nbsp;parameterized&nbsp;number&nbsp;ranges,&nbsp;also&nbsp;including&nbsp;support<br>
+Secure&nbsp;finite&nbsp;field&nbsp;arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;fields&nbsp;of&nbsp;arbitrary&nbsp;order,&nbsp;as<br>
+long&nbsp;as&nbsp;the&nbsp;order&nbsp;exceeds&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;Secure&nbsp;integer&nbsp;and&nbsp;fixed-point<br>
+arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;parameterized&nbsp;number&nbsp;ranges,&nbsp;also&nbsp;including&nbsp;support<br>
 for&nbsp;comparison&nbsp;and&nbsp;bitwise&nbsp;operations.<br>
 These&nbsp;operations&nbsp;are&nbsp;all&nbsp;available&nbsp;via&nbsp;Python's&nbsp;operator&nbsp;overloading.<br>
 Some&nbsp;operations&nbsp;for&nbsp;container&nbsp;datatypes&nbsp;holding&nbsp;secret-shared&nbsp;data&nbsp;items<br>
@@ -31,20 +31,22 @@ are&nbsp;provided&nbsp;as&nbsp;well&nbsp;(e.g.,&nbsp;some&nbsp;matrix-vector&nbs
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="mpyc.asyncoro.html">asyncoro</a><br>
-<a href="mpyc.bfield.html">bfield</a><br>
-<a href="mpyc.gf2x.html">gf2x</a><br>
+<a href="mpyc.finfields.html">finfields</a><br>
+<a href="mpyc.gfpx.html">gfpx</a><br>
 </td><td width="25%" valign=top><a href="mpyc.gmpy.html">gmpy</a><br>
-<a href="mpyc.pfield.html">pfield</a><br>
+<a href="mpyc.mpctools.html">mpctools</a><br>
 <a href="mpyc.random.html">random</a><br>
 </td><td width="25%" valign=top><a href="mpyc.runtime.html">runtime</a><br>
+<a href="mpyc.seclists.html">seclists</a><br>
 <a href="mpyc.sectypes.html">sectypes</a><br>
+</td><td width="25%" valign=top><a href="mpyc.statistics.html">statistics</a><br>
 <a href="mpyc.thresha.html">thresha</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__license__</strong> = 'Apache License 2.0'</td></tr></table>
+<td width="100%"><strong>__license__</strong> = 'MIT License'</td></tr></table>
 </body></html>

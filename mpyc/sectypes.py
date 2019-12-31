@@ -419,6 +419,12 @@ def _SecFld(field):
         if value is not None:
             if isinstance(value, int):
                 value = sectype.field(value)
+            elif not isinstance(value, sectype.field):
+                if isinstance(value, finfields.FiniteFieldElement):
+                    raise TypeError(f'incompatible finite field {type(value).__name__}'
+                                    f' for {type(self).__name__}')
+
+                raise TypeError('None, int, or finite field required')
         super(sectype, self).__init__(value)
     sectype = type(f'SecFld{l}({field.__name__})', (SecureFiniteField,),
                    {'__slots__': (), '__init__': init})
@@ -452,12 +458,19 @@ def _SecInt(l, p, n):
         name = f'SecInt{l}({p})'
 
     def init(self, value=None):
+        """Value must be None, int, or correct field type."""
         if value is not None:
             if isinstance(value, int):
                 value = sectype.field(value)
+            elif not isinstance(value, sectype.field):
+                if isinstance(value, finfields.FiniteFieldElement):
+                    raise TypeError(f'incompatible finite field {type(value).__name__}'
+                                    f' for {type(self).__name__}')
+
+                raise TypeError('None, int, or finite field required')
+
         super(sectype, self).__init__(value)
-    sectype = type(name, (SecureInteger,),
-                   {'__slots__': (), '__init__': init})
+    sectype = type(name, (SecureInteger,), {'__slots__': (), '__init__': init})
     sectype.field = _pfield(l, 0, p, n)
     sectype.bit_length = l
     return sectype
@@ -491,7 +504,7 @@ def _SecFxp(l, f, p, n):
             elif isinstance(value, float):
                 self.integral = value.is_integer()
                 value = sectype.field(round(value * (1<<f)))
-            else:
+            else:  # TODO: check field type
                 self.integral = integral
         else:
             self.integral = integral

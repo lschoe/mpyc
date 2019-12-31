@@ -24,6 +24,7 @@ from mpyc import sectypes
 from mpyc import asyncoro
 import mpyc.random
 import mpyc.statistics
+import mpyc.seclists
 
 Future = asyncio.Future
 Share = sectypes.Share
@@ -1617,6 +1618,7 @@ def setup():
     asyncoro.runtime = rt
     mpyc.random.runtime = rt
     mpyc.statistics.runtime = rt
+    mpyc.seclists.runtime = rt
     return rt
 
 

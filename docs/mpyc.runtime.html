@@ -12,8 +12,8 @@
     <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
 &nbsp;<br>
 Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
-Shamir's&nbsp;threshold&nbsp;secret&nbsp;sharing&nbsp;scheme&nbsp;is&nbsp;used&nbsp;for&nbsp;fields&nbsp;of&nbsp;prime&nbsp;order&nbsp;and<br>
-fields&nbsp;of&nbsp;characteristic&nbsp;two.&nbsp;MPyC&nbsp;provides&nbsp;secure&nbsp;number&nbsp;types&nbsp;and&nbsp;operations,<br>
+Shamir's&nbsp;threshold&nbsp;secret&nbsp;sharing&nbsp;scheme&nbsp;is&nbsp;used&nbsp;for&nbsp;finite&nbsp;fields&nbsp;of&nbsp;any&nbsp;order<br>
+exceeding&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;MPyC&nbsp;provides&nbsp;secure&nbsp;number&nbsp;types&nbsp;and&nbsp;operations,<br>
 many&nbsp;of&nbsp;which&nbsp;are&nbsp;available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&nbsp;operator&nbsp;overloading.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -26,17 +26,18 @@ many&nbsp;of&nbsp;which&nbsp;are&nbsp;available&nbsp;through&nbsp;Python's&nbsp;
 <a href="asyncio.html">asyncio</a><br>
 <a href="mpyc.asyncoro.html">mpyc.asyncoro</a><br>
 <a href="configparser.html">configparser</a><br>
+<a href="datetime.html">datetime</a><br>
 </td><td width="25%" valign=top><a href="functools.html">functools</a><br>
 <a href="itertools.html">itertools</a><br>
 <a href="logging.html">logging</a><br>
 <a href="math.html">math</a><br>
-</td><td width="25%" valign=top><a href="mpyc.html">mpyc</a><br>
-<a href="os.html">os</a><br>
+<a href="mpyc.html">mpyc</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
 <a href="secrets.html">secrets</a><br>
 <a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
-</td><td width="25%" valign=top><a href="ssl.html">ssl</a><br>
+<a href="ssl.html">ssl</a><br>
 <a href="sys.html">sys</a><br>
-<a href="mpyc.thresha.html">mpyc.thresha</a><br>
+</td><td width="25%" valign=top><a href="mpyc.thresha.html">mpyc.thresha</a><br>
 <a href="time.html">time</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -97,7 +98,13 @@ Threshold&nbsp;0&nbsp;(no&nbsp;corrupted&nbsp;parties)&nbsp;is&nbsp;supported&nb
 to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;sharing).<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
+<dl><dt><a name="Runtime-__aenter__"><strong>__aenter__</strong></a>(self)</dt><dd><tt>Start&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;entering&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-__aexit__"><strong>__aexit__</strong></a>(self, exc_type, exc, tb)</dt><dd><tt>Shutdown&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;exiting&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-__init__"><strong>__init__</strong></a>(self, pid, parties, options)</dt><dd><tt>Initialize&nbsp;runtime.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-abs"><strong>abs</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;absolute&nbsp;value&nbsp;of&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-add"><strong>add</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
@@ -107,6 +114,11 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 
 <dl><dt><a name="Runtime-barrier"><strong>barrier</strong></a>(self)</dt><dd><tt>Barrier&nbsp;for&nbsp;runtime.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-convert"><strong>convert</strong></a>(self, x, ttype)</dt><dd><tt>Secure&nbsp;conversion&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x&nbsp;to&nbsp;given&nbsp;ttype.<br>
+&nbsp;<br>
+Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
+Converted&nbsp;values&nbsp;assumed&nbsp;to&nbsp;fit&nbsp;in&nbsp;target&nbsp;type.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-div"><strong>div</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;division&nbsp;of&nbsp;a&nbsp;by&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-eq"><strong>eq</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
@@ -114,6 +126,8 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 <dl><dt><a name="Runtime-eq_public"><strong>eq_public</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;public&nbsp;equality&nbsp;test&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-from_bits"><strong>from_bits</strong></a>(self, x)</dt><dd><tt>Recover&nbsp;secure&nbsp;number&nbsp;from&nbsp;its&nbsp;binary&nbsp;representation&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-gather"><strong>gather</strong></a>(self, *obj)</dt></dl>
 
 <dl><dt><a name="Runtime-gauss"><strong>gauss</strong></a>(self, A, d, b, c)</dt><dd><tt>Secure&nbsp;Gaussian&nbsp;elimination&nbsp;A&nbsp;d&nbsp;-&nbsp;b&nbsp;c.</tt></dd></dl>
 
@@ -135,8 +149,6 @@ The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&n
 
 <dl><dt><a name="Runtime-is_zero_public"><strong>is_zero_public</strong></a>(self, a) -&gt; _asyncio.Future</dt><dd><tt>Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-lin_comb"><strong>lin_comb</strong></a>(self, a, x)</dt><dd><tt>Secure&nbsp;linear&nbsp;combination:&nbsp;dot&nbsp;product&nbsp;of&nbsp;public&nbsp;a&nbsp;and&nbsp;secret&nbsp;x.</tt></dd></dl>
-
 <dl><dt><a name="Runtime-logging"><strong>logging</strong></a>(self, enable=None)</dt><dd><tt>Toggle/enable/disable&nbsp;logging.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-lsb"><strong>lsb</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;least&nbsp;significant&nbsp;bit&nbsp;of&nbsp;a.</tt></dd></dl>
@@ -150,6 +162,12 @@ The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&n
 <dl><dt><a name="Runtime-max"><strong>max</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-min"><strong>min</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-min_max"><strong>min_max</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+&nbsp;<br>
+Total&nbsp;number&nbsp;of&nbsp;comparisons&nbsp;is&nbsp;only&nbsp;(3n-3)//2,&nbsp;compared&nbsp;to&nbsp;2n-2&nbsp;for&nbsp;the&nbsp;obvious&nbsp;approach.<br>
+This&nbsp;is&nbsp;optimal&nbsp;as&nbsp;shown&nbsp;by&nbsp;Ira&nbsp;Pohl&nbsp;in&nbsp;"A&nbsp;sorting&nbsp;problem&nbsp;and&nbsp;its&nbsp;complexity",<br>
+Communications&nbsp;of&nbsp;the&nbsp;ACM&nbsp;15(6),&nbsp;pp.&nbsp;462-464,&nbsp;1972.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-mod"><strong>mod</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;modulo&nbsp;reduction.</tt></dd></dl>
 
@@ -165,7 +183,9 @@ Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nb
 The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;the&nbsp;output.<br>
 The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;receiver.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-pow"><strong>pow</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;exponentation&nbsp;a&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;b,&nbsp;for&nbsp;public&nbsp;integer&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-pos"><strong>pos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;unary&nbsp;+&nbsp;applied&nbsp;to&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-pow"><strong>pow</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;exponentiation&nbsp;a&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;b,&nbsp;for&nbsp;public&nbsp;integer&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-prfs"><strong>prfs</strong></a>(self, bound)</dt><dd><tt>PRFs&nbsp;with&nbsp;codomain&nbsp;range(bound)&nbsp;for&nbsp;pseudorandom&nbsp;secret&nbsp;sharing.<br>
 &nbsp;<br>
@@ -185,9 +205,9 @@ Return&nbsp;a&nbsp;mapping&nbsp;from&nbsp;sets&nbsp;of&nbsp;parties&nbsp;to&nbsp
 
 <dl><dt><a name="Runtime-schur_prod"><strong>schur_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;entrywise&nbsp;multiplication&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, EQ=False, GE=False)</dt><dd><tt>Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.</tt></dd></dl>
+<dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, EQ=False, GE=False, l=None)</dt><dd><tt>Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPC&nbsp;runtime.<br>
+<dl><dt><a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
 &nbsp;<br>
 Close&nbsp;all&nbsp;connections,&nbsp;if&nbsp;any.</tt></dd></dl>
 
@@ -199,11 +219,17 @@ Open&nbsp;connections&nbsp;with&nbsp;other&nbsp;parties,&nbsp;if&nbsp;any.</tt><
 
 <dl><dt><a name="Runtime-sum"><strong>sum</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;sum&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-throttler"><strong>throttler</strong></a>(self, load_percentage=1.0)</dt><dd><tt>Throttle&nbsp;runtime&nbsp;by&nbsp;given&nbsp;percentage&nbsp;(default&nbsp;1.0).</tt></dd></dl>
+
 <dl><dt><a name="Runtime-to_bits"><strong>to_bits</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;(or&nbsp;all)&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-trunc"><strong>trunc</strong></a>(self, x, f=None, l=None)</dt><dd><tt>Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x.<br>
 &nbsp;<br>
 Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f&nbsp;for&nbsp;a&nbsp;in&nbsp;x.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-unit_vector"><strong>unit_vector</strong></a>(self, a, n)</dt><dd><tt>Length-n&nbsp;unit&nbsp;vector&nbsp;[0]*a&nbsp;+&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1-a)&nbsp;for&nbsp;secret&nbsp;a,&nbsp;assuming&nbsp;0&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;n.<br>
+&nbsp;<br>
+NB:&nbsp;If&nbsp;a&nbsp;=&nbsp;n,&nbsp;unit&nbsp;vector&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1)&nbsp;is&nbsp;returned.&nbsp;See&nbsp;mpyc.statistics.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-vector_add"><strong>vector_add</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
 
@@ -213,11 +239,13 @@ Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f&nbsp;for&nbsp;a&nbsp
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="Runtime-SecFld"><strong>SecFld</strong></a>(order=None, modulus=None, char2=None, l=None)</dt><dd><tt>Secure&nbsp;prime&nbsp;or&nbsp;binary&nbsp;field&nbsp;of&nbsp;(l+1)-bit&nbsp;order.<br>
+<dl><dt><a name="Runtime-SecFld"><strong>SecFld</strong></a>(order=None, modulus=None, char=None, ext_deg=None, min_order=None, signed=False)</dt><dd><tt>Secure&nbsp;finite&nbsp;field&nbsp;of&nbsp;order&nbsp;q&nbsp;=&nbsp;p**d.<br>
 &nbsp;<br>
-Field&nbsp;is&nbsp;prime&nbsp;by&nbsp;default,&nbsp;and&nbsp;if&nbsp;order&nbsp;(or&nbsp;modulus)&nbsp;is&nbsp;prime.<br>
-Field&nbsp;is&nbsp;binary&nbsp;if&nbsp;order&nbsp;is&nbsp;a&nbsp;power&nbsp;of&nbsp;2,&nbsp;if&nbsp;modulus&nbsp;is&nbsp;a<br>
-polynomial,&nbsp;or&nbsp;if&nbsp;char2&nbsp;is&nbsp;True.</tt></dd></dl>
+Order&nbsp;q&nbsp;&gt;=&nbsp;min_order.<br>
+Field&nbsp;is&nbsp;prime&nbsp;(d&nbsp;=&nbsp;1)&nbsp;by&nbsp;default&nbsp;and&nbsp;if&nbsp;modulus&nbsp;is&nbsp;prime.<br>
+Extension&nbsp;degree&nbsp;d&nbsp;&gt;&nbsp;1&nbsp;if&nbsp;order&nbsp;is&nbsp;a&nbsp;prime&nbsp;power&nbsp;p**d&nbsp;with&nbsp;d&nbsp;&gt;&nbsp;1,<br>
+if&nbsp;modulus&nbsp;is&nbsp;a&nbsp;polynomial&nbsp;or&nbsp;a&nbsp;string&nbsp;or&nbsp;an&nbsp;integer&nbsp;&gt;&nbsp;char,<br>
+or&nbsp;if&nbsp;ext_deg&nbsp;is&nbsp;an&nbsp;integer&nbsp;&gt;&nbsp;1,&nbsp;or&nbsp;if&nbsp;min_order&nbsp;&gt;&nbsp;char.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-SecFxp"><strong>SecFxp</strong></a>(l=None, f=None, p=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;fixed-point&nbsp;numbers&nbsp;with&nbsp;f-bit&nbsp;fractional&nbsp;part.<br>
 &nbsp;<br>
@@ -227,12 +255,10 @@ NB:&nbsp;if&nbsp;dividing&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;make&n
 
 <dl><dt><a name="Runtime-coroutine"><strong>coroutine</strong></a> = mpc_coro(func, pc=True)</dt><dd><tt>Decorator&nbsp;turning&nbsp;coroutine&nbsp;func&nbsp;into&nbsp;an&nbsp;MPyC&nbsp;coroutine.<br>
 &nbsp;<br>
-An&nbsp;MPyC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asychronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
+An&nbsp;MPyC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asynchronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
 The&nbsp;type&nbsp;of&nbsp;the&nbsp;placeholders&nbsp;is&nbsp;defined&nbsp;either&nbsp;by&nbsp;a&nbsp;return&nbsp;annotation<br>
 of&nbsp;the&nbsp;form&nbsp;"-&gt;&nbsp;expression"&nbsp;or&nbsp;by&nbsp;the&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;func.<br>
 Return&nbsp;annotations&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;static&nbsp;types.</tt></dd></dl>
-
-<dl><dt><a name="Runtime-gather"><strong>gather</strong></a> = gather_shares(*obj)</dt><dd><tt>Gather&nbsp;all&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shared&nbsp;values).</tt></dd></dl>
 
 <dl><dt><a name="Runtime-returnType"><strong>returnType</strong></a>(*args, wrap=True)</dt><dd><tt>Define&nbsp;return&nbsp;type&nbsp;for&nbsp;MPyC&nbsp;coroutines.<br>
 &nbsp;<br>
@@ -253,7 +279,9 @@ Data descriptors defined here:<br>
 Data and other attributes defined here:<br>
 <dl><dt><strong>random</strong> = &lt;module 'mpyc.random' from 'C:\\Users\\Berry\\Documents\\GitHub\\mympyc\\mpyc\\random.py'&gt;</dl>
 
-<dl><dt><strong>version</strong> = '0.5'</dl>
+<dl><dt><strong>statistics</strong> = &lt;module 'mpyc.statistics' from 'C:\\Users\\Berry\\Documents\\GitHub\\mympyc\\mpyc\\statistics.py'&gt;</dl>
+
+<dl><dt><strong>version</strong> = '0.6'</dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">

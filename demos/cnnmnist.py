@@ -23,7 +23,7 @@ secnum = None
 
 def scale_to_int(f):
     if secnum.field.frac_length == 0:
-        scale = lambda a: secnum(round(a * f))
+        scale = lambda a: secnum(int(round(a * f)))  # force Python integers
     else:
         scale = secnum
     return np.vectorize(scale)

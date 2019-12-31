@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.mpctools</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.mpctools</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5Cmpctools.py">c:\users\berry\documents\github\mympyc\mpyc\mpctools.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;module&nbsp;currently&nbsp;provides&nbsp;alternative&nbsp;implementations&nbsp;for&nbsp;two<br>
+functions&nbsp;in&nbsp;Python's&nbsp;itertools&nbsp;and&nbsp;functools&nbsp;modules,&nbsp;respectively.<br>
+&nbsp;<br>
+The&nbsp;alternative&nbsp;implementations&nbsp;can&nbsp;be&nbsp;used&nbsp;as&nbsp;drop-in&nbsp;replacements,&nbsp;however,<br>
+potentially&nbsp;enhancing&nbsp;the&nbsp;performance&nbsp;when&nbsp;used&nbsp;in&nbsp;secure&nbsp;computations.&nbsp;More<br>
+specifically,&nbsp;these&nbsp;implementations&nbsp;are&nbsp;aimed&nbsp;at&nbsp;reducing&nbsp;the&nbsp;overall&nbsp;round<br>
+complexity,&nbsp;possible&nbsp;at&nbsp;the&nbsp;expense&nbsp;of&nbsp;increasing&nbsp;overall&nbsp;space&nbsp;complexity,<br>
+time&nbsp;complexity,&nbsp;and&nbsp;communication&nbsp;complexity.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="operator.html">operator</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-accumulate"><strong>accumulate</strong></a>(x, f=&lt;built-in function add&gt;, iv=None)</dt><dd><tt>For&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments,&nbsp;make&nbsp;an&nbsp;iterator&nbsp;that&nbsp;returns<br>
+the&nbsp;accumulated&nbsp;results&nbsp;over&nbsp;all&nbsp;(nonempty)&nbsp;prefixes&nbsp;of&nbsp;the&nbsp;given&nbsp;iterable&nbsp;x.<br>
+&nbsp;<br>
+The&nbsp;applications&nbsp;of&nbsp;f&nbsp;are&nbsp;arranged&nbsp;such&nbsp;that&nbsp;the&nbsp;maximum&nbsp;depth&nbsp;is&nbsp;logarithmic<br>
+in&nbsp;the&nbsp;number&nbsp;of&nbsp;elements&nbsp;of&nbsp;x,&nbsp;at&nbsp;the&nbsp;cost&nbsp;of&nbsp;increasing&nbsp;the&nbsp;total&nbsp;number&nbsp;of<br>
+applications&nbsp;of&nbsp;f&nbsp;by&nbsp;a&nbsp;logarithmic&nbsp;factor&nbsp;as&nbsp;well.<br>
+&nbsp;<br>
+In&nbsp;contrast,&nbsp;Python's&nbsp;itertools.<a href="#-accumulate">accumulate</a>()&nbsp;higher-order&nbsp;function&nbsp;arranges<br>
+the&nbsp;applications&nbsp;of&nbsp;f&nbsp;in&nbsp;a&nbsp;linear&nbsp;fashion,&nbsp;as&nbsp;in&nbsp;general&nbsp;it&nbsp;cannot&nbsp;be&nbsp;assumed<br>
+that&nbsp;f&nbsp;is&nbsp;associative&nbsp;(and&nbsp;that&nbsp;the&nbsp;arguments&nbsp;to&nbsp;f&nbsp;are&nbsp;even&nbsp;of&nbsp;the&nbsp;same&nbsp;type).<br>
+&nbsp;<br>
+If&nbsp;iv&nbsp;is&nbsp;provided,&nbsp;the&nbsp;accumulation&nbsp;leads&nbsp;off&nbsp;with&nbsp;this&nbsp;initial&nbsp;value&nbsp;so&nbsp;that<br>
+the&nbsp;output&nbsp;has&nbsp;one&nbsp;more&nbsp;element&nbsp;than&nbsp;the&nbsp;input&nbsp;iterable.&nbsp;Otherwise,&nbsp;the&nbsp;number<br>
+of&nbsp;elements&nbsp;output&nbsp;matches&nbsp;the&nbsp;input&nbsp;iterable&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-reduce"><strong>reduce</strong></a>(f, x, iv=None)</dt><dd><tt>Apply&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments&nbsp;to&nbsp;the&nbsp;items&nbsp;of&nbsp;iterable&nbsp;x.<br>
+&nbsp;<br>
+The&nbsp;applications&nbsp;of&nbsp;f&nbsp;are&nbsp;arranged&nbsp;in&nbsp;a&nbsp;binary&nbsp;tree&nbsp;of&nbsp;logarithmic&nbsp;depth,<br>
+thus&nbsp;limiting&nbsp;the&nbsp;overall&nbsp;round&nbsp;complexity&nbsp;of&nbsp;the&nbsp;secure&nbsp;computation.<br>
+&nbsp;<br>
+In&nbsp;contrast,&nbsp;Python's&nbsp;functools.<a href="#-reduce">reduce</a>()&nbsp;higher-order&nbsp;function&nbsp;arranges<br>
+the&nbsp;applications&nbsp;of&nbsp;f&nbsp;in&nbsp;a&nbsp;linear&nbsp;chain&nbsp;(a&nbsp;binary&nbsp;tree&nbsp;of&nbsp;linear&nbsp;depth),<br>
+and&nbsp;in&nbsp;this&nbsp;case&nbsp;f&nbsp;is&nbsp;not&nbsp;required&nbsp;to&nbsp;be&nbsp;associative;&nbsp;the&nbsp;arguments&nbsp;to&nbsp;f<br>
+may&nbsp;even&nbsp;be&nbsp;of&nbsp;different&nbsp;types.<br>
+&nbsp;<br>
+If&nbsp;iv&nbsp;is&nbsp;provided,&nbsp;it&nbsp;is&nbsp;placed&nbsp;before&nbsp;the&nbsp;items&nbsp;of&nbsp;x&nbsp;(hence&nbsp;effectively<br>
+serves&nbsp;as&nbsp;a&nbsp;default&nbsp;when&nbsp;x&nbsp;is&nbsp;empty).&nbsp;If&nbsp;iv&nbsp;is&nbsp;not&nbsp;given&nbsp;and&nbsp;x&nbsp;contains<br>
+only&nbsp;one&nbsp;item,&nbsp;that&nbsp;item&nbsp;is&nbsp;returned.</tt></dd></dl>
+</td></tr></table>
+</body></html>

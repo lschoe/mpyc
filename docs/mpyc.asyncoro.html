@@ -44,7 +44,7 @@ computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
 <font color="#000000" face="helvetica, arial"><a name="SharesExchanger">class <strong>SharesExchanger</strong></a>(<a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#SharesExchanger">SharesExchanger</a>(peer_pid=None)<br>
+<td colspan=2><tt><a href="#SharesExchanger">SharesExchanger</a>(rt,&nbsp;peer_pid=None)<br>
 &nbsp;<br>
 Send&nbsp;and&nbsp;receive&nbsp;shares.<br>
 &nbsp;<br>
@@ -58,15 +58,15 @@ Bidirectional&nbsp;connection&nbsp;with&nbsp;one&nbsp;of&nbsp;the&nbsp;other&nbs
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="SharesExchanger-__init__"><strong>__init__</strong></a>(self, peer_pid=None)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+<dl><dt><a name="SharesExchanger-__init__"><strong>__init__</strong></a>(self, rt, peer_pid=None)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <dl><dt><a name="SharesExchanger-close_connection"><strong>close_connection</strong></a>(self)</dt><dd><tt>Close&nbsp;connection&nbsp;with&nbsp;the&nbsp;peer.</tt></dd></dl>
 
-<dl><dt><a name="SharesExchanger-connection_lost"><strong>connection_lost</strong></a>(self, exc)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;connection&nbsp;is&nbsp;lost&nbsp;or&nbsp;closed.<br>
+<dl><dt><a name="SharesExchanger-connection_lost"><strong>connection_lost</strong></a>(self, exc)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;connection&nbsp;with&nbsp;the&nbsp;peer&nbsp;is&nbsp;lost&nbsp;or&nbsp;closed.<br>
 &nbsp;<br>
-The&nbsp;argument&nbsp;is&nbsp;an&nbsp;exception&nbsp;object&nbsp;or&nbsp;None&nbsp;(the&nbsp;latter<br>
-meaning&nbsp;a&nbsp;regular&nbsp;EOF&nbsp;is&nbsp;received&nbsp;or&nbsp;the&nbsp;connection&nbsp;was<br>
-aborted&nbsp;or&nbsp;closed).</tt></dd></dl>
+If&nbsp;the&nbsp;connection&nbsp;is&nbsp;closed&nbsp;normally&nbsp;(during&nbsp;shutdown)&nbsp;then&nbsp;exc&nbsp;is&nbsp;None.<br>
+Otherwise,&nbsp;if&nbsp;the&nbsp;connection&nbsp;is&nbsp;lost&nbsp;unexpectedly,&nbsp;exc&nbsp;may&nbsp;indicate&nbsp;the<br>
+cause&nbsp;(but&nbsp;exc&nbsp;is&nbsp;None&nbsp;is&nbsp;still&nbsp;possible).</tt></dd></dl>
 
 <dl><dt><a name="SharesExchanger-connection_made"><strong>connection_made</strong></a>(self, transport)</dt><dd><tt>Called&nbsp;when&nbsp;a&nbsp;connection&nbsp;is&nbsp;made.<br>
 &nbsp;<br>
@@ -137,10 +137,10 @@ Data descriptors inherited from <a href="asyncio.protocols.html#BaseProtocol">as
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-gather_shares"><strong>gather_shares</strong></a>(*obj)</dt><dd><tt>Gather&nbsp;all&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shared&nbsp;values).</tt></dd></dl>
+<td width="100%"><dl><dt><a name="-gather_shares"><strong>gather_shares</strong></a>(rt, *obj)</dt><dd><tt>Gather&nbsp;all&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shared&nbsp;values).</tt></dd></dl>
  <dl><dt><a name="-mpc_coro"><strong>mpc_coro</strong></a>(func, pc=True)</dt><dd><tt>Decorator&nbsp;turning&nbsp;coroutine&nbsp;func&nbsp;into&nbsp;an&nbsp;MPyC&nbsp;coroutine.<br>
 &nbsp;<br>
-An&nbsp;MPyC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asychronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
+An&nbsp;MPyC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asynchronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
 The&nbsp;type&nbsp;of&nbsp;the&nbsp;placeholders&nbsp;is&nbsp;defined&nbsp;either&nbsp;by&nbsp;a&nbsp;return&nbsp;annotation<br>
 of&nbsp;the&nbsp;form&nbsp;"-&gt;&nbsp;expression"&nbsp;or&nbsp;by&nbsp;the&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;func.<br>
 Return&nbsp;annotations&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;static&nbsp;types.</tt></dd></dl>
@@ -154,6 +154,5 @@ Used&nbsp;in&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;an&nbsp;MPyC&nbs
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>pc_level</strong> = 0<br>
-<strong>runtime</strong> = None</td></tr></table>
+<td width="100%"><strong>runtime</strong> = None</td></tr></table>
 </body></html>

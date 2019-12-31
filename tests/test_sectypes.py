@@ -66,6 +66,13 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(secfld.field.modulus, 283)  # AES polynomial
         self.assertEqual(secfld.field.order, 256)
 
+        secfld(None)
+        secfld(False)
+        secfld(True)
+        secfld(secfld.field(0))
+        self.assertRaises(TypeError, secfld, float(0))
+        self.assertRaises(TypeError, secfld, SecFld().field(0))
+
         a = secfld(1)
         self.assertRaises(TypeError, abs, a)
         self.assertRaises(TypeError, operator.floordiv, a, a)
@@ -86,3 +93,14 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, sectypes.SecInt, p=2**61 - 1)
         sectypes.SecFxp(p=2**89 - 1)
         self.assertRaises(ValueError, sectypes.SecFxp, f=58, p=2**89 - 1)
+
+    def test_SecInt(self):
+        SecInt = sectypes.SecInt
+        secint = SecInt()
+        secint16 = SecInt(16)
+        secint(None)
+        secint(False)
+        secint(True)
+        secint(secint.field(0))
+        self.assertRaises(TypeError, secint, float(0))
+        self.assertRaises(TypeError, secint, secint16.field(0))
