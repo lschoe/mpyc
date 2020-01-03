@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.asyncoro</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5Casyncoro.py">c:\users\berry\documents\github\mympyc\mpyc\asyncoro.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.6/mpyc/asyncoro.py">github.com/lschoe/mpyc/blob/v0.6/mpyc/asyncoro.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;the&nbsp;basic&nbsp;support&nbsp;for&nbsp;asynchronous&nbsp;communication&nbsp;and<br>
 computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
 <p>
@@ -18,10 +18,10 @@ computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="functools.html">functools</a><br>
-</td><td width="25%" valign=top><a href="itertools.html">itertools</a><br>
-</td><td width="25%" valign=top><a href="struct.html">struct</a><br>
-</td><td width="25%" valign=top><a href="typing.html">typing</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/functools.html">functools</a><br>
+</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/itertools.html">itertools</a><br>
+</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/struct.html">struct</a><br>
+</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/typing.html">typing</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -30,7 +30,7 @@ computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a>(<a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a>)
+<dt><font face="helvetica, arial"><a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.Protocol">asyncio.protocols.Protocol</a>(<a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.BaseProtocol">asyncio.protocols.BaseProtocol</a>)
 </font></dt><dd>
 <dl>
 <dt><font face="helvetica, arial"><a href="mpyc.asyncoro.html#SharesExchanger">SharesExchanger</a>
@@ -41,7 +41,7 @@ computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="SharesExchanger">class <strong>SharesExchanger</strong></a>(<a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="SharesExchanger">class <strong>SharesExchanger</strong></a>(<a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.Protocol">asyncio.protocols.Protocol</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#SharesExchanger">SharesExchanger</a>(rt,&nbsp;peer_pid=None)<br>
@@ -52,9 +52,9 @@ Bidirectional&nbsp;connection&nbsp;with&nbsp;one&nbsp;of&nbsp;the&nbsp;other&nbs
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.asyncoro.html#SharesExchanger">SharesExchanger</a></dd>
-<dd><a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a></dd>
-<dd><a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a></dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
+<dd><a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.Protocol">asyncio.protocols.Protocol</a></dd>
+<dd><a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.BaseProtocol">asyncio.protocols.BaseProtocol</a></dd>
+<dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
@@ -89,7 +89,7 @@ Message&nbsp;format&nbsp;consists&nbsp;of&nbsp;four&nbsp;parts:<br>
 &nbsp;4.&nbsp;payload&nbsp;(byte&nbsp;string&nbsp;of&nbsp;length&nbsp;payload_size).</tt></dd></dl>
 
 <hr>
-Methods inherited from <a href="asyncio.protocols.html#Protocol">asyncio.protocols.Protocol</a>:<br>
+Methods inherited from <a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.Protocol">asyncio.protocols.Protocol</a>:<br>
 <dl><dt><a name="SharesExchanger-eof_received"><strong>eof_received</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;other&nbsp;end&nbsp;calls&nbsp;write_eof()&nbsp;or&nbsp;equivalent.<br>
 &nbsp;<br>
 If&nbsp;this&nbsp;returns&nbsp;a&nbsp;false&nbsp;value&nbsp;(including&nbsp;None),&nbsp;the&nbsp;transport<br>
@@ -97,7 +97,7 @@ will&nbsp;close&nbsp;itself.&nbsp;&nbsp;If&nbsp;it&nbsp;returns&nbsp;a&nbsp;true
 transport&nbsp;is&nbsp;up&nbsp;to&nbsp;the&nbsp;protocol.</tt></dd></dl>
 
 <hr>
-Methods inherited from <a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a>:<br>
+Methods inherited from <a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.BaseProtocol">asyncio.protocols.BaseProtocol</a>:<br>
 <dl><dt><a name="SharesExchanger-pause_writing"><strong>pause_writing</strong></a>(self)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;transport's&nbsp;buffer&nbsp;goes&nbsp;over&nbsp;the&nbsp;high-water&nbsp;mark.<br>
 &nbsp;<br>
 Pause&nbsp;and&nbsp;resume&nbsp;calls&nbsp;are&nbsp;paired&nbsp;--&nbsp;<a href="#SharesExchanger-pause_writing">pause_writing</a>()&nbsp;is&nbsp;called<br>
@@ -113,7 +113,7 @@ equal&nbsp;or&nbsp;lower&nbsp;than&nbsp;the&nbsp;low-water&nbsp;mark.&nbsp;&nbsp
 are&nbsp;important&nbsp;to&nbsp;ensure&nbsp;that&nbsp;things&nbsp;go&nbsp;as&nbsp;expected&nbsp;when&nbsp;either<br>
 mark&nbsp;is&nbsp;zero.<br>
 &nbsp;<br>
-NOTE:&nbsp;This&nbsp;is&nbsp;the&nbsp;only&nbsp;<a href="asyncio.protocols.html#Protocol">Protocol</a>&nbsp;callback&nbsp;that&nbsp;is&nbsp;not&nbsp;called<br>
+NOTE:&nbsp;This&nbsp;is&nbsp;the&nbsp;only&nbsp;<a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.Protocol">Protocol</a>&nbsp;callback&nbsp;that&nbsp;is&nbsp;not&nbsp;called<br>
 through&nbsp;EventLoop.call_soon()&nbsp;--&nbsp;if&nbsp;it&nbsp;were,&nbsp;it&nbsp;would&nbsp;have&nbsp;no<br>
 effect&nbsp;when&nbsp;it's&nbsp;most&nbsp;needed&nbsp;(when&nbsp;the&nbsp;app&nbsp;keeps&nbsp;writing<br>
 without&nbsp;yielding&nbsp;until&nbsp;<a href="#SharesExchanger-pause_writing">pause_writing</a>()&nbsp;is&nbsp;called).</tt></dd></dl>
@@ -123,7 +123,7 @@ without&nbsp;yielding&nbsp;until&nbsp;<a href="#SharesExchanger-pause_writing">p
 See&nbsp;<a href="#SharesExchanger-pause_writing">pause_writing</a>()&nbsp;for&nbsp;details.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="asyncio.protocols.html#BaseProtocol">asyncio.protocols.BaseProtocol</a>:<br>
+Data descriptors inherited from <a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.BaseProtocol">asyncio.protocols.BaseProtocol</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>

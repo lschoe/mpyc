@@ -21,7 +21,7 @@ above to view the entire repository and try out its notebooks in the `demos` dir
 
 `python setup.py install --user`
 
-See `demos` for usage examples.
+See `demos` for usage examples and [MPyC docs](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
 
 ## Notes:
 
@@ -50,4 +50,4 @@ e.g., using `pip install jupyter`. The latest version of Jupyter will come with 
 top-level `await`. Instead of `mpc.run(mpc.start())` one can now simply write `await mpc.start()` anywhere in
 a notebook cell, even outside a coroutine.
 
-Copyright &copy; 2018-2019 Berry Schoenmakers
+Copyright &copy; 2018-2020 Berry Schoenmakers
