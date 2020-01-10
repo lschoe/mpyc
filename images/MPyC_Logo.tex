@@ -32,13 +32,13 @@
 \fill[mpycblue] (-1.45,0) -- (-2.05, 0) arc[x radius=2.05, y radius=2.13, start angle=180, end angle=360]
               -- (1.45,0) arc[x radius=1.45, y radius=1.60, start angle=360, end angle=180];
 % Yellow stroke through eye on the right
-\draw[mpycyellow, line width=0.28cm, rotate=144] (0,0) -- (0,-3);
+\fill[mpycyellow, rotate=144] (-0.14,0) rectangle (0.14,-3);
 % Yellow stroke through mouth on the right
-\draw[mpycyellow, line width=0.28cm, rotate=72] (0,0) -- (0,-3);
+\fill[mpycyellow, rotate=72] (-0.14,0) rectangle (0.14,-3);
 % Yellow stroke through mouth in the middle
-\draw[mpycyellow, line width=0.28cm] (0,0) -- (0,-3);
+\fill[mpycyellow] (-0.14,0) rectangle (0.14,-3);
 % Yellow stroke through mouth on the left
-\draw[mpycyellow, line width=0.28cm, rotate=-72] (0,0) -- (0,-3);
+\fill[mpycyellow, rotate=-72] (-0.14,0) rectangle (0.14,-3);
 \end{tikzpicture}
 
 \end{document}
