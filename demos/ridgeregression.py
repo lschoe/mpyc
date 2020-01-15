@@ -316,7 +316,7 @@ async def main():
         secint = mpc.SecInt(gamma.bit_length() + 1)
         print(f'secint prime size: |q| = {secint.field.modulus.bit_length()} bits'
               f' (secint bit length: {secint.bit_length})')
-        bound = d * round((d-1)**((d-1) / 2)) * gamma**d
+        bound = round(d**(d/2)) * gamma**d
         secfld = mpc.SecFld(min_order=2*bound + 1, signed=True)
         print(f'secfld prime size: |p| = {secfld.field.modulus.bit_length()} bits')
 
