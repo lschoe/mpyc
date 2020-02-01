@@ -260,6 +260,7 @@ async def main():
           ' for own events in the clear')
 
     if args.print_tables or args.plot_curves:
+        plt.figure(1)
         title = f'Party {mpc.pid}: {name} Survival - individual events'
         kmf1, kmf2 = fit_plot(T1, T2, E1, E2, title, unit_of_time, label1, label2)
         if args.print_tables:
@@ -284,6 +285,7 @@ async def main():
           ' for aggregated events in the clear')
 
     if args.print_tables or args.plot_curves:
+        plt.figure(2)
         title = f'Party {mpc.pid}: {name} Survival - aggregated by {stride} {unit_of_time}'
         kmf1, kmf2 = fit_plot([t * stride for t in T1], [t * stride for t in T2], E1, E2,
                               title, unit_of_time, label1, label2)
