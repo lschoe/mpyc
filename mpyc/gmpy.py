@@ -6,6 +6,8 @@ Stubs of limited functionality and efficiency are provided
 in case the gmpy2 package is not available.
 """
 
+import os
+
 
 def factor_prime_power(x):  # TODO: move this to a separate math/number theory module
     """Return p and d for a prime power x = p**d."""
@@ -48,8 +50,12 @@ def factor_prime_power(x):  # TODO: move this to a separate math/number theory m
 
 
 try:
+    if os.getenv('MPYC_NOGMPY') == '1':
+        raise ImportError  # stubs will be loaded
+
     from gmpy2 import is_prime, next_prime, powmod, invert, legendre, is_square, isqrt, iroot
 except ImportError:
+    # load stubs, if MPYC_NOGMPY is set, or if gmpy2 import fails
     import random
 
     def is_prime(x, n=25):
@@ -70,17 +76,14 @@ except ImportError:
             r += 1
             s //= 2
         for _ in range(n):
-            a = random.randrange(1, x-1)
+            a = random.randint(2, x-2)
             b = pow(a, s, x)
-            if b == 1:
+            if b in (1, x-1):
                 continue
-            for _ in range(r):
+            for _ in range(r-1):
+                b = (b * b) % x
                 if b == x-1:
                     break
-                if b == 1:
-                    return False
-
-                b = (b * b) % x
             else:
                 return False
 

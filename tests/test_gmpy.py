@@ -19,6 +19,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(gmpy.powmod(3, 256, 257), 1)
 
         self.assertEqual(gmpy.invert(3, 257), 86)
+        self.assertRaises(ZeroDivisionError, gmpy.invert, 2, 4)
 
         self.assertEqual(gmpy.legendre(0, 101), 0)
         self.assertEqual(gmpy.legendre(42, 101), -1)
@@ -44,6 +45,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(fpp(101**7), (101, 7))
         self.assertEqual(fpp((2**31 - 1)**3), (2**31 - 1, 3))  # 8th Mersenne prime
 
+        self.assertRaises(ValueError, fpp, 1)
         self.assertRaises(ValueError, fpp, 2*3)
         self.assertRaises(ValueError, fpp, 2**6 * 3)
         self.assertRaises(ValueError, fpp, 2**6 * 3**7)
+        self.assertRaises(ValueError, fpp, (1031*1033)**2)

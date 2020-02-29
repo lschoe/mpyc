@@ -12,8 +12,7 @@ fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
 combined with asynchronous evaluation of the associated protocols.
 
-See the [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background. Click the "launch binder" badge
-above to view the entire repository and try out its notebooks in the `demos` directory without any install.
+See the [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background. 
 
 ## Example installs:
 
@@ -21,7 +20,9 @@ above to view the entire repository and try out its notebooks in the `demos` dir
 
 `python setup.py install --user`
 
-See `demos` for usage examples and [MPyC docs](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
+Click the "launch binder" badge above to view the entire repository and try out its notebooks in the `demos` directory without any install.
+
+See `demos` for usage examples and [MPyC docs](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation. 
 
 ## Notes:
 

@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import datetime
+import importlib.util
 import logging
 import math
 import secrets
@@ -1512,6 +1513,8 @@ def setup():
                        default=False, help='disable asynchronous evaluation')
     group.add_argument('--no-barrier', action='store_true',
                        default=False, help='disable barriers')
+    group.add_argument('--no-gmpy2', action='store_true',
+                       default=False, help='disable use of gmpy2 package')
 
     group = parser.add_argument_group('MPyC misc')
     group.add_argument('--output-windows', action='store_true',
@@ -1538,8 +1541,20 @@ def setup():
     else:
         logging.basicConfig(format='{asctime} {message}', style='{',
                             level=logging.INFO, stream=sys.stdout)
-    if 'gmpy2' not in sys.modules:
-        logging.info('Install package gmpy2 for better performance.')
+
+    env_no_gmpy2 = os.getenv('MPYC_NOGMPY') == '1'  # check if variable MPYC_NOGMPY is set
+    if not importlib.util.find_spec('gmpy2'):
+        # gmpy2 package not available
+        if not (options.no_gmpy2 or env_no_gmpy2):
+            logging.info('Install package gmpy2 for better performance.')
+    else:
+        # gmpy2 package available
+        if options.no_gmpy2 or env_no_gmpy2:
+            logging.info('Use of package gmpy2 disabled.')
+            if not env_no_gmpy2:
+                os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
+                from importlib import reload
+                reload(mpyc.gmpy)  # stubs will be loaded this time
 
     if options.config or options.parties:
         # use host:port for each local or remote party
