@@ -1,6 +1,7 @@
 python helloworld.py %*
 python oneliners.py %*
 python ot.py %*
+python unanimous.py %*
 python parallelsort.py %*
 python sort.py %*
 python indextounitvector.py %*
