@@ -278,6 +278,21 @@ class Runtime:
     coroutine = staticmethod(mpc_coro)
     returnType = staticmethod(returnType)
 
+    def plain_input(self, x, sender=None, precision=8):
+        """Plain input x to the computation.
+
+        Value x is a plain number, or a list of plain numbers.
+        The sender is the party that provides an input.
+        For floating points we only share the first 'precision' numbers after the decimal.
+        """
+        x_is_list = isinstance(x, list)
+        if x_is_list:
+            x = x[:]
+        else:
+            x = [x]
+        y = self._distribute_plain(x, sender, precision, x_is_list)
+        return y
+
     def input(self, x, senders=None):
         """Input x to the computation.
 
@@ -305,6 +320,27 @@ class Runtime:
             if not x_is_list:
                 y = [a[0] for a in y]
         return y
+
+    async def _distribute_plain(self, x, sender, precision, x_is_list):
+        """Distribute shares for each x provided by a sender."""
+        assert x[0] is None or self.pid is sender
+        if self.pid == sender:
+            data = b""
+            for index, _ in enumerate(x):
+                data += bytes(f"{_:.{precision}f}".rstrip("0") if isinstance(_, float) else str(_), encoding="utf-8")
+                data += b"," if index + 1 < len(x) else b""
+            for other_pid, _ in enumerate(self.parties):
+                if other_pid == self.pid:
+                    continue
+                else:
+                    self._send_shares(other_pid, data)
+        else:
+            data = self._receive_shares(sender)
+            data = await self.gather(data)
+        x = [float(_) if b"." in _ else int(_) for _ in data.split(b",")]
+        if not x_is_list:
+            return x[0]
+        return x
 
     @mpc_coro
     async def _distribute(self, x, senders):

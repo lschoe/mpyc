@@ -196,6 +196,9 @@ def gather_shares(rt, *obj):
     if isinstance(obj, Future):
         return obj
 
+    if isinstance(obj, bytes):
+        return _AwaitableFuture(obj)
+
     if isinstance(obj, Share):
         if isinstance(obj.df, Future):
             return obj.df
