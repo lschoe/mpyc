@@ -79,7 +79,7 @@ class Polynomial:
         if isinstance(a, list):
             p = cls.p
             if not all(isinstance(a_i, int) and 0 <= a_i < p for a_i in a):
-                raise ValueError(f'polynomial coefficients invalid or out of range')
+                raise ValueError('polynomial coefficients invalid or out of range')
 
             return cls._from_list(a)
 

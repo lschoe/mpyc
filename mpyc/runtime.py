@@ -1482,7 +1482,7 @@ def setup():
     """Setup a runtime."""
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('-H', '--HELP', action='store_true', default=False,
-                        help=f'show this help message for MPyC and exit')
+                        help='show this help message for MPyC and exit')
     parser.add_argument('-h', '--help', action='store_true', default=False,
                         help=f'show {sys.argv[0]} help message (if any)')
 

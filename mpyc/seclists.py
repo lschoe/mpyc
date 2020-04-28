@@ -203,7 +203,7 @@ class seclist(list):
 
         ix = self.find(value)
         if await runtime.eq_public(ix, len(self)):
-            raise ValueError(f'value is not in list')
+            raise ValueError('value is not in list')
 
         return ix
 
