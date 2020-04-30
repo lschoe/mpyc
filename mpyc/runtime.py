@@ -290,6 +290,7 @@ class Runtime:
             x = x[:]
         else:
             x = [x]
+        self._increment_pc()
         y = self._distribute_plain(x, sender, precision, x_is_list)
         return y
 
