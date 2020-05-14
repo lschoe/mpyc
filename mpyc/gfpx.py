@@ -98,10 +98,13 @@ class Polynomial:
     @classmethod
     def _from_int(cls, a):
         p = cls.p
+        neg = a<0
+        if neg:
+            a = -a
         c = []
         while a:
             a, r = divmod(a, p)
-            c.append(r)
+            c.append(p - r if neg and r else r)
         return c
 
     @classmethod
@@ -796,7 +799,7 @@ class BinaryPolynomial(Polynomial):
 
     @staticmethod
     def _from_int(a):
-        return a
+        return abs(a)
 
     @staticmethod
     def _to_int(a):

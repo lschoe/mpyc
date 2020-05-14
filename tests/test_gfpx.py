@@ -26,6 +26,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly.from_terms('1'), 1)
         self.assertEqual(poly.from_terms(f'{X}'), poly.p)
         self.assertEqual(int(poly(poly.p)), poly.p)
+        self.assertEqual(int(poly(-poly.p)), (poly.p-1) * poly.p)
+        self.assertEqual(int(-poly(poly.p)), (poly.p-1) * poly.p)
         self.assertEqual(poly(poly.p).__repr__(), f'{X}')
         self.assertEqual(poly._to_list(poly(poly.p)), [0, 1])
         self.assertEqual(poly.from_terms(f'{X} + {X}^2'), poly.p + poly.p**2)
