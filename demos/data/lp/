@@ -1,0 +1,12 @@
+# tableau =
+default
+# bit-length =
+32
+# security parameter =
+30
+# threshold =
+0
+# solution =
+1.0	0.5
+# dual solution =
+0.5	9.5

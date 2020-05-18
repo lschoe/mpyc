@@ -98,7 +98,7 @@ class Polynomial:
     @classmethod
     def _from_int(cls, a):
         p = cls.p
-        neg = a<0
+        neg = a < 0
         if neg:
             a = -a
         c = []
@@ -914,6 +914,7 @@ class BinaryPolynomial(Polynomial):
 
         if b == 0:
             raise ZeroDivisionError('division by zero polynomial')
+
         m = BinaryPolynomial._deg(a)
         n = BinaryPolynomial._deg(b)
         if m < n:
@@ -930,6 +931,7 @@ class BinaryPolynomial(Polynomial):
     def _divmod(a, b):
         if b == 0:
             raise ZeroDivisionError('division by zero polynomial')
+
         m = BinaryPolynomial._deg(a)
         n = BinaryPolynomial._deg(b)
         if m < n:
@@ -965,12 +967,14 @@ class BinaryPolynomial(Polynomial):
     def _invert(a, b):
         if b == 0:
             raise ZeroDivisionError('division by zero polynomial')
+
         s, s1 = 1, 0
         while b:
             a, (q, b) = b, BinaryPolynomial._divmod(a, b)
             s, s1 = s1, s ^ BinaryPolynomial._mul(q, s1)
         if a != 1:
             raise ZeroDivisionError('inverse does not exist')
+
         return s
 
     @staticmethod

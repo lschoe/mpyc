@@ -6,7 +6,7 @@ import struct
 import itertools
 import functools
 import typing
-from asyncio import Protocol, Future
+from asyncio import Protocol, Future, Task
 from mpyc.sectypes import Share
 
 
@@ -233,8 +233,8 @@ class _ProgramCounterWrapper:
             yield val
 
 
-async def _wrap(coro):
-    return await coro
+async def _wrap_in_coro(awaitable):
+    return await awaitable
 
 
 class _Awaitable:
@@ -382,9 +382,8 @@ def mpc_coro(func, pc=True):
                     raise
 
         if pc:
-            coro = _wrap(_ProgramCounterWrapper(runtime, coro))
-        d = runtime._loop.create_task(coro)  # ensure_future
-        d.add_done_callback(lambda v: _reconcile(decl, v))
+            coro = _wrap_in_coro(_ProgramCounterWrapper(runtime, coro))
+        Task(coro, loop=runtime._loop).add_done_callback(lambda v: _reconcile(decl, v))
         return _ncopy(decl)
 
     return typed_asyncoro

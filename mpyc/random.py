@@ -88,15 +88,18 @@ async def _randbelow(sectype, n, bits=False):
 async def random_unit_vector(sectype, n):
     """Uniformly random secret rotation of [1] + [0]*(n-1).
 
-    Expected number of secret random bits needed is log_2 n + c,
+    Expected number of secret random bits needed is ceil(log_2 n) + c,
     with c a small constant, c < 3.
     """
     await runtime.returnType((sectype, True), n)
+    if n == 1:
+        return [sectype(1)]
+
     b = n-1
     k = b.bit_length()
     x = runtime.random_bits(sectype, k)
-    u = [sectype(1)]
-    i = k
+    i = k-1
+    u = [x[i], 1 - x[i]]
     while i:
         i -= 1
         if (b >> i) & 1:
@@ -106,8 +109,8 @@ async def random_unit_vector(sectype, n):
         elif await runtime.output(u[0] * x[i]):  # TODO: mul_public
             # restart, keeping unused secret random bits x[:i]
             x[i:] = runtime.random_bits(sectype, k - i)
-            u[1:] = []
-            i = k
+            i = k-1
+            u = [x[i], 1 - x[i]]
         else:
             v = runtime.scalar_mul(x[i], u[1:])
             v.extend(runtime.vector_sub(u[1:], v))

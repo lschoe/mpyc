@@ -225,6 +225,7 @@ class Runtime:
                     break
                 except asyncio.CancelledError:
                     raise
+
                 except Exception as exc:
                     logging.debug(exc)
                 time.sleep(0.1)
@@ -1099,6 +1100,7 @@ class Runtime:
             a_integral = a.integral
             if not a_integral:
                 raise ValueError('condition must be integral')
+
             await returnType((stype, a_integral and x[0].integral and y[0].integral), len(x))
 
         a, x, y = await self.gather(a, x, y)

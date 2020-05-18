@@ -425,6 +425,7 @@ def _SecFld(field):
                                     f' for {type(self).__name__}')
 
                 raise TypeError('None, int, or finite field required')
+
         super(sectype, self).__init__(value)
     sectype = type(f'SecFld{l}({field.__name__})', (SecureFiniteField,),
                    {'__slots__': (), '__init__': init})
