@@ -41,6 +41,7 @@ class Share:
         if isinstance(other, Share):
             if not isinstance(other, type(self)):
                 return NotImplemented
+
         elif isinstance(other, int):
             other = type(self)(other)
         elif isinstance(other, float):
@@ -48,12 +49,14 @@ class Share:
                 other = type(self)(other)
             else:
                 return NotImplemented
+
         return other
 
     def _coerce2(self, other):
         if isinstance(other, Share):
             if not isinstance(other, type(self)):
                 return NotImplemented
+
         elif isinstance(other, int):
             pass
         elif isinstance(other, float):
@@ -62,6 +65,7 @@ class Share:
                     other = round(other)
             else:
                 return NotImplemented
+
         return other
 
     def __neg__(self):
@@ -81,6 +85,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
+
         return runtime.add(self, other)
 
     __radd__ = __add__
@@ -90,6 +95,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
+
         return runtime.sub(self, other)
 
     def __rsub__(self, other):
@@ -97,6 +103,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
+
         return runtime.sub(other, self)
 
     def __mul__(self, other):
@@ -104,6 +111,7 @@ class Share:
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
+
         return runtime.mul(self, other)
 
     __rmul__ = __mul__
@@ -113,6 +121,7 @@ class Share:
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
+
         return runtime.div(self, other)
 
     def __rtruediv__(self, other):
@@ -120,6 +129,7 @@ class Share:
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
+
         return runtime.div(other, self)
 
     def __mod__(self, other):
@@ -127,6 +137,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
+
         return runtime.mod(self, other.df.value)
 
     def __rmod__(self, other):
@@ -146,6 +157,7 @@ class Share:
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
+
         r = runtime.mod(self, other.df.value)
         q = (self - r) / other.df
         return q * 2**other.df.frac_length, r
@@ -159,6 +171,7 @@ class Share:
         # TODO: extend to secret exponent
         if not isinstance(other, int):
             return NotImplemented
+
         return runtime.pow(self, other)
 
     def __lshift__(self, other):
@@ -166,7 +179,8 @@ class Share:
         # TODO: extend to secret offset
         if not isinstance(other, int):
             return NotImplemented
-        return runtime.mul(self, 1 << other)
+
+        return runtime.mul(self, 1<<other)
 
     def __rlshift__(self, other):
         """Left shift (with reflected arguments)."""
@@ -177,7 +191,8 @@ class Share:
         # TODO: extend to secret offset
         if not isinstance(other, int):
             return NotImplemented
-        return self.__floordiv__(1 << other)
+
+        return self.__floordiv__(1<<other)
 
     def __rrshift__(self, other):
         """Right shift (with reflected arguments)."""
@@ -414,6 +429,7 @@ def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, si
 @functools.lru_cache(maxsize=None)
 def _SecFld(field):
     l = field.order.bit_length() - 1
+    name = f'SecFld{l}({field.__name__})'
 
     def init(self, value=None):
         if value is not None:
@@ -421,14 +437,13 @@ def _SecFld(field):
                 value = sectype.field(value)
             elif not isinstance(value, sectype.field):
                 if isinstance(value, finfields.FiniteFieldElement):
-                    raise TypeError(f'incompatible finite field {type(value).__name__}'
-                                    f' for {type(self).__name__}')
+                    raise TypeError(f'incompatible finite field {type(value).__name__} for {name}')
 
                 raise TypeError('None, int, or finite field required')
 
         super(sectype, self).__init__(value)
-    sectype = type(f'SecFld{l}({field.__name__})', (SecureFiniteField,),
-                   {'__slots__': (), '__init__': init})
+
+    sectype = type(name, (SecureFiniteField,), {'__slots__': (), '__init__': init})
     sectype.field = field
     sectype.bit_length = l
     return sectype
@@ -453,10 +468,7 @@ def SecInt(l=None, p=None, n=2):
 
 @functools.lru_cache(maxsize=None)
 def _SecInt(l, p, n):
-    if p is None:
-        name = f'SecInt{l}'
-    else:
-        name = f'SecInt{l}({p})'
+    name = f'SecInt{l}' if p is None else f'SecInt{l}({p})'
 
     def init(self, value=None):
         """Value must be None, int, or correct field type."""
@@ -465,12 +477,12 @@ def _SecInt(l, p, n):
                 value = sectype.field(value)
             elif not isinstance(value, sectype.field):
                 if isinstance(value, finfields.FiniteFieldElement):
-                    raise TypeError(f'incompatible finite field {type(value).__name__}'
-                                    f' for {type(self).__name__}')
+                    raise TypeError(f'incompatible finite field {type(value).__name__} for {name}')
 
                 raise TypeError('None, int, or finite field required')
 
         super(sectype, self).__init__(value)
+
     sectype = type(name, (SecureInteger,), {'__slots__': (), '__init__': init})
     sectype.field = _pfield(l, 0, p, n)
     sectype.bit_length = l
@@ -486,16 +498,12 @@ def SecFxp(l=None, f=None, p=None, n=2):
         l = runtime.options.bit_length
     if f is None:
         f = l//2  # l =~ 2f enables division such that x =~ 1/(1/x)
-
     return _SecFxp(l, f, p, n)
 
 
 @functools.lru_cache(maxsize=None)
 def _SecFxp(l, f, p, n):
-    if p is None:
-        name = f'SecFxp{l}:{f}'
-    else:
-        name = f'SecFxp{l}:{f}({p})'
+    name = f'SecFxp{l}:{f}' if p is None else f'SecFxp{l}:{f}({p})'
 
     def init(self, value=None, integral=False):
         if value is not None:
@@ -510,8 +518,8 @@ def _SecFxp(l, f, p, n):
         else:
             self.integral = integral
         super(sectype, self).__init__(value)
-    sectype = type(name, (SecureFixedPoint,),
-                   {'__slots__': 'integral', '__init__': init})
+
+    sectype = type(name, (SecureFixedPoint,), {'__slots__': 'integral', '__init__': init})
     sectype.field = _pfield(l, f, p, n)
     sectype.bit_length = l
     return sectype
