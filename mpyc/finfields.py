@@ -376,16 +376,17 @@ class PrimeFieldElement(FiniteFieldElement):
 
     def sqrt(self, INV=False):
         a = self.value
-        p = self.modulus
+        field = type(self)
+        p = field.modulus
         if p == 2:
-            return type(self)(a)
+            return field(a)
 
         if p&3 == 3:
             if INV:
                 p4 = (p*3 - 5) >> 2  # a**p4 == a**(-1/2) == 1/sqrt(a) mod p
             else:
                 p4 = (p+1) >> 2
-            return type(self)(int(gmpy2.powmod(a, p4, p)))
+            return field(int(gmpy2.powmod(a, p4, p)))
 
         # 1 (mod 4) primes are covered using Cipolla-Lehmer's algorithm.
         # find b s.t. b^2 - 4*a is not a square
@@ -403,9 +404,9 @@ class PrimeFieldElement(FiniteFieldElement):
             if (e >> i) & 1:
                 u, v = (v + b * u) % p, (-a * u) % p
         if INV:
-            return type(self)(v).reciprocal()
+            return field(v).reciprocal()
 
-        return type(self)(v)
+        return field(v)
 
     def signed(self):
         """Return signed integer representation, symmetric around zero."""
@@ -508,58 +509,60 @@ class ExtensionFieldElement(FiniteFieldElement):
 
     def is_sqr(self):
         cls = type(self.value)
-        q = self.order
+        field = type(self)
+        q = field.order
         if q%2 == 0:
             return True
 
-        return cls.powmod(self.value, (q-1) >> 1, self.modulus) != [cls.p - 1]
+        return cls.powmod(self.value, (q-1) >> 1, field.modulus) != [cls.p - 1]
 
     def sqrt(self, INV=False):
-        cls = type(self.value)
         a = self.value
-        q = self.order
+        cls = type(a)
+        field = type(self)
+        q = field.order
         if q%2 == 0:
-            return type(self)(cls.powmod(a, q>>1, self.modulus))
+            return field(cls.powmod(a, q>>1, field.modulus))
 
         if q&3 == 3:
             if INV:
                 q4 = (q*3 - 5) >> 2  # a**q4 == a**(-1/2) == 1/sqrt(a) in GF(q)
             else:
                 q4 = (q+1) >> 2
-            return type(self)(cls.powmod(a, q4, self.modulus))
+            return field(cls.powmod(a, q4, field.modulus))
 
         # Tonelli-Shanks
         n = q-1
         s = (n & -n).bit_length() - 1  # number of times 2 divides n
         t = n >> s
         # q - 1 = t 2^s, t odd
-        z = self.least_qnr
+        z = field.least_qnr
         if z is None:
             c = 1
             i = 2
             while c == 1:
-                z = cls.powmod(i, t, self.modulus)
-                c = cls.powmod(z, 1 << s-1, self.modulus)
+                z = cls.powmod(i, t, field.modulus)
+                c = cls.powmod(z, 1 << s-1, field.modulus)
                 i += 1
-            type(self).least_qnr = z  # cache least QNR raised to power t
+            field.least_qnr = z  # cache least QNR raised to power t
 
         # TODO: improve following code a bit
-        w = cls.powmod(a, t>>1, self.modulus)
-        x = a * w % self.modulus
-        b = x * w % self.modulus
+        w = cls.powmod(a, t>>1, field.modulus)
+        x = a * w % field.modulus
+        b = x * w % field.modulus
         v = s
         while b != 1:
             b2 = b
             k = 0
             while b2 != 1:
-                b2 = b2 * b2 % self.modulus
+                b2 = b2 * b2 % field.modulus
                 k += 1
-            w = cls.powmod(z, 1 << v - k - 1, self.modulus)
-            z = w * w % self.modulus
-            b = b * z % self.modulus
-            x = x * w % self.modulus
+            w = cls.powmod(z, 1 << v - k - 1, field.modulus)
+            z = w * w % field.modulus
+            b = b * z % field.modulus
+            x = x * w % field.modulus
             v = k
-        x = type(self)(x)
+        x = field(x)
         if INV:
             return x.reciprocal()
 
@@ -592,5 +595,6 @@ class BinaryFieldElement(ExtensionFieldElement):
 
     def sqrt(self, INV=False):
         cls = type(self.value)
-        q = self.order
-        return type(self)(cls.powmod(self.value, q>>1, self.modulus))
+        field = type(self)
+        q = field.order
+        return field(cls.powmod(self.value, q>>1, field.modulus))
