@@ -314,18 +314,14 @@ class Polynomial:
 
             a = cls._invert(a, modulus)
             n = -n
-        d = a
-        c = cls._intern(1)
-        for i in range(n.bit_length() - 1):
-            # d = a ** (1 << i) holds
+        b = a
+        for i in range(n.bit_length()-2, -1, -1):
+            b = cls._mul(b, b)
+            b = cls._mod(b, modulus)
             if (n >> i) & 1:
-                c = cls._mul(c, d)
-                c = cls._mod(c, modulus)
-            d = cls._mul(d, d)
-            d = cls._mod(d, modulus)
-        c = cls._mul(c, d)
-        c = cls._mod(c, modulus)
-        return c
+                b = cls._mul(b, a)
+                b = cls._mod(b, modulus)
+        return b
 
     @classmethod
     def _gcd(cls, a, b):
