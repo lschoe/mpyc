@@ -107,7 +107,6 @@ def pseudorandom_share(field, m, i, prfs, uci, n):
     given in prfs, which maps subsets of parties to PRF instances.
     Input uci is used to evaluate the PRFs on a unique common input.
     """
-    uci = str(uci).encode()
     sums = [0] * n
     # iterate over (m-1 choose t) subsets for degree t.
     for S, prf_S in prfs.items():
@@ -128,7 +127,6 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
     Input uci is used to evaluate the PRFs on a unique common input.
     """
     T = type(field.modulus)  # T is int or T is gfpx.Polynomial
-    uci = str(uci).encode()
     sums = [0] * n
     # iterate over (m-1 choose t) subsets for degree t.
     for S, prf_S in prfs.items():

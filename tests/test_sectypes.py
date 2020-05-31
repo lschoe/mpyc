@@ -2,6 +2,8 @@ import operator
 import unittest
 from mpyc import gfpx
 from mpyc import sectypes
+import mpyc.runtime  # NB: to set attribute runtime in sectypes
+
 
 X = gfpx.X
 
@@ -104,3 +106,26 @@ class Arithmetic(unittest.TestCase):
         secint(secint.field(0))
         self.assertRaises(TypeError, secint, float(0))
         self.assertRaises(TypeError, secint, secint16.field(0))
+
+    def test_operatorerrors(self):
+        secfld = sectypes.SecFld()
+        secint = sectypes.SecInt()
+        a = secfld(0)
+        b = secint(1)
+        self.assertRaises(TypeError, operator.add, a, b)
+        self.assertRaises(TypeError, operator.add, a, 3.14)
+        self.assertRaises(TypeError, operator.sub, a, b)
+        self.assertRaises(TypeError, operator.mul, a, b)
+        self.assertRaises(TypeError, operator.mul, 3.14, b)
+        self.assertRaises(TypeError, operator.truediv, a, b)
+        self.assertRaises(TypeError, operator.truediv, a, b)
+        self.assertRaises(TypeError, operator.mod, a, b)
+        self.assertRaises(TypeError, operator.mod, b, a)
+        self.assertRaises(TypeError, operator.floordiv, a, b)
+        self.assertRaises(TypeError, divmod, a, b)
+        self.assertRaises(TypeError, divmod, b, a)
+        self.assertRaises(TypeError, operator.pow, b, 3.14)
+        self.assertRaises(TypeError, operator.lshift, b, 3.14)
+        self.assertRaises(TypeError, operator.lshift, 3.14, b)
+        self.assertRaises(TypeError, operator.rshift, b, 3.14)
+        self.assertRaises(TypeError, operator.rshift, 3.14, b)

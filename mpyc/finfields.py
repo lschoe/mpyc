@@ -180,6 +180,10 @@ class FiniteFieldElement:
         self.value %= self.modulus
         return self
 
+    def __pow__(self, other):
+        """Exponentiation."""
+        raise NotImplementedError('abstract method')
+
     def reciprocal(self):
         """Multiplicative inverse."""
         raise NotImplementedError('abstract method')

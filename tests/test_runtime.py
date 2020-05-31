@@ -13,6 +13,46 @@ class Arithmetic(unittest.TestCase):
     def tearDownClass(cls):
         mpc.run(mpc.shutdown())
 
+    def test_io(self):
+        x = ({4, 3}, [1 - 1j, 2.5], 0, range(7))
+        self.assertEqual(mpc.run(mpc.transfer(x))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, senders=0)), x)
+        self.assertEqual(mpc.run(mpc.transfer(x, senders=[0]))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, senders=iter(range(1))))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, receivers=0))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, receivers=[0]))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, receivers=iter(range(1))))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, senders=0, receivers=0)), x)
+        self.assertEqual(mpc.run(mpc.transfer(x, senders=[0], receivers=[0]))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, sender_receivers=[(0, 0)]))[0], x)
+        self.assertEqual(mpc.run(mpc.transfer(x, sender_receivers={0: {0}}))[0], x)
+
+        a = mpc.SecInt()(7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a)))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a)[0])), 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=0))), 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=[0])))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=iter(range(1)))))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=[0])))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=[0])[0])), 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a), receivers=0))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a)[0], receivers=0)), 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a), receivers=[0]))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a), receivers=iter(range(1))))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a)[0], receivers=[0])), 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=0), receivers=0)), 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=[0]), receivers=[0]))[0], 7)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, senders=[0])[0], receivers=[0])), 7)
+
+        x = [a, a]
+        self.assertEqual(mpc.run(mpc.output(mpc.input(x)[0])), [7, 7])
+        self.assertEqual(mpc.run(mpc.output(mpc.input(x, senders=0))), [7, 7])
+        self.assertEqual(mpc.run(mpc.output(mpc.input(x, senders=[0])[0])), [7, 7])
+        self.assertEqual(mpc.run(mpc.output(mpc.input(x)[0], receivers=0)), [7, 7])
+        self.assertEqual(mpc.run(mpc.output(mpc.input(x)[0], receivers=[0])), [7, 7])
+        self.assertEqual(mpc.run(mpc.output(mpc.input(x, senders=0), receivers=0)), [7, 7])
+        self.assertEqual(mpc.run(mpc.output(mpc.input(x, senders=[0])[0], receivers=[0])), [7, 7])
+
     def test_psecfld(self):
         secfld = mpc.SecFld(min_order=2**16)
         a = secfld(1)
@@ -345,3 +385,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.scalar_mul(secint(0), []), [])
         self.assertEqual(mpc.schur_prod([], []), [])
         self.assertEqual(mpc.from_bits([]), 0)
+
+    def test_misc(self):
+        secint = mpc.SecInt()
+        self.assertEqual(mpc.run(mpc.output(mpc._reshare([secint(0)]))), [0])
+        secfxp = mpc.SecFxp()
+        self.assertEqual(mpc.run(mpc.output(mpc._reshare([secfxp(0.0)]))), [0.0])

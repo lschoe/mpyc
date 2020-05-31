@@ -59,9 +59,9 @@ class Arithmetic(unittest.TestCase):
         m = 1
         pid = 0
         prfs = {(0,): F}
-        uci = 'test uci'
+        uci = 'test uci'.encode()
         n = 8
-        a = F(uci.encode(), n)
+        a = F(uci, n)
         shares = thresha.pseudorandom_share(field, m, pid, prfs, uci, n)
         b = thresha.recombine(field, [(1, shares)])
         self.assertEqual(a, [s.value for s in b])

@@ -66,7 +66,7 @@ votes = mpc.input(secbit(vote), senders=voters)
 result = mpc.run(mpc.output(mpc.prod(votes), receivers=voters))
 mpc.run(mpc.shutdown())
 
-if result is None: # no output
+if result is None:  # no output
     print('Thanks for serving as oblivious matchmaker;)')
 elif result:
     print(f'Match: unanimous agreement between {t+1} part{"ies" if t else "y"}!')

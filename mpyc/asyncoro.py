@@ -10,11 +10,13 @@ from asyncio import Protocol, Future, Task
 from mpyc.sectypes import Share
 
 
-class SharesExchanger(Protocol):
-    """Send and receive shares.
+class MessageExchanger(Protocol):
+    """Send and receive messages.
 
     Bidirectional connection with one of the other parties (peers).
     """
+
+    __slots__ = 'runtime', 'peer_pid', 'bytes', 'buffers', 'transport'
 
     def __init__(self, rt, peer_pid=None):
         self.runtime = rt
@@ -45,7 +47,7 @@ class SharesExchanger(Protocol):
             transport.write(pid_keys)
             self._key_transport_done()
 
-    def send_data(self, pc, payload):
+    def send(self, pc, payload):
         """Send payload labeled with pc to the peer.
 
         Message format consists of four parts:
@@ -92,19 +94,26 @@ class SharesExchanger(Protocol):
             if len(self.bytes) < 6:
                 return
 
-            pc_size, payload_size = struct.unpack('<HI', self.bytes[:6])
+            pc_size, payload_size = struct.unpack_from('<HI', self.bytes)
             len_packet = 6 + pc_size*4 + payload_size
             if len(self.bytes) < len_packet:
                 return
 
-            fmt = f'<{pc_size}I{payload_size}s'
-            *pc, payload = struct.unpack_from(fmt, self.bytes, 6)
+            pc = struct.unpack_from(f'<{pc_size}I', self.bytes, 6)
+            payload = struct.unpack_from(f'<{payload_size}s', self.bytes, 6 + pc_size*4)[0]
             del self.bytes[:len_packet]
-            pc = tuple(pc)
             if pc in self.buffers:
                 self.buffers.pop(pc).set_result(payload)
             else:
                 self.buffers[pc] = payload
+
+    def receive(self, pc):
+        """Receive payload labeled with given pc from the peer."""
+        payload = self.buffers.pop(pc, None)
+        if payload is None:
+            # Data not yet received from peer.
+            payload = self.buffers[pc] = Future(loop=self.runtime._loop)
+        return payload
 
     def connection_lost(self, exc):
         """Called when the connection with the peer is lost or closed.
@@ -216,8 +225,8 @@ class _ProgramCounterWrapper:
     def __init__(self, rt, coro):
         self.runtime = rt
         self.coro = coro
-        runtime._increment_pc()
-        self.pc = (0,) + runtime._program_counter  # fork
+        rt._program_counter[0] += 1
+        self.pc = [0] + rt._program_counter  # fork
 
     def __await__(self):
         while True:

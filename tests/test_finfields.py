@@ -60,14 +60,6 @@ class Arithmetic(unittest.TestCase):
         p, n, w = f(10, n=4)
         self.assertEqual((w**n) % p, 1)
 
-    def test_f2_vs_f256(self):
-        f2 = self.f2
-        f256 = self.f256
-        self.assertRaises(TypeError, operator.add, f2(1), f256(2))
-        self.assertRaises(TypeError, operator.sub, f2(1), f256(2))
-        self.assertRaises(TypeError, operator.mul, f2(1), f256(2))
-        self.assertRaises(TypeError, operator.truediv, f2(1), f256(2))
-
     def test_f2(self):
         f2 = self.f2
         self.assertFalse(f2(0))
@@ -214,14 +206,6 @@ class Arithmetic(unittest.TestCase):
         a >>= 0
         self.assertEqual(a, 18)
 
-    def test_f2_vs_f19(self):
-        f2 = self.f2p
-        f19 = self.f19
-        self.assertRaises(TypeError, operator.add, f2(1), f19(2))
-        self.assertRaises(TypeError, operator.sub, f2(1), f19(2))
-        self.assertRaises(TypeError, operator.mul, f2(1), f19(2))
-        self.assertRaises(TypeError, operator.truediv, f2(1), f19(2))
-
     def test_f101(self):
         f101 = self.f101
         self.assertEqual(f101.nth, 2)
@@ -275,3 +259,26 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(b**2, a**2)
         b = (a**2).sqrt(INV=True)
         self.assertEqual((a * b)**2, 1)
+
+    def test_operatorerrors(self):
+        f2 = self.f2
+        f2p = self.f2p
+        f256 = self.f256
+        f19 = self.f19
+        self.assertRaises(TypeError, operator.add, f2(1), f2p(2))
+        self.assertRaises(TypeError, operator.iadd, f2(1), f2p(2))
+        self.assertRaises(TypeError, operator.sub, f2(1), f256(2))
+        self.assertRaises(TypeError, operator.isub, f2(1), f256(2))
+        self.assertRaises(TypeError, operator.mul, f2(1), f19(2))
+        self.assertRaises(TypeError, operator.imul, f2(1), f19(2))
+        self.assertRaises(TypeError, operator.truediv, f256(1), f19(2))
+        self.assertRaises(TypeError, operator.itruediv, f256(1), f19(2))
+        self.assertRaises(TypeError, operator.truediv, 3.14, f19(2))
+        self.assertRaises(TypeError, operator.lshift, f2(1), f2(1))
+        self.assertRaises(TypeError, operator.ilshift, f2(1), f2(1))
+        self.assertRaises(TypeError, operator.lshift, 1, f2(1))
+        self.assertRaises(TypeError, operator.rshift, f19(1), f19(1))
+        self.assertRaises(TypeError, operator.irshift, f19(1), f19(1))
+        self.assertRaises(TypeError, operator.irshift, f256(1), f256(1))
+        self.assertRaises(TypeError, operator.pow, f2(1), f19(2))
+        self.assertRaises(TypeError, operator.pow, f19(1), 3.14)

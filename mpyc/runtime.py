@@ -18,6 +18,7 @@ import itertools
 import functools
 import configparser
 import argparse
+import pickle
 import asyncio
 import ssl
 from mpyc import thresha
@@ -53,11 +54,11 @@ class Runtime:
     def __init__(self, pid, parties, options):
         """Initialize runtime."""
         self.pid = pid
-        self.parties = parties
+        self.parties = tuple(parties)
         self.options = options
         self.threshold = options.threshold
         self._logging_enabled = not options.no_log
-        self._program_counter = (0,)
+        self._program_counter = [0]
         self._pc_level = 0  # used for implementation of barriers
         self._loop = asyncio.get_event_loop()  # cache running loop
         self.start_time = None
@@ -94,29 +95,23 @@ class Runtime:
                 f[subset] = thresha.PRF(key, bound)
         return f
 
-    def _increment_pc(self):
-        """Increment the program counter."""
-        pc = self._program_counter
-        self._program_counter = (pc[0] + 1,) + pc[1:]
+    def _send_message(self, peer_pid, data):
+        """Send data to given peer, labeled by current program counter."""
+        self.parties[peer_pid].protocol.send(self._program_counter, data)
 
-    def _send_shares(self, peer_pid, data):
-        self.parties[peer_pid].protocol.send_data(self._program_counter, data)
-
-    def _receive_shares(self, peer_pid):
-        pc = self._program_counter
-        buffers = self.parties[peer_pid].protocol.buffers
-        data = buffers.pop(pc, None)
-        if data is None:
-            # Data not yet received from peer.
-            data = buffers[pc] = Future(loop=self._loop)
-        return data
+    def _receive_message(self, peer_pid):
+        """Receive data from given peer, labeled by current program counter."""
+        pc = tuple(self._program_counter)
+        return self.parties[peer_pid].protocol.receive(pc)
 
     def _exchange_shares(self, in_shares):
+        pc = tuple(self._program_counter)
         out_shares = [None] * len(in_shares)
         for peer_pid, data in enumerate(in_shares):
             if peer_pid != self.pid:
-                self._send_shares(peer_pid, data)
-                data = self._receive_shares(peer_pid)
+                protocol = self.parties[peer_pid].protocol
+                protocol.send(pc, data)
+                data = protocol.receive(pc)
             out_shares[peer_pid] = data
         return out_shares
 
@@ -202,7 +197,7 @@ class Runtime:
                 context.verify_mode = ssl.CERT_REQUIRED
             else:
                 context = None
-            factory = lambda: asyncoro.SharesExchanger(self)
+            factory = lambda: asyncoro.MessageExchanger(self)
             server = await loop.create_server(factory, port=listen_port, ssl=context)
             logging.debug(f'Listening on port {listen_port}')
 
@@ -219,7 +214,7 @@ class Runtime:
                     else:
                         context = None
                         server_hostname = None
-                    factory = lambda: asyncoro.SharesExchanger(self, peer.pid)
+                    factory = lambda: asyncoro.MessageExchanger(self, peer.pid)
                     await loop.create_connection(factory, peer.host, peer.port, ssl=context,
                                                  server_hostname=server_hostname)
                     break
@@ -279,6 +274,53 @@ class Runtime:
     coroutine = staticmethod(mpc_coro)
     returnType = staticmethod(returnType)
 
+    @mpc_coro
+    async def transfer(self, obj, senders=None, receivers=None, sender_receivers=None) -> Future:
+        """Transfer pickable Python objects between specified parties.
+
+        The senders are the parties that provide input.
+        The receivers are the parties that will obtain output.
+        The default is to let every party be a sender as well as a receiver.
+        """
+        assert (senders is None and receivers is None) or sender_receivers is None
+        senders_is_int = isinstance(senders, int)
+        if sender_receivers is None:
+            m = len(self.parties)
+            if senders is None:
+                senders = range(m)  # default
+            senders = [senders] if senders_is_int else list(senders)
+            if receivers is None:
+                receivers = range(m)  # default
+            receivers = [receivers] if isinstance(receivers, int) else list(receivers)
+            my_senders = senders if self.pid in receivers else []
+            my_receivers = receivers if self.pid in senders else []
+        else:
+            if isinstance(sender_receivers, dict):
+                my_senders = [a for a, b in sender_receivers.items() if self.pid in b]
+                my_receivers = list(sender_receivers[self.pid])
+            else:
+                my_senders = [a for a, b in sender_receivers if b == self.pid]
+                my_receivers = [b for a, b in sender_receivers if a == self.pid]
+
+        indata = None
+        for peer_pid in my_receivers:
+            if indata is None:
+                indata = pickle.dumps(obj)
+            if peer_pid != self.pid:
+                self._send_message(peer_pid, indata)
+
+        outdata = [None] * len(my_senders)
+        for i, peer_pid in enumerate(my_senders):
+            if peer_pid == self.pid:
+                outdata[i] = indata
+            else:
+                outdata[i] = self._receive_message(peer_pid)
+        outdata = await self.gather(outdata)
+        outdata = list(map(pickle.loads, outdata))
+        if senders_is_int:
+            outdata = outdata[0]
+        return outdata
+
     def input(self, x, senders=None):
         """Input x to the computation.
 
@@ -291,14 +333,13 @@ class Runtime:
             x = x[:]
         else:
             x = [x]
+        senders_is_int = isinstance(senders, int)
         if senders is None:
             m = len(self.parties)
-            senders = list(range(m))
-        senders_is_list = isinstance(senders, list)
-        if not senders_is_list:
-            senders = [senders]
+            senders = range(m)  # default
+        senders = [senders] if senders_is_int else list(senders)
         y = self._distribute(x, senders)
-        if not senders_is_list:
+        if senders_is_int:
             y = y[0]
             if not x_is_list:
                 y = y[0]
@@ -330,9 +371,9 @@ class Runtime:
                     if other_pid == self.pid:
                         shares[i] = data
                     else:
-                        self._send_shares(other_pid, data)
+                        self._send_message(other_pid, data)
             else:
-                shares[i] = self._receive_shares(peer_pid)
+                shares[i] = self._receive_message(peer_pid)
         shares = await self.gather(shares)
         return [[field(a) for a in field.from_bytes(r)] for r in shares]
 
@@ -353,9 +394,8 @@ class Runtime:
 
         if receivers is None:
             m = len(self.parties)
-            receivers = list(range(m))
-        elif isinstance(receivers, int):
-            receivers = [receivers]
+            receivers = range(m)  # default
+        receivers = [receivers] if isinstance(receivers, int) else list(receivers)
         if threshold is None:
             threshold = self.threshold
         y = self._recombine(x, receivers, threshold)
@@ -383,12 +423,12 @@ class Runtime:
         # Send share to all successors in receivers.
         for peer_pid in receivers:
             if 0 < (peer_pid - self.pid) % m <= t:
-                self._send_shares(peer_pid, field.to_bytes(x))
+                self._send_message(peer_pid, field.to_bytes(x))
         # Receive and recombine shares if this party is a receiver.
         if self.pid in receivers:
             shares = [None] * t
             for i in range(t):
-                shares[i] = self._receive_shares((self.pid - t + i) % m)
+                shares[i] = self._receive_message((self.pid - t + i) % m)
             shares = await self.gather(shares)
             points = [((self.pid - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
             points.append((self.pid + 1, x))
@@ -1212,8 +1252,8 @@ class Runtime:
         Increments the program counter to ensure that consecutive calls
         to PRSS-related methods will use unique program counters.
         """
-        self._increment_pc()
-        return self._program_counter
+        self._program_counter[0] += 1
+        return str(self._program_counter).encode()
 
     def _random(self, sftype, bound=None):
         """Secure random value of the given type in the given range."""
@@ -1442,11 +1482,14 @@ class Runtime:
 class Party:
     """Information about a party in the MPC protocol."""
 
+    __slots__ = 'pid', 'host', 'port', 'protocol'
+
     def __init__(self, pid, host=None, port=None):
         """Initialize a party with given party identity pid."""
         self.pid = pid
         self.host = host
         self.port = port
+        self.protocol = None
 
     def __repr__(self):
         """String representation of the party."""
