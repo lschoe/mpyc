@@ -50,15 +50,14 @@ class MessageExchanger(Protocol):
     def send(self, pc, payload):
         """Send payload labeled with pc to the peer.
 
-        Message format consists of four parts:
-         1. pc_size (2 bytes)
-         2. payload_size (4 bytes)
-         3. pc (pc_size 4-byte ints)
-         4. payload (byte string of length payload_size).
+        Message format consists of three parts:
+         1. pc (8 bytes signed int)
+         2. payload_size (4 bytes unsigned int)
+         3. payload (byte string of length payload_size).
         """
-        pc_size, payload_size = len(pc), len(payload)
-        fmt = f'<HI{pc_size}I{payload_size}s'
-        self.transport.write(struct.pack(fmt, pc_size, payload_size, *pc, payload))
+        payload_size = len(payload)
+        fmt = f'<qI{payload_size}s'
+        self.transport.write(struct.pack(fmt, pc, payload_size, payload))
 
     def data_received(self, data):
         """Called when data is received from the peer.
@@ -79,6 +78,7 @@ class MessageExchanger(Protocol):
                     len_packet += 16
             if len(self.bytes) < len_packet:
                 return
+
             # record new protocol peer
             self.peer_pid = peer_pid
             # store keys received from peer
@@ -91,16 +91,15 @@ class MessageExchanger(Protocol):
             self._key_transport_done()
 
         while self.bytes:
-            if len(self.bytes) < 6:
+            if len(self.bytes) < 12:
                 return
 
-            pc_size, payload_size = struct.unpack_from('<HI', self.bytes)
-            len_packet = 6 + pc_size*4 + payload_size
+            pc, payload_size = struct.unpack_from('<qI', self.bytes)
+            len_packet = payload_size + 12
             if len(self.bytes) < len_packet:
                 return
 
-            pc = struct.unpack_from(f'<{pc_size}I', self.bytes, 6)
-            payload = struct.unpack_from(f'<{payload_size}s', self.bytes, 6 + pc_size*4)[0]
+            payload = struct.unpack_from(f'<{payload_size}s', self.bytes, 12)[0]
             del self.bytes[:len_packet]
             if pc in self.buffers:
                 self.buffers.pop(pc).set_result(payload)
@@ -222,11 +221,12 @@ class _ProgramCounterWrapper:
 
     __slots__ = 'runtime', 'coro', 'pc'
 
-    def __init__(self, rt, coro):
-        self.runtime = rt
+    def __init__(self, runtime, coro):
+        self.runtime = runtime
         self.coro = coro
-        rt._program_counter[0] += 1
-        self.pc = [0] + rt._program_counter  # fork
+        runtime._program_counter[0] += 1
+        self.pc = [hash(tuple(runtime._program_counter)), runtime._program_counter[1] + 1]  # fork
+        # TODO: make this work for mix of 32-bit and 64-bit Python parties
 
     def __await__(self):
         while True:
@@ -299,13 +299,13 @@ def returnType(*args, wrap=True):
     return rettype
 
 
-def _reconcile(decl, givn):
+def _reconcile(decl, task):
     runtime._pc_level -= 1
     if decl is None:
         return
 
     try:
-        givn = givn.result()
+        givn = task.result()
     except Exception:
         runtime._loop.stop()  # TODO: stop loop for other exceptions in callbacks
         raise
@@ -392,7 +392,8 @@ def mpc_coro(func, pc=True):
 
         if pc:
             coro = _wrap_in_coro(_ProgramCounterWrapper(runtime, coro))
-        Task(coro, loop=runtime._loop).add_done_callback(lambda v: _reconcile(decl, v))
+        task = Task(coro, loop=runtime._loop)
+        task.add_done_callback(lambda t: _reconcile(decl, t))
         return _ncopy(decl)
 
     return typed_asyncoro

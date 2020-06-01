@@ -51,6 +51,9 @@ class Runtime:
     random = mpyc.random
     statistics = mpyc.statistics
 
+    __slots__ = ('pid', 'parties', 'options', '_threshold', '_logging_enabled', '_program_counter',
+                 '_pc_level', '_loop', 'start_time', 'aggregate_load', '_prss_keys', '_bincoef')
+
     def __init__(self, pid, parties, options):
         """Initialize runtime."""
         self.pid = pid
@@ -58,7 +61,7 @@ class Runtime:
         self.options = options
         self.threshold = options.threshold
         self._logging_enabled = not options.no_log
-        self._program_counter = [0]
+        self._program_counter = [0, 0]  # [hopping-counter, program-depth]
         self._pc_level = 0  # used for implementation of barriers
         self._loop = asyncio.get_event_loop()  # cache running loop
         self.start_time = None
@@ -97,15 +100,14 @@ class Runtime:
 
     def _send_message(self, peer_pid, data):
         """Send data to given peer, labeled by current program counter."""
-        self.parties[peer_pid].protocol.send(self._program_counter, data)
+        self.parties[peer_pid].protocol.send(self._program_counter[0], data)
 
     def _receive_message(self, peer_pid):
         """Receive data from given peer, labeled by current program counter."""
-        pc = tuple(self._program_counter)
-        return self.parties[peer_pid].protocol.receive(pc)
+        return self.parties[peer_pid].protocol.receive(self._program_counter[0])
 
     def _exchange_shares(self, in_shares):
-        pc = tuple(self._program_counter)
+        pc = self._program_counter[0]
         out_shares = [None] * len(in_shares)
         for peer_pid, data in enumerate(in_shares):
             if peer_pid != self.pid:
@@ -123,12 +125,9 @@ class Runtime:
         if self.options.no_barrier:
             return
 
-        logging.info(f'Barrier {self._pc_level} '
-                     f'{len(self._program_counter)} '
-                     f'{list(reversed(self._program_counter))}'
-                     )
+        logging.info(f'Barrier {self._pc_level} {self._program_counter[1]}')
         if not self.options.no_async:
-            while self._pc_level >= len(self._program_counter):
+            while self._pc_level > self._program_counter[1]:
                 await asyncio.sleep(0)
 
     async def throttler(self, load_percentage=1.0):
@@ -239,7 +238,7 @@ class Runtime:
         Close all connections, if any.
         """
         # Wait for all parties behind a barrier.
-        while self._pc_level >= len(self._program_counter):
+        while self._pc_level > self._program_counter[1]:
             await asyncio.sleep(0)
         m = len(self.parties)
         if m > 1:
@@ -1253,7 +1252,7 @@ class Runtime:
         to PRSS-related methods will use unique program counters.
         """
         self._program_counter[0] += 1
-        return str(self._program_counter).encode()
+        return self._program_counter[0].to_bytes(8, 'little', signed=True)
 
     def _random(self, sftype, bound=None):
         """Secure random value of the given type in the given range."""
