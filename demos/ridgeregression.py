@@ -33,6 +33,7 @@ import os
 import time
 import argparse
 import logging
+import random
 import io
 import gzip
 import zipfile
@@ -46,7 +47,7 @@ from mpyc.runtime import mpc
 
 
 async def synthesize_data(n_samples, n_features, n_targets):
-    rnd = int(await mpc.output(mpc.random.randrange(mpc.SecInt(), 2**31)))
+    rnd = await mpc.transfer(random.randrange(2**31), senders=0)
     X, Y = sklearn.datasets.make_regression(n_samples=n_samples,
                                             n_features=n_features,
                                             n_informative=max(1, n_features - 5),
@@ -285,7 +286,7 @@ async def main():
         X1, X2 = X[:split], X[split:]
     else:
         # random split (all parties use same rnd)
-        rnd = int(await mpc.output(mpc.random.randrange(mpc.SecInt(), 2**31)))
+        rnd = await mpc.transfer(random.randrange(2**31), senders=0)
         X1, X2 = sklearn.model_selection.train_test_split(X, train_size=0.7, random_state=rnd)
     del X
     X1, Y1 = X1[:, :d], X1[:, d:]

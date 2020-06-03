@@ -289,6 +289,7 @@ def pGF(modulus, f=0):
         raise ValueError('modulus is not a prime')
 
     GFElement = type(f'GF({p})', (PrimeFieldElement,), {'__slots__': ()})
+    GFElement.__doc__ = 'Class of prime field elements.'
     GFElement.modulus = p
     GFElement.order = p
     GFElement.characteristic = p
@@ -464,9 +465,10 @@ def xGF(p, modulus):
     if not poly.is_irreducible(modulus):
         raise ValueError('modulus is not irreducible')
 
-    BaseFieldElement = BinaryFieldElement if p == 2 else ExtensionFieldElement
     d = poly.deg(modulus)
+    BaseFieldElement = BinaryFieldElement if p == 2 else ExtensionFieldElement
     GFElement = type(f'GF({p}^{d})', (BaseFieldElement,), {'__slots__': ()})
+    GFElement.__doc__ = f'Class of {"binary" if p == 2 else "extension"} field elements.'
     GFElement.modulus = poly(modulus)
     GFElement.order = p**d
     GFElement.characteristic = p

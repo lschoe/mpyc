@@ -49,6 +49,7 @@ This reduces the overall time spent on integer comparisons by a factor of 2 to 3
 
 import os
 import logging
+import random
 import argparse
 import gzip
 import numpy as np
@@ -330,8 +331,8 @@ async def main():
     await mpc.start()
 
     if offset < 0:
-        import mpyc.random as secrnd
-        offset = int(await mpc.output(secrnd.randrange(secint, 10001 - batch_size)))
+        offset = random.randrange(10001 - batch_size) if mpc.pid == 0 else None
+        offset = await mpc.transfer(offset, senders=0)
 
     logging.info('--------------- INPUT   -------------')
     print(f'Type = {secint.__name__}, range = ({offset}, {offset + batch_size})')

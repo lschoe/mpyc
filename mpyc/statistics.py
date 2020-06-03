@@ -257,7 +257,7 @@ def _med(data, med=None):
     if issubclass(stype, sectypes.SecureFiniteField):
         raise TypeError('secure fixed-point or integer type required')
 
-    if not issubclass(stype, sectypes.Share):
+    if not issubclass(stype, sectypes.SecureObject):
         return statistics.median(x)
 
     if n%2:
@@ -333,7 +333,7 @@ def mode(data):
     if not n:
         raise statistics.StatisticsError('mode requires at least one data point')
 
-    if isinstance(x[0], sectypes.Share):
+    if isinstance(x[0], sectypes.SecureObject):
         return _mode(x, PRIV=runtime.options.sec_param//6)
 
     return statistics.mode(x)  # NB: raises StatisticsError in Python < 3.8 if x is multimodal

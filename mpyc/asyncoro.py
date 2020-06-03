@@ -7,7 +7,7 @@ import itertools
 import functools
 import typing
 from asyncio import Protocol, Future, Task
-from mpyc.sectypes import Share
+from mpyc.sectypes import SecureObject
 
 
 class MessageExchanger(Protocol):
@@ -18,8 +18,8 @@ class MessageExchanger(Protocol):
 
     __slots__ = 'runtime', 'peer_pid', 'bytes', 'buffers', 'transport'
 
-    def __init__(self, rt, peer_pid=None):
-        self.runtime = rt
+    def __init__(self, runtime, peer_pid=None):
+        self.runtime = runtime
         self.peer_pid = peer_pid
         self.bytes = bytearray()
         self.buffers = {}
@@ -144,7 +144,7 @@ class _AwaitableFuture:
 
 
 class _SharesCounter(Future):
-    """Count and gather all futures (shared values) in an object."""
+    """Count and gather all futures (shares) recursively for a given object."""
 
     __slots__ = 'counter', 'obj'
 
@@ -163,13 +163,13 @@ class _SharesCounter(Future):
             self.set_result(_get_results(self.obj))
 
     def _add_callbacks(self, obj):
-        if isinstance(obj, Share):
-            if isinstance(obj.df, Future):
-                if obj.df.done():
-                    obj.df = obj.df.result()
+        if isinstance(obj, SecureObject):
+            if isinstance(obj.share, Future):
+                if obj.share.done():
+                    obj.share = obj.share.result()
                 else:
                     self.counter += 1
-                    obj.df.add_done_callback(self._decrement)
+                    obj.share.add_done_callback(self._decrement)
         elif isinstance(obj, Future) and not obj.done():
             self.counter += 1
             obj.add_done_callback(self._decrement)
@@ -179,11 +179,11 @@ class _SharesCounter(Future):
 
 
 def _get_results(obj):
-    if isinstance(obj, Share):
-        if isinstance(obj.df, Future):
-            return obj.df.result()
+    if isinstance(obj, SecureObject):
+        if isinstance(obj.share, Future):
+            return obj.share.result()
 
-        return obj.df
+        return obj.share
 
     if isinstance(obj, Future):
         return obj.result()
@@ -195,7 +195,7 @@ def _get_results(obj):
 
 
 def gather_shares(rt, *obj):
-    """Gather all results for the given futures (shared values)."""
+    """Gather all results for the given futures (shares)."""
     if len(obj) == 1:
         obj = obj[0]
     if obj is None:
@@ -204,11 +204,11 @@ def gather_shares(rt, *obj):
     if isinstance(obj, Future):
         return obj
 
-    if isinstance(obj, Share):
-        if isinstance(obj.df, Future):
-            return obj.df
+    if isinstance(obj, SecureObject):
+        if isinstance(obj.share, Future):
+            return obj.share
 
-        return _AwaitableFuture(obj.df)
+        return _AwaitableFuture(obj.share)
 
     if not rt.options.no_async:
         assert isinstance(obj, (list, tuple)), obj
@@ -314,22 +314,22 @@ def _reconcile(decl, task):
 
 
 def __reconcile(decl, givn):
-    if isinstance(decl, Share):
-        if isinstance(givn, Share):
-            if isinstance(givn.df, Future):
+    if isinstance(decl, SecureObject):
+        if isinstance(givn, SecureObject):
+            if isinstance(givn.share, Future):
                 if runtime.options.no_async:
-                    decl.df.set_result(givn.df.result())
+                    decl.share.set_result(givn.share.result())
                 else:
-                    givn.df.add_done_callback(lambda x: decl.df.set_result(x.result()))
+                    givn.share.add_done_callback(lambda x: decl.share.set_result(x.result()))
             else:
-                decl.df.set_result(givn.df)
+                decl.share.set_result(givn.share)
         elif isinstance(givn, Future):
             if runtime.options.no_async:
-                decl.df.set_result(givn.result())
+                decl.share.set_result(givn.result())
             else:
-                givn.add_done_callback(lambda x: decl.df.set_result(x.result()))
+                givn.add_done_callback(lambda x: decl.share.set_result(x.result()))
         else:
-            decl.df.set_result(givn)
+            decl.share.set_result(givn)
     elif isinstance(decl, list):
         for d, g in zip(decl, givn):
             __reconcile(d, g)

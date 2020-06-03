@@ -14,6 +14,7 @@ secure computation (reduces memory usage).
 import os
 import sys
 import logging
+import random
 import gzip
 import numpy as np
 from mpyc.runtime import mpc
@@ -25,7 +26,7 @@ def scale_to_int(f):
     if secnum.field.frac_length == 0:
         scale = lambda a: secnum(int(round(a * f)))  # force Python integers
     else:
-        scale = secnum
+        scale = lambda a: secnum(float(a))  # force Python floats
     return np.vectorize(scale)
 
 
@@ -149,11 +150,10 @@ async def main():
     await mpc.start()
 
     if len(sys.argv) <= 2:
-        import mpyc.random as secrnd
-        offset = await mpc.output(secrnd.randrange(secnum, 10001 - batch_size))
+        offset = random.randrange(10001 - batch_size) if mpc.pid == 0 else None
+        offset = await mpc.transfer(offset, senders=0)
     else:
-        offset = sys.argv[2]
-    offset = int(offset)
+        offset = int(sys.argv[2])
 
     f = 6
 

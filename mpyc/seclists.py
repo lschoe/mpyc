@@ -27,7 +27,7 @@ provided by runtime.in_prod(). Performance for modestly sized lists of lengths 1
 should be adequate. Later: With better amortized complexity, e.g., square root ORAM.
 """
 
-from mpyc.sectypes import Share
+from mpyc.sectypes import SecureObject
 from mpyc.random import random_unit_vector
 from mpyc import asyncoro
 
@@ -46,7 +46,7 @@ class seclist(list):
         super().__init__(x)
         t = len(self)
         for a in self:
-            if isinstance(a, Share):
+            if isinstance(a, SecureObject):
                 t -= 1
                 if sectype is None:
                     sectype = type(a)
@@ -58,7 +58,7 @@ class seclist(list):
 
         i = 0
         while t:
-            while isinstance(self[i], Share):
+            while isinstance(self[i], SecureObject):
                 i += 1
             super().__setitem__(i, sectype(self[i]))
             t -= 1

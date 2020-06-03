@@ -1,6 +1,6 @@
 """This module collects the secure (secret-shared) types for MPyC.
 
-Secure (secret-shared) number types all use a common base class, which
+Secure (secret-shared) number types all use common base classes, which
 ensures that operators such as +, *, >= are defined by operator overloading.
 """
 
@@ -14,34 +14,43 @@ from mpyc import finfields
 runtime = None
 
 
-class Share:
-    """A secret-shared value.
+class SecureObject:
+    """A secret-shared object.
 
-    An MPC protocol operates on secret-shared values, represented by Share
-    objects. The basic Python operators are overloaded for Share objects.
-    An expression like a * b will create a new Share object, which will
+    An MPC protocol operates on secret-shared objects of type SecureObject.
+    The basic Python operators are overloaded by SecureObject classes.
+    An expression like a * b will create a new SecureObject, which will
     eventually contain the product of a and b. The product is computed
     asynchronously, using an instance of a specific cryptographic protocol.
     """
 
-    __slots__ = 'df'
+    __slots__ = 'share'
+
+    def __init__(self, value=None):
+        """Initialize a share.
+
+        If value is None (default), the SecureObject starts out as an empty
+        placeholder (implemented as a Future).
+        """
+        if value is None:
+            value = asyncio.Future(loop=runtime._loop)
+        self.share = value
+
+    def __bool__(self):
+        """Use of secret-shared objects in Boolean expressions makes no sense."""
+        raise TypeError('cannot use secure type in Boolean expressions')
+
+
+class SecureNumber(SecureObject):
+    """Base class for secret-shared numbers."""
+
+    __slots__ = ()
 
     field = None
     bit_length = None
 
-    def __init__(self, value=None):
-        """Initialize a share."""
-        if value is not None:
-            self.df = value
-        else:
-            self.df = asyncio.Future(loop=runtime._loop)
-
-    def __bool__(self):
-        """Use of secret-shared values in Boolean expressions makes no sense."""
-        raise TypeError('cannot use secure type in Boolean expressions')
-
     def _coerce(self, other):
-        if isinstance(other, Share):
+        if isinstance(other, SecureObject):
             if not isinstance(other, type(self)):
                 return NotImplemented
 
@@ -56,7 +65,7 @@ class Share:
         return other
 
     def _coerce2(self, other):
-        if isinstance(other, Share):
+        if isinstance(other, SecureObject):
             if not isinstance(other, type(self)):
                 return NotImplemented
 
@@ -254,14 +263,13 @@ class Share:
         return 1 - runtime.eq(self, other)
 
 
-class SecureFiniteField(Share):
-    """Base class for secret-shared finite field values.
+class SecureFiniteField(SecureNumber):
+    """Base class for secret-shared finite field elements.
 
     NB: bit-oriented operations will be supported for prime fields.
     """
 
     __slots__ = ()
-    field = None
 
     def __abs__(self):
         """Currently no support at all."""
@@ -352,16 +360,24 @@ class SecureFiniteField(Share):
         return NotImplemented
 
 
-class SecureInteger(Share):
-    """Base class for secret-shared integer values."""
+class SecureInteger(SecureNumber):
+    """Base class for secret-shared integers."""
 
     __slots__ = ()
 
 
-class SecureFixedPoint(Share):
-    """Base class for secret-shared fixed-point values."""
+class SecureFixedPoint(SecureNumber):
+    """Base class for secret-shared fixed-point numbers."""
 
-    __slots__ = ()
+    __slots__ = 'integral'
+
+    def __init__(self, value=None, integral=False):
+        """Initialize a secret-shared fixed-point number.
+
+        Set parameter integral to True if value is publicly known to be a whole number.
+        """
+        self.integral = integral  # TODO: consider automatic inference of integral from value
+        super().__init__(value)
 
 
 def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, signed=False):
@@ -434,19 +450,25 @@ def _SecFld(field):
     l = field.order.bit_length() - 1
     name = f'SecFld{l}({field.__name__})'
 
+    sectype = type(name, (SecureFiniteField,), {'__slots__': ()})
+    sectype.__doc__ = 'Class of secret-shared finite field elements.'
+
     def init(self, value=None):
+        """Value must be None, int, or correct field type."""
         if value is not None:
             if isinstance(value, int):
                 value = sectype.field(value)
-            elif not isinstance(value, sectype.field):
-                if isinstance(value, finfields.FiniteFieldElement):
-                    raise TypeError(f'incompatible finite field {type(value).__name__} for {name}')
+            elif isinstance(value, sectype.field):
+                pass
+            elif isinstance(value, finfields.FiniteFieldElement):
+                raise TypeError(f'incompatible finite field {type(value).__name__} for {name}')
 
-                raise TypeError('None, int, or finite field required')
+            else:
+                raise TypeError('None, int, or finite field element required')
 
         super(sectype, self).__init__(value)
 
-    sectype = type(name, (SecureFiniteField,), {'__slots__': (), '__init__': init})
+    sectype.__init__ = init
     sectype.field = field
     sectype.bit_length = l
     return sectype
@@ -473,20 +495,25 @@ def SecInt(l=None, p=None, n=2):
 def _SecInt(l, p, n):
     name = f'SecInt{l}' if p is None else f'SecInt{l}({p})'
 
+    sectype = type(name, (SecureInteger,), {'__slots__': ()})
+    sectype.__doc__ = 'Class of secret-shared integers.'
+
     def init(self, value=None):
         """Value must be None, int, or correct field type."""
         if value is not None:
             if isinstance(value, int):
                 value = sectype.field(value)
-            elif not isinstance(value, sectype.field):
-                if isinstance(value, finfields.FiniteFieldElement):
-                    raise TypeError(f'incompatible finite field {type(value).__name__} for {name}')
+            elif isinstance(value, sectype.field):
+                pass
+            elif isinstance(value, finfields.FiniteFieldElement):
+                raise TypeError(f'incompatible finite field {type(value).__name__} for {name}')
 
-                raise TypeError('None, int, or finite field required')
+            else:
+                raise TypeError('None, int, or finite field element required')
 
         super(sectype, self).__init__(value)
 
-    sectype = type(name, (SecureInteger,), {'__slots__': (), '__init__': init})
+    sectype.__init__ = init
     sectype.field = _pfield(l, 0, p, n)
     sectype.bit_length = l
     return sectype
@@ -508,21 +535,35 @@ def SecFxp(l=None, f=None, p=None, n=2):
 def _SecFxp(l, f, p, n):
     name = f'SecFxp{l}:{f}' if p is None else f'SecFxp{l}:{f}({p})'
 
+    sectype = type(name, (SecureFixedPoint,), {'__slots__': ()})
+    sectype.__doc__ = 'Class of secret-shared fixed-point numbers.'
+
     def init(self, value=None, integral=False):
+        """Value must be None, int, float, or correct field type.
+
+        Set parameter integral to True if value is publicly known to be a whole number,
+        or will be a whole number in case value is still None.
+        """
         if value is not None:
             if isinstance(value, int):
-                self.integral = True
+                integral = True
                 value = sectype.field(value << f)
             elif isinstance(value, float):
-                self.integral = value.is_integer()
+                integral = value.is_integer()
                 value = sectype.field(round(value * (1<<f)))
-            else:  # TODO: check field type
-                self.integral = integral
-        else:
-            self.integral = integral
-        super(sectype, self).__init__(value)
+            elif isinstance(value, sectype.field):
+                pass
+            elif isinstance(value, asyncio.Future):
+                pass  # TODO: consider use of special Future type
+            elif isinstance(value, finfields.FiniteFieldElement):
+                raise TypeError(f'incompatible finite field {type(value).__name__} for {name}')
 
-    sectype = type(name, (SecureFixedPoint,), {'__slots__': 'integral', '__init__': init})
+            else:
+                raise TypeError('None, int, float, or finite field element required')
+
+        super(sectype, self).__init__(value, integral)
+
+    sectype.__init__ = init
     sectype.field = _pfield(l, f, p, n)
     sectype.bit_length = l
     return sectype
