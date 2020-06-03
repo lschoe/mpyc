@@ -356,14 +356,13 @@ class Runtime:
             await returnType(stype, len(senders), len(x))
         else:
             await returnType((stype, x[0].integral), len(senders), len(x))
-        value = x[0].df if not isinstance(x[0].df, Future) else None
-        assert value is None or self.pid in senders
-        m = len(self.parties)
-        t = self.threshold
-        x = [a.df for a in x]  # Extract values from all elements of x.
+
         shares = [None] * len(senders)
         for i, peer_pid in enumerate(senders):
             if peer_pid == self.pid:
+                x = await self.gather(x)
+                t = self.threshold
+                m = len(self.parties)
                 in_shares = thresha.random_split(x, t, m)
                 for other_pid, data in enumerate(in_shares):
                     data = field.to_bytes(data)
@@ -455,8 +454,8 @@ class Runtime:
             field = sftype
             await returnType(Future)
 
-        m = len(self.parties)
         t = self.threshold
+        m = len(self.parties)
         in_shares = thresha.random_split(x, t, m)
         in_shares = [field.to_bytes(elts) for elts in in_shares]
         # Recombine the first 2t+1 output_shares.
@@ -684,24 +683,28 @@ class Runtime:
 
     def div(self, a, b):
         """Secure division of a by b, for nonzero b."""
-        if isinstance(b, Share):
-            if type(b).field.frac_length:
+        b_is_Share = isinstance(b, Share)
+        stype = type(b) if b_is_Share else type(a)
+        field = stype.field
+        f = field.frac_length
+        if b_is_Share:
+            if f:
                 c = self._rec(b)
             else:
                 c = self.reciprocal(b)
             return self.mul(c, a)
 
         # isinstance(a, Share) ensured
-        if type(a).field.frac_length:
+        if f:
             if isinstance(b, (int, float)):
                 c = 1/b
                 if c.is_integer():
                     c = round(c)
             else:
-                c = b.reciprocal() << type(a).field.frac_length
+                c = b.reciprocal() << f
         else:
-            if not isinstance(b, a.field):
-                b = a.field(b)
+            if not isinstance(b, field):
+                b = field(b)
             c = b.reciprocal()
         return self.mul(a, c)
 
@@ -921,16 +924,22 @@ class Runtime:
         x <<= Zp.frac_length
         return x
 
-    def mod(self, a, b):
+    @mpc_coro_no_pc
+    async def mod(self, a, b):
         """Secure modulo reduction."""
         # TODO: optimize for integral a of type secfxp
+        stype = type(a)
+        await returnType(stype)
+        b = await self.gather(b)
+        b = b.value
+        assert isinstance(b, int)
         if b == 2:
             r = self.lsb(a)
         elif not b & (b-1):
             r = self.from_bits(self.to_bits(a, b.bit_length() - 1))
         else:
             r = self._mod(a, b)
-        f = type(a).field.frac_length
+        f = stype.field.frac_length
         return r * 2**-f
 
     @mpc_coro

@@ -26,6 +26,9 @@ class Share:
 
     __slots__ = 'df'
 
+    field = None
+    bit_length = None
+
     def __init__(self, value=None):
         """Initialize a share."""
         if value is not None:
@@ -138,7 +141,7 @@ class Share:
         if other is NotImplemented:
             return NotImplemented
 
-        return runtime.mod(self, other.df.value)
+        return runtime.mod(self, other)
 
     def __rmod__(self, other):
         """Integer remainder (with reflected arguments)."""
@@ -158,9 +161,9 @@ class Share:
         if other is NotImplemented:
             return NotImplemented
 
-        r = runtime.mod(self, other.df.value)
-        q = (self - r) / other.df
-        return q * 2**other.df.frac_length, r
+        r = runtime.mod(self, other)
+        q = (self - r) * runtime.reciprocal(other)
+        return q * 2**self.field.frac_length, r
 
     def __rdivmod__(self, other):
         """Integer division (with reflected arguments)."""
