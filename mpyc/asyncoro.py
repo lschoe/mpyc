@@ -225,7 +225,7 @@ class _ProgramCounterWrapper:
         self.runtime = runtime
         self.coro = coro
         runtime._program_counter[0] += 1
-        self.pc = [hash(tuple(runtime._program_counter)), runtime._program_counter[1] + 1]  # fork
+        self.pc = [hash(frozenset(runtime._program_counter)), runtime._program_counter[1]+1]  # fork
         # TODO: make this work for mix of 32-bit and 64-bit Python parties
 
     def __await__(self):
