@@ -248,7 +248,7 @@ def _med(data, med=None):
     if iter(data) is data:
         x = list(data)
     else:
-        x = data
+        x = data[:]
     n = len(x)
     if not n:
         raise statistics.StatisticsError('median requires at least one data point')
@@ -328,7 +328,7 @@ def mode(data):
     if iter(data) is data:
         x = list(data)
     else:
-        x = data
+        x = data[:]
     n = len(x)
     if not n:
         raise statistics.StatisticsError('mode requires at least one data point')

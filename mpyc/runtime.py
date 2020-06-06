@@ -704,7 +704,7 @@ class Runtime:
                 if c.is_integer():
                     c = round(c)
             else:
-                c = b.reciprocal() << f
+                c = b.reciprocal() << f  # TODO: check if this case is needed
         else:
             if not isinstance(b, field):
                 b = field(b)
@@ -808,7 +808,7 @@ class Runtime:
         u2 = self.schur_prod(u, u)
         a, u2, z = await self.gather(a, u2, z)
         r = self._randoms(Zp, k)
-        c = [Zp(a.value * r[i].value + (1 - (z[i].value << 1)) * u2[i].value) for i in range(k)]
+        c = [Zp(a.value * r[i].value + (1-(z[i].value << 1)) * u2[i].value) for i in range(k)]
         # -1 is nonsquare for Blum p, u_i !=0 w.v.h.p.
         # If a == 0, c_i is square mod p iff z[i] == 0.
         # If a != 0, c_i is square mod p independent of z[i].
@@ -817,8 +817,8 @@ class Runtime:
             if c[i] == 0:
                 c[i] = Zp(1)
             else:
-                c[i] = 1 - z[i] if c[i].is_sqr() else z[i]
-        e = await self.prod(c)
+                c[i] = 1-z[i] if c[i].is_sqr() else z[i]
+        e = await self.all(c)
         e <<= Zp.frac_length
         return e
 
@@ -858,7 +858,7 @@ class Runtime:
             z = (a_rmodl - (c + (UF << l-1))) / (1<<l)
 
         if not GE:
-            h = self.prod([r_bits[i] if (c >> i) & 1 else 1 - r_bits[i] for i in range(l)])
+            h = self.all(r_bits[i] if (c >> i) & 1 else 1-r_bits[i] for i in range(l))
             h = await h
             if EQ:
                 z = h
@@ -870,10 +870,15 @@ class Runtime:
         return z
 
     def min(self, *x):
-        """Secure minimum of all given elements in x."""
+        """Secure minimum of all given elements in x, similar to Python's built-in min()."""
         if len(x) == 1:
             x = x[0]
+        if iter(x) is x:
+            x = list(x)
         n = len(x)
+        if not n:
+            raise ValueError('min() arg is an empty sequence')
+
         if n == 1:
             return x[0]
 
@@ -882,10 +887,15 @@ class Runtime:
         return m0 + (m1 <= m0) * (m1 - m0)
 
     def max(self, *x):
-        """Secure maximum of all given elements in x."""
+        """Secure maximum of all given elements in x, similar to Python's built-in max()."""
         if len(x) == 1:
             x = x[0]
+        if iter(x) is x:
+            x = list(x)
         n = len(x)
+        if not n:
+            raise ValueError('max() arg is an empty sequence')
+
         if n == 1:
             return x[0]
 
@@ -896,6 +906,7 @@ class Runtime:
     def min_max(self, *x):
         """Secure minimum and maximum of all given elements in x.
 
+        Saves 25% compared to calling min(x) and max(x) separately.
         Total number of comparisons is only (3n-3)//2, compared to 2n-2 for the obvious approach.
         This is optimal as shown by Ira Pohl in "A sorting problem and its complexity",
         Communications of the ACM 15(6), pp. 462-464, 1972.
@@ -904,6 +915,9 @@ class Runtime:
             x = x[0]
         x = list(x)
         n = len(x)
+        if not n:
+            raise ValueError('min_max() arg is an empty sequence')
+
         for i in range(n//2):
             a, b = x[i], x[-1-i]
             d = (a >= b) * (b - a)
@@ -973,13 +987,17 @@ class Runtime:
         return self.from_bits(self.add_bits(r_bits, c_bits)) - z * b
 
     @mpc_coro_no_pc
-    async def sum(self, x):
-        """Secure sum of all elements in x."""
+    async def sum(self, x, start=0):
+        """Secure sum of all elements in x, similar to Python's built-in sum()."""
+        if iter(x) is x:
+            x = list(x)
+        else:
+            x = x[:]
         if x == []:
-            return 0
+            return start
 
-        x = x[:]
-        stype = type(x[0])
+        x[0] = x[0] + start  # NB: also updates x[0].integral if applicable
+        stype = type(x[0])  # all elts assumed of same type
         field = stype.field
         f = field.frac_length
         if not f:
@@ -1032,24 +1050,102 @@ class Runtime:
         return s
 
     @mpc_coro
-    async def prod(self, x):
-        """Secure product of all elements in x (in log_2 len(x) rounds)."""
+    async def prod(self, x, start=1):
+        """Secure product of all elements in x, similar to Python's math.prod().
+
+        Runs in log_2 len(x) rounds).
+        """
+        if iter(x) is x:
+            x = list(x)
+        else:
+            x = x[:]
+        if x == []:
+            return start
+
+        x[0] = x[0] * start  # NB: also updates x[0].integral if applicable
+        stype = type(x[0])  # all elts assumed of same type
+        if issubclass(stype, SecureObject):
+            f = stype.field.frac_length
+            if not f:
+                await returnType(stype)
+            else:
+                integral = [a.integral for a in x]
+                await returnType((stype, all(integral)))
+            x = await self.gather(x)
+        else:
+            f = 0
+            await returnType(Future)
+
+        n = len(x)
+        while n > 1:
+            h = [x[i] * x[i+1] for i in range(n%2, n, 2)]
+            x[n%2:] = await self._reshare(h)
+            if f:
+                z = []
+                for i in range(n%2, n, 2):
+                    j = (n%2 + i)//2
+                    if not integral[i] and not integral[i+1]:
+                        z.append(stype(x[j]))  # will be truncated
+                    else:
+                        x[j] >>= f  # NB: in-place rshift
+                if z:
+                    z = await self.gather(self.trunc(z))
+                    for i in reversed(range(n%2, n, 2)):
+                        j = (n%2 + i)//2
+                        if not integral[i] and not integral[i+1]:
+                            x[j] = z.pop()
+                integral[n%2:] = [integral[i] and integral[i+1] for i in range(n%2, n, 2)]
+            n = len(x)
+        return x[0]
+
+    @mpc_coro
+    async def all(self, x):
+        """Secure all of elements in x, similar to Python's built-in all().
+
+        Elements of x are assumed to be either 0 or 1 (Boolean).
+        Runs in log_2 len(x) rounds.
+        """
+        if iter(x) is x:
+            x = list(x)
+        else:
+            x = x[:]
         if x == []:
             return 1
 
-        x = x[:]
-        if isinstance(x[0], SecureObject):
-            await returnType(type(x[0]))
+        stype = type(x[0])  # all elts assumed of same type
+        if issubclass(stype, SecureObject):
+            f = stype.field.frac_length
+            if not f:
+                await returnType(stype)
+            else:
+                if not all(a.integral for a in x):
+                    raise ValueError('nonintegral fixed-point number')
+
+                await returnType((stype, True))
             x = await self.gather(x)
         else:
+            f = 0
             await returnType(Future)
 
-        while len(x) > 1:
-            n = len(x)
+        n = len(x)  # TODO: for sufficiently large n use mpc.eq(mpc.sum(x), n) instead
+        while n > 1:
             h = [x[i] * x[i+1] for i in range(n%2, n, 2)]
-            h = await self._reshare(h)  # TODO: handle trunc
+            if f:
+                for a in h:
+                    a >>= f  # NB: in-place rshift
+            h = await self._reshare(h)
             x[n%2:] = h
+            n = len(x)
         return x[0]
+
+    @mpc_coro
+    async def any(self, x):
+        """Secure any of elements in x, similar to Python's built-in any().
+
+        Elements of x are assumed to be either 0 or 1 (Boolean).
+        Runs in log_2 len(x) rounds.
+        """
+        return 1 - self.all(1-a for a in x)
 
     @mpc_coro_no_pc
     async def vector_add(self, x, y):

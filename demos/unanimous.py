@@ -3,7 +3,9 @@
 Unanimous voting between parties P[0],...,P[t] is implemented by securely
 evaluating the product of their votes (using 1s and 0s to encode "yes"
 and "no" votes, respectively) and revealing only whether the product
-equals 1 (unanimous agreement) or 0 (someone disagrees).
+equals 1 (unanimous agreement) or 0 (someone disagrees). The MPyC method
+mpc.all() modeled after Python's built-in function all() can be used
+for this purpose.
 
 The secure computation is designed to be maximally private, meaning
 that any t parties colluding against the remaining party should be
@@ -59,11 +61,11 @@ if mpc.pid in voters:
 else:
     vote = None  # no input
 
-secbit = mpc.SecInt(1)  # 1-bit integer suffices
+secbit = mpc.SecInt(1)  # 1-bit integers suffice
 
 mpc.run(mpc.start())
 votes = mpc.input(secbit(vote), senders=voters)
-result = mpc.run(mpc.output(mpc.prod(votes), receivers=voters))
+result = mpc.run(mpc.output(mpc.all(votes), receivers=voters))
 mpc.run(mpc.shutdown())
 
 if result is None:  # no output
