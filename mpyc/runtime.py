@@ -530,6 +530,9 @@ class Runtime:
         if issubclass(stype, sectypes.SecureFiniteField):
             for i in range(n):
                 x[i] = self._mod(ttype(x[i]), stype.field.modulus)
+                if stype.field.is_signed and ttype.field.is_signed:
+                    is_neg = x[i] > stype.field.modulus >> 1
+                    x[i] = x[i] + is_neg * (ttype.field.modulus - stype.field.modulus)
         if d > 0:
             for i in range(n):
                 x[i] <<= d
