@@ -127,16 +127,6 @@ def ReLU(x):
     return np.vectorize(lambda a: (a >= 0) * a)(x)
 
 
-def argmax(x):
-    a = type(x[0])(0)
-    m = x[0]
-    for i in range(1, len(x)):
-        b = m >= x[i]
-        a = b * (a - i) + i
-        m = b * (m - x[i]) + x[i]
-    return a
-
-
 async def main():
     global secnum
 
@@ -211,7 +201,7 @@ async def main():
     if secnum.__name__.startswith('SecInt'):
         secnum.bit_length = 37
     for i in range(batch_size):
-        prediction = int(await mpc.output(argmax(x[i])))
+        prediction = int(await mpc.output(mpc.argmax(x[i])[0]))
         error = '******* ERROR *******' if prediction != labels[i] else ''
         print(f'Image #{offset+i} with label {labels[i]}: {prediction} predicted. {error}')
         print(await mpc.output(x[i]))

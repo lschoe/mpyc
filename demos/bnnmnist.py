@@ -281,16 +281,6 @@ async def vector_sge(x):
     return z
 
 
-def argmax(x):
-    a = type(x[0])(0)
-    m = x[0]
-    for i in range(1, len(x)):
-        b = m >= x[i]
-        a = b * (a - i) + i
-        m = b * (m - x[i]) + x[i]
-    return a
-
-
 async def main():
     global secint
 
@@ -413,7 +403,7 @@ async def main():
     if args.no_legendre:
         secint.bit_length = 14
     for i in range(batch_size):
-        prediction = await mpc.output(argmax(L[i]))
+        prediction = int(await mpc.output(mpc.argmax(L[i])[0]))
         error = '******* ERROR *******' if prediction != labels[i] else ''
         print(f'Image #{offset+i} with label {labels[i]}: {prediction} predicted. {error}')
         print(await mpc.output(L[i]))

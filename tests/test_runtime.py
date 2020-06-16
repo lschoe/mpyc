@@ -1,3 +1,4 @@
+import operator
 import unittest
 from mpyc.runtime import mpc
 
@@ -293,6 +294,10 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(mpc.max(a, 0))), max(s[0], 0))
             self.assertEqual(mpc.run(mpc.output(mpc.max(0, b))), max(0, s[1]))
             self.assertEqual(mpc.run(mpc.output(list(mpc.min_max(a, b, c, d)))), [min(s), max(s)])
+            self.assertEqual(mpc.run(mpc.output(mpc.argmin([a, b, c, d])[0])), 1)
+            self.assertEqual(mpc.run(mpc.output(mpc.argmin([a, b], key=operator.neg)[1])), max(s))
+            self.assertEqual(mpc.run(mpc.output(mpc.argmax([a, b, c, d])[0])), 0)
+            self.assertEqual(mpc.run(mpc.output(mpc.argmax([a, b], key=operator.neg)[1])), min(s))
 
             self.assertEqual(mpc.run(mpc.output(secfxp(5) % 2)), 1)
             self.assertEqual(mpc.run(mpc.output(secfxp(1) % 2**(1-f))), 0)
@@ -338,6 +343,8 @@ class Arithmetic(unittest.TestCase):
         secint16 = mpc.SecInt(16)
         secfld257 = mpc.SecFld(257)
         secfld263 = mpc.SecFld(263)
+        secfld37s = mpc.SecFld(37, signed=True)
+        secfld47s = mpc.SecFld(47, signed=True)
         secfxp = mpc.SecFxp()
         secfxp16 = mpc.SecFxp(16)
 
@@ -353,6 +360,10 @@ class Arithmetic(unittest.TestCase):
 
         x = [secfld257(i) for i in range(10)]
         y = mpc.convert(x, secfld263)
+        self.assertEqual(mpc.run(mpc.output(y)), list(range(10)))
+
+        x = [secfld47s(i) for i in range(10)]
+        y = mpc.convert(x, secfld37s)
         self.assertEqual(mpc.run(mpc.output(y)), list(range(10)))
 
         x = [secint(-100), secint(100)]
@@ -393,6 +404,9 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, mpc.min, [])
         self.assertRaises(ValueError, mpc.max, [])
         self.assertRaises(ValueError, mpc.min_max, [])
+        self.assertRaises(ValueError, mpc.argmin, [])
+        self.assertRaises(ValueError, mpc.argmax, [])
+        self.assertRaises(ValueError, mpc.if_else, secfxp(1.5), [0], [0])
         self.assertRaises(ValueError, mpc.unit_vector, secfxp(1.5), 2)
 
     def test_misc(self):
@@ -409,7 +423,9 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(mpc.prod([secnum(1)], start=1))), 1)
             self.assertEqual(mpc.run(mpc.output(mpc.sum([secnum(1)], start=secnum(1)))), 2)
         self.assertEqual(mpc.run(mpc.output(mpc.min(secint(i) for i in range(-1, 2, 1)))), -1)
+        self.assertEqual(mpc.run(mpc.output(mpc.argmin(secint(i) for i in range(-1, 2, 1))[0])), 0)
         self.assertEqual(mpc.run(mpc.output(mpc.max(secfxp(i) for i in range(-1, 2, 1)))), 1)
+        self.assertEqual(mpc.run(mpc.output(mpc.argmax(secfxp(i) for i in range(-1, 2, 1))[0])), 2)
         self.assertEqual(mpc.run(mpc.output(list(mpc.min_max(map(secfxp, range(5)))))), [0, 4])
         self.assertEqual(mpc.run(mpc.output(mpc.sum(map(secint, range(5))))), 10)
         self.assertEqual(mpc.run(mpc.output(mpc.sum([secfxp(2.72)], start=3.14))), 5.86)

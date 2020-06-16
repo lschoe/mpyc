@@ -449,7 +449,10 @@ class Runtime:
             if not field.frac_length:
                 await returnType(sftype, len(x))
             else:
-                await returnType((sftype, x[0].integral), len(x))
+                if x_is_list:
+                    await returnType((sftype, x[0].integral), len(x))
+                else:
+                    await returnType((sftype, x[0].integral))
             x = await self.gather(x)
         else:
             field = sftype
@@ -517,7 +520,7 @@ class Runtime:
         x = await self.gather(x)
         d = ttype.field.frac_length - stype.field.frac_length  # TODO: use integral attribute fxp
         if d < 0:
-            x = await self.trunc(x, -d, stype.bit_length)  # TODO: take minimum with ttype or so
+            x = await self.trunc(x, f=-d, l=stype.bit_length)  # TODO: take minimum with ttype or so
         offset = 1 << l-1
         r = thresha.pseudorandom_share(stype.field, m, self.pid, prfs, uci, n)
         for i in range(n):
@@ -684,7 +687,7 @@ class Runtime:
         if shb:
             c = self._reshare(c)
         if f and not (a_integral or b_integral):
-            c = self.trunc(stype(c))
+            c = self.trunc(stype(c))  # TODO: compare to approach in in_prod
         return c
 
     def div(self, a, b):
@@ -810,8 +813,9 @@ class Runtime:
         u = self._randoms(Zp, k)
         u2 = self.schur_prod(u, u)
         a, u2, z = await self.gather(a, u2, z)
+        a = a.value
         r = self._randoms(Zp, k)
-        c = [Zp(a.value * r[i].value + (1-(z[i].value << 1)) * u2[i].value) for i in range(k)]
+        c = [Zp(a * r[i].value + (1-(z[i].value << 1)) * u2[i].value) for i in range(k)]
         # -1 is nonsquare for Blum p, u_i !=0 w.v.h.p.
         # If a == 0, c_i is square mod p iff z[i] == 0.
         # If a != 0, c_i is square mod p independent of z[i].
@@ -841,8 +845,8 @@ class Runtime:
         a = await self.gather(a)
         a_rmodl = a + ((1<<l) + r_modl)
         k = self.options.sec_param
-        r_divl = self._random(Zp, 1<<k)
-        c = await self.output(a_rmodl + (r_divl.value << l))
+        r_divl = self._random(Zp, 1<<k).value
+        c = await self.output(a_rmodl + (r_divl << l))
         c = c.value % (1<<l)
 
         if not EQ:  # a la Toft
@@ -927,6 +931,76 @@ class Runtime:
             x[i], x[-1-i] = a + d, b - d
         return self.min(x[:(n+1)//2]), self.max(x[n//2:])  # NB: x[n//2] in both parts if n odd
 
+    def argmin(self, *x, key=None):
+        """Secure argmin of all given elements in x.
+
+        Argument key specifies a function applied to all elements of x before comparing them, using
+        only < comparisons (that is, using only the __lt__() method, as for Python's list.sort()).
+        Default key=None means that elements of x are compared directly.
+        """
+        if len(x) == 1:
+            x = x[0]
+        if iter(x) is x:
+            x = list(x)
+        n = len(x)
+        if not n:
+            raise ValueError('argmin() arg is an empty sequence')
+
+        if key is None:
+            key = lambda a: a
+        return self._argmin(x, key)
+
+    def _argmin(self, xs, key):
+        # xs list of lists
+        n = len(xs)
+        if n == 1:
+            m = xs[0]
+            stype = type(m[0]) if isinstance(m, list) else type(m)
+            return stype(0), m  # NB: sets integral attr to True for SecureFixedPoint numbers
+
+        i0, min0 = self._argmin(xs[:n//2], key)
+        i1, min1 = self._argmin(xs[n//2:], key)
+        i1 += n//2
+        c = key(min0) < key(min1)
+        a = self.if_else(c, i0, i1)
+        m = self.if_else(c, min0, min1)  # TODO: merge if_else's once integral attr per list element
+        return a, m
+
+    def argmax(self, *x, key=None):
+        """Secure argmax of all given elements in x.
+
+        Argument key specifies a function applied to all elements of x before comparing them, using
+        only < comparisons (that is, using only the __lt__() method, as for Python's list.sort()).
+        Default key=None means that elements of x are compared directly.
+        """
+        if len(x) == 1:
+            x = x[0]
+        if iter(x) is x:
+            x = list(x)
+        n = len(x)
+        if not n:
+            raise ValueError('argmax() arg is an empty sequence')
+
+        if key is None:
+            key = lambda a: a
+        return self._argmax(x, key)
+
+    def _argmax(self, xs, key):
+        # xs list of lists
+        n = len(xs)
+        if n == 1:
+            m = xs[0]
+            stype = type(m[0]) if isinstance(m, list) else type(m)
+            return stype(0), m  # NB: sets integral attr to True for SecureFixedPoint numbers
+
+        i0, max0 = self._argmax(xs[:n//2], key)
+        i1, max1 = self._argmax(xs[n//2:], key)
+        i1 += n//2
+        c = key(max0) < key(max1)
+        a = self.if_else(c, i1, i0)
+        m = self.if_else(c, max1, max0)  # TODO: merge if_else's once integral attr per list element
+        return a, m
+
     @mpc_coro
     async def lsb(self, a):
         """Secure least significant bit of a."""  # a la [ST06]
@@ -938,8 +1012,8 @@ class Runtime:
         b = self.random_bit(stype)
         a, b = await self.gather(a, b)
         b >>= Zp.frac_length
-        r = self._random(Zp, 1 << (l + k - 1))
-        c = await self.output(a + ((1<<l) + (r.value << 1) + b.value))
+        r = self._random(Zp, 1 << (l + k - 1)).value
+        c = await self.output(a + ((1<<l) + (r << 1) + b.value))
         x = 1 - b if c.value & 1 else b  # xor
         x <<= Zp.frac_length
         return x
@@ -979,8 +1053,8 @@ class Runtime:
             r_modb <<= 1
             r_modb += r_i
         r_modb = Zp(r_modb)
-        r_divb = self._random(Zp, 1 << k)
-        c = await self.output(a + ((1<<l) - ((1<<l) % b) + b * r_divb.value - r_modb.value))
+        r_divb = self._random(Zp, 1 << k).value
+        c = await self.output(a + ((1<<l) - ((1<<l) % b) + b * r_divb - r_modb.value))
         c = c.value % b
         c_bits = [(c >> i) & 1 for i in range(len(r_bits))]
         c_bits.append(0)
@@ -1032,7 +1106,8 @@ class Runtime:
             await returnType(stype)
         else:
             x_integral = all(a.integral for a in x)
-            await returnType((stype, x_integral and all(a.integral for a in y)))
+            y_integral = all(a.integral for a in y)
+            await returnType((stype, x_integral and y_integral))
 
         if x is y:
             x = y = await self.gather(x)
@@ -1044,12 +1119,15 @@ class Runtime:
             y = await self.gather(y)
         s = sum(a.value * b.value for a, b in zip(x, y))
         s = field(s)
-        if f and x_integral:
-            s >>= f
+        if f:
+            if x_integral or y_integral:
+                s >>= f
+            else:
+                s = stype(s)
         if shx and shy:
             s = self._reshare(s)
-        if f and not x_integral:
-            s = self.trunc(stype(s))
+        if f and not x_integral and not y_integral:
+            s = self.trunc(s)  # TODO: compare to approach in mul
         return s
 
     @mpc_coro
@@ -1066,14 +1144,14 @@ class Runtime:
             return start
 
         x[0] = x[0] * start  # NB: also updates x[0].integral if applicable
-        stype = type(x[0])  # all elts assumed of same type
-        if issubclass(stype, SecureObject):
-            f = stype.field.frac_length
+        sftype = type(x[0])  # all elts assumed of same type
+        if issubclass(sftype, SecureObject):
+            f = sftype.field.frac_length
             if not f:
-                await returnType(stype)
+                await returnType(sftype)
             else:
                 integral = [a.integral for a in x]
-                await returnType((stype, all(integral)))
+                await returnType((sftype, all(integral)))
             x = await self.gather(x)
         else:
             f = 0
@@ -1088,11 +1166,11 @@ class Runtime:
                 for i in range(n%2, n, 2):
                     j = (n%2 + i)//2
                     if not integral[i] and not integral[i+1]:
-                        z.append(stype(x[j]))  # will be truncated
+                        z.append(x[j])  # will be truncated
                     else:
                         x[j] >>= f  # NB: in-place rshift
                 if z:
-                    z = await self.gather(self.trunc(z))
+                    z = await self.trunc(z, l=sftype.bit_length)
                     for i in reversed(range(n%2, n, 2)):
                         j = (n%2 + i)//2
                         if not integral[i] and not integral[i+1]:
@@ -1115,16 +1193,16 @@ class Runtime:
         if x == []:
             return 1
 
-        stype = type(x[0])  # all elts assumed of same type
-        if issubclass(stype, SecureObject):
-            f = stype.field.frac_length
+        sftype = type(x[0])  # all elts assumed of same type
+        if issubclass(sftype, SecureObject):
+            f = sftype.field.frac_length
             if not f:
-                await returnType(stype)
+                await returnType(sftype)
             else:
                 if not all(a.integral for a in x):
                     raise ValueError('nonintegral fixed-point number')
 
-                await returnType((stype, True))
+                await returnType((sftype, True))
             x = await self.gather(x)
         else:
             f = 0
@@ -1233,7 +1311,7 @@ class Runtime:
 
         a, x = await self.gather(a, x)
         if f and a_integral:
-            a = a >> f  # NB: no in-place rshift
+            a = a >> f  # NB: no in-place rshift!
         for i in range(n):
             x[i] = x[i] * a
         x = await self._reshare(x)
@@ -1251,23 +1329,23 @@ class Runtime:
         f = field.frac_length
         if not f:
             await returnType(stype, n)
-        else:
-            a_integral = a.integral
-            if not a_integral:
-                raise ValueError('condition must be integral')
-
-            await returnType((stype, a_integral and x[0].integral and y[0].integral), n)
+        else:  # NB: a is integral
+            await returnType((stype, x[0].integral and y[0].integral), n)
 
         a, x, y = await self.gather(a, x, y)
         if f:
-            a = a >> f  # NB: no in-place rshift
+            a = a >> f  # NB: no in-place rshift!
+        a = a.value
         for i in range(n):
-            x[i] = field(a.value * (x[i].value - y[i].value) + y[i].value)
+            x[i] = field(a * (x[i].value - y[i].value) + y[i].value)
         x = await self._reshare(x)
         return x
 
     def if_else(self, c, x, y):
         '''Secure selection based on condition c between x and y.'''
+        if isinstance(c, sectypes.SecureFixedPoint) and not c.integral:
+            raise ValueError('condition must be integral')
+
         if isinstance(x, list):
             z = self._if_else_list(c, x, y)
         else:
@@ -1286,22 +1364,30 @@ class Runtime:
         else:
             x, y = x[:], y[:]
         n = len(x)
-        if isinstance(x[0], SecureObject):
-            stype = type(x[0])
-            await returnType(stype, n)
+        sftype = type(x[0])  # all elts of x and y assumed of same type
+        if issubclass(sftype, SecureObject):
+            f = sftype.field.frac_length
+            if not f:
+                await returnType(sftype, n)
+            else:
+                x_integral = x[0].integral
+                y_integral = y[0].integral
+                await returnType((sftype, x_integral and y_integral), n)
             if x is y:
                 x = y = await self.gather(x)
             else:
                 x, y = await self.gather(x, y)
-            truncy = stype.field.frac_length
         else:
+            f = 0
             await returnType(Future)
-            truncy = False
+
         for i in range(n):
             x[i] = x[i] * y[i]
+            if f and (x_integral or y_integral):
+                x[i] >>= f  # NB: in-place rshift
         x = await self._reshare(x)
-        if truncy:
-            x = self.trunc(x, l=stype.bit_length)
+        if f and not x_integral and not y_integral:
+            x = self.trunc(x, l=sftype.bit_length)
             x = await self.gather(x)
         return x
 
@@ -1313,16 +1399,22 @@ class Runtime:
         shB = isinstance(B[0][0], SecureObject)
         stype = type(A[0][0]) if shA else type(B[0][0])
         field = stype.field
+        f = field.frac_length
         n1 = len(A)
         n2 = len(B) if tr else len(B[0])
-        await returnType(stype, n1, n2)
+        if not f:
+            await returnType(stype, n1, n2)
+        else:
+            A_integral = A[0][0].integral
+            B_integral = B[0][0].integral
+            await returnType((stype, A_integral and B_integral), n1, n2)
+
         if shA and shB:
             A, B = await self.gather(A, B)
         elif shA:
             A = await self.gather(A)
         else:
             B = await self.gather(B)
-
         n = len(A[0])
         C = [None] * n1
         for ia in range(n1):
@@ -1331,14 +1423,16 @@ class Runtime:
                 s = 0
                 for i in range(n):
                     s += A[ia][i].value * (B[ib][i] if tr else B[i][ib]).value
-                C[ia][ib] = field(s)
+                s = field(s)
+                if f and (A_integral or B_integral):
+                    s >>= f  # NB: in-place rshift
+                C[ia][ib] = s
             if shA and shB:
                 C[ia] = self._reshare(C[ia])
         if shA and shB:
             C = await self.gather(C)
-        if field.frac_length:
-            l = stype.bit_length
-            C = [self.trunc(c, l=l) for c in C]
+        if f and not A_integral and not B_integral:
+            C = [self.trunc(c, l=stype.bit_length) for c in C]
             C = await self.gather(C)
         return C
 
@@ -1353,14 +1447,13 @@ class Runtime:
         A, d, b, c = await self.gather(A, d, b, c)
         d = d.value
         for i in range(n1):
-            b[i] = b[i].value
+            b_i = b[i].value
             for j in range(n2):
-                A[i][j] = field(A[i][j].value * d - b[i] * c[j].value)
+                A[i][j] = field(A[i][j].value * d - b_i * c[j].value)
             A[i] = self._reshare(A[i])
         A = await self.gather(A)
         if field.frac_length:
-            l = stype.bit_length
-            A = [self.trunc(a, l=l) for a in A]
+            A = [self.trunc(a, l=stype.bit_length) for a in A]
             A = await self.gather(A)
         return A
 
@@ -1511,14 +1604,14 @@ class Runtime:
             return self.convert(a_bits, stype)
 
         k = self.options.sec_param
-        r_divl = self._random(field, 1<<k)
+        r_divl = self._random(field, 1<<k).value
         a = await self.gather(a)
         if rshift_f:
             a = a >> f
-        c = await self.output(a + ((1<<l) + (r_divl.value << l) - r_modl))
+        c = await self.output(a + ((1<<l) + (r_divl << l) - r_modl))
         c = c.value % (1<<l)
         c_bits = [(c >> i) & 1 for i in range(l)]
-        r_bits = [stype(r.value) for r in r_bits]
+        r_bits = [stype(r.value) for r in r_bits]  # TODO: drop .value, fix secfxp(r) if r field elt
         a_bits = self.add_bits(r_bits, c_bits)
         if rshift_f:
             a_bits = [field(0) for _ in range(f)] + a_bits
