@@ -76,10 +76,10 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.imod, poly(0), 0.1)
         self.assertRaises(TypeError, divmod, poly(0), 0.1)
         self.assertRaises(TypeError, divmod, 0.1, poly(0))
-        self.assertRaises(TypeError, operator.ge, poly(0), 0.1)
-        self.assertRaises(TypeError, operator.ge, 0.1, poly(0))  # NB: tests <=
-        self.assertRaises(TypeError, operator.gt, poly(0), 0.1)
-        self.assertRaises(TypeError, operator.gt, 0.1, poly(0))  # NB: tests <
+        self.assertRaises(TypeError, operator.lt, poly(0), 0.1)
+        self.assertRaises(TypeError, operator.lt, 0.1, poly(0))  # NB: tests >
+        self.assertRaises(TypeError, operator.le, poly(0), 0.1)
+        self.assertRaises(TypeError, operator.le, 0.1, poly(0))  # NB: tests <
         self.assertRaises(ZeroDivisionError, poly.invert, poly(283), poly(0))
         self.assertRaises(ZeroDivisionError, poly.invert, poly(283), poly(283))
         self.assertRaises(ZeroDivisionError, poly.mod, poly(283), poly(0))
@@ -167,10 +167,10 @@ class Arithmetic(unittest.TestCase):
         self.assertFalse(poly.is_irreducible(621))
         self.assertFalse(poly.is_irreducible(1905))
 
+        self.assertTrue(poly(7) < poly(8))
+        self.assertTrue(poly(7) <= poly(8))
         self.assertTrue(poly(7) >= poly(5))
         self.assertTrue(poly(7) > poly(5))
-        self.assertTrue(poly(7) <= poly(8))
-        self.assertTrue(poly(7) < poly(8))
 
     def test_mod3(self):
         poly = gfpx.GFpX(3)
@@ -194,10 +194,10 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(poly.is_irreducible(99986))
         self.assertEqual(poly.next_irreducible(53), 86)
 
+        self.assertTrue(poly(7) < poly(8))
+        self.assertTrue(poly(7) <= poly(8))
         self.assertTrue(poly(7) >= poly(5))
         self.assertTrue(poly(7) > poly(5))
-        self.assertTrue(poly(7) <= poly(8))
-        self.assertTrue(poly(7) < poly(8))
 
     def test_mod11(self):
         poly = gfpx.GFpX(11)
@@ -244,7 +244,7 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(poly.is_irreducible(19488))
         self.assertEqual(poly.next_irreducible(53), 122)
 
+        self.assertTrue(poly(17) < poly(18))
+        self.assertTrue(poly(17) <= poly(18))
         self.assertTrue(poly(17) >= poly(15))
         self.assertTrue(poly(17) > poly(15))
-        self.assertTrue(poly(17) <= poly(18))
-        self.assertTrue(poly(17) < poly(18))

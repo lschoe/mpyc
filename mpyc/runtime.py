@@ -51,8 +51,8 @@ class Runtime:
     random = mpyc.random
     statistics = mpyc.statistics
 
-    __slots__ = ('pid', 'parties', 'options', '_threshold', '_logging_enabled', '_program_counter',
-                 '_pc_level', '_loop', 'start_time', 'aggregate_load', '_prss_keys', '_bincoef')
+#    __slots__ = ('pid', 'parties', 'options', '_threshold', '_logging_enabled', '_program_counter',
+#                 '_pc_level', '_loop', 'start_time', 'aggregate_load', '_prss_keys', '_bincoef')
 
     def __init__(self, pid, parties, options):
         """Initialize runtime."""
@@ -779,17 +779,21 @@ class Runtime:
         """Secure bitwise or of a and b."""
         return a + b + self.and_(a, b)
 
+    def lt(self, a, b):
+        """Secure comparison a < b."""
+        return self.sgn(a - b, LT=True)
+
     def eq(self, a, b):
         """Secure comparison a == b."""
         return self.is_zero(a - b)
 
     def ge(self, a, b):
         """Secure comparison a >= b."""
-        return self.sgn(a - b, GE=True)
+        return 1 - self.sgn(a - b, LT=True)
 
     def abs(self, a):
         """Secure absolute value of a."""
-        return (self.sgn(a, GE=True)*2-1) * a
+        return (-2*self.sgn(a, LT=True) + 1) * a
 
     def is_zero(self, a):
         """Secure zero test a == 0."""
@@ -830,8 +834,12 @@ class Runtime:
         return e
 
     @mpc_coro
-    async def sgn(self, a, EQ=False, GE=False, l=None):
+    async def sgn(self, a, EQ=False, LT=False, GE=False, l=None):
         """Secure sign(um) of a, -1 if a < 0 else 0 if a == 0 else 1."""
+        if GE:
+            print('GE flag will be deprecated in MPyC v0.7, use LT flag instead')
+        assert not (GE and LT)
+        assert not (EQ and (GE or LT))
         stype = type(a)
         await returnType((stype, True))
         Zp = stype.field
@@ -859,25 +867,27 @@ class Runtime:
                 e[i] = Zp(s_sign + r_i - c_i + 3*sumXors)
                 sumXors += 1 - r_i if c_i else r_i
             e[l] = Zp(s_sign - 1 + 3*sumXors)
-            e = await self.prod(e)
-            g = await self.is_zero_public(stype(e))
-            UF = 1 - s_sign if g else s_sign + 1
-            z = (a_rmodl - (c + (UF << l-1))) / (1<<l)
+            g = await self.is_zero_public(stype(self.prod(e)))
+            f = 3 - s_sign if g else 3 + s_sign
+            z = (c - a_rmodl + (f << l-1)) / (1<<l)
 
-        if not GE:
+        if not LT:
             h = self.all(r_bits[i] if (c >> i) & 1 else 1-r_bits[i] for i in range(l))
             h = await h
             if EQ:
                 z = h
             else:
-                z = (1 - h) * (2*z - 1)
+                z = (h - 1) * (2*z - 1)
                 z = await self._reshare(z)
 
         z <<= Zp.frac_length
         return z
 
-    def min(self, *x):
-        """Secure minimum of all given elements in x, similar to Python's built-in min()."""
+    def min(self, *x, key=None):
+        """Secure minimum of all given elements in x, similar to Python's built-in min().
+
+        See runtime.sorted() for details on key etc.
+        """
         if len(x) == 1:
             x = x[0]
         if iter(x) is x:
@@ -889,12 +899,17 @@ class Runtime:
         if n == 1:
             return x[0]
 
-        m0 = self.min(x[:n//2])
-        m1 = self.min(x[n//2:])
-        return m0 + (m1 <= m0) * (m1 - m0)
+        if key is None:
+            key = lambda a: a
+        min0 = self.min(x[:n//2], key=key)
+        min1 = self.min(x[n//2:], key=key)
+        return self.if_else(key(min0) < key(min1), min0, min1)
 
-    def max(self, *x):
-        """Secure maximum of all given elements in x, similar to Python's built-in max()."""
+    def max(self, *x, key=None):
+        """Secure maximum of all given elements in x, similar to Python's built-in max().
+
+        See runtime.sorted() for details on key etc.
+        """
         if len(x) == 1:
             x = x[0]
         if iter(x) is x:
@@ -906,11 +921,13 @@ class Runtime:
         if n == 1:
             return x[0]
 
-        m0 = self.max(x[:n//2])
-        m1 = self.max(x[n//2:])
-        return m0 + (m1 >= m0) * (m1 - m0)
+        if key is None:
+            key = lambda a: a
+        max0 = self.max(x[:n//2], key=key)
+        max1 = self.max(x[n//2:], key=key)
+        return self.if_else(key(max0) < key(max1), max1, max0)
 
-    def min_max(self, *x):
+    def min_max(self, *x, key=None):
         """Secure minimum and maximum of all given elements in x.
 
         Saves 25% compared to calling min(x) and max(x) separately.
@@ -925,18 +942,20 @@ class Runtime:
         if not n:
             raise ValueError('min_max() arg is an empty sequence')
 
+        if key is None:
+            key = lambda a: a
         for i in range(n//2):
             a, b = x[i], x[-1-i]
-            d = (a >= b) * (b - a)
-            x[i], x[-1-i] = a + d, b - d
-        return self.min(x[:(n+1)//2]), self.max(x[n//2:])  # NB: x[n//2] in both parts if n odd
+            c = a < b
+            x[i] = self.if_else(c, a, b)
+            x[-1-i] = self.if_else(c, b, a)
+        # NB: x[n//2] both in x[:(n+1)//2] and in x[n//2:] if n odd
+        return self.min(x[:(n+1)//2], key=key), self.max(x[n//2:], key=key)
 
     def argmin(self, *x, key=None):
         """Secure argmin of all given elements in x.
 
-        Argument key specifies a function applied to all elements of x before comparing them, using
-        only < comparisons (that is, using only the __lt__() method, as for Python's list.sort()).
-        Default key=None means that elements of x are compared directly.
+        See runtime.sorted() for details on key etc.
         """
         if len(x) == 1:
             x = x[0]
@@ -950,16 +969,15 @@ class Runtime:
             key = lambda a: a
         return self._argmin(x, key)
 
-    def _argmin(self, xs, key):
-        # xs list of lists
-        n = len(xs)
+    def _argmin(self, x, key):
+        n = len(x)
         if n == 1:
-            m = xs[0]
+            m = x[0]
             stype = type(m[0]) if isinstance(m, list) else type(m)
             return stype(0), m  # NB: sets integral attr to True for SecureFixedPoint numbers
 
-        i0, min0 = self._argmin(xs[:n//2], key)
-        i1, min1 = self._argmin(xs[n//2:], key)
+        i0, min0 = self._argmin(x[:n//2], key)
+        i1, min1 = self._argmin(x[n//2:], key)
         i1 += n//2
         c = key(min0) < key(min1)
         a = self.if_else(c, i0, i1)
@@ -969,9 +987,7 @@ class Runtime:
     def argmax(self, *x, key=None):
         """Secure argmax of all given elements in x.
 
-        Argument key specifies a function applied to all elements of x before comparing them, using
-        only < comparisons (that is, using only the __lt__() method, as for Python's list.sort()).
-        Default key=None means that elements of x are compared directly.
+        See runtime.sorted() for details on key etc.
         """
         if len(x) == 1:
             x = x[0]
@@ -985,21 +1001,64 @@ class Runtime:
             key = lambda a: a
         return self._argmax(x, key)
 
-    def _argmax(self, xs, key):
-        # xs list of lists
-        n = len(xs)
+    def _argmax(self, x, key):
+        n = len(x)
         if n == 1:
-            m = xs[0]
+            m = x[0]
             stype = type(m[0]) if isinstance(m, list) else type(m)
             return stype(0), m  # NB: sets integral attr to True for SecureFixedPoint numbers
 
-        i0, max0 = self._argmax(xs[:n//2], key)
-        i1, max1 = self._argmax(xs[n//2:], key)
+        i0, max0 = self._argmax(x[:n//2], key)
+        i1, max1 = self._argmax(x[n//2:], key)
         i1 += n//2
         c = key(max0) < key(max1)
         a = self.if_else(c, i1, i0)
         m = self.if_else(c, max1, max0)  # TODO: merge if_else's once integral attr per list element
         return a, m
+
+    def sorted(self, x, key=None, reverse=False):
+        """Return a new securely sorted list with elements from x in ascending order.
+
+        Similar to Python's built-in sorted(), but not stable.
+
+        Elements of x are either secure numbers or lists of secure numbers.
+
+        Argument key specifies a function applied to all elements of x before comparing them, using
+        only < comparisons (that is, using only the __lt__() method, as for Python's list.sort()).
+        Default key compares elements of x directly (using identity function 'lambda a: a').
+        """
+        x = list(x)
+        n = len(x)
+        if n < 2:
+            return x
+
+        if key is None:
+            key = lambda a: a
+        self._sort(x, key)  # TODO: stable sort &  vectorization of <'s
+        if reverse:
+            x.reverse()
+        return x
+
+    def _sort(self, x, key):
+        """Batcher's merge-exchange sort, see Knuth TAOCP Algorithm 5.2.2M.
+
+        In-place sort in roughly 1/2(log_2 n)^2 rounds of about n/2 comparions each.
+        """
+        n = len(x)  # n >= 2
+        t = (n-1).bit_length()
+        p = 1 << t-1
+        while p:
+            d, q, r = p, 1 << t-1, 0
+            while d:
+                for i in range(n - d):  # NB: all n-d comparisons can be done in parallel
+                    if i & p == r:
+                        a, b = x[i], x[i + d]
+                        c = key(a) < key(b)
+                        x[i] = mpc.if_else(c, a, b)
+                        x[i + d] = mpc.if_else(c, b, a)
+                d, q, r = q - p, q >> 1, p
+            p >>= 1
+        return x
 
     @mpc_coro
     async def lsb(self, a):

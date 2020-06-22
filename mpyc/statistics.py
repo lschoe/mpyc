@@ -362,15 +362,4 @@ async def _mode(x, PRIV=0):
 
     # e <= PRIV or e = (M - m).bit_length()
     freqs = reduce(runtime.vector_add, (runtime.unit_vector(a - m, 2**e) for a in x))
-    return m + _argmax(freqs)[0]
-
-
-def _argmax(x):
-    """Return index and value of maximum in x."""
-    n = len(x)
-    if n == 1:
-        return [type(x[0])(0), x[0]]
-
-    i0, m0 = _argmax(x[:n//2])
-    i1, m1 = _argmax(x[n//2:])
-    return runtime.if_else(m0 >= m1, [i0, m0], [i1 + n//2, m1])
+    return m + runtime.argmax(freqs)[0]

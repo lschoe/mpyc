@@ -14,9 +14,10 @@ compatible with the secure list x: the type of i must fit with the type of the
 elements of x and the value of i must fit with the length of list x, that is,
 0 <= i < len(x).
 
-Common usage scenarios of secure lists are supported through functions such as count()
-and index(), or can be coded easily. For example, the frequency of values in a list x
-of secure integers (which are known to be between 0 and n-1) is computed by:
+Common usage scenarios of secure lists are supported through methods such as sort(),
+count(), and index(), or can be coded easily. For example, the frequency of values
+in a list x of secure integers (whose values are known to be between 0 and n-1)
+is computed by:
 
     s = seclist([0]*n, secint)
     for a in x:
@@ -206,6 +207,21 @@ class seclist(list):
             raise ValueError('value is not in list')
 
         return ix
+
+    def sort(self, key=None, reverse=False):
+        """Sort the list in-place, similar to Python's list.sort().
+
+        See runtime.sorted() for details on key etc.
+        """
+        if len(self) < 2:
+            return
+
+        if key is None:
+            key = lambda a: a
+        runtime._sort(self, key)
+        if reverse:
+            self.reverse()
+        return
 
 
 class secindex(list):

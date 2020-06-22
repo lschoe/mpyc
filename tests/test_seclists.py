@@ -64,6 +64,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(s.index(4))), 4)
         self.assertRaises(ValueError, s.index, 9)
         self.assertRaises(ValueError, seclist([], secint).index, 0)
+        s.sort(lambda a: -a**2, reverse=True)
+        self.assertEqual(mpc.run(mpc.output(list(s))), 5*[0] + [3, 4])
 
     def test_secindex(self):
         secint = mpc.SecInt()

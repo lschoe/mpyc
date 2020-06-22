@@ -87,8 +87,8 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.lshift, 1, a)  # tests __rlshift__
         self.assertRaises(TypeError, operator.rshift, a, a)
         self.assertRaises(TypeError, operator.rshift, 1, a)  # tests __rrshift__
-        self.assertRaises(TypeError, operator.ge, a, a)  # NB: also tests <=
-        self.assertRaises(TypeError, operator.gt, a, a)  # NB: also tests <
+        self.assertRaises(TypeError, operator.lt, a, a)  # NB: also tests >
+        self.assertRaises(TypeError, operator.le, a, a)  # NB: also tests >=
 
     def test_SecNum(self):
         sectypes.SecInt(p=2**89 - 1)

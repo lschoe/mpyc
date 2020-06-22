@@ -6,7 +6,7 @@ ensures that operators such as +, *, >= are defined by operator overloading.
 
 import math
 import functools
-import asyncio
+from asyncio import Future
 from mpyc import gmpy as gmpy2
 from mpyc import gfpx
 from mpyc import finfields
@@ -33,7 +33,7 @@ class SecureObject:
         placeholder (implemented as a Future).
         """
         if value is None:
-            value = asyncio.Future(loop=runtime._loop)
+            value = Future(loop=runtime._loop)
         self.share = value
 
     def __bool__(self):
@@ -232,30 +232,30 @@ class SecureNumber(SecureObject):
 
     __ror__ = __or__
 
-    def __ge__(self, other):
-        """Greater-than or equal comparison."""
-        # self >= other
-        return runtime.ge(self, other)
-
-    def __gt__(self, other):
-        """Strictly greater-than comparison."""
-        # self > other <=> not (self <= other)
-        return 1 - runtime.ge(other, self)
+    def __lt__(self, other):
+        """Strictly less-than comparison."""
+        # self < other
+        return runtime.lt(self, other)
 
     def __le__(self, other):
         """Less-than or equal comparison."""
-        # self <= other <=> other >= self
-        return runtime.ge(other, self)
-
-    def __lt__(self, other):
-        """Strictly less-than comparison."""
-        # self < other <=> not (self >= other)
-        return 1 - runtime.ge(self, other)
+        # self <= other <=> not (other < self)
+        return 1 - runtime.lt(other, self)
 
     def __eq__(self, other):
         """Equality testing."""
         # self == other
         return runtime.eq(self, other)
+
+    def __ge__(self, other):
+        """Greater-than or equal comparison."""
+        # self >= other <=> not (self < other)
+        return 1 - runtime.lt(self, other)
+
+    def __gt__(self, other):
+        """Strictly greater-than comparison."""
+        # self > other <=> other < self
+        return runtime.lt(other, self)
 
     def __ne__(self, other):
         """Negated equality testing."""
@@ -281,11 +281,13 @@ class SecureFiniteField(SecureNumber):
                 value = self.field(value)
             elif isinstance(value, self.field):
                 pass
-            elif isinstance(value, finfields.FiniteFieldElement):
-                raise TypeError(f'incompatible finite field {type(value).__name__} '
-                                f'for {type(self).__name__}')
-
+#            elif isinstance(value, Future):
+#                pass  # NB: for internal use in runtime only
             else:
+                if isinstance(value, finfields.FiniteFieldElement):
+                    raise TypeError(f'incompatible finite field {type(value).__name__} '
+                                    f'for {type(self).__name__}')
+
                 raise TypeError('None, int, or finite field element required')
 
         super().__init__(value)
@@ -362,11 +364,7 @@ class SecureFiniteField(SecureNumber):
 
         return super().__or__(other)
 
-    def __ge__(self, other):
-        """Currently no support at all."""
-        return NotImplemented
-
-    def __gt__(self, other):
+    def __lt__(self, other):
         """Currently no support at all."""
         return NotImplemented
 
@@ -374,7 +372,11 @@ class SecureFiniteField(SecureNumber):
         """Currently no support at all."""
         return NotImplemented
 
-    def __lt__(self, other):
+    def __ge__(self, other):
+        """Currently no support at all."""
+        return NotImplemented
+
+    def __gt__(self, other):
         """Currently no support at all."""
         return NotImplemented
 
@@ -394,11 +396,13 @@ class SecureInteger(SecureNumber):
                 value = self.field(value)
             elif isinstance(value, self.field):
                 pass
-            elif isinstance(value, finfields.FiniteFieldElement):
-                raise TypeError(f'incompatible finite field {type(value).__name__} '
-                                f'for {type(self).__name__}')
-
+            elif isinstance(value, Future):
+                pass  # NB: for internal use in runtime only
             else:
+                if isinstance(value, finfields.FiniteFieldElement):
+                    raise TypeError(f'incompatible finite field {type(value).__name__} '
+                                    f'for {type(self).__name__}')
+
                 raise TypeError('None, int, or finite field element required')
 
         super().__init__(value)
@@ -430,13 +434,13 @@ class SecureFixedPoint(SecureNumber):
                 value = self.field(round(value * (1<<self.field.frac_length)))
             elif isinstance(value, self.field):
                 pass
-            elif isinstance(value, asyncio.Future):
-                pass  # TODO: consider use of special Future type
-            elif isinstance(value, finfields.FiniteFieldElement):
-                raise TypeError(f'incompatible finite field {type(value).__name__} '
-                                f'for {type(self).__name__}')
-
+            elif isinstance(value, Future):
+                pass  # NB: for internal use in runtime only
             else:
+                if isinstance(value, finfields.FiniteFieldElement):
+                    raise TypeError(f'incompatible finite field {type(value).__name__} '
+                                    f'for {type(self).__name__}')
+
                 raise TypeError('None, int, float, or finite field element required')
 
         self.integral = integral

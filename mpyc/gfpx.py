@@ -713,6 +713,33 @@ class Polynomial:
         cls = type(self)
         return cls._to_terms(self.value)
 
+    def __lt__(self, other):
+        """Strictly less-than comparison."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls._to_int(self.value) <= cls._to_int(other)
+
+    def __le__(self, other):
+        """Less-than or equal comparison."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls._to_int(self.value) < cls._to_int(other)
+
+    def __eq__(self, other):
+        """Equality test."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return False
+
+        return self.value == other
+
     def __ge__(self, other):
         """Greater-than or equal comparison."""
         cls = type(self)
@@ -730,33 +757,6 @@ class Polynomial:
             return NotImplemented
 
         return cls._to_int(self.value) > cls._to_int(other)
-
-    def __le__(self, other):
-        """Less-than or equal comparison."""
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return NotImplemented
-
-        return cls._to_int(self.value) < cls._to_int(other)
-
-    def __lt__(self, other):
-        """Strictly less-than comparison."""
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return NotImplemented
-
-        return cls._to_int(self.value) <= cls._to_int(other)
-
-    def __eq__(self, other):
-        """Equality test."""
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return False
-
-        return self.value == other
 
     def __ne__(self, other):
         """Negated equality test."""
