@@ -6,23 +6,21 @@
 # MPyC [![MPyC logo](https://github.com/lschoe/mpyc/blob/master/images/MPyC_Logo.svg)](https://github.com/lschoe/mpyc) Secure Multiparty Computation in Python
 
 MPyC supports secure *m*-party computation tolerating a dishonest minority of up to *t* passively corrupt parties,
-where *m &ge; 1* and *0 &le; t &le; (m-1)/2*. The underlying protocols are based on threshold secret sharing over finite
+where *m &ge; 1* and *0 &le; t &lt; m/2*. The underlying protocols are based on threshold secret sharing over finite
 fields (using Shamir's threshold scheme as well as pseudorandom secret sharing).
 
 The details of the secure computation protocols are mostly transparent due to the use of sophisticated operator overloading
 combined with asynchronous evaluation of the associated protocols.
 
-See the [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background. 
-
-## Example installs:
-
-`python setup.py install`
-
-`python setup.py install --user`
+See the [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) for more info and background.
 
 Click the "launch binder" badge above to view the entire repository and try out its notebooks in the `demos` directory without any install.
 
-See `demos` for usage examples and [MPyC docs](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation. 
+## Installation:
+
+Just run: `python setup.py install` (pure Python, no dependencies).
+
+See `demos` for usage examples and [MPyC docs](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
 
 ## Notes:
 

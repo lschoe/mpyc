@@ -573,10 +573,10 @@ class Runtime:
                 s <<= 1
                 s += r_bits[f * j + i].value
             r_modf[j] = Zp(s)
-        r_divf = self._randoms(Zp, n, 1<<(k + l - f))
+        r_divf = self._randoms(Zp, n, 1 << k + l - f)
         if issubclass(sftype, SecureObject):
             x = await self.gather(x)
-        c = await self.output([a + ((1<<f) + (q.value << f) + r.value)
+        c = await self.output([a + ((1 << k + l) + (q.value << f) + r.value)
                                for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
         y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
@@ -710,7 +710,7 @@ class Runtime:
                 if c.is_integer():
                     c = round(c)
             else:
-                c = b.reciprocal() << f  # TODO: check if this case is needed
+                c = b.reciprocal() << f
         else:
             if not isinstance(b, field):
                 b = field(b)
@@ -868,8 +868,8 @@ class Runtime:
                 sumXors += 1 - r_i if c_i else r_i
             e[l] = Zp(s_sign - 1 + 3*sumXors)
             g = await self.is_zero_public(stype(self.prod(e)))
-            f = 3 - s_sign if g else 3 + s_sign
-            z = (c - a_rmodl + (f << l-1)) / (1<<l)
+            h = 3 - s_sign if g else 3 + s_sign
+            z = (c - a_rmodl + (h << l-1)) / (1<<l)
 
         if not LT:
             h = self.all(r_bits[i] if (c >> i) & 1 else 1-r_bits[i] for i in range(l))
@@ -1475,9 +1475,8 @@ class Runtime:
         else:
             B = await self.gather(B)
         n = len(A[0])
-        C = [None] * n1
+        C = [None] * (n1 * n2)
         for ia in range(n1):
-            C[ia] = [None] * n2
             for ib in range(n2):
                 s = 0
                 for i in range(n):
@@ -1485,15 +1484,13 @@ class Runtime:
                 s = field(s)
                 if f and (A_integral or B_integral):
                     s >>= f  # NB: in-place rshift
-                C[ia][ib] = s
-            if shA and shB:
-                C[ia] = self._reshare(C[ia])
+                C[ia * n2 + ib] = s
         if shA and shB:
-            C = await self.gather(C)
+            C = await self.gather(self._reshare(C))
         if f and not A_integral and not B_integral:
             C = [self.trunc(c, l=stype.bit_length) for c in C]
             C = await self.gather(C)
-        return C
+        return [[C[ia * n2 + ib] for ib in range(n2)] for ia in range(n1)]
 
     @mpc_coro
     async def gauss(self, A, d, b, c):
@@ -1698,7 +1695,6 @@ class Runtime:
         b = x[-1]  # sign bit
         s = 1 - b*2  # sign s = (-1)^b
         x = x[:-1]
-        _1 = type(a)(1)
 
         def __norm(x):
             n = len(x)
@@ -1709,7 +1705,7 @@ class Runtime:
             i0, nz0 = __norm(x[:n//2])  # low bits
             i1, nz1 = __norm(x[n//2:])  # high bits
             i0 *= (1 << ((n+1)//2))
-            return self.if_else(nz1, [i1, _1], [i0, nz0])  # self.or_(nz0, nz1)
+            return self.if_else(nz1, [i1, nz1], [i0, nz0])  # self.or_(nz0, nz1)
 
         l = type(a).bit_length
         f = type(a).field.frac_length

@@ -60,10 +60,15 @@ The LP demos include the following m x n datasets (m constraints, n variables):
   1=wiki (2 x 3): https://en.wikipedia.org/wiki/Simplex_algorithm#Example
   2=tb2x2 (2 x 2): tiny example
   3=woody (3 x 2): wooden tables & chairs manufacturer classic text book example
-  4=LPExample_R20 (20 x 20): small example from SecureSCM project
+  4=LPExample_R20 (20 x 20): randomly generated example from SecureSCM project
   5=sc50b (70 x 48): netlib.org/lp/data test problem, obtained via Mathematica
   6=kb2 (68 x 41): netlib.org/lp/data test problem, obtained via Mathematica
-  7=LPExample (202 x 288): large example from SecureSCM project
+  7=LPExample (202 x 288): large example from SecureSCM project (*)
+
+(*) Slight variant of problem and solution given in Figures 2 and 5, respectively,
+of "Centralised and decentralised supply chain planning" by Richard Pibernik and
+Eric Sucky, International Journal of Integrated Supply Management (IJISM), Vol. 2,
+Nos. 1/2, pp. 6-27, Inderscience, 2006.
 
 The demos use the small (or, condensed) tableau variant of the simplex algorithm,
 combined with Dantzig's pivoting rule. The pivot column is selected by picking
@@ -103,8 +108,6 @@ def pow_list(a, x, n):
     """Return [a,ax, ax^2, ..., ax^(n-1)].
 
     Runs in O(log n) rounds using minimal number of n-1 secure multiplications.
-    NB: equivalent to list(mpyc.mpctools.accumulate([x] * (n-1), f=operator.mul, iv=a)),
-    which also runs in O(log n) rounds but using O(n log n) secure multiplications.
     """
     if n == 1:
         powers = [a]

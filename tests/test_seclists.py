@@ -1,3 +1,4 @@
+import operator
 import unittest
 from mpyc.seclists import seclist, secindex
 from mpyc.runtime import mpc
@@ -20,7 +21,15 @@ class Arithmetic(unittest.TestCase):
         s.reverse()
         s = s + [6, 7]
         del s[0]
-        self.assertEqual(mpc.run(mpc.output(list(s))), [1, 2, 3, 4, 5, 6, 7])
+        s.remove(4)
+        s[5] = 9
+        del s[2:4]
+        self.assertEqual(mpc.run(mpc.output(list(s))), [1, 2, 6, 9])
+
+        secfld2 = mpc.SecFld()
+        self.assertRaises(TypeError, seclist, [secfld(1)], secfld2)
+        self.assertRaises(ValueError, seclist, [])
+        self.assertRaises(TypeError, operator.add, seclist([secfld(1)]), seclist([secfld2(1)]))
 
     def test_secint(self):
         secint = mpc.SecInt()
@@ -31,7 +40,7 @@ class Arithmetic(unittest.TestCase):
         s.append(False)
         s.append(secint(7))
         s[0] = secint(13)
-        self.assertEqual(mpc.run(mpc.output(list(s))), [13, 7])  # NB: list to convert from seclist
+        self.assertEqual(mpc.run(mpc.output(list(s))), [13, 7])
         i = [secint(0), secint(1)]
         s[i] = 5
         self.assertEqual(mpc.run(mpc.output(s[1])), 5)
@@ -44,12 +53,20 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(list(s))), [13, 5])
         s[0], s[1] = s[1], s[0]
         self.assertEqual(mpc.run(mpc.output(list(s))), [5, 13])
-        s.append(secint(8))
-        s.reverse()
-        self.assertEqual(mpc.run(mpc.output(list(s))), [8, 13, 5])
-
-        a = s[secint(1)]
-        self.assertEqual(mpc.run(mpc.output(a)), 13)
+        s.append(secint(8))     # s = [5, 13, 8]
+        s.reverse()             # s = [8, 13, 5]
+        s.insert(secint(0), 9)  # s = [9, 8, 13, 5]
+        del s[secint(1)]        # s = [9, 13, 5]
+        s.pop(secint(2))        # s = [9, 13]
+        s.insert(0, 99)         # s = [99, 9, 13]
+        s.pop(0)                # s = [9, 13]
+        self.assertRaises(ValueError, s.remove, secint(11))
+        s *= 2                  # s = [9, 13, 9, 13]
+        s.remove(9)             # s = [13, 9, 13]
+        s[0:1] = []             # s = [9, 13]
+        s = 1 * s + s * 0       # s = [9, 13]
+        self.assertEqual(mpc.run(mpc.output(list(s))), [9, 13])
+        self.assertEqual(mpc.run(mpc.output(s[secint(1)])), 13)
         s[secint(1)] = secint(21)
         self.assertEqual(mpc.run(mpc.output(s[1])), 21)
 
@@ -58,14 +75,48 @@ class Arithmetic(unittest.TestCase):
             s[a] += 1
         self.assertEqual(mpc.run(mpc.output(list(s))), [0, 0, 0, 3, 4, 0, 0])
 
-        self.assertTrue(mpc.run(mpc.output(s.__contains__(0))))
-        self.assertFalse(mpc.run(mpc.output(s.__contains__(9))))
+        with self.assertRaises(NotImplementedError):
+            0 in s
+        self.assertTrue(mpc.run(mpc.output(s.contains(0))))
+        self.assertFalse(mpc.run(mpc.output(s.contains(9))))
         self.assertEqual(mpc.run(mpc.output(s.count(0))), 5)
         self.assertEqual(mpc.run(mpc.output(s.index(4))), 4)
         self.assertRaises(ValueError, s.index, 9)
         self.assertRaises(ValueError, seclist([], secint).index, 0)
         s.sort(lambda a: -a**2, reverse=True)
+        s.sort()
         self.assertEqual(mpc.run(mpc.output(list(s))), 5*[0] + [3, 4])
+        self.assertFalse(mpc.run(mpc.output(s < s)))
+        self.assertTrue(mpc.run(mpc.output(s <= s)))
+        self.assertTrue(mpc.run(mpc.output(s == s)))
+        self.assertFalse(mpc.run(mpc.output(s > s)))
+        self.assertTrue(mpc.run(mpc.output(s >= s)))
+        self.assertFalse(mpc.run(mpc.output(s != s)))
+        self.assertFalse(mpc.run(mpc.output(s < [])))
+        self.assertFalse(mpc.run(mpc.output(s <= [])))
+        self.assertTrue(mpc.run(mpc.output(s >= [])))
+        self.assertTrue(mpc.run(mpc.output(s > [])))
+        self.assertFalse(mpc.run(mpc.output(s < s[:-1])))
+        self.assertTrue(mpc.run(mpc.output(s[:-1] < s)))
+        self.assertTrue(mpc.run(mpc.output(s[:-1] != s)))
+        t = s.copy()
+        t[-1] += 1
+        self.assertTrue(mpc.run(mpc.output(s < t)))
+        t[1] -= 1
+        self.assertFalse(mpc.run(mpc.output(s < t)))
+        self.assertFalse(mpc.run(mpc.output(s[:-1] <= t)))
+
+    def test_secfxp(self):
+        secfxp = mpc.SecFxp()
+        s = seclist([5, -3, 2, 5, 5], secfxp)
+        self.assertFalse(mpc.run(mpc.output(s < s)))
+        t = s[:]
+        t[-1] += 1
+        self.assertTrue(mpc.run(mpc.output(s < t)))
+
+        s = [[1, 0], [0, 1], [0, 0], [1, 1]]
+        ss = mpc.sorted([[secfxp(a) for a in _] for _ in s], key=seclist)
+        self.assertEqual([mpc.run(mpc.output(_)) for _ in ss], sorted(s))
 
     def test_secindex(self):
         secint = mpc.SecInt()
