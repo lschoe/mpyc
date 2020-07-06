@@ -61,29 +61,29 @@ class Arithmetic(unittest.TestCase):
         x = [1, 1, 2, 2, 3, 4, 4, 4, 6] * 5
         random.shuffle(x)
         x = list(map(secfxp, x))
-        self.assertAlmostEqual(mpc.run(mpc.output(mean(x))).signed(), 3, delta=1)
-        self.assertAlmostEqual(mpc.run(mpc.output(median(x))).signed(), 3)
-        self.assertAlmostEqual(mpc.run(mpc.output(mode(x))).signed(), 4)
+        self.assertAlmostEqual(mpc.run(mpc.output(mean(x))), 3, delta=1)
+        self.assertAlmostEqual(mpc.run(mpc.output(median(x))), 3)
+        self.assertAlmostEqual(mpc.run(mpc.output(mode(x))), 4)
 
         x = [1, 1, 1, 1, 2, 2, 3, 4, 4, 4, 4, 5, 6, 6, 6] * 100
         random.shuffle(x)
         x = list(map(lambda a: a * 2**-4, x))
         x = list(map(secfxp, x))
-        self.assertAlmostEqual(mpc.run(mpc.output(mean(x))).signed(), (2**-4) * 10/3, delta=1)
+        self.assertAlmostEqual(mpc.run(mpc.output(mean(x))), (2**-4) * 10/3, delta=1)
 
         y = [1.75, 1.25, -0.25, 0.5, 1.25, -3.5] * 5
         random.shuffle(y)
         x = list(map(secfxp, y))
-        self.assertAlmostEqual(float(mpc.run(mpc.output(mean(x)))), statistics.mean(y), 4)
-        self.assertAlmostEqual(float(mpc.run(mpc.output(variance(x)))), statistics.variance(y), 2)
-        self.assertAlmostEqual(float(mpc.run(mpc.output(stdev(x)))), statistics.stdev(y), 3)
-        self.assertAlmostEqual(float(mpc.run(mpc.output(pvariance(x)))), statistics.pvariance(y), 2)
-        self.assertAlmostEqual(float(mpc.run(mpc.output(pstdev(x)))), statistics.pstdev(y), 3)
-        self.assertAlmostEqual(float(mpc.run(mpc.output(median(x)))), statistics.median(y), 4)
+        self.assertAlmostEqual(mpc.run(mpc.output(mean(x))), statistics.mean(y), 4)
+        self.assertAlmostEqual(mpc.run(mpc.output(variance(x))), statistics.variance(y), 2)
+        self.assertAlmostEqual(mpc.run(mpc.output(stdev(x))), statistics.stdev(y), 3)
+        self.assertAlmostEqual(mpc.run(mpc.output(pvariance(x))), statistics.pvariance(y), 2)
+        self.assertAlmostEqual(mpc.run(mpc.output(pstdev(x))), statistics.pstdev(y), 3)
+        self.assertAlmostEqual(mpc.run(mpc.output(median(x))), statistics.median(y), 4)
 
         x = list(map(secfxp, [1.0]*10))
-        self.assertAlmostEqual(mpc.run(mpc.output(mode(x))).signed(), 1)
+        self.assertAlmostEqual(mpc.run(mpc.output(mode(x))), 1)
         k = mpc.options.sec_param
         mpc.options.sec_param = 1  # force no privacy case
-        self.assertAlmostEqual(mpc.run(mpc.output(mode(x))).signed(), 1)
+        self.assertAlmostEqual(mpc.run(mpc.output(mode(x))), 1)
         mpc.options.sec_param = k

@@ -34,9 +34,8 @@ class FiniteFieldElement:
     characteristic = None
     ext_deg = None
     byte_length = None
-    frac_length = 0
     is_signed = None
-    mix_types = None
+    _mix_types = None
 
     def __init__(self, value):
         self.value = value % self.modulus  # TODO: make this more direct for efficiency
@@ -65,14 +64,14 @@ class FiniteFieldElement:
         if isinstance(other, type(self)):
             return type(self)(self.value + other.value)
 
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return type(self)(self.value + other)
 
         return NotImplemented
 
     def __radd__(self, other):
         """Addition (with reflected arguments)."""
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return type(self)(self.value + other)
 
         return NotImplemented
@@ -81,7 +80,7 @@ class FiniteFieldElement:
         """In-place addition."""
         if isinstance(other, type(self)):
             other = other.value
-        elif not isinstance(other, self.mix_types):
+        elif not isinstance(other, self._mix_types):
             return NotImplemented
 
         self.value += other
@@ -93,14 +92,14 @@ class FiniteFieldElement:
         if isinstance(other, type(self)):
             return type(self)(self.value - other.value)
 
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return type(self)(self.value - other)
 
         return NotImplemented
 
     def __rsub__(self, other):
         """Subtraction (with reflected arguments)."""
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return type(self)(other - self.value)
 
         return NotImplemented
@@ -109,7 +108,7 @@ class FiniteFieldElement:
         """In-place subtraction."""
         if isinstance(other, type(self)):
             other = other.value
-        elif not isinstance(other, self.mix_types):
+        elif not isinstance(other, self._mix_types):
             return NotImplemented
 
         self.value -= other
@@ -129,14 +128,14 @@ class FiniteFieldElement:
         if isinstance(other, type(self)):
             return type(self)(self.value * other.value)
 
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return type(self)(self.value * other)
 
         return NotImplemented
 
     def __rmul__(self, other):
         """Multiplication (with reflected arguments)."""
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return type(self)(self.value * other)
 
         return NotImplemented
@@ -145,7 +144,7 @@ class FiniteFieldElement:
         """In-place multiplication."""
         if isinstance(other, type(self)):
             other = other.value
-        elif not isinstance(other, self.mix_types):
+        elif not isinstance(other, self._mix_types):
             return NotImplemented
 
         self.value *= other
@@ -157,21 +156,21 @@ class FiniteFieldElement:
         if isinstance(other, type(self)):
             return self * other.reciprocal()
 
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return self * type(self)(other).reciprocal()
 
         return NotImplemented
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             return type(self)(other) * self.reciprocal()
 
         return NotImplemented
 
     def __itruediv__(self, other):
         """In-place division."""
-        if isinstance(other, self.mix_types):
+        if isinstance(other, self._mix_types):
             other = type(self)(other)
         elif not isinstance(other, type(self)):
             return NotImplemented
@@ -227,6 +226,16 @@ class FiniteFieldElement:
     def sqrt(self, INV=False):
         """Modular (inverse) square roots."""
         raise NotImplementedError('abstract method')
+
+    def __eq__(self, other):
+        """Equality test."""
+        if isinstance(other, type(self)):
+            return self.value == other.value
+
+        if isinstance(other, self._mix_types):
+            return not (self.value - other) % self.modulus
+
+        return NotImplemented
 
     def __bool__(self):
         """Truth value testing.
@@ -295,8 +304,8 @@ def pGF(modulus, f=0):
     GFElement.characteristic = p
     GFElement.ext_deg = 1
     GFElement.byte_length = (GFElement.order.bit_length() + 7) >> 3
-    GFElement.frac_length = f
-    GFElement.rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
+    GFElement._frac_length = f
+    GFElement._rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
     GFElement.is_signed = True
     GFElement.nth = n
     GFElement.root = w % p
@@ -308,35 +317,24 @@ class PrimeFieldElement(FiniteFieldElement):
 
     __slots__ = ()
 
-    rshift_factor = 1
+    _frac_length = 0
+    _rshift_factor = 1
     is_signed = None
     nth = None
     root = None
-    mix_types = int  # NB: pydoc inserts doc for class int ...
+    _mix_types = int
 
     def __int__(self):
         """Extract field element as a (signed) integer value."""
         if self.is_signed:
-            v = self.signed()
+            v = self.signed_()
         else:
-            v = self.unsigned()
-        return round(v)
-
-    def __float__(self):
-        """Extract field element as a (signed) float value."""
-        if self.is_signed:
-            v = self.signed()
-        else:
-            v = self.unsigned()
-        return float(v)
+            v = self.unsigned_()
+        return v
 
     def __abs__(self):
         """Absolute value of (signed) value."""
-        if self.is_signed:
-            v = self.signed()
-        else:
-            v = self.unsigned()
-        return abs(v)
+        return abs(self.__int__())
 
     def __pow__(self, other):
         """Exponentiation."""
@@ -354,8 +352,8 @@ class PrimeFieldElement(FiniteFieldElement):
         if not isinstance(other, int):
             return NotImplemented
 
-        if other == self.frac_length:
-            rsf = self.rshift_factor
+        if other == self._frac_length:
+            rsf = self._rshift_factor
         else:
             rsf = int(gmpy2.invert(1 << other, self.modulus))
         return type(self)(self.value * rsf)
@@ -364,8 +362,8 @@ class PrimeFieldElement(FiniteFieldElement):
         if not isinstance(other, int):
             return NotImplemented
 
-        if other == self.frac_length:
-            rsf = self.rshift_factor
+        if other == self._frac_length:
+            rsf = self._rshift_factor
         else:
             rsf = int(gmpy2.invert(1 << other, self.modulus))
         self.value *= rsf
@@ -413,44 +411,19 @@ class PrimeFieldElement(FiniteFieldElement):
 
         return field(v)
 
-    def signed(self):
+    def signed_(self):
         """Return signed integer representation, symmetric around zero."""
         v = self.value
         if v > self.modulus >> 1:
             v -= self.modulus
-        if self.frac_length:
-            v = float(v * 2**-self.frac_length)
         return v
 
-    def unsigned(self):
+    def unsigned_(self):
         """Return unsigned integer representation."""
-        if self.frac_length:
-            return float(self.value * 2**-self.frac_length)
-
         return self.value
 
     def __repr__(self):
-        if self.frac_length:
-            return f'{self.__float__()}'
-
         return f'{self.__int__()}'
-
-    def __eq__(self, other):
-        """Equality test."""
-        if isinstance(other, type(self)):
-            return self.value == other.value
-
-        if isinstance(other, int):
-            if self.frac_length:
-                other <<= self.frac_length
-            return self.value == type(self)(other).value
-
-        if self.frac_length:
-            if isinstance(other, float):
-                other = round(other * (1 << self.frac_length))
-                return self.value == type(self)(other).value
-
-        return NotImplemented
 
 
 def find_irreducible(p, d):
@@ -482,8 +455,8 @@ class ExtensionFieldElement(FiniteFieldElement):
 
     __slots__ = ()
 
-    least_qnr = None
-    mix_types = (int, gfpx.Polynomial)
+    _least_qnr = None
+    _mix_types = (int, gfpx.Polynomial)
 
     def __int__(self):
         return int(self.value)
@@ -542,7 +515,7 @@ class ExtensionFieldElement(FiniteFieldElement):
         s = (n & -n).bit_length() - 1  # number of times 2 divides n
         t = n >> s
         # q - 1 = t 2^s, t odd
-        z = field.least_qnr
+        z = field._least_qnr
         if z is None:
             c = 1
             i = 2
@@ -550,7 +523,7 @@ class ExtensionFieldElement(FiniteFieldElement):
                 z = cls.powmod(i, t, field.modulus)
                 c = cls.powmod(z, 1 << s-1, field.modulus)
                 i += 1
-            field.least_qnr = z  # cache least QNR raised to power t
+            field._least_qnr = z  # cache least QNR raised to power t
 
         # TODO: improve following code a bit
         w = cls.powmod(a, t>>1, field.modulus)
@@ -577,16 +550,6 @@ class ExtensionFieldElement(FiniteFieldElement):
     def __repr__(self):
         return f'{self.value}'
 
-    def __eq__(self, other):
-        """Equality test."""
-        if isinstance(other, type(self)):
-            return self.value == other.value
-
-        if isinstance(other, self.mix_types):
-            return self.value == other
-
-        return NotImplemented
-
 
 class BinaryFieldElement(ExtensionFieldElement):
     """Common base class for binary field elements."""
@@ -594,7 +557,7 @@ class BinaryFieldElement(ExtensionFieldElement):
     __slots__ = ()
 
     characteristic = 2
-    mix_types = (int, gfpx.BinaryPolynomial)
+    _mix_types = (int, gfpx.BinaryPolynomial)
 
     def is_sqr(self):
         return True

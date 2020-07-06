@@ -432,7 +432,7 @@ class secindex:
 
     async def __index__(self):
         field = self.sectype.field
-        f = field.frac_length
+        f = self.sectype.frac_length
         i = runtime.in_prod(self.value, [field(_) for _ in range(len(self.value))])
         i = await runtime.output(i)
         return self.offset + i.value >> f

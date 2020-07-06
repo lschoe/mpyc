@@ -70,13 +70,13 @@ async def id3(T, R) -> asyncio.Future:
     sizeT = mpc.sum(sizes)
     stop = (sizeT <= int(args.epsilon * len(T))) + (mx == sizeT)
     if not (R and await mpc.is_zero_public(stop)):
-        i = int(await mpc.output(i))
+        i = await mpc.output(i)
         logging.info(f'Leaf node label {i}')
         tree = i
     else:
         T_R = [[mpc.schur_prod(T, v) for v in S[A]] for A in R]
         gains = [GI(mpc.matrix_prod(T_A, S[C], True)) for T_A in T_R]
-        k = int(await mpc.output(mpc.argmax(gains, key=SecureFraction)[0]))
+        k = await mpc.output(mpc.argmax(gains, key=SecureFraction)[0])
         T_Rk = T_R[k]
         del T_R, gains  # release memory
         A = list(R)[k]

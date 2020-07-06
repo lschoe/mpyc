@@ -282,7 +282,7 @@ def returnType(*args, wrap=True):
         if isinstance(rettype, tuple):
             stype = rettype[0]
             integral = rettype[1]
-            if stype.field.frac_length:
+            if stype.frac_length:
                 rt = lambda: stype(None, integral)
             else:
                 rt = stype

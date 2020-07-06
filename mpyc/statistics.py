@@ -199,8 +199,7 @@ def _fsqrt(a):
     See function _isqrt(a).
     """
     stype = type(a)
-    field = stype.field
-    f = field.frac_length
+    f = stype.frac_length
     e = (stype.bit_length + f-1) // 2  # (l+f)/2 - f = (l-f)/2 in [0..l/2]
     r = stype(0)
     j = 2**(e - f)
@@ -295,7 +294,7 @@ async def _quickselect(x, k):
     if n == 1:
         return x[0]
 
-    f = stype.field.frac_length
+    f = stype.frac_length
     y = runtime.random_bits(stype, n)
     p = runtime.in_prod(x, random.random_unit_vector(stype, n))  # random pivot
     z = [(x[i] - p)*2 < y[i] * 2**-f for i in range(n)]  # break ties x[i] == p uniformly at random
@@ -350,7 +349,7 @@ async def _mode(x, PRIV=0):
 
     await runtime.returnType(stype)
 
-    f = stype.field.frac_length
+    f = stype.frac_length
     m, M = runtime.min_max(x)
     b = runtime.to_bits(M - m)
     e = len(b) - f

@@ -130,7 +130,7 @@ async def logrank_test(secfxp, d1, d2, n1, n2):
         detot += d1[j] - a * b * c
         vtot += a * n2[j] * (n_j - d_j) * c
         await mpc.throttler(0.01)
-    chi = float(await mpc.output(detot**2 / vtot))
+    chi = await mpc.output(detot**2 / vtot)
     p = scipy.stats.chi2.sf(chi, 1)
     return lifelines.statistics.StatisticalResult(p_value=p, test_statistic=chi)
 

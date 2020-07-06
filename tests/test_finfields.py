@@ -13,7 +13,6 @@ class Arithmetic(unittest.TestCase):
         self.f2p = finfields.GF(2)
         self.f19 = finfields.GF(19)    # 19 % 4 = 3
         self.f101 = finfields.GF(101)  # 101 % 4 = 1
-        self.f19.is_signed = False
         self.f101.is_signed = False
 
         self.f27 = finfields.GF(gfpx.GFpX(3)(46))  # irreducible polynomial X^3 + 2X^2 + 1
@@ -172,6 +171,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(bool(f19(0)), False)
         self.assertEqual(bool(f19(1)), True)
         self.assertEqual(bool(f19(-1)), True)
+        self.assertEqual(int(f19(-1)), -1)
+        self.assertEqual(abs(f19(-1)), 1)
 
         a = f19(12)
         b = f19(11)

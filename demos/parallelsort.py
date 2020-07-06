@@ -19,7 +19,7 @@ P[0],...,P[m-1] work on the task in parallel as follows:
 4. P[i] computes the length-m list with x[i] in position p[i].
 
 The rank of x[i] is computed using O(m) comparisons by counting how many
-values are below x[i]. Hence, each step can clearly be O(m) time. Assuming
+values are below x[i]. Hence, each step can clearly takes O(m) time. Assuming
 unique input values x[i] for now, p will be a permutation on {0,...,m-1}.
 So, each party will obtain the sorted list using O(m) time overall.
 
@@ -58,7 +58,7 @@ from mpyc.runtime import mpc
 
 mpc.threshold = 0  # No secrecy.
 m = len(mpc.parties)
-k = 2**m  # n = m 2^m (lower values for k also allowed
+k = 2**(m-1)  # any k=O(2^m) allowed, ensuring that n = m*k = O(m 2^m)
 
 secint = mpc.SecInt()
 secfxp = mpc.SecFxp()
@@ -108,8 +108,6 @@ async def parsort1(a):
     """Sort m numbers in O(m) time, each party providing one number a."""
     if isinstance(a, (secint, secfxp)):
         x = await mpc.output(mpc.input(a))
-        num = int if isinstance(a, secint) else float
-        x = [num(a) for a in x]
     else:
         x = await mpc.transfer(a)
     print('Random inputs, one per party: ', x)

@@ -101,8 +101,9 @@ async def main():
 
         # reveal progress a bit
         iteration += 1
-        logging.info(f'Iteration {iteration}: {float(await mpc.output(T[0][-1]))} '
-                     f'pivot={float(await mpc.output(pivot))}')
+        mx = await mpc.output(T[0][-1])
+        p = await mpc.output(pivot)
+        logging.info(f'Iteration {iteration}: {mx} pivot={p}')
 
         # swap basis entries
         delta = mpc.in_prod(basis, p_row_index) - mpc.in_prod(cobasis, p_col_index)
@@ -118,7 +119,7 @@ async def main():
         p_row = mpc.vector_add(p_row, p_col_index)
         T = mpc.gauss(T, secfxp(1), p_col, p_row)
 
-    mx = float(await mpc.output(T[0][-1]))
+    mx = await mpc.output(T[0][-1])
     rel_error = (mx - exact_max) / exact_max
     print(f'max = {mx} (error {rel_error:.3%}) in {iteration} iterations')
 
@@ -152,7 +153,7 @@ async def main():
     print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A <= c, y <= 0: {check}')
 
     x = await mpc.output(x)
-    print(f'solution = {[float(a) for a in x]}')
+    print(f'solution = {x}')
 
     await mpc.shutdown()
 

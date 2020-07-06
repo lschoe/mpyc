@@ -213,9 +213,10 @@ async def main():
 
         # reveal progress a bit
         iteration += 1
-        pp = float(await mpc.output(previous_pivot))
-        logging.info(f'Iteration {iteration}/{n_iter}: {float(await mpc.output(T[0][-1])) / pp} '
-                     f'pivot={float(await mpc.output(pivot)) / pp}')
+        mx = await mpc.output(T[0][-1])
+        cd = await mpc.output(previous_pivot)
+        p = await mpc.output(pivot)  # NB: no await in f-strings in Python 3.6
+        logging.info(f'Iteration {iteration}/{n_iter}: {mx / cd} pivot={p / cd}')
 
         # swap basis entries
         delta = mpc.in_prod(basis, p_row_index) - mpc.in_prod(cobasis, p_col_index)
@@ -233,8 +234,8 @@ async def main():
         T = mpc.gauss(T, pivot * pp_inv, p_col, p_row)
         previous_pivot = pivot
 
-    mx = int(await mpc.output(T[0][-1]))
-    cd = int(await mpc.output(previous_pivot))  # common denominator for all entries of T
+    mx = await mpc.output(T[0][-1])
+    cd = await mpc.output(previous_pivot)  # common denominator for all entries of T
     print(f'max = {mx} / {cd} / {scale} = {mx / cd / scale} in {iteration} iterations')
 
     logging.info('Solution x')
@@ -272,7 +273,7 @@ async def main():
     print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A <= c, y <= 0: {check}')
 
     x = await mpc.output(x)
-    print(f'solution = {[int(a) / cd for a in x]}')
+    print(f'solution = {[a / cd for a in x]}')
 
     await mpc.shutdown()
 

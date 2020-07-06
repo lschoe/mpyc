@@ -26,6 +26,8 @@ class SecureObject:
 
     __slots__ = 'share'
 
+    _output_conversion = None
+
     def __init__(self, value=None):
         """Initialize a share.
 
@@ -48,6 +50,7 @@ class SecureNumber(SecureObject):
 
     field = None
     bit_length = None
+    frac_length = 0
 
     def _coerce(self, other):
         if isinstance(other, SecureObject):
@@ -172,7 +175,7 @@ class SecureNumber(SecureObject):
 
         r = runtime.mod(self, other)
         q = (self - r) * runtime.reciprocal(other)
-        return q * 2**self.field.frac_length, r
+        return q * 2**self.frac_length, r
 
     def __rdivmod__(self, other):
         """Integer division (with reflected arguments)."""
@@ -386,6 +389,8 @@ class SecureInteger(SecureNumber):
 
     __slots__ = ()
 
+    _output_conversion = int
+
     def __init__(self, value=None):
         """Initialize a secure integer.
 
@@ -413,6 +418,10 @@ class SecureFixedPoint(SecureNumber):
 
     __slots__ = 'integral'
 
+    @classmethod
+    def _output_conversion(cls, a):
+        return int(a) / 2**cls.frac_length
+
     def __init__(self, value=None, integral=None):
         """Initialize a secure fixed-point number.
 
@@ -427,11 +436,11 @@ class SecureFixedPoint(SecureNumber):
             if isinstance(value, int):
                 if integral is None:
                     integral = True
-                value = self.field(value << self.field.frac_length)
+                value = self.field(value << self.frac_length)
             elif isinstance(value, float):
                 if integral is None:
                     integral = value.is_integer()
-                value = self.field(round(value * (1<<self.field.frac_length)))
+                value = self.field(round(value * (1<<self.frac_length)))
             elif isinstance(value, self.field):
                 pass
             elif isinstance(value, Future):
@@ -569,4 +578,5 @@ def _SecFxp(l, f, p, n):
     sectype.__doc__ = 'Class of secret-shared fixed-point numbers.'
     sectype.field = _pfield(l, f, p, n)
     sectype.bit_length = l
+    sectype.frac_length = f
     return sectype

@@ -403,7 +403,7 @@ async def main():
     if args.no_legendre:
         secint.bit_length = 14
     for i in range(batch_size):
-        prediction = int(await mpc.output(mpc.argmax(L[i])[0]))
+        prediction = await mpc.output(mpc.argmax(L[i])[0])
         error = '******* ERROR *******' if prediction != labels[i] else ''
         print(f'Image #{offset+i} with label {labels[i]}: {prediction} predicted. {error}')
         print(await mpc.output(L[i]))

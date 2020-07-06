@@ -223,7 +223,7 @@ async def random_derangement(sectype, x):
     if isinstance(x, int):
         x = range(x)
     x = list(x)
-    if sectype.field.frac_length:
+    if issubclass(sectype, runtime.FixedPoint):
         # all elts assumed of same type as x[0]
         if not isinstance(x[0], sectype):
             x = [sectype(a) for a in x]  # NB: original x is not modified
@@ -285,7 +285,7 @@ async def sample(sectype, population, k):
 
 def random(sectype):
     """Uniformly random secret fixed-point number in the range [0.0, 1.0)."""
-    f = sectype.field.frac_length
+    f = sectype.frac_length
     if not f:
         raise TypeError('secure fixed-point type required')
 
@@ -297,7 +297,7 @@ def uniform(sectype, a, b):
     """Uniformly random secret fixed-point number N such that
     a <= N <= b for a <= b and b <= N <= a for b < a.
     """
-    f = sectype.field.frac_length
+    f = sectype.frac_length
     if not f:
         raise TypeError('secure fixed-point type required')
 
