@@ -47,7 +47,7 @@ async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--dataset', type=int, metavar='I',
                         help=('dataset 0=uvlp (default), 1=wiki, 2=tb2x2, 3=woody, '
-                              '4=LPExample_R20, 5=kb2, 6=sc50b, 7=LPExample'))
+                              '4=LPExample_R20, 5=sc50b, 6=kb2, 7=LPExample'))
     parser.add_argument('-l', '--bit-length', type=int, metavar='L',
                         help='override preset bit length for dataset')
     parser.set_defaults(dataset=0, bit_length=0)
