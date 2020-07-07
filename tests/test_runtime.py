@@ -411,6 +411,7 @@ class Arithmetic(unittest.TestCase):
         secfxp = mpc.SecFxp()
         secfld = mpc.SecFld()
         for secnum in (secint, secfxp, secfld):
+            self.assertEqual(type(mpc.run(mpc.output(secnum(0), raw=True))), secnum.field)
             self.assertEqual(mpc.run(mpc.output(mpc._reshare([secnum(0)]))), [0])
             self.assertEqual(mpc.run(mpc.output(mpc.all(secnum(1) for _ in range(5)))), True)
             self.assertEqual(mpc.run(mpc.output(mpc.all([secnum(1), secnum(1), secnum(0)]))), False)

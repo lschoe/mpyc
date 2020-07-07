@@ -381,7 +381,7 @@ class Runtime:
         return [[field(a) for a in field.from_bytes(r)] for r in shares]
 
     @mpc_coro
-    async def output(self, x, receivers=None, threshold=None) -> Future:
+    async def output(self, x, receivers=None, threshold=None, raw=False) -> Future:
         """Output the value of x to the receivers specified.
 
         Value x is a secure number, or a list of secure numbers.
@@ -391,6 +391,7 @@ class Runtime:
         A secure integer is output as a Python int, a secure
         fixed-point number is output as a Python float, and a secure
         finite field element is output as an MPyC finite field element.
+        Set flag raw=True to suppress output conversion.
         """
         x_is_list = isinstance(x, list)
         if x_is_list:
@@ -426,7 +427,7 @@ class Runtime:
             y = thresha.recombine(field, points)
             if issubclass(sftype, SecureObject):
                 f = sftype._output_conversion
-                if f is not None:
+                if not raw and f is not None:
                     y = [f(a) for a in y]
         else:
             y = [None] * len(x)
@@ -799,7 +800,7 @@ class Runtime:
         if isinstance(a, SecureFiniteField):
             return 1 - self.pow(a, a.field.order - 1)
 
-        if (a.bit_length / 2 > self.options.sec_param >= 8 and a.field.order % 4 == 3):
+        if a.bit_length/2 > self.options.sec_param >= 8 and a.field.order%4 == 3:
             return self._is_zero(a)
 
         return self.sgn(a, EQ=True)
@@ -1277,8 +1278,7 @@ class Runtime:
             n = len(x)
         return x[0]
 
-    @mpc_coro
-    async def any(self, x):
+    def any(self, x):
         """Secure any of elements in x, similar to Python's built-in any().
 
         Elements of x are assumed to be either 0 or 1 (Boolean).
