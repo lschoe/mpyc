@@ -120,12 +120,12 @@ class Runtime:
     def gather(self, *obj):
         return asyncoro.gather_shares(self, *obj)
 
-    async def barrier(self):
+    async def barrier(self, name=""):
         """Barrier for runtime."""
         if self.options.no_barrier:
             return
 
-        logging.info(f'Barrier {self._pc_level} {self._program_counter[1]}')
+        logging.info(f'Barrier{" " + name} {self._pc_level} {self._program_counter[1]}')
         if not self.options.no_async:
             while self._pc_level > self._program_counter[1]:
                 await asyncio.sleep(0)
