@@ -120,25 +120,26 @@ class Runtime:
     def gather(self, *obj):
         return asyncoro.gather_shares(self, *obj)
 
-    async def barrier(self, name=""):
-        """Barrier for runtime."""
+    async def barrier(self, name=None):
+        """Barrier for runtime, using optional string name for easy identification."""
         if self.options.no_barrier:
             return
 
-        logging.info(f'Barrier{" " + name} {self._pc_level} {self._program_counter[1]}')
+        name = f'-{name}' if name else ''
+        logging.info(f'Barrier{name} {self._pc_level} {self._program_counter[1]}')
         if not self.options.no_async:
             while self._pc_level > self._program_counter[1]:
                 await asyncio.sleep(0)
 
-    async def throttler(self, load_percentage=1.0):
-        """Throttle runtime by given percentage (default 1.0)."""
+    async def throttler(self, load_percentage=1.0, name=None):
+        """Throttle runtime by given percentage (default 1.0), using optional name for barrier."""
         assert 0.0 <= load_percentage <= 1.0, 'percentage as decimal fraction between 0.0 and 1.0'
         self.aggregate_load += load_percentage * 10000
         if self.aggregate_load < 10000:
             return
 
         self.aggregate_load -= 10000
-        await mpc.barrier()
+        await mpc.barrier(name=name)
 
     def run(self, f):
         """Run the given coroutine or future until it is done."""
