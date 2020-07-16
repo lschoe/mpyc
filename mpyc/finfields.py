@@ -12,13 +12,20 @@ from mpyc import gmpy as gmpy2
 from mpyc import gfpx
 
 
-@functools.lru_cache(maxsize=None)
 def GF(modulus, f=0):
     """Create a finite (Galois) field for given modulus (prime number or irreducible polynomial)."""
-    if not isinstance(modulus, gfpx.Polynomial):
-        return pGF(modulus, f)
+    if isinstance(modulus, gfpx.Polynomial):
+        return xGF(modulus)
 
-    return xGF(modulus.p, modulus)
+    if isinstance(modulus, tuple):
+        p, n, w = modulus
+    else:
+        p = modulus
+        if p == 2:
+            n, w = 1, 1
+        else:
+            n, w = 2, p-1
+    return pGF(p, f, n, w)
 
 
 class FiniteFieldElement:
@@ -250,7 +257,7 @@ def find_prime_root(l, blum=True, n=1):
     """Find smallest prime of bit length at least l satisfying given constraints.
 
     Default is to return Blum primes (primes p with p % 4 == 3).
-    Also, a primitive root w is returned of prime order at least n.
+    Also, a primitive root w is returned of prime order at least n (0 < w < p).
     """
     if l == 2:
         if not blum:
@@ -259,14 +266,14 @@ def find_prime_root(l, blum=True, n=1):
             w = 1
         else:
             p = 3
-            n, w = 2, -1
+            n, w = 2, p-1
     elif n <= 2:
-        w = -1 if n == 2 else 1
         p = gmpy2.next_prime(1 << l-1)
         if blum:
             while p%4 != 3:
                 p = gmpy2.next_prime(p)
         p = int(p)
+        w = p-1 if n == 2 else 1
     else:
         assert blum
         if not gmpy2.is_prime(n):
@@ -284,32 +291,25 @@ def find_prime_root(l, blum=True, n=1):
     return p, n, w
 
 
-def pGF(modulus, f=0):
-    """Create a finite field for given prime modulus."""
-    if isinstance(modulus, tuple):
-        p, n, w = modulus
-    else:
-        p = modulus
-        if p == 2:
-            n, w = 1, 1
-        else:
-            n, w = 2, -1
+@functools.lru_cache(maxsize=None)
+def pGF(p, f, n, w):
+    """Create a finite field for given prime modulus p."""
     if not gmpy2.is_prime(p):
         raise ValueError('modulus is not a prime')
 
-    GFElement = type(f'GF({p})', (PrimeFieldElement,), {'__slots__': ()})
-    GFElement.__doc__ = 'Class of prime field elements.'
-    GFElement.modulus = p
-    GFElement.order = p
-    GFElement.characteristic = p
-    GFElement.ext_deg = 1
-    GFElement.byte_length = (GFElement.order.bit_length() + 7) >> 3
-    GFElement._frac_length = f
-    GFElement._rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
-    GFElement.is_signed = True
-    GFElement.nth = n
-    GFElement.root = w % p
-    return GFElement
+    GFtype = type(f'GF({p})', (PrimeFieldElement,), {'__slots__': ()})
+    GFtype.__doc__ = 'Class of prime field elements.'
+    GFtype.modulus = p
+    GFtype.order = p
+    GFtype.characteristic = p
+    GFtype.ext_deg = 1
+    GFtype.byte_length = (GFtype.order.bit_length() + 7) >> 3
+    GFtype._frac_length = f
+    GFtype._rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
+    GFtype.is_signed = True
+    GFtype.nth = n
+    GFtype.root = w % p
+    return GFtype
 
 
 class PrimeFieldElement(FiniteFieldElement):
@@ -323,6 +323,16 @@ class PrimeFieldElement(FiniteFieldElement):
     nth = None
     root = None
     _mix_types = int
+
+    @staticmethod
+    def createGF(p, f, n, w):
+        """Create new object for use by pickle module."""
+        obj = pGF(p, f, n, w)
+        return PrimeFieldElement.__new__(obj)
+
+    def __reduce__(self):
+        return (PrimeFieldElement.createGF, (self.modulus, self._frac_length, self.nth, self.root),
+                (None, {'value': self.value}))
 
     def __int__(self):
         """Extract field element as a (signed) integer value."""
@@ -432,22 +442,24 @@ def find_irreducible(p, d):
     return gfpx.GFpX(p).next_irreducible(p**d - 1)
 
 
-def xGF(p, modulus):
+@functools.lru_cache(maxsize=None)
+def xGF(modulus):
     """Create a finite field for given irreducible polynomial."""
+    p = modulus.p
     poly = gfpx.GFpX(p)
     if not poly.is_irreducible(modulus):
         raise ValueError('modulus is not irreducible')
 
     d = poly.deg(modulus)
     BaseFieldElement = BinaryFieldElement if p == 2 else ExtensionFieldElement
-    GFElement = type(f'GF({p}^{d})', (BaseFieldElement,), {'__slots__': ()})
-    GFElement.__doc__ = f'Class of {"binary" if p == 2 else "extension"} field elements.'
-    GFElement.modulus = poly(modulus)
-    GFElement.order = p**d
-    GFElement.characteristic = p
-    GFElement.ext_deg = d
-    GFElement.byte_length = (GFElement.order.bit_length() + 7) >> 3
-    return GFElement
+    GFtype = type(f'GF({p}^{d})', (BaseFieldElement,), {'__slots__': ()})
+    GFtype.__doc__ = f'Class of {"binary" if p == 2 else "extension"} field elements.'
+    GFtype.modulus = modulus
+    GFtype.order = p**d
+    GFtype.characteristic = p
+    GFtype.ext_deg = d
+    GFtype.byte_length = (GFtype.order.bit_length() + 7) >> 3
+    return GFtype
 
 
 class ExtensionFieldElement(FiniteFieldElement):
@@ -457,6 +469,15 @@ class ExtensionFieldElement(FiniteFieldElement):
 
     _least_qnr = None
     _mix_types = (int, gfpx.Polynomial)
+
+    @staticmethod
+    def createGF(modulus):
+        """Create new object for use by pickle module."""
+        obj = xGF(modulus)
+        return ExtensionFieldElement.__new__(obj)
+
+    def __reduce__(self):
+        return ExtensionFieldElement.createGF, (self.modulus,), (None, {'value': self.value})
 
     def __int__(self):
         return int(self.value)

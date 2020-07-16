@@ -38,7 +38,7 @@ runtime = None
 
 class seclist(list):
 
-    __slots__ = 'sectype'
+    sectype = None
 
     def __init__(self, x=(), sectype=None):
         """Build a secure list from the items in iterable x using the given secure type.

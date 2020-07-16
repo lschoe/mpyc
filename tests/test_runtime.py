@@ -54,6 +54,30 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.input(x, senders=0), receivers=0)), [7, 7])
         self.assertEqual(mpc.run(mpc.output(mpc.input(x, senders=[0])[0], receivers=[0])), [7, 7])
 
+    def test_pickle(self):
+        xsecfld = mpc.SecFld(256)
+        psecfld = mpc.SecFld(257)
+        secint = mpc.SecInt()
+        secfxp = mpc.SecFxp()
+        # NB: mpc.transfer() calls pickle.dumps() and pickle.loads()
+        self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(xsecfld(12), senders=0)))), 12)
+        self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(psecfld(12), senders=0)))), 12)
+        self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secint(12), senders=0)))), 12)
+        self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secfxp(12.5), senders=0)))), 12.5)
+        self.assertEqual(mpc.run(mpc.transfer(xsecfld.field(12), senders=0)), 12)
+        self.assertEqual(mpc.run(mpc.transfer(psecfld.field(12), senders=0)), 12)
+        self.assertEqual(mpc.run(mpc.transfer(secint.field(12), senders=0)), 12)
+        self.assertEqual(mpc.run(mpc.transfer(secfxp.field(13), senders=0)), 13)
+        self.assertEqual(mpc.run(mpc.transfer(xsecfld.field.modulus, 0)), xsecfld.field.modulus)
+
+        x = [(xsecfld(12), psecfld(12), secint(12), secfxp(12.5)),
+             [xsecfld.field(12), psecfld.field(12), secint.field(12), secfxp.field(13)],
+             xsecfld.field.modulus]
+        y = mpc.run(mpc.transfer(x, senders=0))
+        self.assertTrue(all(mpc.run(mpc.output(a == b)) for a, b in zip(y[0], x[0])))
+        self.assertEqual(y[1], x[1])
+        self.assertEqual(y[2], x[2])
+
     def test_psecfld(self):
         secfld = mpc.SecFld(min_order=2**16)
         a = secfld(1)

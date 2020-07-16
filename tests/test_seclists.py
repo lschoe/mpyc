@@ -105,6 +105,9 @@ class Arithmetic(unittest.TestCase):
         t[1] -= 1
         self.assertFalse(mpc.run(mpc.output(s < t)))
         self.assertFalse(mpc.run(mpc.output(s[:-1] <= t)))
+        s = seclist([1, 2, 3, 4], secint)
+        t = mpc.run(mpc.transfer(s, senders=0))
+        self.assertTrue(mpc.run(mpc.output(s == t)))
 
     def test_secfxp(self):
         secfxp = mpc.SecFxp()

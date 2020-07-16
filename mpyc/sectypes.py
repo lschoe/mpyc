@@ -529,6 +529,7 @@ def _SecFld(field):
     sectype.__doc__ = 'Class of secret-shared finite field elements.'
     sectype.field = field
     sectype.bit_length = l
+    globals()[name] = sectype  # TODO: check name dynamic SecureFiniteField type sufficiently unique
     return sectype
 
 
@@ -556,6 +557,7 @@ def _SecInt(l, p, n):
     sectype.__doc__ = 'Class of secret-shared integers.'
     sectype.field = _pfield(l, 0, p, n)
     sectype.bit_length = l
+    globals()[name] = sectype  # NB: exploit (almost) unique name dynamic SecureInteger type
     return sectype
 
 
@@ -579,4 +581,5 @@ def _SecFxp(l, f, p, n):
     sectype.field = _pfield(l, f, p, n)
     sectype.bit_length = l
     sectype.frac_length = f
+    globals()[name] = sectype  # NB: exploit (almost) unique name dynamic SecureFixedPoint type
     return sectype

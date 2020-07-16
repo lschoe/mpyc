@@ -34,6 +34,7 @@ def GFpX(p):
     BasePolynomial = BinaryPolynomial if p == 2 else Polynomial
     GFpPolynomial = type(f'GF({p})[{X}]', (BasePolynomial,), {'__slots__': ()})
     GFpPolynomial.p = p
+    globals()[f'GF({p})[{X}]'] = GFpPolynomial  # NB: exploit unique name dynamic Polynomial type
     return GFpPolynomial
 
 
