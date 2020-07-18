@@ -159,7 +159,7 @@ async def main():
     x = list(map(lambda a: a/255, d))
     x = np.array(x).reshape(batch_size, 1, 28, 28)
     if batch_size == 1:
-        print(np.vectorize(lambda a: int(bool(a)))(x[0, 0]))
+        print(np.array2string(np.vectorize(lambda a: int(bool(a)))(x[0, 0]), separator=''))
     x = scale_to_int(1 << f)(x)
 
     logging.info('--------------- LAYER 1 -------------')

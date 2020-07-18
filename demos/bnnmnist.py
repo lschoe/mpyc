@@ -336,7 +336,7 @@ async def main():
     L = np.array(list(d)).reshape(batch_size, 28**2)
     if batch_size == 1:
         x = np.array(L[0]).reshape(28, 28)
-        print(np.vectorize(lambda a: int(bool(a/255)))(x))
+        print(np.array2string(np.vectorize(lambda a: int(bool((a/255))))(x), separator=''))
 
     L = np.vectorize(lambda a: secint(int(a)))(L).tolist()
 
