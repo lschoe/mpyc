@@ -1654,7 +1654,10 @@ class Runtime:
                 c = int(c.value)
                 return [r_bits[i] + ((c >> i) & 1) for i in range(l)]
 
-            a = self.convert(a, self.SecInt())
+            if field.ext_deg > 1:
+                raise TypeError('Binary field or prime field required.')
+
+            a = self.convert(a, self.SecInt(l=1+stype.field.order.bit_length()))
             a_bits = self.to_bits(a)
             return self.convert(a_bits, stype)
 
