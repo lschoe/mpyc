@@ -530,14 +530,11 @@ class Runtime:
         x = await self.output(x)
         r = thresha.pseudorandom_share(ttype.field, m, self.pid, prfs, uci, n)
         for i in range(n):
-            x[i] = x[i].value - offset - r[i]
-        if issubclass(stype, sectypes.SecureFiniteField):
-            for i in range(n):
+            x[i] = x[i].value - r[i]
+            if issubclass(stype, sectypes.SecureFiniteField):
                 x[i] = self._mod(ttype(x[i]), stype.field.modulus)
-                if stype.field.is_signed and ttype.field.is_signed:
-                    is_neg = x[i] > stype.field.modulus >> 1
-                    x[i] = x[i] + is_neg * (ttype.field.modulus - stype.field.modulus)
-        elif d > 0:
+            x[i] = x[i] - offset
+        if d > 0 and not issubclass(stype, sectypes.SecureFiniteField):
             for i in range(n):
                 x[i] <<= d
         return x
