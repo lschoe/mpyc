@@ -382,9 +382,11 @@ class Arithmetic(unittest.TestCase):
         y = mpc.convert(x, secfld263)
         self.assertEqual(mpc.run(mpc.output(y)), list(range(10)))
 
-        x = [secfld47s(i) for i in range(10)]
+        x = [secfld47s(i) for i in range(-5, 10)]
         y = mpc.convert(x, secfld37s)
-        self.assertEqual(mpc.run(mpc.output(y)), list(range(10)))
+        self.assertEqual(mpc.run(mpc.output(y)), list(range(-5, 10)))
+        y = mpc.convert(y, secfxp)
+        self.assertEqual(mpc.run(mpc.output(y)), list(range(-5, 10)))
 
         x = [secint(-100), secint(100)]
         y = mpc.convert(x, secfxp)
