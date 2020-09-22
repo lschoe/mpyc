@@ -1662,11 +1662,11 @@ class Runtime:
             return self.convert(a_bits, stype)
 
         k = self.options.sec_param
-        r_divl = self._random(field, 1<<k).value
+        r_divl = self._random(field, 1<<(stype.bit_length + k - l)).value
         a = await self.gather(a)
         if rshift_f:
             a = a >> f
-        c = await self.output(a + ((1<<l) + (r_divl << l) - r_modl))
+        c = await self.output(a + ((1<<stype.bit_length) + (r_divl << l) - r_modl))
         c = c.value % (1<<l)
         c_bits = [(c >> i) & 1 for i in range(l)]
         r_bits = [stype(r.value) for r in r_bits]  # TODO: drop .value, fix secfxp(r) if r field elt
