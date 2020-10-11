@@ -594,7 +594,7 @@ class Runtime:
         field = stype.field
         m = len(self.parties)
         t = self.threshold
-        if issubclass(stype, SecureFiniteField):
+        if field.order.bit_length() <= 60:  # TODO: introduce MPyC parameter for failure probability
             prfs = self.prfs(field.order)
             while True:
                 r, s = self._randoms(field, 2)
@@ -602,7 +602,7 @@ class Runtime:
                 if await self.output(r * s + z[0], threshold=2*t):
                     break
         else:
-            r = self._random(field)  # NB: failure r=0 with probability 1/p
+            r = self._random(field)  # NB: failure r=0 with probability less than 2**-60
         a = await self.gather(a)
         if issubclass(stype, SecureFiniteField):
             z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
