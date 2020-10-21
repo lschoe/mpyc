@@ -48,15 +48,17 @@ def _recombination_vector(field, xs, x_r):
     A recombination vector depends on the field, the x-coordinates xs
     of the shares and the x-coordinate x_r of the recombination point.
     """
+    xs = [field(x).value for x in xs]
+    x_r = field(x_r).value
     vector = []
     for i, x_i in enumerate(xs):
-        x_i = field(x_i)
-        coefficient = field(1)
+        coefficient_d = field(1)
+        coefficient_n = field(1)
         for j, x_j in enumerate(xs):
-            x_j = field(x_j)
             if i != j:
-                coefficient *= (x_r - x_j) / (x_i - x_j)
-        vector.append(coefficient.value)
+                coefficient_d *= (x_r - x_j)
+                coefficient_n *= (x_i - x_j)
+        vector.append((coefficient_d / coefficient_n).value)
     return vector
 
 
