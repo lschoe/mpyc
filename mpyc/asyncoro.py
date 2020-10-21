@@ -2,6 +2,8 @@
 computation of secret-shared values.
 """
 
+import sys
+import traceback
 import struct
 import itertools
 import functools
@@ -393,7 +395,31 @@ def mpc_coro(func, pc=True):
         if pc:
             coro = _wrap_in_coro(_ProgramCounterWrapper(runtime, coro))
         task = Task(coro, loop=runtime._loop)
+        task.f_back = sys._getframe(1)  # enclosing MPyC coroutine call
         task.add_done_callback(lambda t: _reconcile(decl, t))
         return _ncopy(decl)
 
     return typed_asyncoro
+
+
+def exception_handler(loop, context):
+    """Handle some MPyC coroutine related exceptions."""
+    if 'handle' in context:
+        if 'mpc_coro' in context['message']:
+            task = context['handle']._args[0]
+            del context['message']  # suppress detailed message
+            del context['handle']  # suppress details of handle
+            loop.default_exception_handler(context)
+            print('Traceback (enclosing MPyC coroutine call):')
+            traceback.print_stack(task.f_back)  # TODO: extend call chain
+            return
+
+    elif 'task' in context:
+        cb = context['task']._callbacks[0]
+        if isinstance(cb, tuple):
+            cb = cb[0]  # NB: drop context paramater for Python 3.7+
+        if 'mpc_coro' in cb.__qualname__:
+            if not loop.get_debug():  # Unless asyncio debug mode is enabled,
+                return  # suppress 'Task was destroyed but it is pending!' message.
+
+    loop.default_exception_handler(context)

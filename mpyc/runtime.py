@@ -64,6 +64,7 @@ class Runtime:
         self._program_counter = [0, 0]  # [hopping-counter, program-depth]
         self._pc_level = 0  # used for implementation of barriers
         self._loop = asyncio.get_event_loop()  # cache running loop
+        self._loop.set_exception_handler(asyncoro.exception_handler)  # exceptions re MPyC coroutine
         self.start_time = None
         self.aggregate_load = 0.0 * 10000  # unit: basis point 0.0001 = 0.01%
 
