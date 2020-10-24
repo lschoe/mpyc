@@ -87,3 +87,6 @@ class Arithmetic(unittest.TestCase):
         mpc.options.sec_param = 1  # force no privacy case
         self.assertAlmostEqual(mpc.run(mpc.output(mode(x))), 1)
         mpc.options.sec_param = k
+
+        x[0] = secfxp(1.5)
+        self.assertRaises(ValueError, mode, x)

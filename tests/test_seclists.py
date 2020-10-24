@@ -38,6 +38,7 @@ class Arithmetic(unittest.TestCase):
         s = seclist(sectype=secint)
         self.assertEqual(s, [])
         s.append(False)
+        s.sort()
         s.append(secint(7))
         s[0] = secint(13)
         self.assertEqual(mpc.run(mpc.output(list(s))), [13, 7])
@@ -69,6 +70,13 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(s[secint(1)])), 13)
         s[secint(1)] = secint(21)
         self.assertEqual(mpc.run(mpc.output(s[1])), 21)
+        self.assertRaises(IndexError, s.insert, [secint(1), secint(0)], 42)
+        self.assertRaises(IndexError, s.pop, [secint(1)])
+        self.assertRaises(IndexError, s.__getitem__, [secint(1)])
+        self.assertRaises(TypeError, s.__setitem__, [secint(1)], 42.5)
+        self.assertRaises(TypeError, s.__setitem__, slice(0, 2), seclist([0], mpc.SecFxp()))
+        self.assertRaises(IndexError, s.__setitem__, [secint(1)], 42)
+        self.assertRaises(IndexError, s.__delitem__, [secint(1)])
 
         s = seclist([0]*7, secint)
         for a in [secint(3)]*3 + [secint(4)]*4:

@@ -107,6 +107,17 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, secint, float(0))
         self.assertRaises(TypeError, secint, secint16.field(0))
 
+    def test_SecFxp(self):
+        SecFxp = sectypes.SecFxp
+        secfxp = SecFxp()
+        secfxp16 = SecFxp(16)
+        secfxp(None)
+        secfxp(False)
+        secfxp(True)
+        secfxp(secfxp.field(0))
+        self.assertRaises(TypeError, secfxp, complex(0))
+        self.assertRaises(TypeError, secfxp, secfxp16.field(0))
+
     def test_operatorerrors(self):
         secfld = sectypes.SecFld()
         secint = sectypes.SecInt()

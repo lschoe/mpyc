@@ -112,7 +112,7 @@ class Arithmetic(unittest.TestCase):
         a /= 1
         self.assertEqual(a, f256(1))
         a <<= 0
-        a >>= 0
+        a = a >> 0
         self.assertEqual(a, f256(1))
         a <<= 2
         self.assertEqual(a, f256(4))
@@ -151,6 +151,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(f2(1).sqrt(), 1)
         self.assertEqual(bool(f2(0)), False)
         self.assertEqual(bool(f2(1)), True)
+        self.assertTrue(f2(1).is_sqr())
 
         a = f2(1)
         b = f2(1)
@@ -183,6 +184,7 @@ class Arithmetic(unittest.TestCase):
         c = c - a
         self.assertEqual(c, 0)
         self.assertEqual(a / a, 1)
+        self.assertEqual(1 / a, 8)
         self.assertEqual((f19(1).sqrt())**2, 1)
         self.assertEqual(((a**2).sqrt())**2, a**2)
         self.assertNotEqual(((a**2).sqrt())**2, -a**2)
@@ -261,7 +263,9 @@ class Arithmetic(unittest.TestCase):
         b = (a**2).sqrt(INV=True)
         self.assertEqual((a * b)**2, 1)
 
-    def test_operatorerrors(self):
+    def test_errors(self):
+        self.assertRaises(ValueError, finfields.GF, 4)
+        self.assertRaises(ValueError, finfields.GF, gfpx.GFpX(2)(4))
         f2 = self.f2
         f2p = self.f2p
         f256 = self.f256

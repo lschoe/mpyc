@@ -70,15 +70,14 @@ def recombine(field, points, x_rs=0):
     xs, shares = list(zip(*points))
     if not isinstance(x_rs, list):
         x_rs = (x_rs,)
-    m = len(shares)
     n = len(shares[0])
     width = len(x_rs)
     T_is_field = isinstance(shares[0][0], field)  # all elts assumed of same type
     vector = [_recombination_vector(field, xs, x_r) for x_r in x_rs]
     sums = [[0] * n for _ in range(width)]
-    for i in range(m):
+    for i, share_i in enumerate(shares):
         for h in range(n):
-            s = shares[i][h]
+            s = share_i[h]
             if T_is_field:
                 s = s.value
             # type(s) is int or gfpx.Polynomial

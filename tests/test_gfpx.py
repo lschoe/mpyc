@@ -17,6 +17,7 @@ class Arithmetic(unittest.TestCase):
         mod_all = mod_2 + (gf3x, gf101x)
 
     def test_modall(self):
+        self.assertRaises(ValueError, gfpx.GFpX, 4)
         for poly in mod_all:
             self._test_modall(poly)
             self._test_errors(poly)

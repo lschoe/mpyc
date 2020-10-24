@@ -20,6 +20,8 @@ class Arithmetic(unittest.TestCase):
             shares = thresha.random_split(a, t, m)
             b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
             self.assertEqual(a, b)
+            b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))], [0])[0]
+            self.assertEqual(a, b)
 
         for field in (self.f19, self.f27, self.f256):
             for t in range(8):
@@ -68,4 +70,17 @@ class Arithmetic(unittest.TestCase):
         a = [0] * n
         shares = thresha.pseudorandom_share_zero(field, m, pid, prfs, uci, n)
         b = thresha.recombine(field, [(1, shares)])
+        self.assertEqual(a, b)
+
+        m = 3
+        pid = 0
+        prfs = {(0, 1): F, (0, 2): F}  # reuse dummy PRF
+        shares0 = thresha.pseudorandom_share_zero(field, m, pid, prfs, uci, n)
+        pid = 1
+        prfs = {(0, 1): F, (1, 2): F}  # reuse dummy PRF
+        shares1 = thresha.pseudorandom_share_zero(field, m, pid, prfs, uci, n)
+        pid = 2
+        prfs = {(0, 2): F, (1, 2): F}  # reuse dummy PRF
+        shares2 = thresha.pseudorandom_share_zero(field, m, pid, prfs, uci, n)
+        b = thresha.recombine(field, [(1, shares0), (2, shares1), (3, shares2)])
         self.assertEqual(a, b)
