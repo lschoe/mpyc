@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.random</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.6/mpyc/random.py">github.com/lschoe/mpyc/blob/v0.6/mpyc/random.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.7/mpyc/random.py">github.com/lschoe/mpyc/blob/v0.7/mpyc/random.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;several&nbsp;functions&nbsp;for<br>
 generating&nbsp;pseudorandom&nbsp;numbers,&nbsp;cf.&nbsp;the&nbsp;random&nbsp;module&nbsp;of&nbsp;Python's<br>
 standard&nbsp;library.&nbsp;Each&nbsp;function&nbsp;behaves&nbsp;like&nbsp;its&nbsp;Python&nbsp;counterpart,<br>
@@ -72,7 +72,7 @@ A&nbsp;derangement&nbsp;is&nbsp;a&nbsp;permutation&nbsp;without&nbsp;fixed&nbsp;
  <dl><dt><a name="-random_permutation"><strong>random_permutation</strong></a>(sectype, x)</dt><dd><tt>Uniformly&nbsp;random&nbsp;permutation&nbsp;of&nbsp;given&nbsp;sequence&nbsp;x&nbsp;or&nbsp;range(x).</tt></dd></dl>
  <dl><dt><a name="-random_unit_vector"><strong>random_unit_vector</strong></a>(sectype, n)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;rotation&nbsp;of&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1).<br>
 &nbsp;<br>
-Expected&nbsp;number&nbsp;of&nbsp;secret&nbsp;random&nbsp;bits&nbsp;needed&nbsp;is&nbsp;log_2&nbsp;n&nbsp;+&nbsp;c,<br>
+Expected&nbsp;number&nbsp;of&nbsp;secret&nbsp;random&nbsp;bits&nbsp;needed&nbsp;is&nbsp;ceil(log_2&nbsp;n)&nbsp;+&nbsp;c,<br>
 with&nbsp;c&nbsp;a&nbsp;small&nbsp;constant,&nbsp;c&nbsp;&lt;&nbsp;3.</tt></dd></dl>
  <dl><dt><a name="-randrange"><strong>randrange</strong></a>(sectype, start, stop=None, step=1)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;integer&nbsp;in&nbsp;range(start,&nbsp;stop[,&nbsp;step]).</tt></dd></dl>
  <dl><dt><a name="-sample"><strong>sample</strong></a>(sectype, population, k)</dt><dd><tt>List&nbsp;of&nbsp;k&nbsp;uniformly&nbsp;random&nbsp;secret&nbsp;elements&nbsp;chosen&nbsp;from&nbsp;population.<br>

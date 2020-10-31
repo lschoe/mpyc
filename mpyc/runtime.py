@@ -649,7 +649,7 @@ class Runtime:
     @mpc_coro_no_pc
     async def sub(self, a, b):
         """Secure subtraction of a and b."""
-        stype = type(a)
+        stype = type(b) if isinstance(b, SecureObject) else type(a)
         if not stype.frac_length:
             await returnType(stype)
         else:
@@ -833,12 +833,18 @@ class Runtime:
         return e
 
     @mpc_coro
-    async def sgn(self, a, EQ=False, LT=False, GE=False, l=None):
-        """Secure sign(um) of a, -1 if a < 0 else 0 if a == 0 else 1."""
-        if GE:
-            print('GE flag will be deprecated in MPyC v0.7, use LT flag instead')
-        assert not (GE and LT)
-        assert not (EQ and (GE or LT))
+    async def sgn(self, a, l=None, LT=False, EQ=False):
+        """Secure sign(um) of a, return -1 if a < 0 else 0 if a == 0 else 1.
+
+        If integer flag l=L is set, it is assumed that -2^(L-1) <= a < 2^(L-1)
+        to save work (compared to the default l=type(a).bit_length).
+
+        If Boolean flag LT is set, perform a secure less than zero test instead, and
+        return 1 if a < 0 else 0, saving the work for a secure equality test.
+        If Boolean flag EQ is set, perform a secure equal to zero test instead, and
+        return 1 if a == 0 else 0, saving the work for a secure comparison.
+        """
+        assert not (LT and EQ)
         stype = type(a)
         await returnType((stype, True))
         Zp = stype.field

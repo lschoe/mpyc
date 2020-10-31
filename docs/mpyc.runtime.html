@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.runtime</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.6/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.6/mpyc/runtime.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.7/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.7/mpyc/runtime.py</a></font></td></tr></table>
     <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
 &nbsp;<br>
 Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
@@ -28,16 +28,18 @@ many&nbsp;of&nbsp;which&nbsp;are&nbsp;available&nbsp;through&nbsp;Python's&nbsp;
 <a href="https://docs.python.org/3/library/configparser.html">configparser</a><br>
 <a href="https://docs.python.org/3/library/datetime.html">datetime</a><br>
 </td><td width="25%" valign=top><a href="https://docs.python.org/3/library/functools.html">functools</a><br>
+<a href="https://docs.python.org/3/library/importlib.html">importlib</a><br>
 <a href="https://docs.python.org/3/library/itertools.html">itertools</a><br>
 <a href="https://docs.python.org/3/library/logging.html">logging</a><br>
 <a href="https://docs.python.org/3/library/math.html">math</a><br>
-<a href="mpyc.html">mpyc</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/os.html">os</a><br>
+</td><td width="25%" valign=top><a href="mpyc.html">mpyc</a><br>
+<a href="https://docs.python.org/3/library/os.html">os</a><br>
+<a href="https://docs.python.org/3/library/pickle.html">pickle</a><br>
 <a href="https://docs.python.org/3/library/secrets.html">secrets</a><br>
 <a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
-<a href="https://docs.python.org/3/library/ssl.html">ssl</a><br>
+</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/ssl.html">ssl</a><br>
 <a href="https://docs.python.org/3/library/sys.html">sys</a><br>
-</td><td width="25%" valign=top><a href="mpyc.thresha.html">mpyc.thresha</a><br>
+<a href="mpyc.thresha.html">mpyc.thresha</a><br>
 <a href="https://docs.python.org/3/library/time.html">time</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -73,11 +75,13 @@ Information&nbsp;about&nbsp;a&nbsp;party&nbsp;in&nbsp;the&nbsp;MPC&nbsp;protocol
 
 <hr>
 Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+<dl><dt><strong>host</strong></dt>
 </dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+<dl><dt><strong>pid</strong></dt>
+</dl>
+<dl><dt><strong>port</strong></dt>
+</dl>
+<dl><dt><strong>protocol</strong></dt>
 </dl>
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -90,17 +94,17 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 MPyC&nbsp;runtime&nbsp;secure&nbsp;against&nbsp;passive&nbsp;attacks.<br>
 &nbsp;<br>
-The&nbsp;runtime&nbsp;maintains&nbsp;basic&nbsp;information&nbsp;such&nbsp;as&nbsp;a&nbsp;program&nbsp;counter,<br>
-the&nbsp;list&nbsp;of&nbsp;parties,&nbsp;etc.,&nbsp;and&nbsp;handles&nbsp;secret-shared&nbsp;values&nbsp;of&nbsp;type&nbsp;Share.<br>
+The&nbsp;runtime&nbsp;maintains&nbsp;basic&nbsp;information&nbsp;such&nbsp;as&nbsp;a&nbsp;program&nbsp;counter,&nbsp;the&nbsp;list<br>
+of&nbsp;parties,&nbsp;etc.,&nbsp;and&nbsp;handles&nbsp;secret-shared&nbsp;objects&nbsp;of&nbsp;type&nbsp;SecureObject.<br>
 &nbsp;<br>
 1-party&nbsp;case&nbsp;is&nbsp;supported&nbsp;(with&nbsp;option&nbsp;to&nbsp;disable&nbsp;asynchronous&nbsp;evaluation).<br>
 Threshold&nbsp;0&nbsp;(no&nbsp;corrupted&nbsp;parties)&nbsp;is&nbsp;supported&nbsp;for&nbsp;m-party&nbsp;case&nbsp;as&nbsp;well<br>
 to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;sharing).<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Runtime-__aenter__"><strong>__aenter__</strong></a>(self)</dt><dd><tt>Start&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;entering&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
+<dl><dt>async <a name="Runtime-__aenter__"><strong>__aenter__</strong></a>(self)</dt><dd><tt>Start&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;entering&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-__aexit__"><strong>__aexit__</strong></a>(self, exc_type, exc, tb)</dt><dd><tt>Shutdown&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;exiting&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
+<dl><dt>async <a name="Runtime-__aexit__"><strong>__aexit__</strong></a>(self, exc_type, exc, tb)</dt><dd><tt>Shutdown&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;exiting&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-__init__"><strong>__init__</strong></a>(self, pid, parties, options)</dt><dd><tt>Initialize&nbsp;runtime.</tt></dd></dl>
 
@@ -110,9 +114,27 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 
 <dl><dt><a name="Runtime-add_bits"><strong>add_bits</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;binary&nbsp;addition&nbsp;of&nbsp;bit&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-all"><strong>all</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;all&nbsp;of&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-all">all</a>().<br>
+&nbsp;<br>
+Elements&nbsp;of&nbsp;x&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;either&nbsp;0&nbsp;or&nbsp;1&nbsp;(Boolean).<br>
+Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-and_"><strong>and_</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;bitwise&nbsp;and&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-barrier"><strong>barrier</strong></a>(self)</dt><dd><tt>Barrier&nbsp;for&nbsp;runtime.</tt></dd></dl>
+<dl><dt><a name="Runtime-any"><strong>any</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;any&nbsp;of&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-any">any</a>().<br>
+&nbsp;<br>
+Elements&nbsp;of&nbsp;x&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;either&nbsp;0&nbsp;or&nbsp;1&nbsp;(Boolean).<br>
+Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-argmax"><strong>argmax</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;argmax&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+&nbsp;<br>
+See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-argmin"><strong>argmin</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;argmin&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+&nbsp;<br>
+See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</tt></dd></dl>
+
+<dl><dt>async <a name="Runtime-barrier"><strong>barrier</strong></a>(self, name=None)</dt><dd><tt>Barrier&nbsp;for&nbsp;runtime,&nbsp;using&nbsp;optional&nbsp;string&nbsp;name&nbsp;for&nbsp;easy&nbsp;identification.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-convert"><strong>convert</strong></a>(self, x, ttype)</dt><dd><tt>Secure&nbsp;conversion&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x&nbsp;to&nbsp;given&nbsp;ttype.<br>
 &nbsp;<br>
@@ -153,18 +175,25 @@ The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&n
 
 <dl><dt><a name="Runtime-lsb"><strong>lsb</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;least&nbsp;significant&nbsp;bit&nbsp;of&nbsp;a.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-lt"><strong>lt</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;&lt;&nbsp;b.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-matrix_add"><strong>matrix_add</strong></a>(self, A, B, tr=False)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;(transposed)&nbsp;B.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-matrix_prod"><strong>matrix_prod</strong></a>(self, A, B, tr=False)</dt><dd><tt>Secure&nbsp;matrix&nbsp;product&nbsp;of&nbsp;A&nbsp;with&nbsp;(transposed)&nbsp;B.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-matrix_sub"><strong>matrix_sub</strong></a>(self, A, B, tr=False)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;(transposed)&nbsp;B.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-max"><strong>max</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
-
-<dl><dt><a name="Runtime-min"><strong>min</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
-
-<dl><dt><a name="Runtime-min_max"><strong>min_max</strong></a>(self, *x)</dt><dd><tt>Secure&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+<dl><dt><a name="Runtime-max"><strong>max</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-max">max</a>().<br>
 &nbsp;<br>
+See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-min"><strong>min</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-min">min</a>().<br>
+&nbsp;<br>
+See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-min_max"><strong>min_max</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+&nbsp;<br>
+Saves&nbsp;25%&nbsp;compared&nbsp;to&nbsp;calling&nbsp;<a href="#Runtime-min">min</a>(x)&nbsp;and&nbsp;<a href="#Runtime-max">max</a>(x)&nbsp;separately.<br>
 Total&nbsp;number&nbsp;of&nbsp;comparisons&nbsp;is&nbsp;only&nbsp;(3n-3)//2,&nbsp;compared&nbsp;to&nbsp;2n-2&nbsp;for&nbsp;the&nbsp;obvious&nbsp;approach.<br>
 This&nbsp;is&nbsp;optimal&nbsp;as&nbsp;shown&nbsp;by&nbsp;Ira&nbsp;Pohl&nbsp;in&nbsp;"A&nbsp;sorting&nbsp;problem&nbsp;and&nbsp;its&nbsp;complexity",<br>
 Communications&nbsp;of&nbsp;the&nbsp;ACM&nbsp;15(6),&nbsp;pp.&nbsp;462-464,&nbsp;1972.</tt></dd></dl>
@@ -177,11 +206,16 @@ Communications&nbsp;of&nbsp;the&nbsp;ACM&nbsp;15(6),&nbsp;pp.&nbsp;462-464,&nbsp
 
 <dl><dt><a name="Runtime-or_"><strong>or_</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;bitwise&nbsp;or&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, x, receivers=None, threshold=None)</dt><dd><tt>Output&nbsp;the&nbsp;value&nbsp;of&nbsp;x&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.<br>
+<dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, x, receivers=None, threshold=None, raw=False) -&gt; _asyncio.Future</dt><dd><tt>Output&nbsp;the&nbsp;value&nbsp;of&nbsp;x&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.<br>
 &nbsp;<br>
 Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
 The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;the&nbsp;output.<br>
-The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;receiver.</tt></dd></dl>
+The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;receiver.<br>
+&nbsp;<br>
+A&nbsp;secure&nbsp;integer&nbsp;is&nbsp;output&nbsp;as&nbsp;a&nbsp;Python&nbsp;int,&nbsp;a&nbsp;secure<br>
+fixed-point&nbsp;number&nbsp;is&nbsp;output&nbsp;as&nbsp;a&nbsp;Python&nbsp;float,&nbsp;and&nbsp;a&nbsp;secure<br>
+finite&nbsp;field&nbsp;element&nbsp;is&nbsp;output&nbsp;as&nbsp;an&nbsp;MPyC&nbsp;finite&nbsp;field&nbsp;element.<br>
+Set&nbsp;flag&nbsp;raw=True&nbsp;to&nbsp;suppress&nbsp;output&nbsp;conversion.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-pos"><strong>pos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;unary&nbsp;+&nbsp;applied&nbsp;to&nbsp;a.</tt></dd></dl>
 
@@ -191,7 +225,9 @@ The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&n
 &nbsp;<br>
 Return&nbsp;a&nbsp;mapping&nbsp;from&nbsp;sets&nbsp;of&nbsp;parties&nbsp;to&nbsp;PRFs.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-prod"><strong>prod</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;product&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x&nbsp;(in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</tt></dd></dl>
+<dl><dt><a name="Runtime-prod"><strong>prod</strong></a>(self, x, start=1)</dt><dd><tt>Secure&nbsp;product&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;math.<a href="#Runtime-prod">prod</a>().<br>
+&nbsp;<br>
+Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</tt></dd></dl>
 
 <dl><dt><a name="Runtime-random_bit"><strong>random_bit</strong></a>(self, stype, signed=False)</dt><dd><tt>Secure&nbsp;uniformly&nbsp;random&nbsp;bit&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
 
@@ -205,23 +241,47 @@ Return&nbsp;a&nbsp;mapping&nbsp;from&nbsp;sets&nbsp;of&nbsp;parties&nbsp;to&nbsp
 
 <dl><dt><a name="Runtime-schur_prod"><strong>schur_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;entrywise&nbsp;multiplication&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, EQ=False, GE=False, l=None)</dt><dd><tt>Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.</tt></dd></dl>
+<dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, l=None, LT=False, EQ=False)</dt><dd><tt>Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;return&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.<br>
+&nbsp;<br>
+If&nbsp;integer&nbsp;flag&nbsp;l=L&nbsp;is&nbsp;set,&nbsp;it&nbsp;is&nbsp;assumed&nbsp;that&nbsp;-2^(L-1)&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;2^(L-1)<br>
+to&nbsp;save&nbsp;work&nbsp;(compared&nbsp;to&nbsp;the&nbsp;default&nbsp;l=type(a).bit_length).<br>
+&nbsp;<br>
+If&nbsp;Boolean&nbsp;flag&nbsp;LT&nbsp;is&nbsp;set,&nbsp;perform&nbsp;a&nbsp;secure&nbsp;less&nbsp;than&nbsp;zero&nbsp;test&nbsp;instead,&nbsp;and<br>
+return&nbsp;1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;equality&nbsp;test.<br>
+If&nbsp;Boolean&nbsp;flag&nbsp;EQ&nbsp;is&nbsp;set,&nbsp;perform&nbsp;a&nbsp;secure&nbsp;equal&nbsp;to&nbsp;zero&nbsp;test&nbsp;instead,&nbsp;and<br>
+return&nbsp;1&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;comparison.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
+<dl><dt>async <a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
 &nbsp;<br>
 Close&nbsp;all&nbsp;connections,&nbsp;if&nbsp;any.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-start"><strong>start</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
+<dl><dt><a name="Runtime-sorted"><strong>sorted</strong></a>(self, x, key=None, reverse=False)</dt><dd><tt>Return&nbsp;a&nbsp;new&nbsp;securely&nbsp;sorted&nbsp;list&nbsp;with&nbsp;elements&nbsp;from&nbsp;x&nbsp;in&nbsp;ascending&nbsp;order.<br>
+&nbsp;<br>
+Similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-sorted">sorted</a>(),&nbsp;but&nbsp;not&nbsp;stable.<br>
+&nbsp;<br>
+Elements&nbsp;of&nbsp;x&nbsp;are&nbsp;either&nbsp;secure&nbsp;numbers&nbsp;or&nbsp;lists&nbsp;of&nbsp;secure&nbsp;numbers.<br>
+&nbsp;<br>
+Argument&nbsp;key&nbsp;specifies&nbsp;a&nbsp;function&nbsp;applied&nbsp;to&nbsp;all&nbsp;elements&nbsp;of&nbsp;x&nbsp;before&nbsp;comparing&nbsp;them,&nbsp;using<br>
+only&nbsp;&lt;&nbsp;comparisons&nbsp;(that&nbsp;is,&nbsp;using&nbsp;only&nbsp;the&nbsp;<a href="#Runtime-__lt__">__lt__</a>()&nbsp;method,&nbsp;as&nbsp;for&nbsp;Python's&nbsp;list.sort()).<br>
+Default&nbsp;key&nbsp;compares&nbsp;elements&nbsp;of&nbsp;x&nbsp;directly&nbsp;(using&nbsp;identity&nbsp;function&nbsp;'lambda&nbsp;a:&nbsp;a').</tt></dd></dl>
+
+<dl><dt>async <a name="Runtime-start"><strong>start</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
 &nbsp;<br>
 Open&nbsp;connections&nbsp;with&nbsp;other&nbsp;parties,&nbsp;if&nbsp;any.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-sub"><strong>sub</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-sum"><strong>sum</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;sum&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="Runtime-sum"><strong>sum</strong></a>(self, x, start=0)</dt><dd><tt>Secure&nbsp;sum&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-sum">sum</a>().</tt></dd></dl>
 
-<dl><dt><a name="Runtime-throttler"><strong>throttler</strong></a>(self, load_percentage=1.0)</dt><dd><tt>Throttle&nbsp;runtime&nbsp;by&nbsp;given&nbsp;percentage&nbsp;(default&nbsp;1.0).</tt></dd></dl>
+<dl><dt>async <a name="Runtime-throttler"><strong>throttler</strong></a>(self, load_percentage=1.0, name=None)</dt><dd><tt>Throttle&nbsp;runtime&nbsp;by&nbsp;given&nbsp;percentage&nbsp;(default&nbsp;1.0),&nbsp;using&nbsp;optional&nbsp;name&nbsp;for&nbsp;barrier.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-to_bits"><strong>to_bits</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;(or&nbsp;all)&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-transfer"><strong>transfer</strong></a>(self, obj, senders=None, receivers=None, sender_receivers=None) -&gt; _asyncio.Future</dt><dd><tt>Transfer&nbsp;pickable&nbsp;Python&nbsp;objects&nbsp;between&nbsp;specified&nbsp;parties.<br>
+&nbsp;<br>
+The&nbsp;senders&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;provide&nbsp;input.<br>
+The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;output.<br>
+The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;sender&nbsp;as&nbsp;well&nbsp;as&nbsp;a&nbsp;receiver.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-trunc"><strong>trunc</strong></a>(self, x, f=None, l=None)</dt><dd><tt>Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x.<br>
 &nbsp;<br>
@@ -277,11 +337,29 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
+<dl><dt><strong>FiniteField</strong> = &lt;class 'mpyc.sectypes.SecureFiniteField'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;field&nbsp;elements.<br>
+&nbsp;<br>
+NB:&nbsp;bit-oriented&nbsp;operations&nbsp;will&nbsp;be&nbsp;supported&nbsp;for&nbsp;prime&nbsp;fields.</tt></dl>
+
+<dl><dt><strong>FixedPoint</strong> = &lt;class 'mpyc.sectypes.SecureFixedPoint'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;fixed-point&nbsp;numbers.</tt></dl>
+
+<dl><dt><strong>Integer</strong> = &lt;class 'mpyc.sectypes.SecureInteger'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;integers.</tt></dl>
+
+<dl><dt><strong>Number</strong> = &lt;class 'mpyc.sectypes.SecureNumber'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;numbers.</tt></dl>
+
+<dl><dt><strong>Object</strong> = &lt;class 'mpyc.sectypes.SecureObject'&gt;<dd><tt>A&nbsp;secret-shared&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
+&nbsp;<br>
+An&nbsp;MPC&nbsp;protocol&nbsp;operates&nbsp;on&nbsp;secret-shared&nbsp;objects&nbsp;of&nbsp;type&nbsp;SecureObject.<br>
+The&nbsp;basic&nbsp;Python&nbsp;operators&nbsp;are&nbsp;overloaded&nbsp;by&nbsp;SecureObject&nbsp;classes.<br>
+An&nbsp;expression&nbsp;like&nbsp;a&nbsp;*&nbsp;b&nbsp;will&nbsp;create&nbsp;a&nbsp;new&nbsp;SecureObject,&nbsp;which&nbsp;will<br>
+eventually&nbsp;contain&nbsp;the&nbsp;product&nbsp;of&nbsp;a&nbsp;and&nbsp;b.&nbsp;The&nbsp;product&nbsp;is&nbsp;computed<br>
+asynchronously,&nbsp;using&nbsp;an&nbsp;instance&nbsp;of&nbsp;a&nbsp;specific&nbsp;cryptographic&nbsp;protocol.</tt></dl>
+
 <dl><dt><strong>random</strong> = &lt;module 'mpyc.random' from 'github.com/lschoe/mpyc/blob/v0.6/mpyc/random.py'&gt;</dl>
 
 <dl><dt><strong>statistics</strong> = &lt;module 'mpyc.statistics' from 'github.com/lschoe/mpyc/blob/v0.6/mpyc/statistics.py'&gt;</dl>
 
-<dl><dt><strong>version</strong> = '0.6'</dl>
+<dl><dt><strong>version</strong> = '0.7'</dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">

@@ -6,23 +6,32 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>mpyc</strong></big></big> (version 0.6)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>mpyc</strong></big></big> (version 0.7)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.6/mpyc/__init__.py">github.com/lschoe/mpyc/blob/v0.6/mpyc/__init__.py</a></font></td></tr></table>
-    <p><tt>MPyC&nbsp;is&nbsp;a&nbsp;Python&nbsp;package&nbsp;for&nbsp;secure&nbsp;multi-party&nbsp;computation&nbsp;(MPC).<br>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.7/mpyc/__init__.py">github.com/lschoe/mpyc/blob/v0.7/mpyc/__init__.py</a></font></td></tr></table>
+    <p><tt>MPyC&nbsp;is&nbsp;a&nbsp;Python&nbsp;package&nbsp;for&nbsp;secure&nbsp;multiparty&nbsp;computation&nbsp;(MPC).<br>
 &nbsp;<br>
 MPyC&nbsp;provides&nbsp;a&nbsp;runtime&nbsp;for&nbsp;performing&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values,<br>
 where&nbsp;parties&nbsp;interact&nbsp;by&nbsp;exchanging&nbsp;messages&nbsp;via&nbsp;peer-to-peer&nbsp;connections.<br>
 The&nbsp;MPC&nbsp;protocols&nbsp;are&nbsp;based&nbsp;on&nbsp;Shamir's&nbsp;threshold&nbsp;secret&nbsp;sharing&nbsp;scheme<br>
 and&nbsp;withstand&nbsp;passive&nbsp;adversaries&nbsp;controlling&nbsp;less&nbsp;than&nbsp;half&nbsp;of&nbsp;the&nbsp;parties.<br>
 &nbsp;<br>
+Secure&nbsp;integer&nbsp;and&nbsp;fixed-point&nbsp;arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;parameterized<br>
+number&nbsp;ranges,&nbsp;also&nbsp;including&nbsp;support&nbsp;for&nbsp;comparison&nbsp;and&nbsp;bitwise&nbsp;operations.<br>
 Secure&nbsp;finite&nbsp;field&nbsp;arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;fields&nbsp;of&nbsp;arbitrary&nbsp;order,&nbsp;as<br>
-long&nbsp;as&nbsp;the&nbsp;order&nbsp;exceeds&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;Secure&nbsp;integer&nbsp;and&nbsp;fixed-point<br>
-arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;parameterized&nbsp;number&nbsp;ranges,&nbsp;also&nbsp;including&nbsp;support<br>
-for&nbsp;comparison&nbsp;and&nbsp;bitwise&nbsp;operations.<br>
-These&nbsp;operations&nbsp;are&nbsp;all&nbsp;available&nbsp;via&nbsp;Python's&nbsp;operator&nbsp;overloading.<br>
-Some&nbsp;operations&nbsp;for&nbsp;container&nbsp;datatypes&nbsp;holding&nbsp;secret-shared&nbsp;data&nbsp;items<br>
-are&nbsp;provided&nbsp;as&nbsp;well&nbsp;(e.g.,&nbsp;some&nbsp;matrix-vector&nbsp;operations).</tt></p>
+long&nbsp;as&nbsp;the&nbsp;order&nbsp;exceeds&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;These&nbsp;operations&nbsp;are&nbsp;all<br>
+available&nbsp;via&nbsp;Python's&nbsp;operator&nbsp;overloading.<br>
+&nbsp;<br>
+Secure&nbsp;drop-in&nbsp;replacements&nbsp;for&nbsp;lots&nbsp;of&nbsp;Python&nbsp;built-in&nbsp;functions,&nbsp;such&nbsp;as<br>
+all(),&nbsp;any(),&nbsp;sum(),&nbsp;min(),&nbsp;max(),&nbsp;sorted()&nbsp;are&nbsp;provided,&nbsp;mimicking&nbsp;the&nbsp;Python<br>
+APIs&nbsp;as&nbsp;much&nbsp;as&nbsp;possible.&nbsp;Futher&nbsp;operations&nbsp;for&nbsp;container&nbsp;datatypes&nbsp;holding<br>
+secret-shared&nbsp;data&nbsp;items&nbsp;are&nbsp;provided&nbsp;as&nbsp;well&nbsp;(e.g.,&nbsp;matrix-vector&nbsp;operations<br>
+like&nbsp;secure&nbsp;dot&nbsp;products).<br>
+&nbsp;<br>
+And&nbsp;much&nbsp;more&nbsp;functionality&nbsp;still&nbsp;in&nbsp;a&nbsp;couple&nbsp;of&nbsp;extensions&nbsp;modules:&nbsp;seclists<br>
+(secure&nbsp;lists&nbsp;with&nbsp;oblivious&nbsp;access&nbsp;and&nbsp;updates),&nbsp;mpctools&nbsp;(reduce&nbsp;and&nbsp;accumulate<br>
+with&nbsp;log&nbsp;round&nbsp;complexity),&nbsp;random&nbsp;(securely&nbsp;mimicking&nbsp;Python’s&nbsp;random&nbsp;module),<br>
+and&nbsp;statistics&nbsp;(securely&nbsp;mimicking&nbsp;Python’s&nbsp;statistics&nbsp;module).</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">

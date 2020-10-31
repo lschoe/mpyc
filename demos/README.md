@@ -9,7 +9,8 @@ Use `-H`, `--HELP` option with any demo to see the MPyC help message.
 ```
 usage: secretsanta.py [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t] [-B b]
                       [--ssl] [-L l] [-K k] [--no-log] [--no-async]
-                      [--no-barrier] [--output-windows] [--output-file] [-f F]
+                      [--no-barrier] [--no-gmpy2] [--output-windows]
+                      [--output-file] [-f F]
 
 optional arguments:
   -H, --HELP            show this help message for MPyC and exit
@@ -30,6 +31,7 @@ MPyC parameters:
   --no-log              disable logging messages
   --no-async            disable asynchronous evaluation
   --no-barrier          disable barriers
+  --no-gmpy2            disable use of gmpy2 package
 
 MPyC misc:
   --output-windows      screen output for parties i>0 (only on Windows)
@@ -114,5 +116,5 @@ optional arguments:
 [KaplanMeierSurvivalExplained](KaplanMeierSurvivalExplained.ipynb) presents privacy-preserving Kaplan-Meier survival analysis, featuring aggregate Kaplan-Meier curves and secure logrank tests.
 
 [4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, cnnmnist.py.
- 
+
 [OneWayHashChainsExplained](OneWayHashChainsExplained.ipynb) shows a more advanced MPyC program.

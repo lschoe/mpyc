@@ -141,6 +141,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c, [1])
         c = mpc.run(mpc.output(mpc.to_bits(secfld(255), 4)))
         self.assertEqual(c, [1, 1, 1, 1])
+        self.assertEqual(mpc.run(mpc.output(mpc.matrix_sub([[a]], [[a]])[0])), [0])
+        self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([c], [[a]*4], True)[0])), [0])
+        self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([[a]*4], [c], True)[0])), [0])
 
     def test_secint(self):
         secint = mpc.SecInt()
@@ -270,6 +273,10 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(mpc.in_prod(x, x))), t)
             self.assertEqual(mpc.run(mpc.output(mpc.in_prod(x, x[:]))), t)
             self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([x], [x], True)[0])), [t])
+            u = mpc.unit_vector(secfxp(3), 4)
+            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([x], [u], True)[0])), [s[3]])
+            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([u], [x], True)[0])), [s[3]])
+            self.assertEqual(mpc.run(mpc.output(mpc.gauss([[a]], b, [a], [b])[0])), [0])
             t = [_ for a, b, c, d in [s] for _ in [a + b, a * b, a - b]]
             self.assertEqual(mpc.run(mpc.output([a + b, a * b, a - b])), t)
             t = [_ for a, b, c, d in [s] for _ in [(a + b)**2, (a + b)**2 + 3*c]]
