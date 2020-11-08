@@ -47,8 +47,10 @@ SSL key material of your own, use `pip install pyOpenSSL`.
 
 5. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, you need to have Jupyter installed,
 e.g., using `pip install jupyter`. The latest version of Jupyter will come with IPython 7.x, which supports
-top-level `await`. Instead of `mpc.run(mpc.start())` one can now simply write `await mpc.start()` anywhere in
-a notebook cell, even outside a coroutine. For Python 3.8+ you also get top-level `await` by running `python -m asyncio`
-to launch a natively async REPL.
+top-level `await`. For example, instead of `mpc.run(mpc.start())` one can now simply write `await mpc.start()` anywhere in
+a notebook cell, even outside a coroutine.
+
+6. For Python 3.8+, you also get top-level `await` by running `python -m asyncio` to launch a natively async REPL.
+By running `python -m mpyc` instead you even get this REPL with the MPyC runtime preloaded!
 
 Copyright &copy; 2018-2020 Berry Schoenmakers
