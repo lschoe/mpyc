@@ -219,6 +219,16 @@ def gather_shares(rt, *obj):
     return _AwaitableFuture(_get_results(obj))
 
 
+def _hop(a):  # NB: redefined in MPyC setup if mix of 32-bit/64-bit platforms enabled
+    """Simple and efficient pseudorandom program counter hop for Python 3.6+.
+
+    Compatible between all 64-bit platforms.
+    Compatible between all 32-bit platforms.
+    Not compatible between mix of 32-bit and 64-bit platforms.
+    """
+    return hash(frozenset(a))
+
+
 class _ProgramCounterWrapper:
 
     __slots__ = 'runtime', 'coro', 'pc'
@@ -227,8 +237,7 @@ class _ProgramCounterWrapper:
         self.runtime = runtime
         self.coro = coro
         runtime._program_counter[0] += 1
-        self.pc = [hash(frozenset(runtime._program_counter)), runtime._program_counter[1]+1]  # fork
-        # TODO: make this work for mix of 32-bit and 64-bit Python parties
+        self.pc = [_hop(runtime._program_counter), runtime._program_counter[1]+1]  # fork
 
     def __await__(self):
         while True:

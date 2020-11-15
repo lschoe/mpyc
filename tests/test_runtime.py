@@ -258,6 +258,8 @@ class Arithmetic(unittest.TestCase):
                 self.assertEqual(c, 1 + 2**-f)
             self.assertEqual(mpc.run(mpc.output(secfxp(0.5) * secfxp(2.0))), 1)
             self.assertEqual(mpc.run(mpc.output(secfxp(2.0) * secfxp(0.5))), 1)
+            c =  mpc.run(mpc.output(secfxp(2**(f//2 - 1) - 0.5) * secfxp(-2**(f//2) + 0.5)))
+            self.assertEqual(c, -2**(f-1) + 1.5 * 2**(f//2 - 1) - 0.25)
 
             s = [10.75, -3.375, 0.125, -0.125]
             self.assertEqual(mpc.run(mpc.output(list(map(secfxp, s)))), s)

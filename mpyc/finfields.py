@@ -259,7 +259,7 @@ def find_prime_root(l, blum=True, n=1):
     Default is to return Blum primes (primes p with p % 4 == 3).
     Also, a primitive root w is returned of prime order at least n (0 < w < p).
     """
-    if l == 2:
+    if l <= 2:
         if not blum:
             p = 2
             assert n == 1
@@ -278,7 +278,7 @@ def find_prime_root(l, blum=True, n=1):
         assert blum
         if not gmpy2.is_prime(n):
             n = int(gmpy2.next_prime(n))
-        p = 1 + n * (1 + (n**2)%4 + 4*((1 << l-2) // n))
+        p = 1 + 2*n * (3 + 2*((1 << l-3) // n))
         while not gmpy2.is_prime(p):
             p += 4*n
 

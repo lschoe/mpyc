@@ -565,6 +565,7 @@ class Runtime:
             Zp = sftype
 
         k = self.options.sec_param
+        h = max(k, f-1)
         r_bits = await self.random_bits(Zp, f * n)
         r_modf = [None] * n
         for j in range(n):
@@ -573,10 +574,10 @@ class Runtime:
                 s <<= 1
                 s += r_bits[f * j + i].value
             r_modf[j] = Zp(s)
-        r_divf = self._randoms(Zp, n, 1 << k + l - f)
+        r_divf = self._randoms(Zp, n, 1 << h + l - f)
         if issubclass(sftype, SecureObject):
             x = await self.gather(x)
-        c = await self.output([a + ((1 << k + l) + (q.value << f) + r.value)
+        c = await self.output([a + ((1 << h + l) + (q.value << f) + r.value)
                                for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
         y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
@@ -1832,6 +1833,8 @@ def setup():
                        default=False, help='disable barriers')
     group.add_argument('--no-gmpy2', action='store_true',
                        default=False, help='disable use of gmpy2 package')
+    group.add_argument('--mix32-64bit', action='store_true',
+                       default=False, help='enable mix of 32-bit and 64-bit platforms')
 
     group = parser.add_argument_group('MPyC misc')
     group.add_argument('--output-windows', action='store_true',
@@ -1872,6 +1875,23 @@ def setup():
                 os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
                 from importlib import reload
                 reload(mpyc.gmpy)  # stubs will be loaded this time
+
+    env_mix32_64bit = os.getenv('MPYC_MIX32_64BIT') == '1'  # check if MPYC_MIX32_64BIT is set
+    if options.mix32_64bit or env_mix32_64bit:
+        logging.info('Mix of parties on 32-bit and 64-bit platforms enabled.')
+        from hashlib import sha1
+
+        def hop(a):
+            """Simple and portable pseudorandom program counter hop for Python 3.6+.
+
+            Compatible across all (mixes of) 32-bit and 64-bit Python 3.6+ versions. Let's
+            you run MPyC with some parties on 64-bit platforms and others on 32-bit platforms.
+            Useful when working with standard 64-bit installations on Linux/MacOS/Windows and
+            installations currently restricted to 32-bit such as pypy3 on Windows and Python on
+            Raspberry Pi OS.
+            """
+            return int.from_bytes(sha1(str(a).encode()).digest()[:8], 'little', signed=True)
+        asyncoro._hop = hop
 
     if options.config or options.parties:
         # use host:port for each local or remote party

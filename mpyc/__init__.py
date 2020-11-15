@@ -17,11 +17,11 @@ APIs as much as possible. Futher operations for container datatypes holding
 secret-shared data items are provided as well (e.g., matrix-vector operations
 like secure dot products).
 
-And much more functionality still in a couple of extensions modules: seclists
+And much more functionality still in a couple of extension modules: seclists
 (secure lists with oblivious access and updates), mpctools (reduce and accumulate
 with log round complexity), random (securely mimicking Python’s random module),
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.7'
+__version__ = '0.7.1'
 __license__ = 'MIT License'
