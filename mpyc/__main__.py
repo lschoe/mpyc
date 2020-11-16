@@ -8,16 +8,18 @@ This causes Python's asyncio to be preloaded as well, allowing code with
 top-level await expressions to be evaluated directly (instead of using
 calls to mpc.run() or asyncio.run() in top-level code).
 
-Besides setting mpc as a handle for the MPyC runtime, also two secure types
-are predefined, effectively by executing the following code:
+Besides setting mpc as a handle for the MPyC runtime, also three secure
+(secret-shared) types are predefined, effectively executing the following code:
 
     from mpyc.runtime import mpc
     secint = mpc.SecInt()
     secfxp = mpc.SecFxp()
+    secfld256 = mpc.SecFld(256)
 
 Type secint represents secure integers and type secfxp represents secure
-fixed-point numbers, both of default bit lengths. Some more "popular"
-types etc. can easily be added here in the future.
+fixed-point numbers, both of default bit lengths. Type secfld256 represents
+secure GF(256)-elements. Other "popular" types etc. can easily be added
+here in the future.
 """
 
 # The implementation is copied as much as possible from asyncio's  __main__
@@ -138,12 +140,20 @@ class REPLThread(threading.Thread):
             self.loop.call_soon_threadsafe(self.loop.stop)
 
 
-def main(repl_locals={}, preamble=()):
+def main(preamble=()):
     """Adapted from the top-level code of the asyncio.__main__  module, no essential changes."""
     global repl_future_interrupted
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+
+    caller_locals = inspect.currentframe().f_back.f_locals
+    repl_locals = {}
+    for key in {'__name__', '__package__',
+                '__loader__', '__spec__',
+                '__builtins__', '__file__'}:
+        if key in caller_locals:
+            repl_locals[key] = caller_locals[key]
 
     repl_locals['asyncio'] = asyncio
     console = AsyncIOInteractiveConsole(repl_locals, loop)
@@ -173,13 +183,8 @@ def main(repl_locals={}, preamble=()):
 
 
 if __name__ == '__main__':
-    repl_locals = {}
-    for key in {'__name__', '__package__',
-                '__loader__', '__spec__',
-                '__builtins__', '__file__'}:
-        repl_locals[key] = locals()[key]
-
     preamble = ('from mpyc.runtime import mpc',
                 'secint = mpc.SecInt()',
-                'secfxp = mpc.SecFxp()')
-    main(repl_locals, preamble)
+                'secfxp = mpc.SecFxp()',
+                'secfld256 = mpc.SecFld(256)')
+    main(preamble)
