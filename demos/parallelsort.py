@@ -62,6 +62,7 @@ k = 2**(m-1)  # any k=O(2^m) allowed, ensuring that n = m*k = O(m 2^m)
 
 secint = mpc.SecInt()
 secfxp = mpc.SecFxp()
+secflt = mpc.SecFlt()
 
 flatten = lambda s: [a for _ in s for a in _]
 
@@ -106,14 +107,14 @@ def inverse(p):
 
 async def parsort1(a):
     """Sort m numbers in O(m) time, each party providing one number a."""
-    if isinstance(a, (secint, secfxp)):
+    if isinstance(a, (secint, secfxp, secflt)):
         x = await mpc.output(mpc.input(a))
     else:
         x = await mpc.transfer(a)
     print('Random inputs, one per party: ', x)
 
     p = rank(x, mpc.pid)  # x[mpc.pid] = a
-    if isinstance(a, (secint, secfxp)):
+    if isinstance(a, (secint, secfxp, secflt)):
         p = await mpc.output(mpc.input(type(a)(p)))
         p = [int(a) for a in p]
     else:
@@ -139,20 +140,26 @@ async def parsort2(z):
 
 mpc.run(mpc.start())
 
-print(f'====== Using MPyC integers {secint} ======')
+print(f'====== Using MPyC integers {secint}')
 mpc.run(parsort1(secint(random.randint(0, 99))))
-
-print('====== Using Python integers ======')
-mpc.run(parsort1(random.randint(0, 99)))
-mpc.run(parsort2([random.randint(0, 999) for _ in range(k)]))
-
 print(' * * *')
 
-print(f'====== Using MPyC fixed-point numbers {secfxp} ======')
-mpc.run(parsort1(secfxp(0.5 - random.randint(0, 99))))
+print('====== Using Python integers')
+mpc.run(parsort1(random.randint(0, 99)))
+mpc.run(parsort2([random.randint(0, 999) for _ in range(k)]))
+print(' * * *')
 
-print('====== Using Python floats ======')
+print(f'====== Using MPyC fixed-point numbers {secfxp}')
+mpc.run(parsort1(secfxp(0.5 - random.randint(0, 99))))
+print(' * * *')
+
+print('====== Using Python floats')
 mpc.run(parsort1(0.5 - random.randint(0, 99)))
 mpc.run(parsort2([random.randint(0, 8)/8 + random.randint(0, 99) for _ in range(k)]))
+print(' * * *')
+
+print(f'====== Using MPyC floats {secflt}')
+mpc.run(parsort1(secflt(random.uniform(0, 1)*10**30)))
+print(' * * *')
 
 mpc.run(mpc.shutdown())

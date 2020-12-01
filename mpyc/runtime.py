@@ -274,9 +274,11 @@ class Runtime:
     FiniteField = sectypes.SecureFiniteField
     Integer = sectypes.SecureInteger
     FixedPoint = sectypes.SecureFixedPoint
+    Float = sectypes.SecureFloat
     SecFld = staticmethod(sectypes.SecFld)
     SecInt = staticmethod(sectypes.SecInt)
     SecFxp = staticmethod(sectypes.SecFxp)
+    SecFlt = staticmethod(sectypes.SecFlt)
     coroutine = staticmethod(mpc_coro)
     returnType = staticmethod(returnType)
 
@@ -330,9 +332,15 @@ class Runtime:
     def input(self, x, senders=None):
         """Input x to the computation.
 
-        Value x is a secure number, or a list of secure numbers.
+        Value x is a secure object, or a list of secure objects.
         The senders are the parties that provide an input.
         The default is to let every party be a sender.
+
+        Except for secure integers, secure fixed-point numbers, and
+        secure finite field elements, which are handled directly, the
+        input of secure objects is controlled by their _input() method.
+        For instance, mpyc.sectypes.SecureFloat._input() does this for
+        secure floating-point numbers.
         """
         x_is_list = isinstance(x, list)
         if x_is_list:
@@ -358,11 +366,14 @@ class Runtime:
     async def _distribute(self, x, senders):
         """Distribute shares for each x provided by a sender."""
         stype = type(x[0])  # all elts assumed of same type
+        field = getattr(stype, 'field', None)  # TODO: avoid this use of 'field' attr
+        if not field:
+            return stype._input(x, senders)
+
         if not stype.frac_length:
             await returnType(stype, len(senders), len(x))
         else:
             await returnType((stype, x[0].integral), len(senders), len(x))
-        field = stype.field
 
         shares = [None] * len(senders)
         for i, peer_pid in enumerate(senders):
@@ -386,7 +397,7 @@ class Runtime:
     async def output(self, x, receivers=None, threshold=None, raw=False) -> Future:
         """Output the value of x to the receivers specified.
 
-        Value x is a secure number, or a list of secure numbers.
+        Value x is a secure object, or a list of secure objects.
         The receivers are the parties that will obtain the output.
         The default is to let every party be a receiver.
 
@@ -394,6 +405,11 @@ class Runtime:
         fixed-point number is output as a Python float, and a secure
         finite field element is output as an MPyC finite field element.
         Set flag raw=True to suppress output conversion.
+
+        For all other types of secure objects their _output() method controls
+        what is output. For instance, mpyc.sectypes.SecureFloat._output()
+        outputs secure floating-point numbers as Python floats.
+        The flag raw is ignored for these types.
         """
         x_is_list = isinstance(x, list)
         if x_is_list:
@@ -410,8 +426,14 @@ class Runtime:
         receivers = [receivers] if isinstance(receivers, int) else list(receivers)
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, SecureObject):
+            field = getattr(sftype, 'field', None)  # TODO: avoid this use of 'field' attr
+            if not field:
+                y = await sftype._output(x, receivers, threshold)
+                if not x_is_list:
+                    y = y[0]
+                return y
+
             x = await self.gather(x)
-            field = type(x[0])
         else:
             field = sftype
         x = [a.value for a in x]
@@ -565,7 +587,6 @@ class Runtime:
             Zp = sftype
 
         k = self.options.sec_param
-        h = max(k, f-1)
         r_bits = await self.random_bits(Zp, f * n)
         r_modf = [None] * n
         for j in range(n):
@@ -574,10 +595,10 @@ class Runtime:
                 s <<= 1
                 s += r_bits[f * j + i].value
             r_modf[j] = Zp(s)
-        r_divf = self._randoms(Zp, n, 1 << h + l - f)
+        r_divf = self._randoms(Zp, n, 1 << k + l)
         if issubclass(sftype, SecureObject):
             x = await self.gather(x)
-        c = await self.output([a + ((1 << h + l) + (q.value << f) + r.value)
+        c = await self.output([a + ((1 << l - 1 + f) + (q.value << f) + r.value)
                                for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
         y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
@@ -1701,7 +1722,7 @@ class Runtime:
         x = self.to_bits(a)  # low to high bits
         b = x[-1]  # sign bit
         s = 1 - b*2  # sign s = (-1)^b
-        x = x[:-1]
+        del x[-1]
 
         def __norm(x):
             n = len(x)

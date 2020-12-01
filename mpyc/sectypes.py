@@ -26,8 +26,6 @@ class SecureObject:
 
     __slots__ = 'share'
 
-    _output_conversion = None
-
     def __init__(self, value=None):
         """Initialize a share.
 
@@ -48,9 +46,7 @@ class SecureNumber(SecureObject):
 
     __slots__ = ()
 
-    field = None
     bit_length = None
-    frac_length = 0
 
     def _coerce(self, other):
         if isinstance(other, SecureObject):
@@ -274,6 +270,11 @@ class SecureFiniteField(SecureNumber):
 
     __slots__ = ()
 
+    frac_length = 0
+    field = None
+
+    _output_conversion = None
+
     def __init__(self, value=None):
         """Initialize a secure finite field element.
 
@@ -389,6 +390,9 @@ class SecureInteger(SecureNumber):
 
     __slots__ = ()
 
+    frac_length = 0
+    field = None
+
     _output_conversion = int
 
     def __init__(self, value=None):
@@ -417,6 +421,9 @@ class SecureFixedPoint(SecureNumber):
     """Base class for secure (secret-shared) fixed-point numbers."""
 
     __slots__ = 'integral'
+
+    frac_length = 0
+    field = None
 
     @classmethod
     def _output_conversion(cls, a):
@@ -536,8 +543,8 @@ def _SecFld(field):
 def _pfield(l, f, p, n):
     k = runtime.options.sec_param
     if p is None:
-        p = finfields.find_prime_root(l + max(f, k+1) + 1, n=n)
-    elif p.bit_length() <= l + max(f, k+1):
+        p = finfields.find_prime_root(l + f + k + 2, n=n)
+    elif p.bit_length() <= l + f + k + 1:
         raise ValueError(f'Prime {p} too small.')
 
     return finfields.GF(p, f)
@@ -582,4 +589,261 @@ def _SecFxp(l, f, p, n):
     sectype.bit_length = l
     sectype.frac_length = f
     globals()[name] = sectype  # NB: exploit (almost) unique name dynamic SecureFixedPoint type
+    return sectype
+
+
+class SecureFloat(SecureNumber):
+    """Base class for secure (secret-shared) floating-point numbers.
+
+    Basic arithmetic +,-,*,/ and comparisons <,<=,--,>,>=,!= are supported for secure floats,
+    as well as input()/output() and sorting operations like min()/argmax()/sorted().
+    Other operations like sum()/prod()/all()/any()/in_prod() are currently not supported for
+    secure floats.
+
+    Implementation is kept simple, representing a secure float as a pair consisting of
+    a secure fixed-point number for the significand and a secure integer for the exponent.
+    Note, however, that even basic arithmetic +,-,*,/ with secure floats is very
+    demanding performance-wise (due to dependence on secure bitwise operations).
+    """
+
+    __slots__ = ()
+
+    significand_type = None
+    exponent_type = None
+
+    def __init__(self, value=None):
+        """Initialize a secure floating-point number.
+
+        Value must be None, int, or float.
+        """
+        if value is not None:
+            if isinstance(value, (int, float)):
+                e = math.ceil(math.log(abs(value), 2)) if value else 0
+                s = value / 2**e
+                assert s == 0 or 0.5 <= abs(s) <= 1, (value, s, e)
+                value = (self.significand_type(s), self.exponent_type(e))
+            elif isinstance(value, tuple):
+                if len(value) != 2 or \
+                   not isinstance(value[0], self.significand_type) or \
+                   not isinstance(value[1], self.exponent_type):
+                    raise TypeError('Significand/exponent pair required')
+
+            else:
+                raise TypeError('None, int, float, or significand/exponent pair required')
+
+        super().__init__(value)
+
+    def __neg__(self):
+        """Negation."""
+        s, e = self.share
+        return type(self)((-s, e))
+
+    def __pos__(self):
+        """Unary +."""
+        return self
+
+    def __abs__(self):
+        """Absolute value."""
+        s, e = self.share
+        return type(self)((abs(s), e))
+
+    def __add__(self, other):
+        """Addition."""
+        secflt = type(self)
+        if isinstance(other, (int, float)):
+            other = secflt(other)
+        s1, e1 = self.share
+        s2, e2 = other.share
+        secfxp = type(s1)
+        secint = type(e1)
+        f = secfxp.frac_length
+
+        c_e = e1 < e2
+        c_s = runtime.convert(c_e, secfxp)
+        c_s.integral = True
+        e1, e2 = runtime.if_else(c_e, [e2, e1], [e1, e2])
+        s1, s2 = runtime.if_else(c_s, [s2, s1], [s1, s2])
+        # e1 >= e2
+        d = runtime.min(e1 - e2, f)
+        d = runtime.convert(d, secfxp)  # NB: 0 <= d <= f fits in headroom secfxp
+        d.integral = True  # TODO: let convert() set integral attr automatically
+        d_u = runtime.unit_vector(d, f+1)
+        d2 = runtime.in_prod(d_u, [secfxp(2**-i) for i in range(f+1)])  # TODO: avoid reshare
+        s = s1 + s2 * d2
+        N, n = _norm_secflt(s)  # N = 2**n
+        n = runtime.convert(n, secint)
+        return secflt((s * N, e1 - n))
+
+    __radd__ = __add__
+
+    def __sub__(self, other):
+        """Subtraction."""
+        return self + (-other)
+
+    def __rsub__(self, other):
+        """Subtraction (with reflected arguments)."""
+        return other + (-self)
+
+    def __mul__(self, other):
+        """Multiplication."""
+        secflt = type(self)
+        if isinstance(other, (int, float)):
+            other = secflt(other)
+        s1, e1 = self.share
+        s2, e2 = other.share
+        s = s1 * s2  # 1/4 <= abs(s) <= 1
+        e = e1 + e2
+        x = runtime.to_bits(s)
+        # -1   = 1_1.0_00000000
+        # -3/4 = 1_1.0_10000000
+        # -1/2 = 1_1.1_00000000   <-- x[-2] == x[-3]
+        # -1/4 = 1_1.1_10000000   <-- x[-2] == x[-3]
+        #  1/4 = 0_0.0_10000000   <-- x[-2] == x[-3]
+        #  1/2 = 0_0.1_00000000
+        #  3/4 = 0_0.1_10000000
+        #  1   = 0_1.0_00000000
+        c_s = (x[-2] - x[-3])**2  # x[-2] ^ x[-3]
+        c_e = runtime.convert(c_s, type(e))
+        s = runtime.if_else(c_s, s, s*2)
+        e = runtime.if_else(c_e, e, e-1)
+        return secflt((s, e))
+
+    __rmul__ = __mul__
+
+    def __truediv__(self, other):
+        """Division."""
+        return self * (1/other)
+
+    def __rtruediv__(self, other):
+        """Division (with reflected arguments)."""
+        return other * self.reciprocal()
+
+    def reciprocal(self):
+        """Secure reciprocal (multiplicative inverse)."""
+        s, e = self.share
+        s = 0.5*(1/s)  # TODO: no normalization for 1/s as 1/2<=abs(s)<=1 (s<0 test still needed)
+        return type(self)((s, 1-e))
+
+    def __lt__(self, other):
+        """Strictly less-than comparison."""
+        # self < other
+        s = (self - other).share[0]
+        return type(self)((s < 0, self.exponent_type(0)))
+
+    def __le__(self, other):
+        """Less-than or equal comparison."""
+        # self <= other
+        s = (self - other).share[0]
+        return type(self)((s <= 0, self.exponent_type(0)))
+
+    def __eq__(self, other):
+        """Equality testing."""
+        # self == other
+        s = (self - other).share[0]
+        return type(self)((s == 0, self.exponent_type(0)))
+
+    def __ge__(self, other):
+        """Greater-than or equal comparison."""
+        # self >= other
+        s = (self - other).share[0]
+        return type(self)((s >= 0, self.exponent_type(0)))
+
+    def __gt__(self, other):
+        """Strictly greater-than comparison."""
+        # self > other
+        s = (self - other).share[0]
+        return type(self)((s > 0, self.exponent_type(0)))
+
+    def __ne__(self, other):
+        """Negated equality testing."""
+        # self != other
+        s = (self - other).share[0]
+        return type(self)((s != 0, self.exponent_type(0)))
+
+    @staticmethod
+    def _input(x, senders):
+        """Called by runtime.input()."""
+        secflt = type(x[0])
+        x_s = [a.share[0] for a in x]
+        x_e = [a.share[1] for a in x]
+        shares_s = runtime.input(x_s, senders)
+        shares_e = runtime.input(x_e, senders)
+        return [[secflt(a) for a in zip(x_s, x_e)] for x_s, x_e in zip(shares_s, shares_e)]
+
+    @staticmethod
+    async def _output(x, receivers, threshold):
+        """Called by runtime.output()."""
+        x_s = [a.share[0] for a in x]
+        x_s = await runtime.output(x_s, receivers, threshold)
+        e_0 = type(x[0]).exponent_type(0)
+        x_e = [x[i].share[1] if x_s[i] else e_0 for i in range(len(x))]
+        x_e = await runtime.output(x_e, receivers, threshold)
+        # TODO: consider normalization to eliminate case abs(s)=1 (or case abs(s)=0.5)
+        assert all(s == 0 or 0.5 <= abs(s) <= 1 for s in x_s), (x_s, x_e)
+        assert all(s != 0 or e == 0 for s, e in zip(x_s, x_e)), (x_s, x_e)
+        return [s * 2**e for s, e in zip(x_s, x_e)]
+
+
+def _norm_secflt(a):  # signed normalization factor
+    """Slight variation of runtime._norm()."""
+    # TODO: avoid code duplication with runtime._norm().
+    x = runtime.to_bits(a)  # low to high bits
+    b = x[-1]  # sign bit
+    s = 1 - b*2  # sign s = (-1)^b
+    del x[-1]
+
+    def __norm(x):
+        n = len(x)
+        if n == 1:
+            t = s * x[0] + b  # xor(b, x[0])
+            return 2 - t, 1 - t, t
+
+        i0, j0, nz0 = __norm(x[:n//2])  # low bits
+        i1, j1, nz1 = __norm(x[n//2:])  # high bits
+        i0 *= (1 << ((n+1)//2))
+        j0 += (n+1)//2
+        return runtime.if_else(nz1, [i1, j1, nz1], [i0, j0, nz0])
+
+    l = type(a).bit_length
+    f = type(a).frac_length
+    i, j, _ = __norm(x)
+    return i * (2**(f - (l-1))), j + (f - (l-1))  # NB: f <= l
+
+
+def SecFlt(l=None, s=None, e=None):
+    """Secure l-bit floating-point number with s-bit significand and e-bit exponent, where l=s+e.
+
+    The significand is an (s+1)-bit secure (signed) fixed-point number. The absolute value
+    of a nonzero significand is normalized between 0.5 and 1.0. Here, both 0.5 and 1.0 are
+    included and therefore one extra bit is used.
+    The exponent is an e-bit secure (signed) integer.
+    """
+    if l is None:
+        if s is None or e is None:
+            l = runtime.options.bit_length
+        else:
+            l = s + e
+    if s is None:
+        if e is None:
+            s = round(6.2 + 0.99*l - 4.1*math.log(l))  # yields IEEE 754 precisions
+            # 1-bit float -> s-bit significand: 16->11, 32->24, 64->53, 128->113, 256->237
+        else:
+            s = l - e
+    if e is None:
+        e = l - s
+    if not l == s + e:
+        raise ValueError(f'Inconsistent bit lengths: l={l} not equal to s+e={s}+{e}={s+e}.')
+
+    return _SecFlt(s, e)
+
+
+@functools.lru_cache(maxsize=None)
+def _SecFlt(s, e):
+    name = f'SecFlt{s + e}:{s}:{e}'
+    sectype = type(name, (SecureFloat,), {'__slots__': ()})
+    sectype.__doc__ = 'Class of secret-shared floating-point numbers.'
+    sectype.bit_length = s + e
+    sectype.significand_type = SecFxp(s+1, s-1)  # NB: 1 sign bit, 1 extra bit, s-1 fractional bits
+    sectype.exponent_type = SecInt(e)
+    globals()[name] = sectype  # NB: exploit (almost) unique name dynamic SecureFloat type
     return sectype

@@ -1,4 +1,5 @@
 import operator
+import math
 import unittest
 from mpyc.runtime import mpc
 
@@ -59,18 +60,20 @@ class Arithmetic(unittest.TestCase):
         psecfld = mpc.SecFld(257)
         secint = mpc.SecInt()
         secfxp = mpc.SecFxp()
+        secflt = mpc.SecFlt()
         # NB: mpc.transfer() calls pickle.dumps() and pickle.loads()
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(xsecfld(12), senders=0)))), 12)
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(psecfld(12), senders=0)))), 12)
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secint(12), senders=0)))), 12)
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secfxp(12.5), senders=0)))), 12.5)
+        self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secflt(12.5), senders=0)))), 12.5)
         self.assertEqual(mpc.run(mpc.transfer(xsecfld.field(12), senders=0)), 12)
         self.assertEqual(mpc.run(mpc.transfer(psecfld.field(12), senders=0)), 12)
         self.assertEqual(mpc.run(mpc.transfer(secint.field(12), senders=0)), 12)
         self.assertEqual(mpc.run(mpc.transfer(secfxp.field(13), senders=0)), 13)
         self.assertEqual(mpc.run(mpc.transfer(xsecfld.field.modulus, 0)), xsecfld.field.modulus)
 
-        x = [(xsecfld(12), psecfld(12), secint(12), secfxp(12.5)),
+        x = [(xsecfld(12), psecfld(12), secint(12), secfxp(12.5), secflt(12.5)),
              [xsecfld.field(12), psecfld.field(12), secint.field(12), secfxp.field(13)],
              xsecfld.field.modulus]
         y = mpc.run(mpc.transfer(x, senders=0))
@@ -258,7 +261,7 @@ class Arithmetic(unittest.TestCase):
                 self.assertEqual(c, 1 + 2**-f)
             self.assertEqual(mpc.run(mpc.output(secfxp(0.5) * secfxp(2.0))), 1)
             self.assertEqual(mpc.run(mpc.output(secfxp(2.0) * secfxp(0.5))), 1)
-            c =  mpc.run(mpc.output(secfxp(2**(f//2 - 1) - 0.5) * secfxp(-2**(f//2) + 0.5)))
+            c = mpc.run(mpc.output(secfxp(2**(f//2 - 1) - 0.5) * secfxp(-2**(f//2) + 0.5)))
             self.assertEqual(c, -2**(f-1) + 1.5 * 2**(f//2 - 1) - 0.25)
 
             s = [10.75, -3.375, 0.125, -0.125]
@@ -339,6 +342,28 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(secfxp(21.5) % 7.5)), 6.5)
             self.assertEqual(mpc.run(mpc.output(secfxp(-21.5) // 7.5)), -3.0)
             self.assertEqual(mpc.run(mpc.output(list(divmod(secfxp(21.5), 0.5)))), [43.0, 0.0])
+
+    def test_secflt(self):
+        secflt = mpc.SecFlt()
+        a = secflt(1.25)
+        b = secflt(2.5)
+        self.assertEqual(mpc.run(mpc.output(mpc.input(a, 0))), 1.25)
+        self.assertEqual(mpc.run(mpc.output(a + b)), 3.75)
+        self.assertEqual(mpc.run(mpc.output(-a + -b)), -3.75)
+        self.assertEqual(mpc.run(mpc.output(a * 2**10 + 2**10 * b)), 3.75 * 2**10)
+        self.assertEqual(mpc.run(mpc.output(a - a)), 0)
+        self.assertEqual(mpc.run(mpc.output(-b + b)), 0)
+        self.assertEqual(mpc.run(mpc.output(a - b)), -1.25)
+        self.assertEqual(mpc.run(mpc.output(a * b)), 1.25 * 2.5)
+        self.assertAlmostEqual(mpc.run(mpc.output(a / b)), 0.5, delta=2**-21)
+        self.assertTrue(mpc.run(mpc.output(a < b)))
+        self.assertTrue(mpc.run(mpc.output(a <= b)))
+        self.assertFalse(mpc.run(mpc.output(a == b)))
+        self.assertFalse(mpc.run(mpc.output(a >= b)))
+        self.assertFalse(mpc.run(mpc.output(a > b)))
+        self.assertTrue(mpc.run(mpc.output(a != b)))
+        phi = secflt((math.sqrt(5) + 1) / 2)
+        self.assertAlmostEqual(mpc.run(mpc.output(phi**2 - phi - 1)), 0, delta=2**-21)
 
     def test_if_else(self):
         secfld = mpc.SecFld()

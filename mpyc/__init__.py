@@ -8,7 +8,8 @@ and withstand passive adversaries controlling less than half of the parties.
 Secure integer and fixed-point arithmetic is supported for parameterized
 number ranges, also including support for comparison and bitwise operations.
 Secure finite field arithmetic is supported for fields of arbitrary order, as
-long as the order exceeds the number of parties. These operations are all
+long as the order exceeds the number of parties. Basic support for secure
+floating-point arithmetic is provided as well. These operations are all
 available via Python's operator overloading.
 
 Secure drop-in replacements for lots of Python built-in functions, such as
@@ -23,5 +24,5 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 __license__ = 'MIT License'

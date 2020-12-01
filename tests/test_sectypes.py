@@ -20,11 +20,15 @@ class Arithmetic(unittest.TestCase):
         SecFxp = sectypes.SecFxp
         self.assertEqual(SecFxp(), SecFxp(l=32))
         self.assertEqual(SecFxp(), SecFxp(l=32, f=16))
+        SecFlt = sectypes.SecFlt
+        self.assertEqual(SecFlt(), SecFlt(l=32))
+        self.assertEqual(SecFlt(), SecFlt(s=24, e=8))
 
     def test_bool(self):
         self.assertRaises(TypeError, bool, sectypes.SecFld()(0))
         self.assertRaises(TypeError, bool, sectypes.SecInt()(0))
         self.assertRaises(TypeError, bool, sectypes.SecFxp()(0))
+        self.assertRaises(TypeError, bool, sectypes.SecFlt()(0))
 
     def test_SecFld(self):
         SecFld = sectypes.SecFld
@@ -90,14 +94,10 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.lt, a, a)  # NB: also tests >
         self.assertRaises(TypeError, operator.le, a, a)  # NB: also tests >=
 
-    def test_SecNum(self):
-        sectypes.SecInt(p=2**89 - 1)
-        self.assertRaises(ValueError, sectypes.SecInt, p=2**61 - 1)
-        sectypes.SecFxp(p=2**89 - 1)
-        self.assertRaises(ValueError, sectypes.SecFxp, f=58, p=2**89 - 1)
-
     def test_SecInt(self):
         SecInt = sectypes.SecInt
+        SecInt(p=2**89 - 1)
+        self.assertRaises(ValueError, SecInt, p=2**61 - 1)
         secint = SecInt()
         secint16 = SecInt(16)
         secint(None)
@@ -109,6 +109,8 @@ class Arithmetic(unittest.TestCase):
 
     def test_SecFxp(self):
         SecFxp = sectypes.SecFxp
+        SecFxp(p=2**89 - 1)
+        self.assertRaises(ValueError, SecFxp, f=58, p=2**89 - 1)
         secfxp = SecFxp()
         secfxp16 = SecFxp(16)
         secfxp(None)
@@ -117,6 +119,14 @@ class Arithmetic(unittest.TestCase):
         secfxp(secfxp.field(0))
         self.assertRaises(TypeError, secfxp, complex(0))
         self.assertRaises(TypeError, secfxp, secfxp16.field(0))
+
+    def test_SecFlt(self):
+        SecFlt = sectypes.SecFlt
+        secflt = SecFlt()
+        secflt(None)
+        secflt(False)
+        secflt(True)
+        self.assertRaises(TypeError, secflt, complex(0))
 
     def test_operatorerrors(self):
         secfld = sectypes.SecFld()
