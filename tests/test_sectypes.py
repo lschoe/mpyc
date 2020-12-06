@@ -122,11 +122,13 @@ class Arithmetic(unittest.TestCase):
 
     def test_SecFlt(self):
         SecFlt = sectypes.SecFlt
-        secflt = SecFlt()
+        secflt = SecFlt(16, e=6)
         secflt(None)
         secflt(False)
         secflt(True)
         self.assertRaises(TypeError, secflt, complex(0))
+        self.assertRaises(TypeError, secflt, (2.0, 3))
+        self.assertRaises(ValueError, SecFlt, l=16, s=10, e=7)
 
     def test_operatorerrors(self):
         secfld = sectypes.SecFld()
