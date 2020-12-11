@@ -244,7 +244,7 @@ class Runtime:
             await asyncio.sleep(0)
         m = len(self.parties)
         if m > 1:
-            await self.gather(self.input(sectypes.SecFld(257)(self.pid)))
+            await self.gather(self.transfer(self.pid))
             # Close connections to all parties.
             for peer in self.parties:
                 if peer.pid != self.pid:
