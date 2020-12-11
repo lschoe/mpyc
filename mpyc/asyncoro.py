@@ -330,14 +330,15 @@ def _reconcile(decl, task):
 def __reconcile(decl, givn):
     if isinstance(decl, SecureObject):
         if isinstance(givn, SecureObject):
-            if isinstance(givn.share, Future):
-                if runtime.options.no_async:
-                    decl.share.set_result(givn.share.result())
-                else:
-                    givn.share.add_done_callback(lambda x: decl.share.set_result(x.result()))
-            else:
-                decl.share.set_result(givn.share)
-        elif isinstance(givn, Future):
+            givn = givn.share
+            # if isinstance(givn.share, Future):
+                # if runtime.options.no_async:
+                    # decl.share.set_result(givn.share.result())
+                # else:
+                    # givn.share.add_done_callback(lambda x: decl.share.set_result(x.result()))
+            # else:
+                # decl.share.set_result(givn.share)
+        if isinstance(givn, Future):
             if runtime.options.no_async:
                 decl.share.set_result(givn.result())
             else:
