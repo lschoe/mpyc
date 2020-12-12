@@ -36,6 +36,15 @@ class SecureObject:
             value = Future(loop=runtime._loop)
         self.share = value
 
+    def set_share(self, v):
+        if isinstance(v, Future):
+            if v.done():
+                self.share.set_result(v.result())
+            else:
+                v.add_done_callback(lambda x: self.share.set_result(x.result()))
+        else:
+            self.share.set_result(v)
+
     def __bool__(self):
         """Use of secret-shared objects in Boolean expressions makes no sense."""
         raise TypeError('cannot use secure type in Boolean expressions')
@@ -616,7 +625,9 @@ class SecureFloat(SecureNumber):
 
         Value must be None, int, or float.
         """
-        if value is not None:
+        if value is None:
+            value = (self.significand_type(None), self.exponent_type(None))
+        else:
             if isinstance(value, (int, float)):
                 e = math.ceil(math.log(abs(value), 2)) if value else 0
                 s = value / 2**e
@@ -632,6 +643,10 @@ class SecureFloat(SecureNumber):
                 raise TypeError('None, int, float, or significand/exponent pair required')
 
         super().__init__(value)
+
+    def set_share(self, v):
+        self.share[0].set_share(v[0].share)
+        self.share[1].set_share(v[1].share)
 
     def __neg__(self):
         """Negation."""

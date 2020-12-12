@@ -365,6 +365,11 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(mpc.run(mpc.eq_public(a, a)))
         phi = secflt((math.sqrt(5) + 1) / 2)
         self.assertAlmostEqual(mpc.run(mpc.output(phi**2 - phi - 1)), 0, delta=2**-21)
+        
+        @mpc.coroutine
+        async def nop(a) -> secflt:
+            return a
+        self.assertEqual(mpc.run(mpc.output(nop(a))), 1.25)
 
     def test_if_else(self):
         secfld = mpc.SecFld()

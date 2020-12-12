@@ -331,20 +331,7 @@ def __reconcile(decl, givn):
     if isinstance(decl, SecureObject):
         if isinstance(givn, SecureObject):
             givn = givn.share
-            # if isinstance(givn.share, Future):
-                # if runtime.options.no_async:
-                    # decl.share.set_result(givn.share.result())
-                # else:
-                    # givn.share.add_done_callback(lambda x: decl.share.set_result(x.result()))
-            # else:
-                # decl.share.set_result(givn.share)
-        if isinstance(givn, Future):
-            if runtime.options.no_async:
-                decl.share.set_result(givn.result())
-            else:
-                givn.add_done_callback(lambda x: decl.share.set_result(x.result()))
-        else:
-            decl.share.set_result(givn)
+        decl.set_share(givn)
     elif isinstance(decl, list):
         for d, g in zip(decl, givn):
             __reconcile(d, g)
