@@ -351,9 +351,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(a + b)), 3.75)
         self.assertEqual(mpc.run(mpc.output(-a + -b)), -3.75)
         self.assertEqual(mpc.run(mpc.output(a * 2**10 + 2**10 * b)), 3.75 * 2**10)
-        self.assertEqual(mpc.run(mpc.output(a - a)), 0)
         self.assertEqual(mpc.run(mpc.output(-b + b)), 0)
-        self.assertEqual(mpc.run(mpc.output(a - b)), -1.25)
+        self.assertEqual(mpc.run(mpc.output(abs(1.25 - +b))), 1.25)
         self.assertEqual(mpc.run(mpc.output(a * b)), 1.25 * 2.5)
         self.assertAlmostEqual(mpc.run(mpc.output(a / b)), 0.5, delta=2**-21)
         self.assertTrue(mpc.run(mpc.output(a < b)))
@@ -362,8 +361,15 @@ class Arithmetic(unittest.TestCase):
         self.assertFalse(mpc.run(mpc.output(a >= b)))
         self.assertFalse(mpc.run(mpc.output(a > b)))
         self.assertTrue(mpc.run(mpc.output(a != b)))
+        self.assertFalse(mpc.run(mpc.eq_public(a, b)))
+        self.assertTrue(mpc.run(mpc.eq_public(a, a)))
         phi = secflt((math.sqrt(5) + 1) / 2)
         self.assertAlmostEqual(mpc.run(mpc.output(phi**2 - phi - 1)), 0, delta=2**-21)
+
+        @mpc.coroutine
+        async def nop(a) -> secflt:
+            return a
+        self.assertEqual(mpc.run(mpc.output(nop(a))), 1.25)
 
     def test_if_else(self):
         secfld = mpc.SecFld()
@@ -494,3 +500,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.sum([secfxp(2.75)], start=3.125))), 5.875)
         self.assertEqual(int(mpc.run(mpc.output(mpc.prod(map(secfxp, range(1, 5)))))), 24)
         self.assertEqual(int(mpc.run(mpc.output(mpc.prod([secfxp(1.414214)]*4)))), 4)
+
+
+if __name__ == "__main__":
+    unittest.main()

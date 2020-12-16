@@ -36,6 +36,15 @@ class SecureObject:
             value = Future(loop=runtime._loop)
         self.share = value
 
+    def set_share(self, v):
+        if isinstance(v, Future):
+            if v.done():
+                self.share.set_result(v.result())
+            else:
+                v.add_done_callback(lambda x: self.share.set_result(x.result()))
+        else:
+            self.share.set_result(v)
+
     def __bool__(self):
         """Use of secret-shared objects in Boolean expressions makes no sense."""
         raise TypeError('cannot use secure type in Boolean expressions')
@@ -616,12 +625,14 @@ class SecureFloat(SecureNumber):
 
         Value must be None, int, or float.
         """
-        if value is not None:
+        if value is None:
+            value = (self.significand_type(None), self.exponent_type(None))
+        else:
             if isinstance(value, (int, float)):
                 e = math.ceil(math.log(abs(value), 2)) if value else 0
                 s = value / 2**e
                 assert s == 0 or 0.5 <= abs(s) <= 1, (value, s, e)
-                value = (self.significand_type(s), self.exponent_type(e))
+                value = (self.significand_type(s, integral=False), self.exponent_type(e))
             elif isinstance(value, tuple):
                 if len(value) != 2 or \
                    not isinstance(value[0], self.significand_type) or \
@@ -632,6 +643,10 @@ class SecureFloat(SecureNumber):
                 raise TypeError('None, int, float, or significand/exponent pair required')
 
         super().__init__(value)
+
+    def set_share(self, v):
+        self.share[0].set_share(v[0].share)
+        self.share[1].set_share(v[1].share)
 
     def __neg__(self):
         """Negation."""
@@ -761,21 +776,25 @@ class SecureFloat(SecureNumber):
         return type(self)((s != 0, self.exponent_type(0)))
 
     @staticmethod
-    def _input(x, senders):
+    def is_zero_public(a):
+        """Called by runtime.is_zero_public()."""
+        return runtime.is_zero_public(a.share[0])
+
+    @classmethod
+    def _input(cls, x, senders):
         """Called by runtime.input()."""
-        secflt = type(x[0])
         x_s = [a.share[0] for a in x]
         x_e = [a.share[1] for a in x]
         shares_s = runtime.input(x_s, senders)
         shares_e = runtime.input(x_e, senders)
-        return [[secflt(a) for a in zip(x_s, x_e)] for x_s, x_e in zip(shares_s, shares_e)]
+        return [[cls(a) for a in zip(x_s, x_e)] for x_s, x_e in zip(shares_s, shares_e)]
 
-    @staticmethod
-    async def _output(x, receivers, threshold):
+    @classmethod
+    async def _output(cls, x, receivers, threshold):
         """Called by runtime.output()."""
         x_s = [a.share[0] for a in x]
         x_s = await runtime.output(x_s, receivers, threshold)
-        e_0 = type(x[0]).exponent_type(0)
+        e_0 = cls.exponent_type(0)
         x_e = [x[i].share[1] if x_s[i] else e_0 for i in range(len(x))]
         x_e = await runtime.output(x_e, receivers, threshold)
         # TODO: consider normalization to eliminate case abs(s)=1 (or case abs(s)=0.5)

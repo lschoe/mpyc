@@ -287,3 +287,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.irshift, f256(1), f256(1))
         self.assertRaises(TypeError, operator.pow, f2(1), f19(2))
         self.assertRaises(TypeError, operator.pow, f19(1), 3.14)
+
+
+if __name__ == "__main__":
+    unittest.main()

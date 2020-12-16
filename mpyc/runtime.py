@@ -244,7 +244,7 @@ class Runtime:
             await asyncio.sleep(0)
         m = len(self.parties)
         if m > 1:
-            await self.gather(self.input(sectypes.SecFld(257)(self.pid)))
+            await self.gather(self.transfer(self.pid))
             # Close connections to all parties.
             for peer in self.parties:
                 if peer.pid != self.pid:
@@ -614,6 +614,9 @@ class Runtime:
     async def is_zero_public(self, a) -> Future:
         """Secure public zero test of a."""
         stype = type(a)
+        if issubclass(stype, sectypes.SecureFloat):
+            return await stype.is_zero_public(a)
+
         field = stype.field
         m = len(self.parties)
         t = self.threshold
@@ -627,7 +630,7 @@ class Runtime:
         else:
             r = self._random(field)  # NB: failure r=0 with probability less than 2**-60
         a = await self.gather(a)
-        if issubclass(stype, SecureFiniteField):
+        if field.order.bit_length() <= 60:
             z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
             b = a * r + z[0]
         else:

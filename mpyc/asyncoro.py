@@ -42,7 +42,7 @@ class MessageExchanger(Protocol):
         if self.peer_pid is not None:  # party is client (peer is server)
             m = len(self.runtime.parties)
             t = self.runtime.threshold
-            pid_keys = self.runtime.pid.to_bytes(1, 'little')  # send pid
+            pid_keys = self.runtime.pid.to_bytes(2, 'little')  # send pid
             for subset in itertools.combinations(range(m), m - t):
                 if self.peer_pid in subset and self.runtime.pid == min(subset):
                     pid_keys += self.runtime._prss_keys[subset]  # send PRSS keys
@@ -71,8 +71,11 @@ class MessageExchanger(Protocol):
         """
         self.bytes.extend(data)
         if self.peer_pid is None:  # peer is client (party is server)
-            peer_pid = int.from_bytes(self.bytes[:1], 'little')
-            len_packet = 1
+            if len(self.bytes) < 2:
+                return
+
+            peer_pid = int.from_bytes(self.bytes[:2], 'little')
+            len_packet = 2
             m = len(self.runtime.parties)
             t = self.runtime.threshold
             for subset in itertools.combinations(range(m), m - t):
@@ -84,7 +87,7 @@ class MessageExchanger(Protocol):
             # record new protocol peer
             self.peer_pid = peer_pid
             # store keys received from peer
-            len_packet = 1
+            len_packet = 2
             for subset in itertools.combinations(range(m), m - t):
                 if self.runtime.pid in subset and peer_pid == min(subset):
                     self.runtime._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
@@ -327,20 +330,8 @@ def _reconcile(decl, task):
 def __reconcile(decl, givn):
     if isinstance(decl, SecureObject):
         if isinstance(givn, SecureObject):
-            if isinstance(givn.share, Future):
-                if runtime.options.no_async:
-                    decl.share.set_result(givn.share.result())
-                else:
-                    givn.share.add_done_callback(lambda x: decl.share.set_result(x.result()))
-            else:
-                decl.share.set_result(givn.share)
-        elif isinstance(givn, Future):
-            if runtime.options.no_async:
-                decl.share.set_result(givn.result())
-            else:
-                givn.add_done_callback(lambda x: decl.share.set_result(x.result()))
-        else:
-            decl.share.set_result(givn)
+            givn = givn.share
+        decl.set_share(givn)
     elif isinstance(decl, list):
         for d, g in zip(decl, givn):
             __reconcile(d, g)

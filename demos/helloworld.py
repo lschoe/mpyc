@@ -11,20 +11,17 @@ all parties, noting that TCP connections are full-duplex (bidirectional). So the
 no connections when run with m=1 party only, there is one connection for m=2 parties, and
 there are three connections for m=3 parties.
 
-For the maximum value of m=256 parties, as currently supported by MPyC, there will be a
-total of 32640 TCP connections. With all parties running on localhost, your OS may run out
-of available ports, and the program will therefore not terminate.
+With all m parties running on localhost, your OS may run out of available ports for large m,
+and the program will therefore not terminate properly. For example, the default range for
+dynamic (private) ports on Windows is 49152-65535, which will take you to around m=180 parties,
+before exhausting the available ports. The range for dynamic ports can be increased like this,
+requiring administrator privileges:
 
-For example, the default range for dynamic (private) ports on Windows is 49152-65535,
-which will take you to around m=180 parties, before exhausting the available ports.
-To reach m=256 parties the range for dynamic ports can be increased like this, requiring
-administrator privileges:
+    netsh int ipv4 set dynamicport tcp start=16000 num=48000
 
-    netsh int ipv4 set dynamicport tcp start=30000 num=35000
+Now run the demo (as a nice stress test) with m=300, for a total of 44850 TCP connections:
 
-Now run the demo (as a nice stress test):
-
-    python helloworld.py -M256 -T0
+    python helloworld.py -M300 -T0
 
 It it essential to use threshold t=0 (or, maybe t=1). Otherwise the time needed to set up
 the PRSS keys, which is proportional to (m choose t) = m!/t!/(m-t)!, will be prohibitive.

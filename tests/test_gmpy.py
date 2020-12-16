@@ -50,3 +50,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, fpp, 2**6 * 3)
         self.assertRaises(ValueError, fpp, 2**6 * 3**7)
         self.assertRaises(ValueError, fpp, (1031*1033)**2)
+
+
+if __name__ == "__main__":
+    unittest.main()
