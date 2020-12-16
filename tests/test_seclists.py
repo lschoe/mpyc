@@ -134,3 +134,7 @@ class Arithmetic(unittest.TestCase):
         i = secindex([secint(0), secint(0), secint(1), secint(0)])
         j = secindex([secint(0), secint(1), secint(0)])
         k = i + j
+
+
+if __name__ == "__main__":
+    unittest.main()

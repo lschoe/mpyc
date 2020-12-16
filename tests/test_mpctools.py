@@ -45,3 +45,7 @@ class Arithmetic(unittest.TestCase):
         a = secint(10)
         self.assertEqual(mpc.run(mpc.output(list(acc(itertools.repeat(a, 5), mpc.mul, secint(1))))),
                          [1, 10, 10**2, 10**3, 10**4, 10**5])
+
+
+if __name__ == "__main__":
+    unittest.main()

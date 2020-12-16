@@ -249,3 +249,7 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(poly(17) <= poly(18))
         self.assertTrue(poly(17) >= poly(15))
         self.assertTrue(poly(17) > poly(15))
+
+
+if __name__ == "__main__":
+    unittest.main()

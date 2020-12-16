@@ -90,3 +90,7 @@ class Arithmetic(unittest.TestCase):
 
         x[0] = secfxp(1.5)
         self.assertRaises(ValueError, mode, x)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -365,7 +365,7 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(mpc.run(mpc.eq_public(a, a)))
         phi = secflt((math.sqrt(5) + 1) / 2)
         self.assertAlmostEqual(mpc.run(mpc.output(phi**2 - phi - 1)), 0, delta=2**-21)
-        
+
         @mpc.coroutine
         async def nop(a) -> secflt:
             return a
@@ -500,3 +500,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.sum([secfxp(2.75)], start=3.125))), 5.875)
         self.assertEqual(int(mpc.run(mpc.output(mpc.prod(map(secfxp, range(1, 5)))))), 24)
         self.assertEqual(int(mpc.run(mpc.output(mpc.prod([secfxp(1.414214)]*4)))), 4)
+
+
+if __name__ == "__main__":
+    unittest.main()

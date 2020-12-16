@@ -152,3 +152,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.lshift, 3.14, b)
         self.assertRaises(TypeError, operator.rshift, b, 3.14)
         self.assertRaises(TypeError, operator.rshift, 3.14, b)
+
+
+if __name__ == "__main__":
+    unittest.main()

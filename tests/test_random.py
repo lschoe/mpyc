@@ -162,3 +162,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, sample, secint, [], 1)
         self.assertRaises(TypeError, random, secint)
         self.assertRaises(TypeError, uniform, secint, -0.5, 0.5)
+
+
+if __name__ == "__main__":
+    unittest.main()

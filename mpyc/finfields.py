@@ -297,19 +297,19 @@ def pGF(p, f, n, w):
     if not gmpy2.is_prime(p):
         raise ValueError('modulus is not a prime')
 
-    GFtype = type(f'GF({p})', (PrimeFieldElement,), {'__slots__': ()})
-    GFtype.__doc__ = 'Class of prime field elements.'
-    GFtype.modulus = p
-    GFtype.order = p
-    GFtype.characteristic = p
-    GFtype.ext_deg = 1
-    GFtype.byte_length = (GFtype.order.bit_length() + 7) >> 3
-    GFtype._frac_length = f
-    GFtype._rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
-    GFtype.is_signed = True
-    GFtype.nth = n
-    GFtype.root = w % p
-    return GFtype
+    GFp = type(f'GF({p})', (PrimeFieldElement,), {'__slots__': ()})
+    GFp.__doc__ = 'Class of prime field elements.'
+    GFp.modulus = p
+    GFp.order = p
+    GFp.characteristic = p
+    GFp.ext_deg = 1
+    GFp.byte_length = (GFp.order.bit_length() + 7) >> 3
+    GFp._frac_length = f
+    GFp._rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
+    GFp.is_signed = True
+    GFp.nth = n
+    GFp.root = w % p
+    return GFp
 
 
 class PrimeFieldElement(FiniteFieldElement):
@@ -452,14 +452,14 @@ def xGF(modulus):
 
     d = poly.deg(modulus)
     BaseFieldElement = BinaryFieldElement if p == 2 else ExtensionFieldElement
-    GFtype = type(f'GF({p}^{d})', (BaseFieldElement,), {'__slots__': ()})
-    GFtype.__doc__ = f'Class of {"binary" if p == 2 else "extension"} field elements.'
-    GFtype.modulus = modulus
-    GFtype.order = p**d
-    GFtype.characteristic = p
-    GFtype.ext_deg = d
-    GFtype.byte_length = (GFtype.order.bit_length() + 7) >> 3
-    return GFtype
+    GFq = type(f'GF({p}^{d})', (BaseFieldElement,), {'__slots__': ()})
+    GFq.__doc__ = f'Class of {"binary" if p == 2 else "extension"} field elements.'
+    GFq.modulus = modulus
+    GFq.order = p**d
+    GFq.characteristic = p
+    GFq.ext_deg = d
+    GFq.byte_length = (GFq.order.bit_length() + 7) >> 3
+    return GFq
 
 
 class ExtensionFieldElement(FiniteFieldElement):
