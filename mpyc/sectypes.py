@@ -675,13 +675,11 @@ class SecureFloat(SecureNumber):
 
         c_e = e1 < e2
         c_s = runtime.convert(c_e, secfxp)
-        c_s.integral = True
         e1, e2 = runtime.if_else(c_e, [e2, e1], [e1, e2])
         s1, s2 = runtime.if_else(c_s, [s2, s1], [s1, s2])
         # e1 >= e2
         d = runtime.min(e1 - e2, f)
         d = runtime.convert(d, secfxp)  # NB: 0 <= d <= f fits in headroom secfxp
-        d.integral = True  # TODO: let convert() set integral attr automatically
         d_u = runtime.unit_vector(d, f+1)
         d2 = runtime.in_prod(d_u, [secfxp(2**-i) for i in range(f+1)])  # TODO: avoid reshare
         s = s1 + s2 * d2

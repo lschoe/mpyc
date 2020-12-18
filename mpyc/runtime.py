@@ -530,7 +530,7 @@ class Runtime:
     async def _convert(self, x, ttype):
         stype = type(x[0])  # source type
         n = len(x)
-        await returnType(ttype, n)  # target type
+        await returnType((ttype, not stype.frac_length) , n)  # target type
         m = len(self.parties)
         k = self.options.sec_param
         l = min(stype.bit_length, ttype.bit_length)
