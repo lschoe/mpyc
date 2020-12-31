@@ -530,7 +530,7 @@ class Runtime:
     async def _convert(self, x, ttype):
         stype = type(x[0])  # source type
         n = len(x)
-        await returnType((ttype, not stype.frac_length) , n)  # target type
+        await returnType((ttype, not stype.frac_length), n)  # target type
         m = len(self.parties)
         k = self.options.sec_param
         l = min(stype.bit_length, ttype.bit_length)
@@ -1721,26 +1721,149 @@ class Runtime:
             s += a.value
         return stype.field(s)
 
+    def find(self, x, a, bits=True, e='len(x)', f=None, cs_f=None):
+        """Return index ix of the first occurrence of a in list x.
+
+        The elements of x and a are assumed to be in {0, 1}, by default.
+        Set Boolean flag bits=False for arbitrary inputs.
+
+        If a is not present in x, then ix=len(x) by default.
+        Set flag e=E to get ix=E instead if a is not present in x.
+        Set e=None to get the "raw" output as a pair (nf, ix), where
+        the indicator bit nf=1 if and only if a is not found in x.
+
+        For instance, E=-1 can be used to mimic Python's find() methods.
+        If E is a string, i=eval(E) will be returned where E is
+        an expression
+        in terms of len(x). As a simple example, E='len(x)-1' will enforce
+        that a is considered to be present in any case as the last element
+        of x, if not earlier.
+
+        The return value is index ix, by default.
+        If function f is set, the value of f(ix) is returned instead.
+        Even though index ix is a secure number, however, the computation of f(ix)
+        does not incur any communication costs, requiring local computation only.
+        For example, with f=lambda i: 2^i we would save the work for a secure
+        exponentiation, which would otherwise require a call to runtime.to_bits(ix), say.
+
+        Also, function cs_f can be set instead of specifying function f directly.
+        Function cs_f(b, i) will take as input a (secure) bit b and a (public) index i.
+        The relationship between function f and its "conditional-step function" cs_f
+        is given by:
+
+            cs_f(b, i) = f(i+b),                      for b in {0, 1}      (*)
+
+        For example, for f(i) = i, we get cs_f(b, i) = i+b.
+        And, for f(i) = 2^i, we get cs_f(b, i) = 2^(i+b) = (b+1) 2^i.
+        In general, we have:
+
+            cs_f(b, i) = b (f(i+1) - f(i)) + f(i),    for b in {0, 1}      (**)
+
+        For this reason, cs_f(b, i) can be computed locally indeed.
+
+        A few more examples:
+
+            f(i)    =   i  |    2^i    |  n-i  |    2^-i        | (i, 2^i)
+         cs_f(b, i) =  i+b | (b+1) 2^i | n-i-b | (2-b) 2^-(i+1) | (i+b, (b+1) 2^i)
+
+        In the last example, f(i) is a tuple containing two values. In general, f(i)
+        can be a single number or a tuple/list of numbers.
+
+        Note that it suffices to specify either f or cs_f, as (*) implies that
+        f(i) = cs_f(0, i). If cs_f is not set, it will be computed from f using (**),
+        incurring some overhead.
+        """
+        if bits:
+            if not isinstance(a, int):
+                x = self.vector_add([a] * len(x), self.scalar_mul(1 - 2*a, x))
+            elif a == 1:
+                x = [1-b for b in x]
+        else:
+            x = [b != a for b in x]
+        # Problem is now reduced to finding the index of the first 0 in x.
+
+        if cs_f is None:
+            if f is None:
+                type_f = int
+                f = lambda i: [i]
+                cs_f = lambda b, i: [i + b]
+            else:
+                type_f = type(f(0))
+                if issubclass(type_f, int):
+                    _f = f
+                    f = lambda i: [_f(i)]
+                cs_f = lambda b, i: [b * (f_i1 - f_i) + f_i for f_i, f_i1 in zip(f(i), f(i+1))]
+        else:
+            if f is None:
+                type_f = type(cs_f(0, 0))
+                if issubclass(type_f, int):
+                    _cs_f = cs_f
+                    cs_f = lambda b, i: [_cs_f(b, i)]
+                elif issubclass(type_f, tuple):
+                    _cs_f = cs_f
+                    cs_f = lambda b, i: list(_cs_f(b, i))
+                f = lambda i: cs_f(0, i)
+            else:
+                pass  # TODO: check correctness f vs cs_f
+
+        if isinstance(e, str):
+            e = eval(e)
+
+        if not x:
+            if e is None:
+                nf, y = 1, f(0)
+            else:
+                y = f(e)
+        else:
+            def cl(i, j):
+                n = j - i
+                if n == 1:
+                    b = x[i]
+                    return [b] + cs_f(b, i)
+
+                h = i + n//2
+                nf = cl(i, h)  # nf[0] <=> "0 is not found"
+                return self.if_else(nf[0], cl(h, j), nf)
+
+            nf, *f_ix = cl(0, len(x))
+            if e is None:
+                y = f_ix
+            else:
+                f_e = list(map(type(nf), f(e)))
+                y = self.if_else(nf, f_e, f_ix)
+        if issubclass(type_f, int):
+            y = y[0]
+        elif issubclass(type_f, tuple):
+            y = tuple(y)
+        return (nf, y) if e is None else y
+
+    @mpc_coro
+    async def indexOf(self, x, a, bits=False):
+        """Return index of the first occurrence of a in x.
+
+        Raise ValueError if a is not present.
+        """
+        if not x:
+            raise ValueError('value is not in list')
+
+        stype = type(x[0])  # all elts of x and y assumed of same type
+        await self.returnType((stype, True))
+
+        ix = self.find(x, a, e=-1, bits=bits)
+        if await self.eq_public(ix, -1):
+            raise ValueError('value is not in list')
+
+        return ix
+
     def _norm(self, a):  # signed normalization factor
-        x = self.to_bits(a)  # low to high bits
-        b = x[-1]  # sign bit
-        s = 1 - b*2  # sign s = (-1)^b
-        del x[-1]
-
-        def __norm(x):
-            n = len(x)
-            if n == 1:
-                t = s * x[0] + b  # self.xor(b, x[0])
-                return 2 - t, t
-
-            i0, nz0 = __norm(x[:n//2])  # low bits
-            i1, nz1 = __norm(x[n//2:])  # high bits
-            i0 *= (1 << ((n+1)//2))
-            return self.if_else(nz1, [i1, nz1], [i0, nz0])  # self.or_(nz0, nz1)
-
         l = type(a).bit_length
         f = type(a).frac_length
-        return s * __norm(x)[0] * (2**(f - (l-1)))  # NB: f <= l
+        x = self.to_bits(a)  # low to high bits
+        b = x[-1]  # sign bit
+        del x[-1]
+        x.reverse()
+        nf = self.find(x, 1-b, cs_f=lambda b, i: (b+1) << i)
+        return (1 - b*2) * nf * (2**(f - (l-1)))  # NB: f <= l
 
     def _rec(self, a):  # enhance performance by reducing no. of truncs
         f = type(a).frac_length
