@@ -1,1 +1,1 @@
-python -m unittest %1
+python -m unittest %*

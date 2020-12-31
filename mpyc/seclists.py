@@ -302,19 +302,6 @@ class seclist(list):
         """Return the number of occurrences of value."""
         return runtime.sum([a == value for a in list(self)])
 
-    @staticmethod
-    def _find_one(x):
-        """Return (ix, nz), where ix is the index of first 1 in bit list x,
-        where ix=len(x) if no 1 in x and nz indicates if x contains a 1.
-        """
-        n = len(x)
-        if n == 1:
-            return 1-x[0], x[0]
-
-        ix0, nz0 = seclist._find_one(x[:n//2])  # low bits
-        ix1, nz1 = seclist._find_one(x[n//2:])  # high bits
-        return runtime.if_else(nz0, [ix0, nz0], [n//2 + ix1, nz1])
-
     def find(self, value):  # TODO: add optional i and j to indicate slice
         """Return index of the first occurrence of value.
 
@@ -323,23 +310,15 @@ class seclist(list):
         if not self:
             ix = self.sectype(-1)
         else:
-            ix, nz = seclist._find_one([a == value for a in list(self)])
-            ix = runtime.if_else(nz, ix, -1)
+            ix = runtime.find(list(self), value, bits=False, e=-1)
         return ix
 
-    @asyncoro.mpc_coro
-    async def index(self, value):  # TODO: add optional i and j to indicate slice
+    def index(self, value):  # TODO: add optional i and j to indicate slice
         """Return index of the first occurrence of value.
 
         Raise ValueError if value is not present.
         """
-        await runtime.returnType((self.sectype, True))
-
-        ix = self.find(value)
-        if await runtime.eq_public(ix, -1):
-            raise ValueError('value is not in list')
-
-        return ix
+        return runtime.indexOf(list(self), value, bits=False)
 
     def sort(self, key=None, reverse=False):
         """Sort the list in-place, similar to Python's list.sort().

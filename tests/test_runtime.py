@@ -486,6 +486,9 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(mpc.sum([secnum(1)], start=1))), 2)
             self.assertEqual(mpc.run(mpc.output(mpc.prod([secnum(1)], start=1))), 1)
             self.assertEqual(mpc.run(mpc.output(mpc.sum([secnum(1)], start=secnum(1)))), 2)
+            self.assertEqual(mpc.run(mpc.output(mpc.find([secnum(1)], 0, e=-1))), -1)
+            self.assertEqual(mpc.run(mpc.output(mpc.find([secnum(1)], 1))), 0)
+            self.assertEqual(mpc.run(mpc.output(mpc.find([secnum(1)], 1, f=lambda i: i))), 0)
         self.assertEqual(mpc.run(mpc.output(mpc.min(secint(i) for i in range(-1, 2, 1)))), -1)
         self.assertEqual(mpc.run(mpc.output(mpc.argmin(secint(i) for i in range(-1, 2, 1))[0])), 0)
         self.assertEqual(mpc.run(mpc.output(mpc.max(secfxp(i) for i in range(-1, 2, 1)))), 1)
@@ -500,6 +503,15 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.sum([secfxp(2.75)], start=3.125))), 5.875)
         self.assertEqual(int(mpc.run(mpc.output(mpc.prod(map(secfxp, range(1, 5)))))), 24)
         self.assertEqual(int(mpc.run(mpc.output(mpc.prod([secfxp(1.414214)]*4)))), 4)
+        self.assertEqual(mpc.find([], 0), 0)
+        self.assertEqual(mpc.find([], 0, e=None), (1, 0))
+        self.assertEqual(mpc.run(mpc.output(list(mpc.find([secfld(1)], 1, e=None)))), [0, 0])
+        self.assertEqual(mpc.run(mpc.output(mpc.find([secfld(2)], 2, bits=False))), 0)
+        x = [secint(i) for i in range(5)]
+        f = lambda i: [i**2, 3**i]
+        self.assertEqual(mpc.run(mpc.output(mpc.find(x, 2, bits=False, f=f))), [4, 9])
+        cs_f = lambda b, i: [b * (2*i+1) + i**2, (b*2+1) * 3**i]
+        self.assertEqual(mpc.run(mpc.output(mpc.find(x, 2, bits=False, cs_f=cs_f))), [4, 9])
 
 
 if __name__ == "__main__":

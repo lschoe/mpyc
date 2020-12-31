@@ -671,6 +671,7 @@ class SecureFloat(SecureNumber):
         s2, e2 = other.share
         secfxp = type(s1)
         secint = type(e1)
+        l = secfxp.bit_length
         f = secfxp.frac_length
 
         c_e = e1 < e2
@@ -683,7 +684,13 @@ class SecureFloat(SecureNumber):
         d_u = runtime.unit_vector(d, f+1)
         d2 = runtime.in_prod(d_u, [secfxp(2**-i) for i in range(f+1)])  # TODO: avoid reshare
         s = s1 + s2 * d2
-        N, n = _norm_secflt(s)  # N = 2**n
+        # Normalize s, see also runtime._norm():
+        x = runtime.to_bits(s)
+        b = x[-1]  # sign bit
+        del x[-1]
+        x.reverse()
+        N, n = runtime.find(x, 1-b, cs_f=lambda b, i: ((b+1) << i, b + i))
+        N, n = N * (2**(f - (l-1))), n + (f - (l-1))  # NB: f <= l
         n = runtime.convert(n, secint)
         return secflt((s * N, e1 - n))
 
@@ -799,32 +806,6 @@ class SecureFloat(SecureNumber):
         assert all(s == 0 or 0.5 <= abs(s) <= 1 for s in x_s), (x_s, x_e)
         assert all(s != 0 or e == 0 for s, e in zip(x_s, x_e)), (x_s, x_e)
         return [s * 2**e for s, e in zip(x_s, x_e)]
-
-
-def _norm_secflt(a):  # signed normalization factor
-    """Slight variation of runtime._norm()."""
-    # TODO: avoid code duplication with runtime._norm().
-    x = runtime.to_bits(a)  # low to high bits
-    b = x[-1]  # sign bit
-    s = 1 - b*2  # sign s = (-1)^b
-    del x[-1]
-
-    def __norm(x):
-        n = len(x)
-        if n == 1:
-            t = s * x[0] + b  # xor(b, x[0])
-            return 2 - t, 1 - t, t
-
-        i0, j0, nz0 = __norm(x[:n//2])  # low bits
-        i1, j1, nz1 = __norm(x[n//2:])  # high bits
-        i0 *= (1 << ((n+1)//2))
-        j0 += (n+1)//2
-        return runtime.if_else(nz1, [i1, j1, nz1], [i0, j0, nz0])
-
-    l = type(a).bit_length
-    f = type(a).frac_length
-    i, j, _ = __norm(x)
-    return i * (2**(f - (l-1))), j + (f - (l-1))  # NB: f <= l
 
 
 def SecFlt(l=None, s=None, e=None):
