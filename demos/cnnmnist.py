@@ -60,7 +60,7 @@ async def convolvetensor(x, W, b):
     W = W.tolist()
     stype = type(x[0][0][0][0])
     await mpc.returnType(stype, k, v, m, n)
-    x, W = await mpc.gather(x, W)
+    x, W, b = await mpc.gather(x, W, b)
     Y = [[[[b[j]]*m for _ in range(n)] for j in range(v)] for _ in range(k)]
     counter = 0
     for i in range(k):
@@ -70,7 +70,6 @@ async def convolvetensor(x, W, b):
                 if counter % 500 == 0:
                     await mpc.barrier()
                 Y[i][j] = mpc.matrix_add(Y[i][j], inprod2D(x[i][l], W[j][l]))
-    Y = await mpc.gather(Y)
     for i in range(k):
         for j in range(v):
             for im in range(m):
