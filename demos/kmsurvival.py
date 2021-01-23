@@ -86,6 +86,7 @@ def fit_plot(T1, T2, E1, E2, title, unit_of_time, label1, label2):
     if unit_of_time:
         plt.xlabel(f'timeline ({unit_of_time})')
     lifelines.plotting.add_at_risk_counts(kmf1, kmf2, ax=ax, labels=None)
+    plt.tight_layout()
     figname = ax.figure.canvas.get_window_title()
     ax.figure.canvas.set_window_title(f'Party {mpc.pid} - {figname}')
     return kmf1, kmf2
