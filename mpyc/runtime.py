@@ -81,7 +81,7 @@ class Runtime:
         keys = {}
         m = len(self.parties)
         for subset in itertools.combinations(range(m), m - t):
-            if self.pid == min(subset):
+            if subset[0] == self.pid:
                 keys[subset] = secrets.token_bytes(16)  # 128-bit key
         self._prss_keys = keys
         # caching (m choose t):
@@ -95,8 +95,7 @@ class Runtime:
         """
         f = {}
         for subset, key in self._prss_keys.items():
-            if len(subset) == len(self.parties) - self.threshold:
-                f[subset] = thresha.PRF(key, bound)
+            f[subset] = thresha.PRF(key, bound)
         return f
 
     def _send_message(self, peer_pid, data):
