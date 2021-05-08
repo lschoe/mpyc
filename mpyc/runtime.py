@@ -1432,7 +1432,9 @@ class Runtime:
         if isinstance(c, sectypes.SecureFixedPoint) and not c.integral:
             raise ValueError('condition must be integral')
 
-        if isinstance(x, list):
+        if x is y:
+            return x
+        elif isinstance(x, list):
             z = self._if_else_list(c, x, y)
         else:
             z = c * (x - y) + y

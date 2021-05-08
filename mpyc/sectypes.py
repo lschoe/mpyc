@@ -48,6 +48,14 @@ class SecureObject:
     def __bool__(self):
         """Use of secret-shared objects in Boolean expressions makes no sense."""
         raise TypeError('cannot use secure type in Boolean expressions')
+        
+    def __deepcopy__(self, memo):
+        """Lets secret-shared objects behave as immutable objects"""
+        return self
+    
+    def if_else(self, ifobject, elseobject):
+        """Allow to access secure selection from the guard object"""
+        return runtime.if_else(self, ifobject, elseobject)
 
 
 class SecureNumber(SecureObject):
