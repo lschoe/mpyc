@@ -45,17 +45,20 @@ class SecureObject:
         else:
             self.share.set_result(v)
 
+    def __deepcopy__(self, memo):
+        """Let SecureObjects behave as immutable objects.
+
+        Introduced for github.com/meilof/oblif.
+        """
+        return self
+
     def __bool__(self):
         """Use of secret-shared objects in Boolean expressions makes no sense."""
         raise TypeError('cannot use secure type in Boolean expressions')
-        
-    def __deepcopy__(self, memo):
-        """Lets secret-shared objects behave as immutable objects"""
-        return self
-    
-    def if_else(self, ifobject, elseobject):
-        """Allow to access secure selection from the guard object"""
-        return runtime.if_else(self, ifobject, elseobject)
+
+    def if_else(self, x, y):
+        """Use SecureObject as condition for secure selection between x and y."""
+        return runtime.if_else(self, x, y)
 
 
 class SecureNumber(SecureObject):

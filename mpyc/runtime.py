@@ -1432,9 +1432,10 @@ class Runtime:
         if isinstance(c, sectypes.SecureFixedPoint) and not c.integral:
             raise ValueError('condition must be integral')
 
-        if x is y:
+        if x is y:  # introduced for github.com/meilof/oblif
             return x
-        elif isinstance(x, list):
+
+        if isinstance(x, list):
             z = self._if_else_list(c, x, y)
         else:
             z = c * (x - y) + y
