@@ -4,7 +4,7 @@ MPyC demo accompanying the paper 'Efficient Secure Ridge Regression from
 Randomized Gaussian Elimination' by Frank Blom, Niek J. Bouman, Berry
 Schoenmakers, and Niels de Vreede, presented at TPMPC 2019 by Frank Blom.
 See https://eprint.iacr.org/2019/773 (or https://ia.cr/2019/773). To appear
-in the proceedings of CSCML 2021, the 5th International Symposium on Cyber 
+in the proceedings of CSCML 2021, the 5th International Symposium on Cyber
 Security Cryptography and Machine Learning, July 8-9, 2021. LNCS, Springer.
 
 The following datasets from the UCI Machine Learning Repository are used:
@@ -24,7 +24,20 @@ Simply put the files indicated above in directory ./data/regr/, no need to (g)un
 
 By default, the demo runs with synthetic data (with n=1000 samples, d=10 features,
 and e=1 target). The default accuracy varies from 4 to 7 fractional bits. Setting
-the regularization parameter -l --lambda to 0 will revert to linear regression.
+the regularization parameter lambda to 0 will revert to linear regression.
+
+As explained in the paper, the lambda-regularized model W = A^-1 B is computed where
+A = X^T X + lambda I and B = X^T Y for a given n by d matrix X and n by e matrix Y.
+At the end of the secure computation, the d by e matrix W is output in the clear,
+in either of the following two ways:
+
+1. (default) Both (adj A)B and det A are output in the clear as integer values, and
+   model W = (adj A)B / (det A) is computed using ordinary floating-point division.
+
+2. (option --ratrec) Model W = (adj A)B / (det A) is computed securely modulo a
+   sufficiently large prime p'. Then W is output in the clear, and rational reconstruction
+   modulo p' is used to recover each entry of W as a numerator-denominator pair, which
+   are then divided onto each other using ordinary floating-point division.
 
 Use the -h --help command line option for more help.
 
@@ -45,6 +58,7 @@ import sklearn.datasets
 import sklearn.model_selection
 import sklearn.linear_model
 import sklearn.metrics
+from mpyc.gmpy import ratrec
 from mpyc.runtime import mpc
 
 
@@ -195,15 +209,15 @@ def bareiss(Zp, A):
     return A[:, d:], det
 
 
-def random_matrix_determinant(secfld, d):
+def random_matrix_determinant(secnum, d):
     d_2 = d * (d-1) // 2
-    L = np.diagflat([secfld(1)] * d)
-    L[np.tril_indices(d, -1)] = mpc._randoms(secfld, d_2)
-    L[np.triu_indices(d, 1)] = [secfld(0)] * d_2
-    diag = mpc._randoms(secfld, d)
+    L = np.diagflat([secnum(1)] * d)
+    L[np.tril_indices(d, -1)] = mpc._randoms(secnum, d_2)
+    L[np.triu_indices(d, 1)] = [secnum(0)] * d_2
+    diag = mpc._randoms(secnum, d)
     U = np.diagflat(diag)
-    U[np.tril_indices(d, -1)] = [secfld(0)] * d_2
-    U[np.triu_indices(d, 1)] = mpc._randoms(secfld, d_2)
+    U[np.tril_indices(d, -1)] = [secnum(0)] * d_2
+    U[np.triu_indices(d, 1)] = mpc._randoms(secnum, d_2)
     R = mpc.matrix_prod(L.tolist(), U.tolist())
     detR = mpc.prod(diag)  # detR != 0 with overwhelming probability
     return R, detR
@@ -211,20 +225,20 @@ def random_matrix_determinant(secfld, d):
 
 @mpc.coroutine
 async def linear_solve(A, B):
-    secfld = type(A[0][0])
+    secnum = type(A[0][0])
     d, e = len(A), len(B[0])
-    await mpc.returnType(secfld, d * e + 1)
+    await mpc.returnType(secnum, d * e + 1)
 
-    R, detR = random_matrix_determinant(secfld, d)
+    R, detR = random_matrix_determinant(secnum, d)
     RA = mpc.matrix_prod(R, A)
-    RA = await mpc.output([a for row in RA for a in row])
+    RA = await mpc.output([a for row in RA for a in row], raw=True)
     RA = np.reshape(RA, (d, d))
     RB = mpc.matrix_prod(R, B)
     RB = await mpc.gather(RB)  # NB: RB is secret-shared
 
-    invA_B, detRA = bareiss(secfld.field, np.concatenate((RA, RB), axis=1))
+    invA_B, detRA = bareiss(secnum.field, np.concatenate((RA, RB), axis=1))
     detA = detRA / detR
-    adjA_B = [secfld(a) * detA for row in invA_B for a in row]
+    adjA_B = [secnum(a) * detA for row in invA_B for a in row]
     return adjA_B + [detA]
 
 
@@ -249,6 +263,8 @@ async def main():
                         help='number of features in synthetic data (default=10)')
     parser.add_argument('-e', '--targets', type=int, metavar='E',
                         help='number of targets in synthetic data (default=1)')
+    parser.add_argument('--ratrec', action='store_true',
+                        default=False, help='use rational reconstruction to hide determinant')
     parser.set_defaults(dataset=0, lambda_=1.0, accuracy=-1,
                         samples=1000, features=10, targets=1)
     args = parser.parse_args()
@@ -317,11 +333,18 @@ async def main():
         lambda_ = round(args.lambda_ * beta**2)
         gamma = n1 * beta**2 + lambda_
         secint = mpc.SecInt(gamma.bit_length() + 1)
-        print(f'secint prime size: |q| = {secint.field.modulus.bit_length()} bits'
+        print(f'secint prime q: {secint.field.modulus.bit_length()} bits'
               f' (secint bit length: {secint.bit_length})')
         bound = round(d**(d/2)) * gamma**d
-        secfld = mpc.SecFld(min_order=2*bound + 1, signed=True)
-        print(f'secfld prime size: |p| = {secfld.field.modulus.bit_length()} bits')
+        if not args.ratrec:
+            secnum = mpc.SecFld(min_order=2*bound + 1, signed=True)
+            print(f'secfld prime p: {secnum.field.modulus.bit_length()} bits')
+        else:
+            secnum = mpc.SecInt(l=bound.bit_length() + 1)
+            print(f'secint prime p: {secnum.field.modulus.bit_length()} bits'
+                  f' (secint bit length: {secnum.bit_length})')
+            secfld = mpc.SecFld(min_order=4*bound**2)
+            print(f"secfld prime p': {secfld.field.modulus.bit_length()} bits")
 
         f2 = float(beta)
         q = secint.field.modulus
@@ -360,9 +383,9 @@ async def main():
         timeMiddle = time.process_time()
         logging.info('Compute w = A^-1 B')
 
-        # convert secint to secfld
+        # convert secint to secnum
         AB = [secint(a) for a in AB]
-        AB = mpc.convert(AB, secfld)
+        AB = mpc.convert(AB, secnum)
 
         # extract A and B from the AB array
         A = [[None] * d for _ in range(d)]
@@ -380,10 +403,18 @@ async def main():
 
         # solve A w = B
         w_det = linear_solve(A, B)
-        w_det = await mpc.output(w_det)
-        w_det = list(map(int, w_det))
-        w = np.reshape(w_det[:-1], (d, e))
-        w /= w_det[-1]
+        if not args.ratrec:
+            w_det = await mpc.output(w_det)
+            *w, det = list(map(int, w_det))
+            w = np.reshape(w, (d, e))
+            w /= det
+        else:
+            *w, det = mpc.convert(w_det, secfld)
+            w = mpc.scalar_mul(1/det, w)
+            w = await mpc.output(w)
+            w = [ratrec(int(a), secfld.field.modulus) for a in w]
+            w = [a / b for a, b in w]
+            w = np.reshape(w, (d, e))
 
         timeEnd = time.process_time()
         logging.info(f'Total time {timeEnd - timeStart} = '

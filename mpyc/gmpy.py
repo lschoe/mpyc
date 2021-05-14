@@ -1,15 +1,17 @@
 """This module collects all gmpy2 functions used by MPyC.
 
-Plus a function for factoring prime powers.
+Plus a function for factoring prime powers,
+and a function for rational reconstruction.
 
 Stubs of limited functionality and efficiency are provided
 in case the gmpy2 package is not available.
 """
 
 import os
+import math
 
 
-def factor_prime_power(x):  # TODO: move this to a separate math/number theory module
+def factor_prime_power(x):  # TODO: move this to a separate math/number theory module?
     """Return p and d for a prime power x = p**d."""
     if x <= 1:
         raise ValueError('number not a prime power')
@@ -47,6 +49,36 @@ def factor_prime_power(x):  # TODO: move this to a separate math/number theory m
         return int(p), int(d)
 
     raise ValueError('number not a prime power')
+
+
+def ratrec(x, y, N=None, D=None):
+    """Return rational reconstruction (n, d) of x modulo y.
+    That is,  n/d = x (mod y) with |n| <= N and 0 < d <= D,
+    provided 2*N*D < y.
+
+    Default N=D=None will set both N and D to sqrt(y/2) approximately.
+    """
+    if N is None:
+        if D is None:
+            D = max(1, isqrt((y-1)//2))
+        N = (y-1) // (2*D)
+    elif D is None:
+        D = (y-1) // (2*N) if N else 1
+    if N < 0 or D <= 0 or 2 * N * D >= y:
+        raise ValueError('rational reconstruction not supported')
+
+    # Wang's algorithm, assuming N >= 0, D > 0, 2*N*D < y
+    n0, n = x, y
+    d0, d = 1, 0
+    while n > N:
+        n0, (q, n) = n, divmod(n0, n)
+        d0, d = d, d0 - q * d
+    if d < 0:
+        n, d = -n, -d
+    if d <= D and math.gcd(n , d) == 1:
+        return n, d
+
+    raise ValueError('rational reconstruction not possible')
 
 
 try:
