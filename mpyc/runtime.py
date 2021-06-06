@@ -2124,8 +2124,9 @@ def setup():
     return rt
 
 
-try:  # suppress exceptions for pydoc etc.
-    mpc = setup()
-    pass
-except Exception as exc:
-    print('MPyC runtime.setup() exception:', exc)
+if os.getenv('READTHEDOCS') != 'True':
+    try:
+        mpc = setup()
+    except Exception as exc:
+        # suppress exceptions for pydoc etc.
+        print('MPyC runtime.setup() exception:', exc)
