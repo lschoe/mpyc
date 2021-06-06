@@ -24,10 +24,9 @@ copyright = '2018 - 2021, Berry Schoenmakers'
 author = 'Berry Schoenmakers'
 
 # The short X.Y version
-from mpyc.__init__ import __version__
-version = __version__
+version = ''
 # The full version, including alpha/beta/rc tags
-release = version
+release = ''
 
 
 # -- General configuration ---------------------------------------------------
