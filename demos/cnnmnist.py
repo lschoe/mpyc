@@ -1,4 +1,4 @@
-""" Demo Convolutional Neural Network (CNN) MNIST classifier.
+"""Demo Convolutional Neural Network (CNN) MNIST classifier.
 
 The MNIST dataset of handwritten digits consists of a training set of
 60,000 images of a test set of 10,000 images. The training images have been

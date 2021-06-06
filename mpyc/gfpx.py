@@ -10,8 +10,8 @@ The polynomial a_0 + a_1 X + ... + a_n X^n corresponds
 to the integer a_0 + a_1 2 + ... + a_n 2^n.
 Leading coefficient a_n is 1, using 0 for the zero polynomial.
 
-The operators +, -, *, <<, //, %, and function divmod are overloaded.
-The operators <, <=, >, >=, ==, != are overloaded as well, using the
+The operators +,-,*,<<,//,%, and function divmod are overloaded.
+The operators <,<=,>,>=,==,!= are overloaded as well, using the
 lexicographic order for polynomials (zero polynomial is the smallest).
 
 GCD, extended GCD, modular inverse and powers are all supported.

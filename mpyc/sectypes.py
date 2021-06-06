@@ -1,7 +1,7 @@
 """This module collects the secure (secret-shared) types for MPyC.
 
 Secure (secret-shared) number types all use common base classes, which
-ensures that operators such as +, *, >= are defined by operator overloading.
+ensures that operators such as +,*,>= are defined by operator overloading.
 """
 
 import math

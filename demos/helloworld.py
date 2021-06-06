@@ -1,4 +1,4 @@
-"""Hello World in MPyC.
+"""Demo Hello World in MPyC.
 
 Example usage from the command line:
 

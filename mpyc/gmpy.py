@@ -53,7 +53,7 @@ def factor_prime_power(x):  # TODO: move this to a separate math/number theory m
 
 def ratrec(x, y, N=None, D=None):
     """Return rational reconstruction (n, d) of x modulo y.
-    That is,  n/d = x (mod y) with |n| <= N and 0 < d <= D,
+    That is,  n/d = x (mod y) with -N <= n <= N and 0 < d <= D,
     provided 2*N*D < y.
 
     Default N=D=None will set both N and D to sqrt(y/2) approximately.

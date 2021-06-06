@@ -1766,6 +1766,7 @@ class Runtime:
         A few more examples:
 
             f(i)    =   i  |    2^i    |  n-i  |    2^-i        | (i, 2^i)
+
          cs_f(b, i) =  i+b | (b+1) 2^i | n-i-b | (2-b) 2^-(i+1) | (i+b, (b+1) 2^i)
 
         In the last example, f(i) is a tuple containing two values. In general, f(i)
@@ -2124,6 +2125,7 @@ def setup():
 
 
 try:  # suppress exceptions for pydoc etc.
-    mpc = setup()
+    #mpc = setup()
+    pass
 except Exception as exc:
     print('MPyC runtime.setup() exception:', exc)

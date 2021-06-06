@@ -1,4 +1,4 @@
-""" Demo MPC-based One-Way Hash Chains.
+"""Demo MPC-based One-Way Hash Chains.
 
 This MPyC demo shows how to generate and reverse one-way hash chains in a multiparty setting.
 The seed for a hash chain, which serves as the private key, is generated jointly at random such

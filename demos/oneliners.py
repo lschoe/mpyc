@@ -1,4 +1,4 @@
-"""Couple of MPyC oneliners.
+"""Demo MPyC oneliners.
 
 Run with m parties to compute:
 

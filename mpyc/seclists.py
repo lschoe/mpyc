@@ -20,8 +20,8 @@ in a list x of secure integers (whose values are known to be between 0 and n-1)
 is computed by:
 
     s = seclist([0]*n, secint)
-    for a in x:
-        s[a] += 1
+
+    for a in x: s[a] += 1
 
 Current implementation is basic, taking advantage of cheap secure dot products, as
 provided by runtime.in_prod(). Performance for modestly sized lists of lengths 10 to 1000
