@@ -2125,7 +2125,7 @@ def setup():
 
 
 try:  # suppress exceptions for pydoc etc.
-    #mpc = setup()
+    mpc = setup()
     pass
 except Exception as exc:
     print('MPyC runtime.setup() exception:', exc)
