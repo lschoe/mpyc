@@ -1,6 +1,7 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lschoe/mpyc/master)
 [![Travis CI](https://travis-ci.com/lschoe/mpyc.svg)](https://travis-ci.com/lschoe/mpyc)
 [![codecov](https://codecov.io/gh/lschoe/mpyc/branch/master/graph/badge.svg)](https://codecov.io/gh/lschoe/mpyc)
+[![Read the Docs](https://readthedocs.org/projects/mpyc/badge/)](https://mpyc.readthedocs.io)
 [![PyPI](https://img.shields.io/pypi/v/mpyc.svg)](https://pypi.org/project/mpyc/)
 
 # MPyC [![MPyC logo](https://raw.githubusercontent.com/lschoe/mpyc/master/images/MPyC_Logo.svg)](https://github.com/lschoe/mpyc) Secure Multiparty Computation in Python
@@ -21,7 +22,9 @@ in the cloud, without any install.
 
 Just run: `python setup.py install` (pure Python, no dependencies).
 
-See `demos` for usage examples and [MPyC docs](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
+See `demos` for Python programs and Jupyter notebooks with lots of example code.
+
+For technical reference, see [Read the Docs](https://mpyc.readthedocs.io/) for `Sphinx`-based documentation and [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
 
 ## Notes:
 
