@@ -23,8 +23,16 @@ Now run the demo (as a nice stress test) with m=300, for a total of 44850 TCP co
 
     python helloworld.py -M300 -T0
 
-It it essential to use threshold t=0 (or, maybe t=1). Otherwise the time needed to set up
-the PRSS keys, which is proportional to (m choose t) = m!/t!/(m-t)!, will be prohibitive.
+It it essential to use threshold t=0 (or, maybe t=1). Otherwise the time needed to set up the
+PRSS (Pseudoranom Secret Sharing) keys, which is proportional to (m choose t) = m!/t!/(m-t)!,
+will be prohibitive.
+
+Alternatively, since the PRSS keys are not actually used in this simple demo, the demo can also
+be run with PRSS disabled:
+
+    python helloworld.py -M300 --no-prss
+
+This way there is no need to lower the threshold t.
 """
 
 from mpyc.runtime import mpc

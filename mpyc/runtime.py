@@ -75,17 +75,20 @@ class Runtime:
 
     @threshold.setter
     def threshold(self, t):
+        m = len(self.parties)
         self._threshold = t
+        # caching (m choose t):
+        self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
+        if self.options.no_prss:
+            return
+
         # generate new PRSS keys
         self.prfs.cache_clear()
         keys = {}
-        m = len(self.parties)
         for subset in itertools.combinations(range(m), m - t):
             if subset[0] == self.pid:
                 keys[subset] = secrets.token_bytes(16)  # 128-bit key
         self._prss_keys = keys
-        # caching (m choose t):
-        self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
 
     @functools.lru_cache(maxsize=None)
     def prfs(self, bound):
@@ -93,6 +96,9 @@ class Runtime:
 
         Return a mapping from sets of parties to PRFs.
         """
+        if self.options.no_prss:
+            raise NotImplementedError('Functionality not (yet) supported when PRSS is disabled.')
+
         f = {}
         for subset, key in self._prss_keys.items():
             f[subset] = thresha.PRF(key, bound)
@@ -1983,6 +1989,8 @@ def setup():
                        default=False, help='disable barriers')
     group.add_argument('--no-gmpy2', action='store_true',
                        default=False, help='disable use of gmpy2 package')
+    group.add_argument('--no-prss', action='store_true',
+                       default=False, help='disable use of PRSS (pseudorandom secret sharing)')
     group.add_argument('--mix32-64bit', action='store_true',
                        default=False, help='enable mix of 32-bit and 64-bit platforms')
 

@@ -43,9 +43,10 @@ class MessageExchanger(Protocol):
             m = len(self.runtime.parties)
             t = self.runtime.threshold
             pid_keys = [self.runtime.pid.to_bytes(2, 'little')]  # send pid
-            for subset in itertools.combinations(range(m), m - t):
-                if subset[0] == self.runtime.pid and self.peer_pid in subset:
-                    pid_keys.append(self.runtime._prss_keys[subset])  # send PRSS keys
+            if not self.runtime.options.no_prss:
+                for subset in itertools.combinations(range(m), m - t):
+                    if subset[0] == self.runtime.pid and self.peer_pid in subset:
+                        pid_keys.append(self.runtime._prss_keys[subset])  # send PRSS keys
             transport.writelines(pid_keys)
             self._key_transport_done()
 
@@ -76,22 +77,24 @@ class MessageExchanger(Protocol):
 
             peer_pid = int.from_bytes(self.bytes[:2], 'little')
             len_packet = 2
-            m = len(self.runtime.parties)
-            t = self.runtime.threshold
-            for subset in itertools.combinations(range(m), m - t):
-                if subset[0] == peer_pid and self.runtime.pid in subset:
-                    len_packet += 16
-            if len(self.bytes) < len_packet:
-                return
+            if not self.runtime.options.no_prss:
+                m = len(self.runtime.parties)
+                t = self.runtime.threshold
+                for subset in itertools.combinations(range(m), m - t):
+                    if subset[0] == peer_pid and self.runtime.pid in subset:
+                        len_packet += 16
+                if len(self.bytes) < len_packet:
+                    return
 
             # record new protocol peer
             self.peer_pid = peer_pid
-            # store keys received from peer
-            len_packet = 2
-            for subset in itertools.combinations(range(m), m - t):
-                if subset[0] == peer_pid and self.runtime.pid in subset:
-                    self.runtime._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
-                    len_packet += 16
+            if not self.runtime.options.no_prss:
+                # store keys received from peer
+                len_packet = 2
+                for subset in itertools.combinations(range(m), m - t):
+                    if subset[0] == peer_pid and self.runtime.pid in subset:
+                        self.runtime._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
+                        len_packet += 16
             del self.bytes[:len_packet]
             self._key_transport_done()
 
