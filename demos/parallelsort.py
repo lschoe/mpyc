@@ -19,7 +19,7 @@ P[0],...,P[m-1] work on the task in parallel as follows:
 4. P[i] computes the length-m list with x[i] in position p[i].
 
 The rank of x[i] is computed using O(m) comparisons by counting how many
-values are below x[i]. Hence, each step can clearly takes O(m) time. Assuming
+values are below x[i]. Hence, each step clearly takes O(m) time. Assuming
 unique input values x[i] for now, p will be a permutation on {0,...,m-1}.
 So, each party will obtain the sorted list using O(m) time overall.
 

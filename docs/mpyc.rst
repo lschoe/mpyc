@@ -1,5 +1,5 @@
-mpyc
-====
+MPyC package
+============
 
 .. automodule:: mpyc
     :members:

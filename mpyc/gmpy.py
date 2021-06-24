@@ -75,7 +75,7 @@ def ratrec(x, y, N=None, D=None):
         d0, d = d, d0 - q * d
     if d < 0:
         n, d = -n, -d
-    if d <= D and math.gcd(n , d) == 1:
+    if d <= D and math.gcd(n, d) == 1:
         return n, d
 
     raise ValueError('rational reconstruction not possible')

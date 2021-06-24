@@ -14,7 +14,7 @@
 #
 import os
 import sys
-#sys.path.insert(0, os.path.abspath('.'))
+# sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
@@ -80,7 +80,7 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -107,16 +107,17 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    #'preamble':
-# '''
-# % NB: inserted as workaround if -s python.ist is not used for makeindex
-# \let\spxentry\sphinxstyleindexentry
-# \let\spxextra\sphinxstyleindexextra
-# '''
+    # 'preamble':
+    # '''
+    # % NB: inserted as workaround if -s python.ist is not used for makeindex
+    # \let\spxentry\sphinxstyleindexentry
+    # \let\spxextra\sphinxstyleindexextra
+    # '''
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
 }
+
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
@@ -125,5 +126,5 @@ latex_documents = [
     (master_doc, 'MPyC.tex', 'MPyC Documentation',
      'Berry Schoenmakers', 'manual', True),
 ]
-#latex_use_modindex = False
+# latex_use_modindex = False
 latex_logo = '../images/MPyC_Logo.png'

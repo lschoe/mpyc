@@ -10,7 +10,8 @@ Welcome to MPyC's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+	
+   demos
    mpyc
 
 

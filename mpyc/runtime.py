@@ -294,6 +294,18 @@ class Runtime:
         The senders are the parties that provide input.
         The receivers are the parties that will obtain output.
         The default is to let every party be a sender as well as a receiver.
+
+        The (directed) communication graph specifying which parties sends their message
+        given as obj to which receivers is represented by:
+
+         - either the senders/receivers arguments for a complete bipartite graph,
+         - or the sender_receivers argument for an arbitrary graph.
+
+        Each party i corresponds to a node in the communication graph.
+        The senders/receivers arguments represent subsets of nodes, in the form
+        of a list, a Python range object, or a Python int.
+        The sender_receivers argument represents a set of arcs, in the form of a
+        list of node pairs or as a Python dict mapping nodes to subsets of nodes.
         """
         assert (senders is None and receivers is None) or sender_receivers is None
         senders_is_int = isinstance(senders, int)

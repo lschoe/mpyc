@@ -24,7 +24,8 @@ Just run: `python setup.py install` (pure Python, no dependencies).
 
 See `demos` for Python programs and Jupyter notebooks with lots of example code.
 
-For technical reference, see [Read the Docs](https://mpyc.readthedocs.io/) for `Sphinx`-based documentation and [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
+See [Read the Docs](https://mpyc.readthedocs.io/) for `Sphinx`-based documentation, including an overview of the `demos`,
+and [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
 
 ## Notes:
 
@@ -39,7 +40,7 @@ Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christ
 Use, for example, `pip install gmpy2-2.0.8-cp39-cp39-win_amd64.whl` to finish installation.
 
 3. Use `run-all.sh` or `run-all.bat` in the `demos` directory to have a quick look at all pure Python demos.
-The demos `bnnmnist.py` and `cnnmnist.py` require [Numpy](https://www.numpy.org/), the demo `kmsurvival.py` requires
+The demos `bnnmnist.py` and `cnnmnist.py` require [NumPy](https://www.numpy.org/), the demo `kmsurvival.py` requires
 [pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), and [lifelines](https://pypi.org/project/lifelines/),
 and the demo `ridgeregression.py` even requires [Scikit-learn](https://scikit-learn.org/). Also note the example Linux shell
 scripts and Windows batch files in the `docs` and `tests` directories.
