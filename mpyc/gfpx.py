@@ -48,7 +48,8 @@ class Polynomial:
 
     p = None
 
-    def __init__(self, value):
+    def __init__(self, value=0):
+        """Initialize polynomial to given value (zero polynomial, by default)."""
         cls = type(self)
         self.value = cls._intern(value)
 
@@ -89,6 +90,17 @@ class Polynomial:
     def __int__(self):
         cls = type(self)
         return cls._to_int(self.value)
+
+    def __call__(self, x):
+        """Evaluate polynomial at given x."""
+        p = type(self).p
+        x = x % p
+        y = 0
+        for c in reversed(self.value):
+            y *= x
+            y += c
+            y %= p
+        return y
 
     def to_bytes(self, length, byteorder):
         """Return a bytes object representing a polynomial."""
@@ -790,6 +802,10 @@ class BinaryPolynomial(Polynomial):
 
     def __int__(self):
         return self.value
+
+    def __call__(self, x):
+        """Evaluate polynomial at given x."""
+        return bin(self.value).count('1', 2)%2 if x%2 else 0
 
     def to_bytes(self, length, byteorder):
         return self.value.to_bytes(length, byteorder)

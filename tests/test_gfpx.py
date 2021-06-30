@@ -23,6 +23,7 @@ class Arithmetic(unittest.TestCase):
             self._test_errors(poly)
 
     def _test_modall(self, poly):
+        self.assertEqual(poly()(1), 0)
         self.assertEqual(poly.from_terms('0'), 0)
         self.assertEqual(poly.from_terms('1'), 1)
         self.assertEqual(poly.from_terms(f'{X}'), poly.p)
@@ -101,6 +102,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly.deg(poly(2)), 1)
         self.assertEqual(poly.deg(poly(3)), 1)
         self.assertEqual(poly.deg(poly(7)), 2)
+        self.assertEqual(poly(6)(1), 0)
+        self.assertEqual(poly(7)(0), 0)
+        self.assertEqual(poly(7)(1), 1)
 
         self.assertEqual(1 + poly(1), 0)
         self.assertEqual(poly(3) + poly(4), 7)
@@ -202,6 +206,9 @@ class Arithmetic(unittest.TestCase):
 
     def test_mod11(self):
         poly = gfpx.GFpX(11)
+        self.assertEqual(poly(7)(0), 7)
+        self.assertEqual(poly(11)(17), 6)
+        self.assertEqual(poly(34)(3), 10)
         self.assertEqual(poly.to_terms(poly(122)), f'{X}^2+1')
         self.assertEqual(poly.add(poly(9), poly(4)), 2)
         self.assertEqual(poly.mul(poly(4), poly(2)), 8)

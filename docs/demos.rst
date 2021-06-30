@@ -3,7 +3,7 @@ MPyC demos
 
 This is an overview of all demos available from the MPyC repository on GitHub
 in `mpyc/demos <https://github.com/lschoe/mpyc/tree/master/demos>`_. Starting with
-a very simple 'Hello world!' demo, we gradually work towards demos about
+a 'Hello world!' demo, we gradually work towards demos about 
 privacy-preserving machine learning and other interesting topics.
 Many of the more advanced demos are in fact based on research published at
 various cryptography conferences.
@@ -71,7 +71,7 @@ The ``-P`` switches are used to set the IPv4 addresses for the two parties, wher
 To run the demo with more parties just keep adding ``-P`` switches. The port numbers will be set automatically, but can
 also be specified in several ways.
 The ``-I`` switch is used to assign a unique index :math:`i\in\{0,1,\ldots,m-1\}` to each of the :math:`m` parties.
-The party's index :math:`i` is very much like the `rank` assigned to a process(or) in a parallel computing context,
+The party's index :math:`i` is much like the `rank` assigned to a process(or) in a parallel computing context,
 and it can be obtained as ``mpc.pid`` within a running MPyC program.
 
 The actual code of the 'Hello world!' demo is very simple:
@@ -443,7 +443,7 @@ id3gini.py
 
 This demo implements the well-known `ID3 algorithm <https://en.wikipedia.org/wiki/ID3_algorithm>`_
 for generating decision trees, using Gini impurity to determine the best split.
-A nice aspect of our solution in MPyC is that we can stay very close to the high-level recursive
+A nice aspect of our solution in MPyC is that we can stay close to the high-level recursive
 description of ID3.
 
 The demo includes a couple of well-known datasets with up to several thousands samples
@@ -566,7 +566,7 @@ We use the secure type ``mpc.SecFld(256)`` to represent the state of the AES alg
 lexicographically first irreducible degree-8 polynomial over :math:`\mathbb{F}_2` to construct the finite field of order 256,
 which coincides with the choice made for the AES polynomial.
 
-An encryption followed by a decryption with a 128-bit AES key runs as follows::
+An encryption with a 128-bit AES key runs as follows::
 
    $python aes.py -M3 -1
    AES-128 encryption only.
