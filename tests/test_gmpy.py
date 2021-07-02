@@ -18,7 +18,13 @@ class Arithmetic(unittest.TestCase):
 
         self.assertEqual(gmpy.powmod(3, 256, 257), 1)
 
+        self.assertEqual(gmpy.gcdext(3, 257), (1, 86, -1))
+        self.assertEqual(gmpy.gcdext(1234, 257), (1, -126, 605))
+        self.assertEqual(gmpy.gcdext(-1234, 257), (1, 126, 605))
+        self.assertEqual(gmpy.gcdext(-1234*3, -257*3), (3, 126, -605))
+        # self.assertEqual(gmpy.invert(3, -1), 0)  # pending gmpy2 issue if modulus is 1 or -1
         self.assertEqual(gmpy.invert(3, 257), 86)
+        self.assertRaises(ZeroDivisionError, gmpy.invert, 2, 0)
         self.assertRaises(ZeroDivisionError, gmpy.invert, 2, 4)
 
         self.assertEqual(gmpy.legendre(0, 101), 0)
@@ -59,14 +65,14 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, ratrec, 1, 2)
         self.assertEqual(ratrec(2, 12), (2, 1))
         self.assertRaises(ValueError, ratrec, 5, 12)
-        
+
         self.assertEqual(ratrec(6, 19), (-1, 3))
         self.assertRaises(ValueError, ratrec, 6, 19, N=4)
         self.assertEqual(ratrec(6, 19, D=4), (-1, 3))
         self.assertEqual(ratrec(11, 19), (3, 2))
         self.assertEqual(ratrec(11, 19, N=4), (3, 2))
         self.assertRaises(ValueError, ratrec, 11, 19, D=4)
-        
+
 
 if __name__ == "__main__":
     unittest.main()

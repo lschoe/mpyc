@@ -85,7 +85,8 @@ try:
     if os.getenv('MPYC_NOGMPY') == '1':
         raise ImportError  # stubs will be loaded
 
-    from gmpy2 import is_prime, next_prime, powmod, invert, legendre, is_square, isqrt, iroot
+    from gmpy2 import (is_prime, next_prime, powmod, gcdext, invert,
+                       legendre, is_square, isqrt, iroot)
 except ImportError:
     # load stubs, if MPYC_NOGMPY is set, or if gmpy2 import fails
     import random
@@ -135,18 +136,41 @@ except ImportError:
         """Return (x**y) mod m."""
         return pow(x, y, m)
 
+    def gcdext(a, b):
+        """Return a 3-element tuple (g, s, t) such that g == gcd(a, b) and g == a*s + b*t."""
+        g, f = a, b
+        s, s1 = 1, 0
+        t, t1 = 0, 1
+        while f:
+            g, (q, f) = f, divmod(g, f)
+            s, s1 = s1, s - q * s1
+            t, t1 = t1, t - q * t1
+        if g < 0:
+            g, s, t = -g, -s, -t
+        # TODO: ensure s, t match gmpy2.gcdext() output in exceptional cases, e.g., if abs(b)=2g
+        return g, s, t
+
     def invert(x, m):
-        """Return y such that x*y == 1 (mod m), assuming m is prime.
+        """Return y such that x*y == 1 modulo m.
 
-        Raises ZeroDivisionError if no inverse exists.
+        Raises ZeroDivisionError if no inverse y exists (or, if m is zero).
         """
-        if m == 2:
-            y = x%2
-        else:
-            y = pow(x, m-2, m)
-        if y == 0:
-            raise ZeroDivisionError
+        if not m:
+            raise ZeroDivisionError('invert() division by 0')
 
+        m = abs(m)
+        if m == 1:
+            return 0
+
+        a, b, = x, m
+        s, s1 = 1, 0
+        while b:
+            a, (q, b) = b, divmod(a, b)
+            s, s1 = s1, s - q * s1
+        if a != 1:
+            raise ZeroDivisionError('invert() no inverse exists')
+
+        y = s + m if s < 0 else s  # ensure 0 < y < m
         return y
 
     def legendre(x, y):
@@ -158,6 +182,9 @@ except ImportError:
 
     def is_square(x):
         """Return True if x is a perfect square, False otherwise."""
+        if x&15 not in (0, 1, 4, 9):  # quick modulo 16 test
+            return False
+
         y = isqrt(x)
         return x == y**2
 
