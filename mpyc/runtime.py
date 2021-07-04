@@ -993,9 +993,7 @@ class Runtime:
             key = lambda a: a
         for i in range(n//2):
             a, b = x[i], x[-1-i]
-            c = a < b
-            x[i] = self.if_else(c, a, b)
-            x[-1-i] = self.if_else(c, b, a)
+            x[i], x[-1-i] = self.if_swap(a >= b, a, b)
         # NB: x[n//2] both in x[:(n+1)//2] and in x[n//2:] if n odd
         return self.min(x[:(n+1)//2], key=key), self.max(x[n//2:], key=key)
 
@@ -1100,9 +1098,7 @@ class Runtime:
                 for i in range(n - d):  # NB: all n-d comparisons can be done in parallel
                     if i & p == r:
                         a, b = x[i], x[i + d]
-                        c = key(a) < key(b)
-                        x[i] = mpc.if_else(c, a, b)
-                        x[i + d] = mpc.if_else(c, b, a)
+                        x[i], x[i + d] = mpc.if_swap(key(a) >= key(b), a, b)
                 d, q, r = q - p, q >> 1, p
             p >>= 1
         return x
@@ -1446,7 +1442,7 @@ class Runtime:
         return x
 
     def if_else(self, c, x, y):
-        '''Secure selection based on condition c between x and y.'''
+        '''Secure selection between x and y based on condition c.'''
         if isinstance(c, sectypes.SecureFixedPoint) and not c.integral:
             raise ValueError('condition must be integral')
 
@@ -1457,6 +1453,43 @@ class Runtime:
             z = self._if_else_list(c, x, y)
         else:
             z = c * (x - y) + y
+        return z
+
+    @mpc_coro
+    async def _if_swap_list(self, a, x, y):
+        x, y = x[:], y[:]
+        n = len(x)
+        stype = type(a)  # all elts of x and y assumed of same type
+        field = stype.field
+        f = stype.frac_length
+        if not f:
+            await returnType(stype, 2, n)
+        else:  # NB: a is integral
+            await returnType((stype, x[0].integral and y[0].integral), 2, n)
+
+        a, x, y = await self.gather(a, x, y)
+        if f:
+            a = a >> f  # NB: no in-place rshift!
+        a = a.value
+        d = [None] * n
+        for i in range(n):
+            d[i] = field(a * (y[i].value - x[i].value))
+        d = await self._reshare(d)
+        for i in range(n):
+            x[i] = x[i] + d[i]
+            y[i] = y[i] - d[i]
+        return x, y
+
+    def if_swap(self, c, x, y):
+        '''Secure swap of x and y based on condition c.'''
+        if isinstance(c, sectypes.SecureFixedPoint) and not c.integral:
+            raise ValueError('condition must be integral')
+
+        if isinstance(x, list):
+            z = self._if_swap_list(c, x, y)
+        else:
+            d = c * (y - x)
+            z = [x + d, y - d]
         return z
 
     @mpc_coro

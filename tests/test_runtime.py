@@ -371,30 +371,30 @@ class Arithmetic(unittest.TestCase):
             return a
         self.assertEqual(mpc.run(mpc.output(nop(a))), 1.25)
 
-    def test_if_else(self):
+    def test_if_else_if_swap(self):
         secfld = mpc.SecFld()
         a = secfld(0)
         b = secfld(1)
         c = secfld(1)
         self.assertEqual(mpc.run(mpc.output(c.if_else(a, b))), 0)
-        self.assertEqual(mpc.run(mpc.output(mpc.if_else(1-c, a, b))), 1)
+        self.assertEqual(mpc.run(mpc.output(mpc.if_swap(1-c, a, b))), [0, 1])
         self.assertEqual(mpc.run(mpc.output(mpc.if_else(c, [a, b], [b, a]))), [0, 1])
-        self.assertEqual(mpc.run(mpc.output((1-c).if_else([a, b], [b, a]))), [1, 0])
+        self.assertEqual(mpc.run(mpc.output((1-c).if_swap(a, b))), [0, 1])
         secint = mpc.SecInt()
         a = secint(-1)
         b = secint(1)
         c = secint(1)
-        self.assertEqual(mpc.run(mpc.output(c.if_else(a, b))), -1)
+        self.assertEqual(mpc.run(mpc.output(c.if_swap(a, b))), [1, -1])
         self.assertEqual(mpc.run(mpc.output(mpc.if_else(1-c, a, b))), 1)
-        self.assertEqual(mpc.run(mpc.output(mpc.if_else(c, [a, b], [b, a]))), [-1, 1])
+        self.assertEqual(mpc.run(mpc.output(mpc.if_swap(c, a, b))), [1, -1])
         self.assertEqual(mpc.run(mpc.output((1-c).if_else([a, b], [b, a]))), [1, -1])
         secfxp = mpc.SecFxp()
         a = secfxp(-1.0)
         b = secfxp(1.0)
         c = secfxp(1)
-        self.assertEqual(mpc.run(mpc.output(c.if_else(a, b))), -1.0)
-        self.assertEqual(mpc.run(mpc.output(mpc.if_else(1-c, a, b))), 1.0)
-        self.assertEqual(mpc.run(mpc.output(mpc.if_else(c, 0.0, 1.0))), 0.0)
+        self.assertEqual(mpc.run(mpc.output(c.if_else([a, a], [b, b]))), [-1.0, -1.0])
+        self.assertEqual(mpc.run(mpc.output(mpc.if_swap(1-c, a, b))), [-1.0, 1.0])
+        self.assertEqual(mpc.run(mpc.output(mpc.if_swap(c, 0.0, 1.0))), [1.0, 0.0])
         self.assertEqual(mpc.run(mpc.output((1-c).if_else(0.0, 1.0))), 1.0)
 
     def test_convert(self):
@@ -470,6 +470,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, mpc.argmin, [])
         self.assertRaises(ValueError, mpc.argmax, [])
         self.assertRaises(ValueError, mpc.if_else, secfxp(1.5), [0], [0])
+        self.assertRaises(ValueError, mpc.if_swap, secfxp(1.5), [0], [0])
         self.assertRaises(ValueError, mpc.unit_vector, secfxp(1.5), 2)
 
     def test_misc(self):
