@@ -20,8 +20,29 @@ class Arithmetic(unittest.TestCase):
 
         self.assertEqual(gmpy.gcdext(3, 257), (1, 86, -1))
         self.assertEqual(gmpy.gcdext(1234, 257), (1, -126, 605))
-        self.assertEqual(gmpy.gcdext(-1234, 257), (1, 126, 605))
         self.assertEqual(gmpy.gcdext(-1234*3, -257*3), (3, 126, -605))
+
+        def te_s_t(a, b):
+            g, s, t = gmpy.gcdext(a, b)
+            if abs(a) == abs(b):
+                test_s = s == 0
+            elif b == 0 or abs(b) == 2*g:
+                test_s = s == bool(a > 0) - bool(a < 0)  # sign of a
+            else:
+                test_s = abs(s) < abs(b)/(2*g)
+            if abs(a) == abs(b) or a == 0 or abs(a) == 2*g:
+                test_t = t == bool(b > 0) - bool(b < 0)  # sign of b
+            else:
+                test_t = abs(t) < abs(a)/(2*g)
+            return g == a*s + b*t and test_s and test_t
+
+        self.assertTrue(all((te_s_t(0, 0), te_s_t(0, -1), te_s_t(1, 0), te_s_t(-1, 1))))
+        self.assertTrue(te_s_t(-1234, 257))
+        self.assertTrue(te_s_t(-12537, -257))
+        self.assertTrue(te_s_t(-11*1234, -11*2567))
+        self.assertTrue(te_s_t(1234, -2*1234))
+        self.assertTrue(te_s_t(-2*12364, 12364))
+
         # self.assertEqual(gmpy.invert(3, -1), 0)  # pending gmpy2 issue if modulus is 1 or -1
         self.assertEqual(gmpy.invert(3, 257), 86)
         self.assertRaises(ZeroDivisionError, gmpy.invert, 2, 0)

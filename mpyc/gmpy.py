@@ -137,7 +137,15 @@ except ImportError:
         return pow(x, y, m)
 
     def gcdext(a, b):
-        """Return a 3-element tuple (g, s, t) such that g == gcd(a, b) and g == a*s + b*t."""
+        """Return a 3-element tuple (g, s, t) such that g == gcd(a, b) and g == a*s + b*t.
+
+        The particular values output for s and t are consistent with gmpy2, satisfying the
+        following convention inherited from the GMP library, defining s and t uniquely.
+
+        Normally, abs(s) < abs(b)/(2g) and abs(t) < abs(a)/(2g) will hold.
+        When no such s and t exist, we put s=0 and t=sign(b), if this is because abs(a)=abs(b)=g.
+        Otherwise, we put s=sign(a), if b=0 or abs(b)=2g, and we put t=sign(b), if a=0 or abs(a)=2g.
+        """
         g, f = a, b
         s, s1 = 1, 0
         t, t1 = 0, 1
@@ -147,7 +155,10 @@ except ImportError:
             t, t1 = t1, t - q * t1
         if g < 0:
             g, s, t = -g, -s, -t
-        # TODO: ensure s, t match gmpy2.gcdext() output in exceptional cases, e.g., if abs(b)=2g
+        elif g == 0:
+            s = 0  # case a=b=0
+        if (a < 0 < b or b < 0 < a) and abs(b) == 2*g:
+            s, t = -s, t - s * (abs(a) // g)
         return g, s, t
 
     def invert(x, m):
