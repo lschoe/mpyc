@@ -86,7 +86,7 @@ try:
         raise ImportError  # stubs will be loaded
 
     from gmpy2 import (is_prime, next_prime, powmod, gcdext, invert,
-                       legendre, is_square, isqrt, iroot)
+                       legendre, jacobi, kronecker, is_square, isqrt, iroot)
 except ImportError:
     # load stubs, if MPYC_NOGMPY is set, or if gmpy2 import fails
     import random
@@ -186,10 +186,47 @@ except ImportError:
 
     def legendre(x, y):
         """Return the Legendre symbol (x|y), assuming y is an odd prime."""
-        z = pow(x, (y-1)//2, y)
-        if z > 1:  # z == y-1
-            z = -1
-        return z
+        return jacobi(x, y)  # ignore if y is not prime, like gmpy2 does
+
+    def jacobi(x, y):
+        """Return the Jacobi symbol (x|y), assuming y > 0 is odd."""
+        if not (y > 0 and y&1):
+            raise ValueError('y must be odd and >0')
+
+        j = 1
+        while True:
+            x, y = y, x % y
+            if y == 0:
+                break
+            t = (y & -y).bit_length() - 1
+            if t&1 and (x&7 == 3 or x&7 == 5):
+                j = -j
+            y = y >> t
+            if y&3 != 1 and x&3 != 1:
+                j = -j
+        if x != 1:
+            j = 0
+        return j
+
+    def kronecker(x, y):
+        """Return the Kronecker symbol (x|y)."""
+        k = 1
+        if y == 0:
+            if abs(x) != 1:
+                k = 0
+            y = 1
+        if y < 0:
+            if x < 0:
+                k = -k
+            y = -y
+        if y&1 == 0:
+            t = (y & -y).bit_length() - 1
+            if x&1 == 0:
+                k = 0
+            elif t&1 and (x&7 == 3 or x&7 == 5):
+                k = -k
+            y = y >> t
+        return k * jacobi(x, y)
 
     def is_square(x):
         """Return True if x is a perfect square, False otherwise."""

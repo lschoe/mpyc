@@ -691,9 +691,7 @@ class SecureFloat(SecureNumber):
 
         c_e = e1 < e2
         c_s = runtime.convert(c_e, secfxp)
-#        e1, e2 = runtime.if_else(c_e, [e2, e1], [e1, e2])
         e1, e2 = runtime.if_swap(c_e, e1, e2)
-#        s1, s2 = runtime.if_else(c_s, [s2, s1], [s1, s2])
         s1, s2 = runtime.if_swap(c_s, s1, s2)
         # e1 >= e2
         d = runtime.min(e1 - e2, f)
