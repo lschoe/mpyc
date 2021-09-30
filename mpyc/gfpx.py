@@ -140,7 +140,7 @@ class Polynomial:
     @classmethod
     def _from_terms(cls, s, x=X):
         p = cls.p
-        d = {0: 0}
+        d = {}
         s = ''.join(s.split())  # remove all whitespace
         for term in s.split('+'):
             try:
@@ -160,7 +160,7 @@ class Polynomial:
 
             d[i] = d.get(i, 0) + c
 
-        m = max(d.keys())
+        m = max(d.keys(), default=-1)
         a = [0] * (m+1)
         for i, c in d.items():
             a[i] = c % p
@@ -213,11 +213,6 @@ class Polynomial:
             c.pop()
         return c
 
-    def _iadd(self, b):
-        # TODO: make in-place
-        cls = type(self)
-        self.value = cls._add(self.value, b)
-
     @classmethod
     def _sub(cls, a, b):
         p = cls.p
@@ -229,11 +224,6 @@ class Polynomial:
         while c and not c[-1]:
             c.pop()
         return c
-
-    def _isub(self, b):
-        # TODO: make in-place
-        cls = type(self)
-        self.value = cls._sub(self.value, b)
 
     @classmethod
     def _mul(cls, a, b):
@@ -257,15 +247,9 @@ class Polynomial:
     def _lshift(cls, a, n):
         return [0] * n + a
 
-    def _ilshift(self, n):
-        self.value[0:0] = [0] * n
-
     @classmethod
     def _rshift(cls, a, n):
         return a[n:]
-
-    def _irshift(self, n):
-        del self.value[:n]
 
     @classmethod
     def _mod(cls, a, b):
@@ -475,15 +459,6 @@ class Polynomial:
 
     __radd__ = __add__
 
-    def __iadd__(self, other):
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return NotImplemented
-
-        self._iadd(other)
-        return self
-
     @classmethod
     def sub(cls, a, b):
         """Subtract polynomials a and b."""
@@ -507,15 +482,6 @@ class Polynomial:
 
         return cls(cls._sub(other, self.value))
 
-    def __isub__(self, other):
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return NotImplemented
-
-        self._isub(other)
-        return self
-
     @classmethod
     def mul(cls, a, b):
         """Multiply polynomials a and b."""
@@ -533,15 +499,6 @@ class Polynomial:
 
     __rmul__ = __mul__
 
-    def __imul__(self, other):
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return NotImplemented
-
-        self.value = cls._mul(self.value, other)
-        return self
-
     @classmethod
     def lshift(cls, a, n):
         """Multiply polynomial a by X^n."""
@@ -557,13 +514,6 @@ class Polynomial:
 
     def __rlshift__(self, other):
         return NotImplemented
-
-    def __ilshift__(self, other):
-        if not isinstance(other, int):
-            return NotImplemented
-
-        self._ilshift(other)
-        return self
 
     @classmethod
     def rshift(cls, a, n):
@@ -581,13 +531,6 @@ class Polynomial:
     def __rrshift__(self, other):
         return NotImplemented
 
-    def __irshift__(self, other):
-        if not isinstance(other, int):
-            return NotImplemented
-
-        self._irshift(other)
-        return self
-
     def __floordiv__(self, other):
         cls = type(self)
         other = cls._coerce(other)
@@ -603,15 +546,6 @@ class Polynomial:
             return NotImplemented
 
         return cls(cls._divmod(other, self.value)[0])
-
-    def __ifloordiv__(self, other):
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return NotImplemented
-
-        self.value = cls._divmod(self.value, other)[0]
-        return self
 
     @classmethod
     def mod(cls, a, b):
@@ -635,15 +569,6 @@ class Polynomial:
             return NotImplemented
 
         return cls(cls._mod(other, self.value))
-
-    def __imod__(self, other):
-        cls = type(self)
-        other = cls._coerce(other)
-        if other is NotImplemented:
-            return NotImplemented
-
-        self.value = cls._mod(self.value, other)
-        return self
 
     @classmethod
     def divmod(cls, a, b):
@@ -782,8 +707,7 @@ class Polynomial:
 
     def __hash__(self):
         """Make polynomials hashable (e.g., for LRU caching)."""
-        cls = type(self)
-        return hash((cls.__name__, cls._to_int(self.value)))
+        return hash((type(self).__name__, tuple(self.value)))
 
     def __bool__(self):
         """Truth value testing.
@@ -806,6 +730,10 @@ class BinaryPolynomial(Polynomial):
     def __call__(self, x):
         """Evaluate polynomial at given x."""
         return bin(self.value).count('1', 2)%2 if x%2 else 0
+
+    def __hash__(self):
+        """Make polynomials hashable (e.g., for LRU caching)."""
+        return hash((type(self).__name__, self.value))
 
     def to_bytes(self, length, byteorder):
         return self.value.to_bytes(length, byteorder)
@@ -885,11 +813,7 @@ class BinaryPolynomial(Polynomial):
     def _add(a, b):
         return a ^ b
 
-    def _iadd(self, b):
-        self.value ^= b
-
     _sub = _add
-    _isub = _iadd
 
     @staticmethod
 #    @functools.lru_cache(maxsize=None)
@@ -909,15 +833,9 @@ class BinaryPolynomial(Polynomial):
     def _lshift(a, n):
         return a << n
 
-    def _ilshift(self, n):
-        self.value <<= n
-
     @staticmethod
     def _rshift(a, n):
         return a >> n
-
-    def _irshift(self, n):
-        self.value >>= n
 
     @staticmethod
 #    @functools.lru_cache(maxsize=None)

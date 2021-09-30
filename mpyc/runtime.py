@@ -1651,8 +1651,8 @@ class Runtime:
             return bits
 
         bits = [None] * n
-        p = field.characteristic
         if not signed:
+            p = field.characteristic
             modulus = field.modulus
             q = (p+1) >> 1  # q = 1/2 mod p
         prfs = self.prfs(field.order)

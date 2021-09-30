@@ -130,11 +130,17 @@ class Arithmetic(unittest.TestCase):
         s = [int((a**i).value) for i in range(255)]
         self.assertListEqual(sorted(s), list(range(1, 256)))
 
+        a = f256(0)
+        self.assertEqual(a.sqrt(), 0)
+        with self.assertRaises(ZeroDivisionError):
+            a.sqrt(INV=True)
         a = f256(177)
         self.assertTrue(a.is_sqr())
         self.assertEqual(a.sqrt()**2, a)
         a = f256(255)
         self.assertEqual(a.sqrt()**2, a)
+
+        self.assertEqual(len({f256(i) for i in range(-120, 259)}), 256)
 
     def test_f2p(self):
         f2 = self.f2p
@@ -185,12 +191,17 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c, 0)
         self.assertEqual(a / a, 1)
         self.assertEqual(1 / a, 8)
+        self.assertEqual(f19(0).sqrt(), 0)
         self.assertEqual((f19(1).sqrt())**2, 1)
         self.assertEqual(((a**2).sqrt())**2, a**2)
         self.assertNotEqual(((a**2).sqrt())**2, -a**2)
         self.assertEqual(a**f19.modulus, a)
         b = -a
         self.assertEqual(-b, a)
+        a = f19(0)
+        self.assertEqual(a.sqrt(), 0)
+        with self.assertRaises(ZeroDivisionError):
+            a.sqrt(INV=True)
 
         a = f19(12)
         b = f19(11)
@@ -208,6 +219,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, 18)
         a >>= 0
         self.assertEqual(a, 18)
+
+        self.assertEqual(len({f19(i) for i in range(-20, 25)}), 19)
 
     def test_f101(self):
         f101 = self.f101
@@ -245,6 +258,10 @@ class Arithmetic(unittest.TestCase):
 
     def test_f27(self):
         f27 = self.f27  # 27 == 3 (mod 4)
+        a = f27(0)
+        self.assertEqual(a.sqrt(), 0)
+        with self.assertRaises(ZeroDivisionError):
+            a.sqrt(INV=True)
         a = f27(10)
         self.assertTrue((a**2).is_sqr())
         self.assertFalse((-a**2).is_sqr())
@@ -255,6 +272,10 @@ class Arithmetic(unittest.TestCase):
 
     def test_f81(self):
         f81 = self.f81  # 81 == 1 (mod 4)
+        a = f81(0)
+        self.assertEqual(a.sqrt(), 0)
+        with self.assertRaises(ZeroDivisionError):
+            a.sqrt(INV=True)
         a = f81(21)
         self.assertTrue((a**2).is_sqr())
         self.assertTrue((-a**2).is_sqr())
@@ -262,6 +283,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(b**2, a**2)
         b = (a**2).sqrt(INV=True)
         self.assertEqual((a * b)**2, 1)
+
+        self.assertEqual(len({f81(i) for i in range(-20, 125)}), 81)
 
     def test_errors(self):
         self.assertRaises(ValueError, finfields.GF, 4)

@@ -244,6 +244,10 @@ class FiniteFieldElement:
 
         return NotImplemented
 
+    def __hash__(self):
+        """Make finite field elements hashable (e.g., for LRU caching)."""
+        return hash((type(self).__name__, self.value))
+
     def __bool__(self):
         """Truth value testing.
 
@@ -391,6 +395,12 @@ class PrimeFieldElement(FiniteFieldElement):
         a = self.value
         field = type(self)
         p = field.modulus
+        if a == 0:
+            if INV:
+                raise ZeroDivisionError('no inverse sqrt of 0')
+
+            return field(a)
+
         if p == 2:
             return field(a)
 
@@ -521,6 +531,12 @@ class ExtensionFieldElement(FiniteFieldElement):
         cls = type(a)
         field = type(self)
         q = field.order
+        if a == []:
+            if INV:
+                raise ZeroDivisionError('no inverse sqrt of 0')
+
+            return field(a)
+
         if q%2 == 0:
             return field(cls.powmod(a, q>>1, field.modulus))
 
@@ -584,7 +600,14 @@ class BinaryFieldElement(ExtensionFieldElement):
         return True
 
     def sqrt(self, INV=False):
-        cls = type(self.value)
+        a = self.value
+        cls = type(a)
         field = type(self)
         q = field.order
+        if a == 0:
+            if INV:
+                raise ZeroDivisionError('no inverse sqrt of 0')
+
+            return field(a)
+
         return field(cls.powmod(self.value, q>>1, field.modulus))
