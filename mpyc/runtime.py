@@ -832,9 +832,9 @@ class Runtime:
         """Secure comparison a >= b."""
         return 1 - self.sgn(a - b, LT=True)
 
-    def abs(self, a):
+    def abs(self, a, l=None):
         """Secure absolute value of a."""
-        return (-2*self.sgn(a, LT=True) + 1) * a
+        return (-2*self.sgn(a, l=l, LT=True) + 1) * a
 
     def is_zero(self, a):
         """Secure zero test a == 0."""
@@ -1167,6 +1167,145 @@ class Runtime:
         r_bits.append(stype(0))
         z = stype(r_modb - (b - c)) >= 0  # TODO: avoid full comparison (use r_bits)
         return self.from_bits(self.add_bits(r_bits, c_bits)) - z * b
+
+    @mpc_coro
+    async def trailing_zeros(self, a, l=None):
+        """Secure extraction of l least significant (or all) bits of a,
+        only correct up to and including the least significant 1 (if any).
+        """
+        secint = type(a)  # TODO: extend this to secure fixed-point numbers
+        if l is None:
+            l = secint.bit_length
+        await returnType(secint, l)
+        field = secint.field
+
+        r_bits = await self.random_bits(field, l)
+        r_modl = 0
+        for r_i in reversed(r_bits):
+            r_modl <<= 1
+            r_modl += r_i.value
+        k = self.options.sec_param
+        r_divl = self._random(field, 1<<(secint.bit_length + k - l)).value
+        a = await self.gather(a)
+        c = await self.output(a + ((1<<secint.bit_length) + (r_divl << l) + r_modl))
+        c = c.value % (1<<l)
+        return [1-r if (c >> i)&1 else r for i, r in enumerate(r_bits)]
+
+    def gcp2(self, a, b, l=None):
+        """Secure greatest common power of 2 dividing a and b."""
+        x = self.trailing_zeros(a, l=l)
+        y = self.trailing_zeros(b, l=l)
+        z = self.vector_sub(self.vector_add(x, y), self.schur_prod(x, y))  # bitwise or
+        _, f_i = self.find(z, 1, e=None, cs_f=lambda b, i: (b+1) << i)  # 2**"index of first 1 in z"
+        # TODO: consider keeping f_i in number range if z contains no 1, e.g., setting e='len(x)-1'
+        return f_i
+
+    def _iterations(self, l):
+        """Number of required iterations for l-bit integers of Bernstein-Yang's divstep function."""
+        return (49*l + (80 if l < 46 else 57)) // 17
+
+    def _gcd(self, a, b, l=None):
+        secint = type(a)
+        if l is None:
+            l = secint.bit_length
+
+        # Step 1: remove all common factors of 2 from a and b.
+        pow_of_2 = self.gcp2(a, b, l=l)
+        a, b = self.scalar_mul(1/pow_of_2, [a, b])
+
+        # Step 2: compute gcd for the case that (at least) one of the two integers is odd.
+        g, f = (a%2).if_swap(a, b)
+        # f is odd (or f=g=0), use stripped version of _divsteps(f, g, l) below
+        delta = secint(1)
+        for i in range(self._iterations(l)):
+            delta_gt0 = 1 - self.sgn(delta-1, l=min(i, l-1).bit_length()+1, LT=True)
+            # delta_gt0 <=> delta > 0, using that |delta-1| <= i and delta <= l (for g!=0)
+            g_0 = g%2
+            delta, f, g = (delta_gt0 * g_0).if_else([-delta, g, -f], [delta, f, g])
+            delta, g = delta+1, (g + g_0 * f)/2
+
+        # Combine the results of both steps.
+        return pow_of_2 * f
+
+    def gcd(self, a, b, l=None):
+        """Secure greatest common divisor of a and b.
+
+        If provided, l should be an upper bound on the bit lengths of both a and b.
+        """
+        return self.abs(self._gcd(a, b, l=l), l=l)
+
+    def lcm(self, a, b, l=None):
+        """Secure least common multiple of a and b.
+
+        If provided, l should be an upper bound on the bit lengths of both a and b.
+        """
+        g = self._gcd(a, b, l=l)
+        return abs(a * (b / (g + (g == 0))))  # TODO: use l to optimize 0-test for g
+
+    def _divsteps(self, a, b, l=None):
+        """Secure extended GCD of a and b, assuming a is odd (or, a=b=0).
+
+        Return f, v such that f = gcd(a, b) = u*a + v*b for some u.
+        If f=0, then v=0 as well.
+
+        The divstep function due to Bernstein and Yang is used, see Theorem 11.2 in
+        "Fast constant-time gcd computation and modular inversion" (eprint.iacr.org/2019/266),
+        however entirely avoiding the use of 2-adic arithmetic.
+        """
+        secint = type(a)
+        if l is None:
+            l = secint.bit_length
+        delta, f, v, g, r = secint(1), a, secint(0), b, secint(1)
+        for i in range(self._iterations(l)):
+            delta_gt0 = 1 - self.sgn(delta-1, l=min(i, l-1).bit_length()+1, LT=True)
+            # delta_gt0 <=> delta > 0, using that |delta-1| <= i and delta <= l (for g!=0)
+            g_0 = g%2
+            delta, f, v, g, r = (delta_gt0 * g_0).if_else([-delta, g, r, -f, -v],
+                                                          [delta, f, v, g, r])
+            g, r = g_0.if_else([g + f, r + v], [g, r])  # ensure g is even
+            r = (r%2).if_else(r + a, r)  # ensure r is even
+            delta, g, r = delta+1, g/2, r/2
+        return f, v
+
+    def inverse(self, a, b, l=None):  # TODO: reconsider name inverse() vs invert()
+        """Secure inverse of a modulo b, assuming a>=0, b>0, and gcd(a,b)=1.
+        The result is nonnegative and less than b (inverse is 0 only when b=1).
+
+        If provided, l should be an upper bound on the bit lengths of both a and b.
+
+        To compute inverses for negative b, use -b instead of b, and
+        to compute inverses for arbitrary nonzero b, use abs(b) instead of b.
+        """
+        c = 1 - a%2
+        a, b_ = c.if_swap(a, b)  # NB: keep reference to b
+        # a is odd
+        g, t = self._divsteps(a, b_, l=l)
+        # g == 1 or g == -1
+        t = g * (t - a)
+        s = (1 - t * b_) / a
+        u = c.if_else(t, s)
+        u = (u < 0).if_else(u + 2*b, u)
+        u = (u >= b).if_else(u - b, u)
+        return u
+
+    def gcdext(self, a, b, l=None):
+        """Secure extended GCD of secure integers a and b.
+        Return triple (g, s, t) such that g = gcd(a,b) = s*a + t*b.
+
+        If provided, l should be an upper bound on the bit lengths of a and b.
+        """
+        pow_of_2 = self.gcp2(a, b, l=l)
+        a, b = self.scalar_mul(1/pow_of_2, [a, b])
+        c = 1 - a%2
+        a, b = c.if_swap(a, b)  # a is odd (or, a=0 if b=0 as well)
+        g, t = self._divsteps(a, b, l=l)
+        g0 = g%2  # NB: g0=1 <=> g odd <=> g!=0
+        sgn_g = g0 - 2*self.sgn(g, l=l, LT=True)  # sign of g
+        g, t = self.scalar_mul(sgn_g, [g, t])  # ensure g>=0
+        s = (g - t * b) / (a + 1 - g0)  # avoid division by 0 if a=0 (and b=0)
+        s, t = c.if_swap(s, t)
+        # TODO: consider further reduction of coefficients s and t
+        return pow_of_2 * g, s, t
 
     @mpc_coro_no_pc
     async def sum(self, x, start=0):

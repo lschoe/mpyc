@@ -1,6 +1,7 @@
 import operator
 import math
 import unittest
+import mpyc.gmpy as gmpy2
 from mpyc.runtime import mpc
 
 
@@ -472,6 +473,33 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, mpc.if_else, secfxp(1.5), [0], [0])
         self.assertRaises(ValueError, mpc.if_swap, secfxp(1.5), [0], [0])
         self.assertRaises(ValueError, mpc.unit_vector, secfxp(1.5), 2)
+
+    def test_gcd(self):
+        secint = mpc.SecInt(16)
+        self.assertEqual(mpc.run(mpc.output(mpc.trailing_zeros(secint(0)))), [0]*16)
+        self.assertEqual(mpc.run(mpc.output(mpc.trailing_zeros(secint(7))[0])), 1)
+        self.assertEqual(mpc.run(mpc.output(mpc.trailing_zeros(secint(-6))[:2])), [0, 1])
+        self.assertEqual(mpc.run(mpc.output(mpc.trailing_zeros(secint(4))[:3])), [0, 0, 1])
+        self.assertEqual(mpc.run(mpc.output(mpc.trailing_zeros(secint(-5664))[:6])), [0]*5 + [1])
+        self.assertEqual(mpc.run(mpc.output(mpc.gcp2(secint(0), secint(0)))), 1<<16)
+        self.assertEqual(mpc.run(mpc.output(mpc.gcp2(secint(0), secint(-64)))), 64)
+        self.assertEqual(mpc.run(mpc.output(mpc.gcp2(secint(5664), secint(64)))), 32)
+        self.assertEqual(mpc.run(mpc.output(mpc.gcp2(secint(1), secint(-64)))), 1)
+        self.assertEqual(mpc.run(mpc.output(mpc.gcd(secint(0), secint(0)))), 0)
+        self.assertEqual(mpc.run(mpc.output(mpc.gcd(secint(0), secint(3), l=3))), 3)
+        self.assertEqual(mpc.run(mpc.output(mpc.gcd(secint(-33), secint(30)))), 3)
+        self.assertEqual(mpc.run(mpc.output(mpc.lcm(secint(0), secint(0)))), 0)
+        self.assertEqual(mpc.run(mpc.output(mpc.lcm(secint(-33), secint(0)))), 0)
+        self.assertEqual(mpc.run(mpc.output(mpc.lcm(secint(-66), secint(30)))), 330)
+        self.assertEqual(mpc.run(mpc.output(mpc.lcm(secint(-120), secint(60), l=8))), 120)
+        self.assertEqual(mpc.run(mpc.output(mpc.inverse(secint(10), secint(1)))), 0)
+        self.assertEqual(mpc.run(mpc.output(mpc.inverse(secint(11), secint(16), l=6))), 3)
+        self.assertEqual(mpc.run(mpc.output(mpc.inverse(secint(1234), secint(6789)))), 5089)
+        self.assertEqual(mpc.run(mpc.output(mpc.inverse(secint(1234+6789), secint(6789)))), 5089)
+        self.assertEqual(mpc.run(mpc.output(list(mpc.gcdext(secint(0), secint(0))))), [0, 0, 0])
+        for a, b in ((-300, -300), (2345, 2345), (60, -88), (-360, 9), (0, 256)):
+            g, s, t = mpc.run(mpc.output(list(mpc.gcdext(secint(a), secint(b)))))
+            self.assertTrue(g == math.gcd(a, b) and g == s * a + t * b)
 
     def test_misc(self):
         secint = mpc.SecInt()
