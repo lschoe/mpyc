@@ -1000,7 +1000,7 @@ class Runtime:
         # NB: x[n//2] both in x[:(n+1)//2] and in x[n//2:] if n odd
         return self.min(x[:(n+1)//2], key=key), self.max(x[n//2:], key=key)
 
-    def argmin(self, *x, key=None):
+    def argmin(self, *x, key=None, as_vec=False):
         """Secure argmin of all given elements in x.
 
         See runtime.sorted() for details on key etc.
@@ -1015,24 +1015,9 @@ class Runtime:
 
         if key is None:
             key = lambda a: a
-        return self._argmin(x, key)
+        return self._argopt(x, key, as_vec, argmax=False)
 
-    def _argmin(self, x, key):
-        n = len(x)
-        if n == 1:
-            m = x[0]
-            stype = type(m[0]) if isinstance(m, list) else type(m)
-            return stype(0), m  # NB: sets integral attr to True for SecureFixedPoint numbers
-
-        i0, min0 = self._argmin(x[:n//2], key)
-        i1, min1 = self._argmin(x[n//2:], key)
-        i1 += n//2
-        c = key(min0) < key(min1)
-        a = self.if_else(c, i0, i1)
-        m = self.if_else(c, min0, min1)  # TODO: merge if_else's once integral attr per list element
-        return a, m
-
-    def argmax(self, *x, key=None):
+    def argmax(self, *x, key=None, as_vec=False):
         """Secure argmax of all given elements in x.
 
         See runtime.sorted() for details on key etc.
@@ -1047,22 +1032,34 @@ class Runtime:
 
         if key is None:
             key = lambda a: a
-        return self._argmax(x, key)
+        return self._argopt(x, key, as_vec, argmax=True)
 
-    def _argmax(self, x, key):
+    def _argopt(self, x, key, as_vec, argmax=True):
+        """Secure argmax or argmin of all given elements in x.
+
+        Computes the argmax if argmax=True and the argmin otherwise.
+
+        Returns both the secret-shared index of the optimal element and the value of that element.
+        If as_vec is True, then a secret-shared indicator vector is returned instead of the index.
+        """
         n = len(x)
+        stype = type(x[0][0]) if isinstance(x[0], list) else type(x[0])
         if n == 1:
-            m = x[0]
-            stype = type(m[0]) if isinstance(m, list) else type(m)
-            return stype(0), m  # NB: sets integral attr to True for SecureFixedPoint numbers
+            opt = x[0]
+            if as_vec:
+                return [stype(1)], opt  # NB: sets integral attr to True for SecureFixedPoint numbers
+            return stype(0), opt
 
-        i0, max0 = self._argmax(x[:n//2], key)
-        i1, max1 = self._argmax(x[n//2:], key)
-        i1 += n//2
-        c = key(max0) < key(max1)
-        a = self.if_else(c, i1, i0)
-        m = self.if_else(c, max1, max0)  # TODO: merge if_else's once integral attr per list element
-        return a, m
+        i0, opt0 = self._argopt(x[: n // 2], key, as_vec, argmax)
+        i1, opt1 = self._argopt(x[n // 2 :], key, as_vec, argmax)
+
+        c = key(opt0) < key(opt1) if argmax else key(opt0) > key(opt1)
+        opt = self.if_else(c, opt1, opt0)  # TODO: merge if_else's once integral attr per list element
+        if as_vec:
+            i = self.scalar_mul(1-c, i0) + self.scalar_mul(c, i1)
+        else:
+            i = self.if_else(c, i1 + n // 2, i0)
+        return i, opt
 
     def sorted(self, x, key=None, reverse=False):
         """Return a new securely sorted list with elements from x in ascending order.

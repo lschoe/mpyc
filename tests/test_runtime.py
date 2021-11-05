@@ -1,7 +1,6 @@
-import math
 import operator
+import math
 import unittest
-
 import mpyc.gmpy as gmpy2
 from mpyc.runtime import mpc
 
