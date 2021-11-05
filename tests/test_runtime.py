@@ -1,6 +1,7 @@
-import operator
 import math
+import operator
 import unittest
+
 import mpyc.gmpy as gmpy2
 from mpyc.runtime import mpc
 
@@ -328,9 +329,11 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(mpc.max(a, 0))), max(s[0], 0))
             self.assertEqual(mpc.run(mpc.output(mpc.max(0, b))), max(0, s[1]))
             self.assertEqual(mpc.run(mpc.output(list(mpc.min_max(a, b, c, d)))), [min(s), max(s)])
-            self.assertEqual(mpc.run(mpc.output(mpc.argmin([a, b, c, d])[0])), 1)
+            self.assertEqual(mpc.run(mpc.output(mpc.argmin([a, b, b, c, d])[0])), 1)
+            self.assertEqual(mpc.run(mpc.output(mpc.argmin([a, b, b, c, d], as_vec=True)[0])), [0, 1, 0, 0, 0])
             self.assertEqual(mpc.run(mpc.output(mpc.argmin([a, b], key=operator.neg)[1])), max(s))
-            self.assertEqual(mpc.run(mpc.output(mpc.argmax([a, b, c, d])[0])), 0)
+            self.assertEqual(mpc.run(mpc.output(mpc.argmax([a, a, b, c, d])[0])), 0)
+            self.assertEqual(mpc.run(mpc.output(mpc.argmax([a, a, b, c, d], as_vec=True)[0])), [1, 0, 0, 0, 0])
             self.assertEqual(mpc.run(mpc.output(mpc.argmax([a, b], key=operator.neg)[1])), min(s))
 
             self.assertEqual(mpc.run(mpc.output(secfxp(5) % 2)), 1)
@@ -521,8 +524,10 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(mpc.find([secnum(1)], 1, f=lambda i: i))), 0)
         self.assertEqual(mpc.run(mpc.output(mpc.min(secint(i) for i in range(-1, 2, 1)))), -1)
         self.assertEqual(mpc.run(mpc.output(mpc.argmin(secint(i) for i in range(-1, 2, 1))[0])), 0)
+        self.assertEqual(mpc.run(mpc.output(mpc.argmin((secint(i) for i in range(-1, 2, 1)), as_vec=True)[0])), [1, 0, 0])
         self.assertEqual(mpc.run(mpc.output(mpc.max(secfxp(i) for i in range(-1, 2, 1)))), 1)
         self.assertEqual(mpc.run(mpc.output(mpc.argmax(secfxp(i) for i in range(-1, 2, 1))[0])), 2)
+        self.assertEqual(mpc.run(mpc.output(mpc.argmax((secfxp(i) for i in range(-1, 2, 1)), as_vec=True)[0])), [0, 0, 1])
         self.assertEqual(mpc.run(mpc.output(list(mpc.min_max(map(secfxp, range(5)))))), [0, 4])
         x = (secint(i) for i in range(-3, 3))
         s = [0, -1, 1, -2, 2, -3]
