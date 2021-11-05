@@ -1,4 +1,4 @@
-"""This module collects the secure (secret-shared) types for MPyC.
+"""This module collects basic secure (secret-shared) types for MPyC.
 
 Secure (secret-shared) number types all use common base classes, which
 ensures that operators such as +,*,>= are defined by operator overloading.
@@ -10,6 +10,7 @@ from asyncio import Future
 from mpyc import gmpy as gmpy2
 from mpyc import gfpx
 from mpyc import finfields
+from mpyc import fingroups
 
 runtime = None
 
@@ -27,7 +28,7 @@ class SecureObject:
     __slots__ = 'share'
 
     def __init__(self, value=None):
-        """Initialize a share.
+        """Initialize share.
 
         If value is None (default), the SecureObject starts out as an empty
         placeholder (implemented as a Future).
@@ -36,14 +37,19 @@ class SecureObject:
             value = Future(loop=runtime._loop)
         self.share = value
 
-    def set_share(self, v):
-        if isinstance(v, Future):
-            if v.done():
-                self.share.set_result(v.result())
+    def set_share(self, value):
+        """Set share to the given value.
+
+        The share is set directly (or recursively, for a composite SecureObject),
+        using callbacks if value contains Futures that are not yet done.
+        """
+        if isinstance(value, Future):
+            if value.done():
+                self.share.set_result(value.result())
             else:
-                v.add_done_callback(lambda x: self.share.set_result(x.result()))
+                value.add_done_callback(lambda x: self.share.set_result(x.result()))
         else:
-            self.share.set_result(v)
+            self.share.set_result(value)
 
     def __deepcopy__(self, memo):
         """Let SecureObjects behave as immutable objects.
@@ -56,14 +62,6 @@ class SecureObject:
         """Use of secret-shared objects in Boolean expressions makes no sense."""
         raise TypeError('cannot use secure type in Boolean expressions')
 
-    def if_else(self, x, y):
-        """Use SecureObject as condition for secure selection between x and y."""
-        return runtime.if_else(self, x, y)
-
-    def if_swap(self, x, y):
-        """Use SecureObject as condition for secure swap of x and y."""
-        return runtime.if_swap(self, x, y)
-
 
 class SecureNumber(SecureObject):
     """Base class for secure (secret-shared) numbers."""
@@ -71,6 +69,14 @@ class SecureNumber(SecureObject):
     __slots__ = ()
 
     bit_length = None
+
+    def if_else(self, x, y):
+        """Use SecureNumber as condition for secure selection between x and y."""
+        return runtime.if_else(self, x, y)
+
+    def if_swap(self, x, y):
+        """Use SecureNumber as condition for secure swap of x and y."""
+        return runtime.if_swap(self, x, y)
 
     def _coerce(self, other):
         if isinstance(other, SecureObject):
@@ -243,7 +249,15 @@ class SecureNumber(SecureObject):
         """Bitwise exclusive-or, for now 1-bit only."""
         return self + other - 2 * self * other
 
-    __rxor__ = __xor__
+    def __rxor__(self, other):
+        """Bitwise exclusive-or, for now 1-bit only.
+
+        Special case: repeat of finite group operation.
+        """
+        if isinstance(other, fingroups.FiniteGroupElement):
+            return runtime.SecGrp(type(other)).repeat(other, self)
+
+        return self + other - 2 * self * other
 
     def __invert__(self):
         """Bitwise not (inversion), for now 1-bit only."""
@@ -295,7 +309,7 @@ class SecureFiniteField(SecureNumber):
     __slots__ = ()
 
     frac_length = 0
-    field = None
+    field: type
 
     _output_conversion = None
 
@@ -415,7 +429,7 @@ class SecureInteger(SecureNumber):
     __slots__ = ()
 
     frac_length = 0
-    field = None
+    field: type
 
     _output_conversion = int
 
@@ -447,7 +461,7 @@ class SecureFixedPoint(SecureNumber):
     __slots__ = 'integral'
 
     frac_length = 0
-    field = None
+    field: type
 
     @classmethod
     def _output_conversion(cls, a):
@@ -556,12 +570,12 @@ def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, si
 def _SecFld(field):
     l = field.order.bit_length() - 1
     name = f'SecFld{l}({field.__name__})'
-    sectype = type(name, (SecureFiniteField,), {'__slots__': ()})
-    sectype.__doc__ = 'Class of secret-shared finite field elements.'
-    sectype.field = field
-    sectype.bit_length = l
-    globals()[name] = sectype  # TODO: check name dynamic SecureFiniteField type sufficiently unique
-    return sectype
+    secfld = type(name, (SecureFiniteField,), {'__slots__': ()})
+    secfld.__doc__ = 'Class of secret-shared finite field elements.'
+    secfld.field = field
+    secfld.bit_length = l
+    globals()[name] = secfld  # TODO: check name dynamic SecureFiniteField type sufficiently unique
+    return secfld
 
 
 def _pfield(l, f, p, n):
@@ -584,12 +598,12 @@ def SecInt(l=None, p=None, n=2):
 @functools.lru_cache(maxsize=None)
 def _SecInt(l, p, n):
     name = f'SecInt{l}' if p is None else f'SecInt{l}({p})'
-    sectype = type(name, (SecureInteger,), {'__slots__': ()})
-    sectype.__doc__ = 'Class of secret-shared integers.'
-    sectype.field = _pfield(l, 0, p, n)
-    sectype.bit_length = l
-    globals()[name] = sectype  # NB: exploit (almost) unique name dynamic SecureInteger type
-    return sectype
+    secint = type(name, (SecureInteger,), {'__slots__': ()})
+    secint.__doc__ = 'Class of secret-shared integers.'
+    secint.field = _pfield(l, 0, p, n)
+    secint.bit_length = l
+    globals()[name] = secint  # NB: exploit (almost) unique name dynamic SecureInteger type
+    return secint
 
 
 def SecFxp(l=None, f=None, p=None, n=2):
@@ -607,13 +621,13 @@ def SecFxp(l=None, f=None, p=None, n=2):
 @functools.lru_cache(maxsize=None)
 def _SecFxp(l, f, p, n):
     name = f'SecFxp{l}:{f}' if p is None else f'SecFxp{l}:{f}({p})'
-    sectype = type(name, (SecureFixedPoint,), {'__slots__': ()})
-    sectype.__doc__ = 'Class of secret-shared fixed-point numbers.'
-    sectype.field = _pfield(l, f, p, n)
-    sectype.bit_length = l
-    sectype.frac_length = f
-    globals()[name] = sectype  # NB: exploit (almost) unique name dynamic SecureFixedPoint type
-    return sectype
+    secfxp = type(name, (SecureFixedPoint,), {'__slots__': ()})
+    secfxp.__doc__ = 'Class of secret-shared fixed-point numbers.'
+    secfxp.field = _pfield(l, f, p, n)
+    secfxp.bit_length = l
+    secfxp.frac_length = f
+    globals()[name] = secfxp  # NB: exploit (almost) unique name dynamic SecureFixedPoint type
+    return secfxp
 
 
 class SecureFloat(SecureNumber):
@@ -632,8 +646,8 @@ class SecureFloat(SecureNumber):
 
     __slots__ = ()
 
-    significand_type = None
-    exponent_type = None
+    significand_type: type
+    exponent_type: type
 
     def __init__(self, value=None):
         """Initialize a secure floating-point number.
@@ -659,9 +673,9 @@ class SecureFloat(SecureNumber):
 
         super().__init__(value)
 
-    def set_share(self, v):
-        self.share[0].set_share(v[0].share)
-        self.share[1].set_share(v[1].share)
+    def set_share(self, value):
+        self.share[0].set_share(value[0].share)
+        self.share[1].set_share(value[1].share)
 
     def __neg__(self):
         """Negation."""
@@ -853,10 +867,10 @@ def SecFlt(l=None, s=None, e=None):
 @functools.lru_cache(maxsize=None)
 def _SecFlt(s, e):
     name = f'SecFlt{s + e}:{s}:{e}'
-    sectype = type(name, (SecureFloat,), {'__slots__': ()})
-    sectype.__doc__ = 'Class of secret-shared floating-point numbers.'
-    sectype.bit_length = s + e
-    sectype.significand_type = SecFxp(s+1, s-1)  # NB: 1 sign bit, 1 extra bit, s-1 fractional bits
-    sectype.exponent_type = SecInt(e)
-    globals()[name] = sectype  # NB: exploit (almost) unique name dynamic SecureFloat type
-    return sectype
+    secflt = type(name, (SecureFloat,), {'__slots__': ()})
+    secflt.__doc__ = 'Class of secret-shared floating-point numbers.'
+    secflt.bit_length = s + e
+    secflt.significand_type = SecFxp(s+1, s-1)  # NB: 1 sign bit, 1 extra bit, s-1 fractional bits
+    secflt.exponent_type = SecInt(e)
+    globals()[name] = secflt  # NB: exploit (almost) unique name dynamic SecureFloat type
+    return secflt

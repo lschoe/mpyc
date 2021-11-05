@@ -108,6 +108,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(a & b)), 0)
         self.assertEqual(mpc.run(mpc.output(a | b)), 1)
         self.assertEqual(mpc.run(mpc.output(a ^ b)), 1)
+        self.assertEqual(mpc.run(mpc.output(0 ^ b)), 1)
         self.assertEqual(mpc.run(mpc.output(~a)), 1)
 
         self.assertIn(mpc.run(mpc.output(mpc.random_bit(secfld))), [0, 1])

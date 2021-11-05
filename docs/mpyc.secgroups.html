@@ -1,0 +1,650 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mpyc.secgroups</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.secgroups</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5Csecgroups.py">c:\users\berry\documents\github\mympyc\mpyc\secgroups.py</a></font></td></tr></table>
+    <p><tt>Secure&nbsp;(secret-shared)&nbsp;types&nbsp;for&nbsp;finite&nbsp;groups&nbsp;in&nbsp;MPyC.<br>
+&nbsp;<br>
+Includes&nbsp;symmetric&nbsp;group,&nbsp;quadratic&nbsp;residues,&nbsp;elliptic&nbsp;curve&nbsp;groups,<br>
+class&nbsp;groups.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;provides&nbsp;methods&nbsp;and&nbsp;classes&nbsp;to&nbsp;construct&nbsp;secure&nbsp;groups<br>
+from&nbsp;finite&nbsp;groups.<br>
+Operators&nbsp;are&nbsp;inherited&nbsp;from&nbsp;non-secure&nbsp;finite&nbsp;groups&nbsp;and&nbsp;then<br>
+overloaded&nbsp;via&nbsp;secure&nbsp;group&nbsp;constructors.<br>
+<a href="#-SecGrp">SecGrp</a>()&nbsp;is&nbsp;the&nbsp;main&nbsp;entrypoint.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="asyncio.html">asyncio</a><br>
+</td><td width="25%" valign=top><a href="mpyc.fingroups.html">mpyc.fingroups</a><br>
+</td><td width="25%" valign=top><a href="mpyc.mpctools.html">mpyc.mpctools</a><br>
+</td><td width="25%" valign=top><a href="operator.html">operator</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>(<a href="builtins.html#object">builtins.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.secgroups.html#SecureClassGroupForm">SecureClassGroupForm</a>
+</font></dt><dt><font face="helvetica, arial"><a href="mpyc.secgroups.html#SecureEllipticCurvePoint">SecureEllipticCurvePoint</a>
+</font></dt><dt><font face="helvetica, arial"><a href="mpyc.secgroups.html#SecureQuadraticResidue">SecureQuadraticResidue</a>
+</font></dt><dt><font face="helvetica, arial"><a href="mpyc.secgroups.html#SecureSymmetricGroupElement">SecureSymmetricGroupElement</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SecureClassGroupForm">class <strong>SecureClassGroupForm</strong></a>(<a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#SecureClassGroupForm">SecureClassGroupForm</a>(value=None)<br>
+&nbsp;<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;elliptic&nbsp;curve&nbsp;elements.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.secgroups.html#SecureClassGroupForm">SecureClassGroupForm</a></dd>
+<dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
+<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SecureClassGroupForm-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__init__"><strong>__init__</strong></a>(self, value=None)</dt><dd><tt>Ensure&nbsp;all&nbsp;coefficients&nbsp;are&nbsp;of&nbsp;secure&nbsp;type.<br>
+&nbsp;<br>
+Enforce&nbsp;value&nbsp;is&nbsp;a&nbsp;tuple.</tt></dd></dl>
+
+<dl><dt><a name="SecureClassGroupForm-equality"><strong>equality</strong></a>(a, b)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-inversion"><strong>inversion</strong></a>(f)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-operation"><strong>operation</strong></a>(f1, f2)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-operation2"><strong>operation2</strong></a>(f)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-set_share"><strong>set_share</strong></a>(self, value)</dt></dl>
+
+<hr>
+Methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureClassGroupForm-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__radd__"><strong>__radd__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureClassGroupForm-conditional"><strong>conditional</strong></a>(c, a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a^c,&nbsp;where&nbsp;c&nbsp;is&nbsp;asummed&nbsp;to&nbsp;be&nbsp;0&nbsp;or&nbsp;1.<br>
+&nbsp;<br>
+Subclasses&nbsp;override&nbsp;this&nbsp;method&nbsp;with&nbsp;more&nbsp;efficient&nbsp;implementations.<br>
+NB:&nbsp;beware&nbsp;of&nbsp;cyclic&nbsp;definitions!!</tt></dd></dl>
+
+<dl><dt><a name="SecureClassGroupForm-if_else"><strong>if_else</strong></a>(c, a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;binary&nbsp;condition&nbsp;c&nbsp;between&nbsp;group&nbsp;elements&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="SecureClassGroupForm-repeat"><strong>repeat</strong></a>(a, x, sec_grp_hide=None, public_out=False, exp_as_bits=False)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integral&nbsp;x.<br>
+&nbsp;<br>
+Base&nbsp;a&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;group&nbsp;element.<br>
+Exponent&nbsp;x&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;integral&nbsp;number.<br>
+&nbsp;<br>
+Possibly&nbsp;a,&nbsp;x&nbsp;are&nbsp;lists&nbsp;(of&nbsp;same&nbsp;length)<br>
+&nbsp;<br>
+Flags<br>
+&nbsp;&nbsp;&nbsp;&nbsp;public_out&nbsp;&nbsp;set&nbsp;if&nbsp;outputs&nbsp;is&nbsp;public<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp_as_bits&nbsp;set&nbsp;if&nbsp;exponent&nbsp;is&nbsp;given&nbsp;as&nbsp;list&nbsp;of&nbsp;bits</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>share</strong></dt>
+</dl>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>group</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>sectype_of_value</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureClassGroupForm-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
+&nbsp;<br>
+Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
+
+<dl><dt><a name="SecureClassGroupForm-if_swap"><strong>if_swap</strong></a>(self, x, y)</dt><dd><tt>Use&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>&nbsp;as&nbsp;condition&nbsp;for&nbsp;secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SecureEllipticCurvePoint">class <strong>SecureEllipticCurvePoint</strong></a>(<a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#SecureEllipticCurvePoint">SecureEllipticCurvePoint</a>(value=None)<br>
+&nbsp;<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;elliptic&nbsp;curve&nbsp;elements.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.secgroups.html#SecureEllipticCurvePoint">SecureEllipticCurvePoint</a></dd>
+<dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
+<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SecureEllipticCurvePoint-__init__"><strong>__init__</strong></a>(self, value=None)</dt><dd><tt>Ensure&nbsp;all&nbsp;coefficients&nbsp;are&nbsp;of&nbsp;secure&nbsp;field&nbsp;type.<br>
+&nbsp;<br>
+Enforce&nbsp;value&nbsp;is&nbsp;a&nbsp;tuple.</tt></dd></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-set_share"><strong>set_share</strong></a>(self, value)</dt></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="SecureEllipticCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>curve</strong></dt>
+</dl>
+<hr>
+Methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureEllipticCurvePoint-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__radd__"><strong>__radd__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureEllipticCurvePoint-conditional"><strong>conditional</strong></a>(c, a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a^c,&nbsp;where&nbsp;c&nbsp;is&nbsp;asummed&nbsp;to&nbsp;be&nbsp;0&nbsp;or&nbsp;1.<br>
+&nbsp;<br>
+Subclasses&nbsp;override&nbsp;this&nbsp;method&nbsp;with&nbsp;more&nbsp;efficient&nbsp;implementations.<br>
+NB:&nbsp;beware&nbsp;of&nbsp;cyclic&nbsp;definitions!!</tt></dd></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-if_else"><strong>if_else</strong></a>(c, a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;binary&nbsp;condition&nbsp;c&nbsp;between&nbsp;group&nbsp;elements&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-repeat"><strong>repeat</strong></a>(a, x, sec_grp_hide=None, public_out=False, exp_as_bits=False)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integral&nbsp;x.<br>
+&nbsp;<br>
+Base&nbsp;a&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;group&nbsp;element.<br>
+Exponent&nbsp;x&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;integral&nbsp;number.<br>
+&nbsp;<br>
+Possibly&nbsp;a,&nbsp;x&nbsp;are&nbsp;lists&nbsp;(of&nbsp;same&nbsp;length)<br>
+&nbsp;<br>
+Flags<br>
+&nbsp;&nbsp;&nbsp;&nbsp;public_out&nbsp;&nbsp;set&nbsp;if&nbsp;outputs&nbsp;is&nbsp;public<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp_as_bits&nbsp;set&nbsp;if&nbsp;exponent&nbsp;is&nbsp;given&nbsp;as&nbsp;list&nbsp;of&nbsp;bits</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>share</strong></dt>
+</dl>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>group</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>sectype_of_value</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureEllipticCurvePoint-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
+&nbsp;<br>
+Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-if_swap"><strong>if_swap</strong></a>(self, x, y)</dt><dd><tt>Use&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>&nbsp;as&nbsp;condition&nbsp;for&nbsp;secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SecureFiniteGroup">class <strong>SecureFiniteGroup</strong></a>(<a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#SecureFiniteGroup">SecureFiniteGroup</a>(value=None)<br>
+&nbsp;<br>
+Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;group&nbsp;elements.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
+<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SecureFiniteGroup-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__radd__"><strong>__radd__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="SecureFiniteGroup-conditional"><strong>conditional</strong></a>(c, a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a^c,&nbsp;where&nbsp;c&nbsp;is&nbsp;asummed&nbsp;to&nbsp;be&nbsp;0&nbsp;or&nbsp;1.<br>
+&nbsp;<br>
+Subclasses&nbsp;override&nbsp;this&nbsp;method&nbsp;with&nbsp;more&nbsp;efficient&nbsp;implementations.<br>
+NB:&nbsp;beware&nbsp;of&nbsp;cyclic&nbsp;definitions!!</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-if_else"><strong>if_else</strong></a>(c, a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;binary&nbsp;condition&nbsp;c&nbsp;between&nbsp;group&nbsp;elements&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="SecureFiniteGroup-repeat"><strong>repeat</strong></a>(a, x, sec_grp_hide=None, public_out=False, exp_as_bits=False)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integral&nbsp;x.<br>
+&nbsp;<br>
+Base&nbsp;a&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;group&nbsp;element.<br>
+Exponent&nbsp;x&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;integral&nbsp;number.<br>
+&nbsp;<br>
+Possibly&nbsp;a,&nbsp;x&nbsp;are&nbsp;lists&nbsp;(of&nbsp;same&nbsp;length)<br>
+&nbsp;<br>
+Flags<br>
+&nbsp;&nbsp;&nbsp;&nbsp;public_out&nbsp;&nbsp;set&nbsp;if&nbsp;outputs&nbsp;is&nbsp;public<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp_as_bits&nbsp;set&nbsp;if&nbsp;exponent&nbsp;is&nbsp;given&nbsp;as&nbsp;list&nbsp;of&nbsp;bits</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>share</strong></dt>
+</dl>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>group</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>sectype_of_value</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureFiniteGroup-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
+&nbsp;<br>
+Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__init__"><strong>__init__</strong></a>(self, value=None)</dt><dd><tt>Initialize&nbsp;a&nbsp;share.<br>
+&nbsp;<br>
+If&nbsp;value&nbsp;is&nbsp;None&nbsp;(default),&nbsp;the&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>&nbsp;starts&nbsp;out&nbsp;as&nbsp;an&nbsp;empty<br>
+placeholder&nbsp;(implemented&nbsp;as&nbsp;a&nbsp;Future).</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-if_swap"><strong>if_swap</strong></a>(self, x, y)</dt><dd><tt>Use&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>&nbsp;as&nbsp;condition&nbsp;for&nbsp;secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-set_share"><strong>set_share</strong></a>(self, v)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SecureQuadraticResidue">class <strong>SecureQuadraticResidue</strong></a>(<a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#SecureQuadraticResidue">SecureQuadraticResidue</a>(value=None,&nbsp;check=True)<br>
+&nbsp;<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;Quadratic&nbsp;Residue&nbsp;elements.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.secgroups.html#SecureQuadraticResidue">SecureQuadraticResidue</a></dd>
+<dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
+<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SecureQuadraticResidue-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Ensure&nbsp;value&nbsp;is&nbsp;of&nbsp;secure&nbsp;field&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-equality"><strong>equality</strong></a>(a, b)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-set_share"><strong>set_share</strong></a>(self, value)</dt></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="SecureQuadraticResidue-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<hr>
+Methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureQuadraticResidue-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__radd__"><strong>__radd__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureQuadraticResidue-conditional"><strong>conditional</strong></a>(c, a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a^c,&nbsp;where&nbsp;c&nbsp;is&nbsp;asummed&nbsp;to&nbsp;be&nbsp;0&nbsp;or&nbsp;1.<br>
+&nbsp;<br>
+Subclasses&nbsp;override&nbsp;this&nbsp;method&nbsp;with&nbsp;more&nbsp;efficient&nbsp;implementations.<br>
+NB:&nbsp;beware&nbsp;of&nbsp;cyclic&nbsp;definitions!!</tt></dd></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-if_else"><strong>if_else</strong></a>(c, a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;binary&nbsp;condition&nbsp;c&nbsp;between&nbsp;group&nbsp;elements&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-repeat"><strong>repeat</strong></a>(a, x, sec_grp_hide=None, public_out=False, exp_as_bits=False)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integral&nbsp;x.<br>
+&nbsp;<br>
+Base&nbsp;a&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;group&nbsp;element.<br>
+Exponent&nbsp;x&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;integral&nbsp;number.<br>
+&nbsp;<br>
+Possibly&nbsp;a,&nbsp;x&nbsp;are&nbsp;lists&nbsp;(of&nbsp;same&nbsp;length)<br>
+&nbsp;<br>
+Flags<br>
+&nbsp;&nbsp;&nbsp;&nbsp;public_out&nbsp;&nbsp;set&nbsp;if&nbsp;outputs&nbsp;is&nbsp;public<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp_as_bits&nbsp;set&nbsp;if&nbsp;exponent&nbsp;is&nbsp;given&nbsp;as&nbsp;list&nbsp;of&nbsp;bits</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>share</strong></dt>
+</dl>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>group</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>sectype_of_value</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureQuadraticResidue-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
+&nbsp;<br>
+Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-if_swap"><strong>if_swap</strong></a>(self, x, y)</dt><dd><tt>Use&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>&nbsp;as&nbsp;condition&nbsp;for&nbsp;secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SecureSymmetricGroupElement">class <strong>SecureSymmetricGroupElement</strong></a>(<a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#SecureSymmetricGroupElement">SecureSymmetricGroupElement</a>(value=None)<br>
+&nbsp;<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;Symmetric&nbsp;Group&nbsp;elements.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.secgroups.html#SecureSymmetricGroupElement">SecureSymmetricGroupElement</a></dd>
+<dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
+<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SecureSymmetricGroupElement-__init__"><strong>__init__</strong></a>(self, value=None)</dt><dd><tt>Ensure&nbsp;all&nbsp;coefficients&nbsp;of&nbsp;value&nbsp;are&nbsp;of&nbsp;secure&nbsp;field&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-equality"><strong>equality</strong></a>(p, q)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-inversion"><strong>inversion</strong></a>(p)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-operation"><strong>operation</strong></a>(p, q)</dt><dd><tt>First&nbsp;p&nbsp;then&nbsp;q.</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-set_share"><strong>set_share</strong></a>(self, value)</dt></dl>
+
+<hr>
+Methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureSymmetricGroupElement-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__radd__"><strong>__radd__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><a name="SecureSymmetricGroupElement-conditional"><strong>conditional</strong></a>(c, a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a^c,&nbsp;where&nbsp;c&nbsp;is&nbsp;asummed&nbsp;to&nbsp;be&nbsp;0&nbsp;or&nbsp;1.<br>
+&nbsp;<br>
+Subclasses&nbsp;override&nbsp;this&nbsp;method&nbsp;with&nbsp;more&nbsp;efficient&nbsp;implementations.<br>
+NB:&nbsp;beware&nbsp;of&nbsp;cyclic&nbsp;definitions!!</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-if_else"><strong>if_else</strong></a>(c, a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;binary&nbsp;condition&nbsp;c&nbsp;between&nbsp;group&nbsp;elements&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-repeat"><strong>repeat</strong></a>(a, x, sec_grp_hide=None, public_out=False, exp_as_bits=False)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integral&nbsp;x.<br>
+&nbsp;<br>
+Base&nbsp;a&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;group&nbsp;element.<br>
+Exponent&nbsp;x&nbsp;is&nbsp;either&nbsp;a&nbsp;public&nbsp;or&nbsp;a&nbsp;secure&nbsp;integral&nbsp;number.<br>
+&nbsp;<br>
+Possibly&nbsp;a,&nbsp;x&nbsp;are&nbsp;lists&nbsp;(of&nbsp;same&nbsp;length)<br>
+&nbsp;<br>
+Flags<br>
+&nbsp;&nbsp;&nbsp;&nbsp;public_out&nbsp;&nbsp;set&nbsp;if&nbsp;outputs&nbsp;is&nbsp;public<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp_as_bits&nbsp;set&nbsp;if&nbsp;exponent&nbsp;is&nbsp;given&nbsp;as&nbsp;list&nbsp;of&nbsp;bits</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>share</strong></dt>
+</dl>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+<dl><dt><strong>group</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>sectype_of_value</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureSymmetricGroupElement-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
+&nbsp;<br>
+Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-if_swap"><strong>if_swap</strong></a>(self, x, y)</dt><dd><tt>Use&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>&nbsp;as&nbsp;condition&nbsp;for&nbsp;secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-SecGrp"><strong>SecGrp</strong></a>(group)</dt><dd><tt>Secure&nbsp;version&nbsp;of&nbsp;given&nbsp;finite&nbsp;group.</tt></dd></dl>
+ <dl><dt><a name="-repeat_public_base_public_output"><strong>repeat_public_base_public_output</strong></a>(a, x) -&gt; _asyncio.Future</dt><dd><tt>Multi-exponentiation&nbsp;for&nbsp;given&nbsp;base(s)&nbsp;a&nbsp;and&nbsp;exponent(s)&nbsp;x.<br>
+&nbsp;<br>
+Argument&nbsp;a&nbsp;is&nbsp;a&nbsp;group&nbsp;element,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;group&nbsp;elements.<br>
+Argument&nbsp;x&nbsp;is&nbsp;secure&nbsp;number&nbsp;(prime&nbsp;field&nbsp;element,&nbsp;or&nbsp;integer),&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
+The&nbsp;dimensions&nbsp;of&nbsp;a&nbsp;and&nbsp;x&nbsp;should&nbsp;match.<br>
+&nbsp;<br>
+Moreover,&nbsp;the&nbsp;order&nbsp;of&nbsp;the&nbsp;group&nbsp;should&nbsp;be&nbsp;prime&nbsp;and&nbsp;should&nbsp;match&nbsp;the&nbsp;order&nbsp;the&nbsp;field&nbsp;over<br>
+which&nbsp;the&nbsp;secure&nbsp;numbers&nbsp;are&nbsp;shared.&nbsp;This&nbsp;ensures&nbsp;that&nbsp;"Shamir&nbsp;in&nbsp;the&nbsp;exponent"&nbsp;can&nbsp;be&nbsp;used.</tt></dd></dl>
+ <dl><dt><a name="-repeat_public_base_secret_output"><strong>repeat_public_base_secret_output</strong></a>(a, x, sec_grp)</dt><dd><tt>Compute&nbsp;a^[x]-&gt;[a^x]&nbsp;and&nbsp;return&nbsp;sec_grp&nbsp;type.<br>
+&nbsp;<br>
+Requires:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;in&nbsp;prime&nbsp;order&nbsp;group,&nbsp;x&nbsp;in&nbsp;Z.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;is&nbsp;not&nbsp;a&nbsp;secure&nbsp;element.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;is&nbsp;a&nbsp;(secure)&nbsp;prime&nbsp;field&nbsp;element&nbsp;or&nbsp;(secure)&nbsp;int.</tt></dd></dl>
+ <dl><dt><a name="-repeat_secret_base_secret_output"><strong>repeat_secret_base_secret_output</strong></a>(a, n, sectype)</dt><dd><tt>Compute&nbsp;a^[n]-&gt;[a^n]&nbsp;and&nbsp;return&nbsp;sectype&nbsp;type.<br>
+&nbsp;<br>
+Requires:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;&nbsp;&nbsp;exponent&nbsp;&gt;0,&nbsp;given&nbsp;as&nbsp;list&nbsp;of&nbsp;secure&nbsp;bits<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a**x&nbsp;not&nbsp;allowed&nbsp;to&nbsp;overflow,&nbsp;i.e.,&nbsp;&gt;&nbsp;sectype.field.modulus<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;&nbsp;base&nbsp;is&nbsp;abelian.</tt></dd></dl>
+ <dl><dt><a name="-secgrp_if_else"><strong>secgrp_if_else</strong></a>(c, x, y)</dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;condition&nbsp;c&nbsp;between&nbsp;x&nbsp;and&nbsp;y.<br>
+&nbsp;<br>
+Requires:&nbsp;Value&nbsp;of&nbsp;c&nbsp;&lt;&nbsp;order&nbsp;of&nbsp;new&nbsp;sectype&nbsp;for&nbsp;convert&nbsp;to&nbsp;work.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;case&nbsp;when&nbsp;modulus&nbsp;of&nbsp;exponent&nbsp;field&nbsp;corresponds&nbsp;to<br>
+the&nbsp;order&nbsp;of&nbsp;the&nbsp;group.&nbsp;(Then,&nbsp;the&nbsp;order&nbsp;of&nbsp;the&nbsp;group's&nbsp;base&nbsp;field<br>
+is&nbsp;greater&nbsp;than&nbsp;the&nbsp;order&nbsp;of&nbsp;the&nbsp;exponent&nbsp;field.)</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>mpc</strong> = &lt;mpyc.runtime.Runtime object&gt;</td></tr></table>
+</body></html>

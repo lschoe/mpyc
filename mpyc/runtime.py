@@ -24,6 +24,7 @@ import ssl
 from mpyc import thresha
 from mpyc import sectypes
 from mpyc import asyncoro
+import mpyc.secgroups
 import mpyc.random
 import mpyc.statistics
 import mpyc.seclists
@@ -280,10 +281,12 @@ class Runtime:
     Integer = sectypes.SecureInteger
     FixedPoint = sectypes.SecureFixedPoint
     Float = sectypes.SecureFloat
+    FiniteGroup = mpyc.secgroups.SecureFiniteGroup
     SecFld = staticmethod(sectypes.SecFld)
     SecInt = staticmethod(sectypes.SecInt)
     SecFxp = staticmethod(sectypes.SecFxp)
     SecFlt = staticmethod(sectypes.SecFlt)
+    SecGrp = staticmethod(mpyc.secgroups.SecGrp)
     coroutine = staticmethod(mpc_coro)
     returnType = staticmethod(returnType)
 
@@ -1925,8 +1928,7 @@ class Runtime:
         the indicator bit nf=1 if and only if a is not found in x.
 
         For instance, E=-1 can be used to mimic Python's find() methods.
-        If E is a string, i=eval(E) will be returned where E is
-        an expression
+        If E is a string, i=eval(E) will be returned where E is an expression
         in terms of len(x). As a simple example, E='len(x)-1' will enforce
         that a is considered to be present in any case as the last element
         of x, if not earlier.
@@ -2310,6 +2312,7 @@ def setup():
     rt = Runtime(pid, parties, options)
     sectypes.runtime = rt
     asyncoro.runtime = rt
+    mpyc.secgroups.runtime = rt
     mpyc.random.runtime = rt
     mpyc.statistics.runtime = rt
     mpyc.seclists.runtime = rt

@@ -257,7 +257,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(a, 19)
 
     def test_f27(self):
-        f27 = self.f27  # 27 == 3 (mod 4)
+        f27 = self.f27  # 27 = 3 (mod 4)
         a = f27(0)
         self.assertEqual(a.sqrt(), 0)
         with self.assertRaises(ZeroDivisionError):
@@ -271,7 +271,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual((a * b)**2, 1)
 
     def test_f81(self):
-        f81 = self.f81  # 81 == 1 (mod 4)
+        f81 = self.f81  # 81 = 1 (mod 4)
         a = f81(0)
         self.assertEqual(a.sqrt(), 0)
         with self.assertRaises(ZeroDivisionError):

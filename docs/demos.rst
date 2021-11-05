@@ -3,7 +3,7 @@ MPyC demos
 
 This is an overview of all demos available from the MPyC repository on GitHub
 in `mpyc/demos <https://github.com/lschoe/mpyc/tree/master/demos>`_. Starting with
-a 'Hello world!' demo, we gradually work towards demos about 
+a 'Hello world!' demo, we gradually work towards demos about
 privacy-preserving machine learning and other interesting topics.
 Many of the more advanced demos are in fact based on research published at
 various cryptography conferences.
@@ -187,13 +187,19 @@ The helper party will not provide any input.
 .. |MPyClogo| image:: ../images/MPyC_Logo.png
    :width: 16px
 
-Here's an example run between Alice, Bob, and a helper (parties :math:`i=0,1,2`)::
+Here's an example run between Alice, Bob, and a helper (parties :math:`i=0,1,2`):
+
+.. code-block::
 
    $ python unanimous.py -M3 -I0 1
    No match: someone disagrees among 2 parties?
 
+.. code-block::
+
    $ python unanimous.py -M3 -I1 0
    No match: someone disagrees among 2 parties?
+
+.. code-block::
 
    $ python unanimous.py -M3 -I2
    Thanks for serving as oblivious matchmaker;)
@@ -213,7 +219,7 @@ runs between :math:`m=2t+1` in total, of which :math:`t+1` parties cast a vote, 
 act as trusted helpers. The main privacy-preserving property is that even a collusion of :math:`t` voters cannot
 find out what the remaining vote is, of course, unless all colluding voters input a 1.
 
-With ``voters = list(range(1, t+1)``, where :math:`t=\lfloor m/2\rfloor`, the core of the program is formed by these two lines:
+With ``voters = list(range(1, t+1))``, where :math:`t=\lfloor m/2\rfloor`, the core of the program is formed by these two lines:
 
 .. code-block:: python
 
@@ -244,20 +250,30 @@ The trusted helper takes part as a "third" party in the protocol, not seeing any
 As shown below, the trusted helper (party :math:`0`) can take part in multiple OTs run in parallel
 between pairs of senders and receivers.
 
-Here's an example run with :math:`m=5` parties.::
+Here's an example run with :math:`m=5` parties:
+
+.. code-block::
 
   $ python ot.py -M5 -I0
   You are the trusted third party.
 
+.. code-block::
+
   $ python ot.py -M5 -I1
   You are sender 1 holding messages 46 and 10.
+
+.. code-block::
 
   $ python ot.py -M5 -I2
   You are sender 2 holding messages 28 and 17.
 
+.. code-block::
+
   $ python ot.py -M5 -I3
   You are receiver 1 with random choice bit 1.
   You have received message 10.
+
+.. code-block::
 
   $ python ot.py -M5 -I4
   You are receiver 2 with random choice bit 0.

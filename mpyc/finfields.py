@@ -42,7 +42,7 @@ class FiniteFieldElement:
     ext_deg = None
     byte_length = None
     is_signed = None
-    _mix_types = None
+    _mix_types: type  # or, a tuple of types
 
     def __init__(self, value):
         self.value = value % self.modulus  # TODO: make this more direct for efficiency
@@ -281,7 +281,7 @@ def find_prime_root(l, blum=True, n=1):
     else:
         assert blum
         if not gmpy2.is_prime(n):
-            n = int(gmpy2.next_prime(n))
+            n = gmpy2.next_prime(n)
         p = 1 + 2*n * (3 + 2*((1 << l-3) // n))
         while not gmpy2.is_prime(p):
             p += 4*n
@@ -479,6 +479,11 @@ class ExtensionFieldElement(FiniteFieldElement):
 
     _least_qnr = None
     _mix_types = (int, gfpx.Polynomial)
+
+    def __init__(self, value):
+        if isinstance(value, str):
+            value = type(self.modulus)(value)  # to prevent % is used for string formatting
+        super().__init__(value)
 
     @staticmethod
     def createGF(modulus):

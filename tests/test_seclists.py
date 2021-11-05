@@ -1,7 +1,7 @@
 import operator
 import unittest
-from mpyc.seclists import seclist, secindex
 from mpyc.runtime import mpc
+from mpyc.seclists import seclist, secindex
 
 
 class Arithmetic(unittest.TestCase):

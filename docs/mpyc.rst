@@ -22,6 +22,12 @@ mpyc.finfields
 .. automodule:: mpyc.finfields
     :members:
 
+mpyc.fingroups
+--------------
+
+.. automodule:: mpyc.fingroups
+    :members:
+
 mpyc.thresha
 ------------
 
@@ -46,12 +52,6 @@ mpyc.runtime
 .. automodule:: mpyc.runtime
     :members:
 
-mpyc.seclists
--------------
-
-.. automodule:: mpyc.seclists
-    :members:
-
 mpyc.mpctools
 -------------
 
@@ -62,6 +62,18 @@ mpyc.random
 -----------
 
 .. automodule:: mpyc.random
+    :members:
+
+mpyc.seclists
+-------------
+
+.. automodule:: mpyc.seclists
+    :members:
+
+mpyc.secgroups
+--------------
+
+.. automodule:: mpyc.secgroups
     :members:
 
 mpyc.statistics
