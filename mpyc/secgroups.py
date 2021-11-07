@@ -282,12 +282,12 @@ async def repeat_public_base_public_output(a, x) -> asyncio.Future:
     """Multi-exponentiation for given base(s) a and exponent(s) x."""
     # a is a group element, or a list of group elements.
     # x is secure number (prime field element, or integer), or a list of secure numbers.
-    if isinstance(x, int):  # TODO: get rid of this hack
-        return group.identity  # assume x=0
-
     if not isinstance(a, list):
         a, x = [a], [x]
     group = type(a[0])
+    if isinstance(x[0], int):  # TODO: get rid of this hack
+        return group.identity  # assume x=0
+
     m = len(runtime.parties)
     lambda_i = _recombination_vector(x[0].field, range(1, m+1), 0)[runtime.pid]
     x_i = await runtime.gather(x)
