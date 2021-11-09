@@ -76,7 +76,7 @@ async def election(group):
     x, h = await keygen(g)
 
     # Each party encrypts a random vote:
-    v = random.randint(0,1)
+    v = random.randint(0, 1)
     print('My vote:', v)
     c = encrypt(g, h, g^v)  # additive homomorphic ElGamal
     c = await mpc.transfer(c)

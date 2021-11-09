@@ -1,9 +1,11 @@
+import sys
 import unittest
 import random
 import statistics
 from mpyc.runtime import mpc
 from mpyc.statistics import (mean, variance, stdev, pvariance, pstdev,
-                             mode, median, median_low, median_high)
+                             mode, median, median_low, median_high,
+                             covariance, correlation, linear_regression)
 
 
 class Arithmetic(unittest.TestCase):
@@ -21,6 +23,12 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(pstdev(f()), statistics.pstdev(f()))
         self.assertEqual(mode(f()), statistics.mode(f()))
         self.assertEqual(median(f()), statistics.median(f()))
+        if sys.version_info.minor >= 10:
+            x = list(f())
+            y = list(reversed(x))
+            self.assertEqual(covariance(x, y), statistics.covariance(x, y))
+            self.assertEqual(correlation(x, y), statistics.correlation(x, y))
+            self.assertEqual(linear_regression(x, y), statistics.linear_regression(x, y))
 
     def test_statistics_error(self):
         self.assertRaises(statistics.StatisticsError, mean, [])
@@ -30,6 +38,14 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(statistics.StatisticsError, pstdev, [])
         self.assertRaises(statistics.StatisticsError, mode, [])
         self.assertRaises(statistics.StatisticsError, median, [])
+        self.assertRaises(statistics.StatisticsError, covariance, [], [])
+        self.assertRaises(statistics.StatisticsError, covariance, [0], [])
+        self.assertRaises(statistics.StatisticsError, correlation, [], [])
+        self.assertRaises(statistics.StatisticsError, correlation, [0], [])
+        self.assertRaises(statistics.StatisticsError, linear_regression, [], [])
+        self.assertRaises(statistics.StatisticsError, linear_regression, [0], [])
+        self.assertRaises(statistics.StatisticsError, correlation, [1, 1], [2, 3])
+        self.assertRaises(statistics.StatisticsError, linear_regression, [1, 1], [2, 3])
 
     def test_secfld(self):
         secfld = mpc.SecFld()
@@ -39,6 +55,9 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, stdev, x)
         self.assertRaises(TypeError, mode, x)
         self.assertRaises(TypeError, median, x)
+        self.assertRaises(TypeError, covariance, x, x)
+        self.assertRaises(TypeError, correlation, x, x)
+        self.assertRaises(TypeError, linear_regression, x, x)
 
     def test_secint(self):
         secint = mpc.SecInt()
@@ -55,6 +74,13 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(median(x))), round(statistics.median(y)))
         self.assertEqual(mpc.run(mpc.output(median_low(x))), round(statistics.median_low(y)))
         self.assertEqual(mpc.run(mpc.output(median_high(x))), round(statistics.median_high(y)))
+
+        x = list(range(16))
+        y = list(reversed(x))
+        self.assertAlmostEqual(covariance(x, y), -22.667, 3)
+        x = list(map(secint, x))
+        y = list(map(secint, y))
+        self.assertEqual(mpc.run(mpc.output(covariance(x, y))), -23)
 
     def test_secfxp(self):
         secfxp = mpc.SecFxp()
@@ -87,9 +113,31 @@ class Arithmetic(unittest.TestCase):
         mpc.options.sec_param = 1  # force no privacy case
         self.assertAlmostEqual(mpc.run(mpc.output(mode(x))), 1)
         mpc.options.sec_param = k
-
         x[0] = secfxp(1.5)
         self.assertRaises(ValueError, mode, x)
+
+        x = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        y = [1, 2, 3, 1, 2, 3, 1, 2, 3]
+        self.assertEqual(covariance(x, y), 0.75)
+        self.assertEqual(correlation(x, x), 1.0)
+        self.assertAlmostEqual(correlation(x, y), 0.316, 3)
+        self.assertEqual(linear_regression(x, y)[1], 1.5)
+        x = list(map(secfxp, x))
+        y = list(map(secfxp, y))
+        self.assertEqual(mpc.run(mpc.output(covariance(x, y))), 0.75)
+        self.assertAlmostEqual(mpc.run(mpc.output(correlation(x, x))), 1.0, 2)
+        self.assertAlmostEqual(mpc.run(mpc.output(correlation(x, y))), 0.32, 2)
+        self.assertAlmostEqual(mpc.run(mpc.output(linear_regression(x, y)[1])), 1.5, 2)
+        x = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        y = [9, 8, 7, 6, 5, 4, 3, 2, 1]
+        self.assertEqual(covariance(x, y), -7.5)
+        self.assertEqual(correlation(x, y), -1.0)
+        self.assertEqual(linear_regression(x, y)[1], 10.0)
+        x = list(map(secfxp, x))
+        y = list(map(secfxp, y))
+        self.assertAlmostEqual(mpc.run(mpc.output(covariance(x, y))), -7.5, 2)
+        self.assertAlmostEqual(mpc.run(mpc.output(correlation(x, y))), -1.0, 2)
+        self.assertAlmostEqual(mpc.run(mpc.output(linear_regression(x, y)[1])), 10.0, 2)
 
 
 if __name__ == "__main__":
