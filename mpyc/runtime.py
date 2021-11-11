@@ -1017,11 +1017,7 @@ class Runtime:
         if key is None:
             key = lambda a: a
 
-        if not as_vec:
-            return self._argopt(x, key, argmax=False)
-
-        subset_indicator_bintree, opt = self._argopt_as_bintree(x, key, argmax=False)
-        return self._reverse_bintree_search(subset_indicator_bintree), opt
+        return self.argmax(x, key=lambda a: -key(a), as_vec=as_vec)
 
     def argmax(self, *x, key=None, as_vec=False):
         """Secure argmax of all given elements in x.
@@ -1040,17 +1036,15 @@ class Runtime:
             key = lambda a: a
 
         if not as_vec:
-            return self._argopt(x, key, argmax=True)
+            return self._argmax(x, key)
 
-        subset_indicator_bintree, opt = self._argopt_as_bintree(x, key, argmax=True)
+        subset_indicator_bintree, opt = self._argmax_as_bintree(x, key)
         return self._reverse_bintree_search(subset_indicator_bintree), opt
 
-    def _argopt(self, x, key, argmax=True):
-        """Secure argmax or argmin of all given elements in x.
+    def _argmax(self, x, key):
+        """Secure argmax of all given elements in x.
 
         Returns both the secret-shared index of the optimal element and the value of that element.
-
-        Computes the argmax if argmax=True and the argmin otherwise.
         """
         n = len(x)
         stype = type(x[0][0]) if isinstance(x[0], list) else type(x[0])
@@ -1060,16 +1054,16 @@ class Runtime:
                 x[0],
             )  # NB: sets integral attr to True for SecureFixedPoint numbers
 
-        i0, opt0 = self._argopt(x[:n//2], key, argmax)
-        i1, opt1 = self._argopt(x[n//2:], key, argmax)
+        i0, opt0 = self._argmax(x[:n//2], key)
+        i1, opt1 = self._argmax(x[n//2:], key)
 
-        c = key(opt0) >= key(opt1) if argmax else key(opt0) <= key(opt1)
+        c = key(opt0) >= key(opt1)
         opt = self.if_else(c, opt0, opt1)  # TODO: merge if_else's once integral attr per list element
         i = self.if_else(c, i0, i1+n//2)
         return i, opt
 
-    def _argopt_as_bintree(self, x, key, argmax=True):
-        """Secure argmax or argmin of all given elements in x.
+    def _argmax_as_bintree(self, x, key):
+        """Secure argmax of all given elements in x.
 
         Returns both a secret-shared binary tree that indicates the location of the optimal element
         and the value of that element. All nodes in the binary tree have a binary value that
@@ -1078,32 +1072,30 @@ class Runtime:
 
         >>> x = [1, 3, 2]
 
-        Then the revealed output of _argopt_as_bintree equals
+        Then the revealed output of _argmax_as_bintree equals
 
         >>> _BinaryNode(value=0, left=None, right=BinaryNode(value=1, left=None, right=None)), 3
 
         That is, the optimum is not achieved in [1] but in [3, 2], and if we turn to [3, 2] then
         the optimum is achieved in [3] and not in [2]. Equivalently, the binary tree describes the
         path to the target element.
-
-        Computes the argmax if argmax=True and the argmin otherwise.
         """
         n = len(x)
         if n == 1:
             return None, x[0]
 
         node = _BinaryNode()
-        node.left, opt0 = self._argopt_as_bintree(x[:n//2], key, argmax)
-        node.right, opt1 = self._argopt_as_bintree(x[n//2:], key, argmax)
+        node.left, opt0 = self._argmax_as_bintree(x[:n//2], key)
+        node.right, opt1 = self._argmax_as_bintree(x[n//2:], key)
 
-        node.value = key(opt0) >= key(opt1) if argmax else key(opt0) <= key(opt1)  # indicate whether optimum is on left branch
+        node.value = key(opt0) >= key(opt1)  # indicate whether optimum is on left branch
         opt = self.if_else(node.value, opt0, opt1)
         return node, opt
 
     def _reverse_bintree_search(self, bintree_path, _contains_target=None):
         """Convert binary tree path into indicator vector for leaf node.
 
-        Provided a binary tree path as described in _argopt_as_bintree, return an indicator vector
+        Provided a binary tree path as described in _argmax_as_bintree, return an indicator vector
         of the leaf that is indicated by the path.
 
         If the bintree_path equals
