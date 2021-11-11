@@ -10,7 +10,6 @@ import os
 import sys
 import time
 import datetime
-from dataclasses import dataclass
 import importlib.util
 import logging
 import math
@@ -2376,11 +2375,11 @@ def setup():
     return rt
 
 
-@dataclass
 class _BinaryNode:
-    value = None
-    left = None
-    right = None
+    def __init__(self, value=None, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
 
 
 if os.getenv('READTHEDOCS') != 'True':
