@@ -1038,8 +1038,8 @@ class Runtime:
         if not as_vec:
             return self._argmax(x, key)
 
-        subset_indicator_bintree, opt = self._argmax_as_bintree(x, key)
-        return self._reverse_bintree_search(subset_indicator_bintree), opt
+        bintree_path_to_max, max_ = self._argmax_as_bintree(x, key)
+        return self._reverse_bintree_search(bintree_path_to_max), max_
 
     def _argmax(self, x, key):
         """Secure argmax of all given elements in x.
@@ -1047,20 +1047,18 @@ class Runtime:
         Returns both the secret-shared index of the optimal element and the value of that element.
         """
         n = len(x)
-        stype = type(x[0][0]) if isinstance(x[0], list) else type(x[0])
         if n == 1:
-            return (
-                stype(0),
-                x[0],
-            )  # NB: sets integral attr to True for SecureFixedPoint numbers
+            max_ = x[0]
+            stype = type(max_[0]) if isinstance(max_, list) else type(max_)
+            return stype(0), max_  # NB: sets integral attr to True for SecureFixedPoint numbers
 
-        i0, opt0 = self._argmax(x[:n//2], key)
-        i1, opt1 = self._argmax(x[n//2:], key)
+        i0, max0 = self._argmax(x[:n//2], key)
+        i1, max1 = self._argmax(x[n//2:], key)
 
-        c = key(opt0) >= key(opt1)
-        opt = self.if_else(c, opt0, opt1)  # TODO: merge if_else's once integral attr per list element
+        c = key(max0) >= key(max1)
+        max_ = self.if_else(c, max0, max1)  # TODO: merge if_else's once integral attr per list element
         i = self.if_else(c, i0, i1+n//2)
-        return i, opt
+        return i, max_
 
     def _argmax_as_bintree(self, x, key):
         """Secure argmax of all given elements in x.
@@ -1072,7 +1070,7 @@ class Runtime:
 
         >>> x = [1, 3, 2]
 
-        Then the revealed output of _argmax_as_bintree equals
+        then the revealed output of _argmax_as_bintree equals
 
         >>> _BinaryNode(value=0, left=None, right=BinaryNode(value=1, left=None, right=None)), 3
 
@@ -1085,12 +1083,12 @@ class Runtime:
             return None, x[0]
 
         node = _BinaryNode()
-        node.left, opt0 = self._argmax_as_bintree(x[:n//2], key)
-        node.right, opt1 = self._argmax_as_bintree(x[n//2:], key)
+        node.left, max0 = self._argmax_as_bintree(x[:n//2], key)
+        node.right, max1 = self._argmax_as_bintree(x[n//2:], key)
 
-        node.value = key(opt0) >= key(opt1)  # indicate whether optimum is on left branch
-        opt = self.if_else(node.value, opt0, opt1)
-        return node, opt
+        node.value = key(max0) >= key(max1)  # indicate whether maximum is on left branch
+        max_ = self.if_else(node.value, max0, max1)
+        return node, max_
 
     def _reverse_bintree_search(self, bintree_path, _contains_target=None):
         """Convert binary tree path into indicator vector for leaf node.
@@ -1107,27 +1105,21 @@ class Runtime:
         >>> [0, 1, 0]
         """
 
-        stype = type(bintree_path.value)
         if _contains_target is None:
+            stype = type(bintree_path.value)
             _contains_target = stype(1)
 
+        def walk_subpath(subpath, contains_target):
+            if subpath is None:
+                return [contains_target]
+            return self._reverse_bintree_search(subpath, _contains_target=contains_target)
+
         is_target_left = _contains_target * bintree_path.value
-        is_target_right = _contains_target * (1 - bintree_path.value)
+        is_target_right = _contains_target - is_target_left
 
-        if bintree_path.left is None:
-            subset_indicators_left = [is_target_left]
-        else:
-            subset_indicators_left = self._reverse_bintree_search(
-                bintree_path.left, _contains_target=is_target_left
-            )
-
-        if bintree_path.right is None:
-            subset_indicators_right = [is_target_right]
-        else:
-            subset_indicators_right = self._reverse_bintree_search(
-                bintree_path.right, _contains_target=is_target_right
-            )
-        return subset_indicators_left + subset_indicators_right
+        bintree_subpath_left = walk_subpath(bintree_path.left, is_target_left)
+        bintree_subpath_right = walk_subpath(bintree_path.right, is_target_right)
+        return bintree_subpath_left + bintree_subpath_right
 
     def sorted(self, x, key=None, reverse=False):
         """Return a new securely sorted list with elements from x in ascending order.
