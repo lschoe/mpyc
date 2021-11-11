@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import datetime
+from dataclasses import dataclass
 import importlib.util
 import logging
 import math
@@ -1015,7 +1016,12 @@ class Runtime:
 
         if key is None:
             key = lambda a: a
-        return self._argopt(x, key, as_vec, argmax=False)
+
+        if not as_vec:
+            return self._argopt(x, key, argmax=False)
+
+        subset_indicator_bintree, opt = self._argopt_as_bintree(x, key, argmax=False)
+        return self._reverse_bintree_search(subset_indicator_bintree), opt
 
     def argmax(self, *x, key=None, as_vec=False):
         """Secure argmax of all given elements in x.
@@ -1032,34 +1038,104 @@ class Runtime:
 
         if key is None:
             key = lambda a: a
-        return self._argopt(x, key, as_vec, argmax=True)
 
-    def _argopt(self, x, key, as_vec, argmax=True):
+        if not as_vec:
+            return self._argopt(x, key, argmax=True)
+
+        subset_indicator_bintree, opt = self._argopt_as_bintree(x, key, argmax=True)
+        return self._reverse_bintree_search(subset_indicator_bintree), opt
+
+    def _argopt(self, x, key, argmax=True):
         """Secure argmax or argmin of all given elements in x.
 
-        Computes the argmax if argmax=True and the argmin otherwise.
-
         Returns both the secret-shared index of the optimal element and the value of that element.
-        If as_vec is True, then a secret-shared indicator vector is returned instead of the index.
+
+        Computes the argmax if argmax=True and the argmin otherwise.
         """
         n = len(x)
         stype = type(x[0][0]) if isinstance(x[0], list) else type(x[0])
         if n == 1:
-            opt = x[0]
-            if as_vec:
-                return [stype(1)], opt  # NB: sets integral attr to True for SecureFixedPoint numbers
-            return stype(0), opt
+            return (
+                stype(0),
+                x[0],
+            )  # NB: sets integral attr to True for SecureFixedPoint numbers
 
-        i0, opt0 = self._argopt(x[: n // 2], key, as_vec, argmax)
-        i1, opt1 = self._argopt(x[n // 2 :], key, as_vec, argmax)
+        i0, opt0 = self._argopt(x[:n//2], key, argmax)
+        i1, opt1 = self._argopt(x[n//2:], key, argmax)
 
-        c = key(opt0) < key(opt1) if argmax else key(opt0) > key(opt1)
-        opt = self.if_else(c, opt1, opt0)  # TODO: merge if_else's once integral attr per list element
-        if as_vec:
-            i = self.scalar_mul(1-c, i0) + self.scalar_mul(c, i1)
-        else:
-            i = self.if_else(c, i1 + n // 2, i0)
+        c = key(opt0) >= key(opt1) if argmax else key(opt0) <= key(opt1)
+        opt = self.if_else(c, opt0, opt1)  # TODO: merge if_else's once integral attr per list element
+        i = self.if_else(c, i0, i1+n//2)
         return i, opt
+
+    def _argopt_as_bintree(self, x, key, argmax=True):
+        """Secure argmax or argmin of all given elements in x.
+
+        Returns both a secret-shared binary tree that indicates the location of the optimal element
+        and the value of that element. All nodes in the binary tree have a binary value that
+        indicates whether the optimal element is in the first half of the provided elements. For
+        example, if the revealed input x equals
+
+        >>> x = [1, 3, 2]
+
+        Then the revealed output of _argopt_as_bintree equals
+
+        >>> _BinaryNode(value=0, left=None, right=BinaryNode(value=1, left=None, right=None)), 3
+
+        That is, the optimum is not achieved in [1] but in [3, 2], and if we turn to [3, 2] then
+        the optimum is achieved in [3] and not in [2]. Equivalently, the binary tree describes the
+        path to the target element.
+
+        Computes the argmax if argmax=True and the argmin otherwise.
+        """
+        n = len(x)
+        if n == 1:
+            return None, x[0]
+
+        node = _BinaryNode()
+        node.left, opt0 = self._argopt_as_bintree(x[:n//2], key, argmax)
+        node.right, opt1 = self._argopt_as_bintree(x[n//2:], key, argmax)
+
+        node.value = key(opt0) >= key(opt1) if argmax else key(opt0) <= key(opt1)  # indicate whether optimum is on left branch
+        opt = self.if_else(node.value, opt0, opt1)
+        return node, opt
+
+    def _reverse_bintree_search(self, bintree_path, _contains_target=None):
+        """Convert binary tree path into indicator vector for leaf node.
+
+        Provided a binary tree path as described in _argopt_as_bintree, return an indicator vector
+        of the leaf that is indicated by the path.
+
+        If the bintree_path equals
+
+        >>> bintree_path = _BinaryNode(value=0, left=None, right=BinaryNode(value=1, left=None, right=None))
+
+        then the result of _reverse_bintree_search equals
+
+        >>> [0, 1, 0]
+        """
+
+        stype = type(bintree_path.value)
+        if _contains_target is None:
+            _contains_target = stype(1)
+
+        is_target_left = _contains_target * bintree_path.value
+        is_target_right = _contains_target * (1 - bintree_path.value)
+
+        if bintree_path.left is None:
+            subset_indicators_left = [is_target_left]
+        else:
+            subset_indicators_left = self._reverse_bintree_search(
+                bintree_path.left, _contains_target=is_target_left
+            )
+
+        if bintree_path.right is None:
+            subset_indicators_right = [is_target_right]
+        else:
+            subset_indicators_right = self._reverse_bintree_search(
+                bintree_path.right, _contains_target=is_target_right
+            )
+        return subset_indicators_left + subset_indicators_right
 
     def sorted(self, x, key=None, reverse=False):
         """Return a new securely sorted list with elements from x in ascending order.
@@ -2314,6 +2390,13 @@ def setup():
     mpyc.statistics.runtime = rt
     mpyc.seclists.runtime = rt
     return rt
+
+
+@dataclass
+class _BinaryNode:
+    value = None
+    left = None
+    right = None
 
 
 if os.getenv('READTHEDOCS') != 'True':
