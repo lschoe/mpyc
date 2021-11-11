@@ -1037,6 +1037,10 @@ class Runtime:
         if not as_vec:
             return self._argmax(x, key)
 
+        if n == 1:
+            stype = type(x[0][0]) if isinstance(x[0], list) else type(x[0])
+            return [stype(1)], x[0]
+
         bintree_path_to_max, max_ = self._argmax_as_bintree(x, key)
         return self._reverse_bintree_search(bintree_path_to_max), max_
 
