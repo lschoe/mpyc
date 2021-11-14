@@ -9,11 +9,36 @@
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.fingroups</strong></big></big></font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cberry%5Cdocuments%5Cgithub%5Cmympyc%5Cmpyc%5Cfingroups.py">c:\users\berry\documents\github\mympyc\mpyc\fingroups.py</a></font></td></tr></table>
-    <p><tt>This&nbsp;module&nbsp;supports&nbsp;finite&nbsp;groups.<br>
+    <p><tt>This&nbsp;module&nbsp;supports&nbsp;several&nbsp;types&nbsp;of&nbsp;finite&nbsp;groups.<br>
 &nbsp;<br>
 A&nbsp;finite&nbsp;group&nbsp;is&nbsp;a&nbsp;set&nbsp;of&nbsp;group&nbsp;elements&nbsp;together&nbsp;with&nbsp;a&nbsp;group&nbsp;operation.<br>
 The&nbsp;group&nbsp;operation&nbsp;is&nbsp;a&nbsp;binary&nbsp;operation,&nbsp;usually&nbsp;written&nbsp;multiplicatively<br>
-(optionally,&nbsp;the&nbsp;group&nbsp;operation&nbsp;can&nbsp;be&nbsp;written&nbsp;additively).</tt></p>
+(optionally,&nbsp;the&nbsp;group&nbsp;operation&nbsp;can&nbsp;be&nbsp;written&nbsp;additively).<br>
+&nbsp;<br>
+The&nbsp;default&nbsp;Python&nbsp;operators&nbsp;to&nbsp;manipulate&nbsp;group&nbsp;elements&nbsp;are&nbsp;the&nbsp;(binary)<br>
+operator&nbsp;@&nbsp;for&nbsp;the&nbsp;group&nbsp;operation,&nbsp;the&nbsp;(unary)&nbsp;operator&nbsp;~&nbsp;for&nbsp;inversion&nbsp;of<br>
+group&nbsp;elements,&nbsp;and&nbsp;the&nbsp;(binary)&nbsp;operator&nbsp;^&nbsp;for&nbsp;repeated&nbsp;application&nbsp;of<br>
+the&nbsp;group&nbsp;operation.&nbsp;The&nbsp;alternative&nbsp;Python&nbsp;operators&nbsp;used&nbsp;for&nbsp;additive&nbsp;and<br>
+multiplicative&nbsp;notation&nbsp;are:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;default:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;@&nbsp;b,&nbsp;&nbsp;&nbsp;&nbsp;~a,&nbsp;&nbsp;&nbsp;&nbsp;a^n&nbsp;&nbsp;&nbsp;&nbsp;(a^-1&nbsp;=&nbsp;~a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;additive:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;b,&nbsp;&nbsp;&nbsp;&nbsp;-a,&nbsp;&nbsp;&nbsp;&nbsp;n*a&nbsp;&nbsp;&nbsp;&nbsp;(-1*a&nbsp;=&nbsp;-a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;multiplicative:&nbsp;&nbsp;a&nbsp;*&nbsp;b,&nbsp;&nbsp;&nbsp;1/a,&nbsp;&nbsp;&nbsp;&nbsp;a**n&nbsp;&nbsp;&nbsp;(a**-1&nbsp;=&nbsp;1/a)<br>
+&nbsp;<br>
+for&nbsp;arbitrary&nbsp;group&nbsp;elements&nbsp;a,&nbsp;b,&nbsp;and&nbsp;integer&nbsp;n.<br>
+&nbsp;<br>
+Four&nbsp;types&nbsp;of&nbsp;groups&nbsp;are&nbsp;currently&nbsp;supported,&nbsp;aimed&nbsp;mainly&nbsp;at&nbsp;applications<br>
+in&nbsp;cryptography:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;symmetric&nbsp;groups&nbsp;of&nbsp;any&nbsp;degree&nbsp;n&nbsp;(n&gt;=0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;quadratic&nbsp;residue&nbsp;groups&nbsp;modulo&nbsp;a&nbsp;safe&nbsp;prime<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;elliptic&nbsp;curve&nbsp;groups&nbsp;(Edwards&nbsp;curves&nbsp;and&nbsp;Barreto-Naehrig&nbsp;curves)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;class&nbsp;groups&nbsp;of&nbsp;imaginary&nbsp;quadratic&nbsp;fields<br>
+&nbsp;<br>
+The&nbsp;structure&nbsp;of&nbsp;most&nbsp;of&nbsp;these&nbsp;groups&nbsp;will&nbsp;be&nbsp;trivial,&nbsp;preferably&nbsp;cyclic&nbsp;or&nbsp;even<br>
+of&nbsp;prime&nbsp;order.&nbsp;Where&nbsp;applicable,&nbsp;a&nbsp;generator&nbsp;of&nbsp;the&nbsp;group&nbsp;(or&nbsp;a&nbsp;sufficiently<br>
+large&nbsp;subgroup)&nbsp;is&nbsp;provided&nbsp;to&nbsp;accomodate&nbsp;discrete&nbsp;log&nbsp;and&nbsp;Diffie-Hellman<br>
+hardness&nbsp;assumptions.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -21,11 +46,9 @@ The&nbsp;group&nbsp;operation&nbsp;is&nbsp;a&nbsp;binary&nbsp;operation,&nbsp;us
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="mpyc.classgrps.html">mpyc.classgrps</a><br>
-<a href="functools.html">functools</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="decimal.html">decimal</a><br>
+</td><td width="25%" valign=top><a href="functools.html">functools</a><br>
 </td><td width="25%" valign=top><a href="math.html">math</a><br>
-<a href="os.html">os</a><br>
-</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -37,21 +60,30 @@ The&nbsp;group&nbsp;operation&nbsp;is&nbsp;a&nbsp;binary&nbsp;operation,&nbsp;us
 <dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#CurveParams">CurveParams</a>
-</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>
+<dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>
 </font></dt><dd>
 <dl>
 <dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#ClassGroupForm">ClassGroupForm</a>
 </font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#Edwards_Affine">Edwards_Affine</a>
-</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#Edwards_ExtProj">Edwards_ExtProj</a>
-</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#Edwards_HomProj">Edwards_HomProj</a>
-</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#Weierstr_Affine">Weierstr_Affine</a>
-</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#Weierstr_HomProj">Weierstr_HomProj</a>
-</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#Weierstr_Jacobian">Weierstr_Jacobian</a>
+<dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#EdwardsAffine">EdwardsAffine</a>
+</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#EdwardsExtended">EdwardsExtended</a>
+</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#EdwardsProjective">EdwardsProjective</a>
 </font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#WeierstrassAffine">WeierstrassAffine</a>
+</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#WeierstrassJacobian">WeierstrassJacobian</a>
+</font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#WeierstrassProjective">WeierstrassProjective</a>
+</font></dt></dl>
+</dd>
+</dl>
 </dd>
 <dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#QuadraticResidue">QuadraticResidue</a>
 </font></dt><dt><font face="helvetica, arial"><a href="mpyc.fingroups.html#SymmetricGroupElement">SymmetricGroupElement</a>
@@ -69,12 +101,10 @@ The&nbsp;group&nbsp;operation&nbsp;is&nbsp;a&nbsp;binary&nbsp;operation,&nbsp;us
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#ClassGroupForm">ClassGroupForm</a>(value=None,&nbsp;check=True)<br>
 &nbsp;<br>
-Class&nbsp;groups&nbsp;represented&nbsp;by&nbsp;binary&nbsp;quadratic&nbsp;form&nbsp;tuple&nbsp;(a,&nbsp;b,&nbsp;c).<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;class&nbsp;groups&nbsp;of&nbsp;imaginary&nbsp;quadratic&nbsp;fields.<br>
 &nbsp;<br>
-Requirements:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Form&nbsp;is&nbsp;integral,&nbsp;i.e.&nbsp;a,&nbsp;b,&nbsp;c&nbsp;are&nbsp;integers<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Form&nbsp;is&nbsp;primitive,&nbsp;i.e.&nbsp;gcd(a,&nbsp;b,&nbsp;c)&nbsp;==&nbsp;1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Form&nbsp;is&nbsp;positive&nbsp;definite,&nbsp;i.e.&nbsp;Discriminant(f)&nbsp;&lt;&nbsp;0&nbsp;and&nbsp;a&nbsp;&gt;&nbsp;0.<br>&nbsp;</tt></td></tr>
+Represented&nbsp;by&nbsp;primitive&nbsp;positive&nbsp;definite&nbsp;forms&nbsp;(a,b,c)&nbsp;of&nbsp;discriminant&nbsp;D&lt;0.<br>
+That&nbsp;is,&nbsp;all&nbsp;forms&nbsp;(a,b,c)&nbsp;with&nbsp;D=b^2-4ac&lt;0&nbsp;satisfying&nbsp;gcd(a,b,c)=1&nbsp;and&nbsp;a&gt;0.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.fingroups.html#ClassGroupForm">ClassGroupForm</a></dd>
@@ -85,16 +115,18 @@ Requirements:<br>
 Methods defined here:<br>
 <dl><dt><a name="ClassGroupForm-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
 
-<dl><dt><a name="ClassGroupForm-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Create&nbsp;a&nbsp;binary&nbsp;form.<br>
+<dl><dt><a name="ClassGroupForm-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Create&nbsp;a&nbsp;binary&nbsp;quadratic&nbsp;form&nbsp;(a,b,c).<br>
 &nbsp;<br>
-Invariant:&nbsp;form&nbsp;is&nbsp;reduced.</tt></dd></dl>
-
-<dl><dt><a name="ClassGroupForm-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="ClassGroupForm-equality"><strong>equality</strong></a>(a, b)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+Invariant:&nbsp;form&nbsp;(a,b,c)&nbsp;is&nbsp;reduced.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
+<dl><dt><a name="ClassGroupForm-decode"><strong>decode</strong></a>(M, Z)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="ClassGroupForm-encode"><strong>encode</strong></a>(m)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;the&nbsp;first&nbsp;coefficient&nbsp;of&nbsp;a&nbsp;form.</tt></dd></dl>
+
+<dl><dt><a name="ClassGroupForm-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
 <dl><dt><a name="ClassGroupForm-inversion"><strong>inversion</strong></a>(f)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
 <dl><dt><a name="ClassGroupForm-operation"><strong>operation</strong></a>(f1, f2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
@@ -103,13 +135,13 @@ Class methods defined here:<br>
 
 <hr>
 Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {'discriminant': &lt;class 'int'&gt;}</dl>
+
 <dl><dt><strong>bit_length</strong> = None</dl>
 
-<dl><dt><strong>discriminant</strong> = None</dl>
+<dl><dt><strong>gap</strong> = None</dl>
 
 <dl><dt><strong>is_abelian</strong> = True</dl>
-
-<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>is_multiplicative</strong> = True</dl>
 
@@ -121,6 +153,8 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="ClassGroupForm-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
+<dl><dt><a name="ClassGroupForm-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+
 <dl><dt><a name="ClassGroupForm-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="ClassGroupForm-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
@@ -130,6 +164,8 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 <dl><dt><a name="ClassGroupForm-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="ClassGroupForm-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="ClassGroupForm-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
 <dl><dt><a name="ClassGroupForm-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
@@ -141,7 +177,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="ClassGroupForm-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="ClassGroupForm-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="ClassGroupForm-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -153,103 +189,74 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
 <dl><dt><strong>is_additive</strong> = False</dl>
 
+<dl><dt><strong>is_cyclic</strong> = None</dl>
+
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="CurveParams">class <strong>CurveParams</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="EdwardsAffine">class <strong>EdwardsAffine</strong></a>(<a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#CurveParams">CurveParams</a>(*,&nbsp;name,&nbsp;order,&nbsp;gf,&nbsp;is_cyclic)<br>
+<td colspan=2><tt><a href="#EdwardsAffine">EdwardsAffine</a>(value=None,&nbsp;check=True)<br>
 &nbsp;<br>
-Contains&nbsp;curve&nbsp;parameters.<br>
-&nbsp;<br>
-Invariants:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>equation</strong>&nbsp;assumes&nbsp;affine&nbsp;coordinates<br>
-&nbsp;&nbsp;&nbsp;&nbsp;self.<strong>base_pt_tuple</strong>&nbsp;assumes&nbsp;affine&nbsp;coordinates<br>&nbsp;</tt></td></tr>
-<tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
-<dl><dt><a name="CurveParams-__init__"><strong>__init__</strong></a>(self, *, name, order, gf, is_cyclic)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="CurveParams-set_base_pt"><strong>set_base_pt</strong></a>(self, value)</dt></dl>
-
-<dl><dt><a name="CurveParams-set_constants"><strong>set_constants</strong></a>(self, *, a=1, b=1, c=1, d=1)</dt></dl>
-
-<dl><dt><a name="CurveParams-set_equation"><strong>set_equation</strong></a>(self, eq)</dt></dl>
-
-<hr>
-Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Edwards_Affine">class <strong>Edwards_Affine</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
-    
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Edwards_Affine">Edwards_Affine</a>(value=None,&nbsp;check=True)<br>
-&nbsp;<br>
-Common&nbsp;base&nbsp;class&nbsp;for&nbsp;elliptic&nbsp;curve&nbsp;group&nbsp;elements.<br>&nbsp;</tt></td></tr>
+Edwards&nbsp;curves&nbsp;with&nbsp;affine&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="mpyc.fingroups.html#Edwards_Affine">Edwards_Affine</a></dd>
+<dd><a href="mpyc.fingroups.html#EdwardsAffine">EdwardsAffine</a></dd>
+<dd><a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Edwards_Affine-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="Edwards_Affine-operation"><strong>operation</strong></a> = add_edwards_affine(pt1, pt2)</dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;using&nbsp;'mmadd-2007-bl',&nbsp;convert&nbsp;to&nbsp;affine.</tt></dd></dl>
-
-<dl><dt><strong>to_affine</strong> <em>lambda</em> x</dt></dl>
-
-<dl><dt><a name="Edwards_Affine-to_extended"><strong>to_extended</strong></a> = ed_affine_to_extended(pt)</dt><dd><tt>Map&nbsp;(x,&nbsp;y)&nbsp;to&nbsp;(x&nbsp;:&nbsp;y&nbsp;:&nbsp;x*y&nbsp;:&nbsp;&nbsp;1).</tt></dd></dl>
-
-<dl><dt><a name="Edwards_Affine-to_homproj"><strong>to_homproj</strong></a> = ed_affine_to_hom_proj(pt)</dt><dd><tt>Convert&nbsp;affine&nbsp;coordinates&nbsp;to&nbsp;extended&nbsp;hom.&nbsp;proj.&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="Edwards_Affine-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<hr>
-Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
+<dl><dt><a name="EdwardsAffine-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+
+<dl><dt><a name="EdwardsAffine-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;using&nbsp;affine&nbsp;coordinates&nbsp;(projective&nbsp;with&nbsp;z=1).</tt></dd></dl>
+
 <hr>
 Data and other attributes defined here:<br>
 <dl><dt><strong>oblivious</strong> = True</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><a name="Edwards_Affine-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="Edwards_Affine-equality"><strong>equality</strong></a>(pt1, pt2)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Edwards_Affine-on_curve"><strong>on_curve</strong></a> = on_affine_curve(pt)</dt></dl>
+Methods inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsAffine-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+Class methods inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsAffine-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>d</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsAffine-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsAffine-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="EdwardsAffine-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
 <dl><dt><strong>x</strong></dt>
 </dl>
 <dl><dt><strong>y</strong></dt>
@@ -258,6 +265,8 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
 <dl><dt><strong>is_abelian</strong> = True</dl>
 
 <dl><dt><strong>is_additive</strong> = True</dl>
@@ -266,39 +275,43 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCu
 
 <hr>
 Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_Affine-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
-<dl><dt><a name="Edwards_Affine-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
 
-<dl><dt><a name="Edwards_Affine-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
-<dl><dt><a name="Edwards_Affine-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsAffine-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_Affine-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsAffine-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsAffine-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_Affine-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_Affine-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -306,15 +319,11 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -322,109 +331,110 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Edwards_ExtProj">class <strong>Edwards_ExtProj</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="EdwardsCurvePoint">class <strong>EdwardsCurvePoint</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Edwards_ExtProj">Edwards_ExtProj</a>(value=None,&nbsp;check=True)<br>
+<td colspan=2><tt><a href="#EdwardsCurvePoint">EdwardsCurvePoint</a>(value=None,&nbsp;check=True)<br>
 &nbsp;<br>
-Implement&nbsp;Edwards&nbsp;curve&nbsp;<br>
-etic&nbsp;for&nbsp;extended&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;(twisted)&nbsp;Edwards&nbsp;curves.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="mpyc.fingroups.html#Edwards_ExtProj">Edwards_ExtProj</a></dd>
+<dd><a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Edwards_ExtProj-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="Edwards_ExtProj-to_affine"><strong>to_affine</strong></a> = extended_to_affine(pt)</dt><dd><tt>Convert&nbsp;extended&nbsp;Edwards&nbsp;point&nbsp;to&nbsp;affine&nbsp;point.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="Edwards_ExtProj-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
 
-<dl><dt><a name="Edwards_ExtProj-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Addition&nbsp;formula&nbsp;for&nbsp;Twisted&nbsp;Edwards&nbsp;points&nbsp;in&nbsp;extended&nbsp;projective&nbsp;coordinates.<br>
-&nbsp;<br>
-Requires:&nbsp;Twisted&nbsp;Edwards&nbsp;curve&nbsp;(curve&nbsp;constant&nbsp;a&nbsp;=&nbsp;-1)&nbsp;and&nbsp;extended&nbsp;coordinates.<br>
-See&nbsp;Hisil&nbsp;et&nbsp;al.&nbsp;(2008)&nbsp;[HWCD08],&nbsp;Section&nbsp;4.2&nbsp;(p.&nbsp;11)&nbsp;for&nbsp;4&nbsp;processors<br>
-Link:&nbsp;https://eprint.iacr.org/2008/522</tt></dd></dl>
-
-<hr>
-Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>t</strong></dt>
-</dl>
-<dl><dt><strong>z</strong></dt>
-</dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>oblivious</strong> = True</dl>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>d</strong> = None</dl>
 
 <hr>
 Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><a name="Edwards_ExtProj-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-equality"><strong>equality</strong></a>(pt1, pt2)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Edwards_ExtProj-on_curve"><strong>on_curve</strong></a> = on_affine_curve(pt)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsCurvePoint-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="EdwardsCurvePoint-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
 <dl><dt><strong>x</strong></dt>
 </dl>
 <dl><dt><strong>y</strong></dt>
 </dl>
+<dl><dt><strong>z</strong></dt>
+</dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
 <dl><dt><strong>is_abelian</strong> = True</dl>
 
 <dl><dt><strong>is_additive</strong> = True</dl>
 
 <dl><dt><strong>is_multiplicative</strong> = False</dl>
 
+<dl><dt><strong>oblivious</strong> = None</dl>
+
 <hr>
 Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_ExtProj-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsCurvePoint-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_ExtProj-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsCurvePoint-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsCurvePoint-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_ExtProj-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="EdwardsCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+
+<dl><dt><a name="EdwardsCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="EdwardsCurvePoint-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_ExtProj-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -432,15 +442,11 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -448,61 +454,62 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Edwards_HomProj">class <strong>Edwards_HomProj</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="EdwardsExtended">class <strong>EdwardsExtended</strong></a>(<a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Edwards_HomProj">Edwards_HomProj</a>(value=None,&nbsp;check=True)<br>
+<td colspan=2><tt><a href="#EdwardsExtended">EdwardsExtended</a>(value=None,&nbsp;check=True)<br>
 &nbsp;<br>
-Common&nbsp;base&nbsp;class&nbsp;for&nbsp;elliptic&nbsp;curve&nbsp;group&nbsp;elements.<br>&nbsp;</tt></td></tr>
+Edwards&nbsp;curves&nbsp;with&nbsp;extended&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="mpyc.fingroups.html#Edwards_HomProj">Edwards_HomProj</a></dd>
+<dd><a href="mpyc.fingroups.html#EdwardsExtended">EdwardsExtended</a></dd>
+<dd><a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Edwards_HomProj-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="Edwards_HomProj-to_affine"><strong>to_affine</strong></a> = ed_hom_proj_to_affine(pt)</dt><dd><tt>Map&nbsp;(X:Y:Z)&nbsp;to&nbsp;(X/Z,&nbsp;Y/Z,&nbsp;1),&nbsp;assumes&nbsp;hom.&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
-
-<dl><dt><a name="Edwards_HomProj-to_extended"><strong>to_extended</strong></a> = ed_hom_proj_to_extended(pt)</dt><dd><tt>Convert&nbsp;hom.&nbsp;proj.&nbsp;coordinates&nbsp;to&nbsp;extended&nbsp;hom.&nbsp;proj.&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="Edwards_HomProj-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="Edwards_HomProj-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;with&nbsp;homogeneous&nbsp;projective&nbsp;coordinates.<br>
-&nbsp;<br>
-Requires&nbsp;twisted&nbsp;Edwards&nbsp;curve&nbsp;in&nbsp;hom.&nbsp;proj.&nbsp;coordinates.<br>
-Does&nbsp;not&nbsp;assume&nbsp;z1&nbsp;=&nbsp;1&nbsp;and&nbsp;z2&nbsp;=&nbsp;1.<br>
-&nbsp;<br>
-Addition&nbsp;law&nbsp;'add_2008_bbjlp'.<br>
-See:&nbsp;https://www.hyperelliptic.org/EFD/g1p/auto-twisted-projective.html#addition-add-2008-bbjlp</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<hr>
-Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
+<dl><dt><a name="EdwardsExtended-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;(twisted&nbsp;a=-1)&nbsp;Edwards&nbsp;points&nbsp;in&nbsp;extended&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+
 <hr>
 Data and other attributes defined here:<br>
 <dl><dt><strong>oblivious</strong> = True</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><a name="Edwards_HomProj-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="Edwards_HomProj-equality"><strong>equality</strong></a>(pt1, pt2)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Edwards_HomProj-on_curve"><strong>on_curve</strong></a> = on_affine_curve(pt)</dt></dl>
+Methods inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsExtended-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+Class methods inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsExtended-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>d</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsExtended-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsExtended-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="EdwardsExtended-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
 <dl><dt><strong>x</strong></dt>
 </dl>
 <dl><dt><strong>y</strong></dt>
@@ -511,6 +518,8 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
 <dl><dt><strong>is_abelian</strong> = True</dl>
 
 <dl><dt><strong>is_additive</strong> = True</dl>
@@ -519,39 +528,43 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCu
 
 <hr>
 Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_HomProj-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
-<dl><dt><a name="Edwards_HomProj-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
 
-<dl><dt><a name="Edwards_HomProj-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
-<dl><dt><a name="Edwards_HomProj-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="EdwardsExtended-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Edwards_HomProj-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsExtended-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsExtended-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_HomProj-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Edwards_HomProj-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -559,15 +572,141 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
+
+<dl><dt><strong>order</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="EdwardsProjective">class <strong>EdwardsProjective</strong></a>(<a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#EdwardsProjective">EdwardsProjective</a>(value=None,&nbsp;check=True)<br>
+&nbsp;<br>
+Edwards&nbsp;curves&nbsp;with&nbsp;projective&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.fingroups.html#EdwardsProjective">EdwardsProjective</a></dd>
+<dd><a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a></dd>
+<dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
+<dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="EdwardsProjective-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="EdwardsProjective-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="EdwardsProjective-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+
+<dl><dt><a name="EdwardsProjective-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;with&nbsp;(homogeneous)&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>oblivious</strong> = True</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsProjective-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsProjective-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#EdwardsCurvePoint">EdwardsCurvePoint</a>:<br>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>d</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsProjective-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="EdwardsProjective-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="EdwardsProjective-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>x</strong></dt>
+</dl>
+<dl><dt><strong>y</strong></dt>
+</dl>
+<dl><dt><strong>z</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
+<dl><dt><strong>is_abelian</strong> = True</dl>
+
+<dl><dt><strong>is_additive</strong> = True</dl>
+
+<dl><dt><strong>is_multiplicative</strong> = False</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="EdwardsProjective-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="EdwardsProjective-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+
+<dl><dt><a name="EdwardsProjective-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="EdwardsProjective-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="EdwardsProjective-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="EdwardsProjective-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="EdwardsProjective-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><strong>generator</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -578,7 +717,7 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <font color="#000000" face="helvetica, arial"><a name="EllipticCurvePoint">class <strong>EllipticCurvePoint</strong></a>(<a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Common&nbsp;base&nbsp;class&nbsp;for&nbsp;elliptic&nbsp;curve&nbsp;group&nbsp;elements.<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>Common&nbsp;base&nbsp;class&nbsp;for&nbsp;elliptic&nbsp;curve&nbsp;groups.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
@@ -587,14 +726,20 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="EllipticCurvePoint-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+<dl><dt><a name="EllipticCurvePoint-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
 
-<dl><dt><a name="EllipticCurvePoint-equality"><strong>equality</strong></a>(pt1, pt2)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="EllipticCurvePoint-on_curve"><strong>on_curve</strong></a> = on_affine_curve(pt)</dt></dl>
+<dl><dt><a name="EllipticCurvePoint-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
 
 <hr>
-Data descriptors defined here:<br>
+Class methods defined here:<br>
+<dl><dt><a name="EllipticCurvePoint-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="EllipticCurvePoint-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<dl><dt><a name="EllipticCurvePoint-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
 <dl><dt><strong>x</strong></dt>
 </dl>
 <dl><dt><strong>y</strong></dt>
@@ -603,19 +748,23 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
 <dl><dt><strong>is_abelian</strong> = True</dl>
 
 <dl><dt><strong>is_additive</strong> = True</dl>
 
 <dl><dt><strong>is_multiplicative</strong> = False</dl>
 
-<dl><dt><strong>oblivious</strong> = False</dl>
+<dl><dt><strong>oblivious</strong> = None</dl>
 
 <hr>
 Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
 <dl><dt><a name="EllipticCurvePoint-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="EllipticCurvePoint-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="EllipticCurvePoint-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
 
 <dl><dt><a name="EllipticCurvePoint-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
@@ -627,6 +776,8 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="EllipticCurvePoint-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
 
+<dl><dt><a name="EllipticCurvePoint-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
 <dl><dt><a name="EllipticCurvePoint-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="EllipticCurvePoint-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
@@ -637,10 +788,12 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="EllipticCurvePoint-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="EllipticCurvePoint-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="EllipticCurvePoint-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="EllipticCurvePoint-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
 <dl><dt><a name="EllipticCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
 <dl><dt><a name="EllipticCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
@@ -657,15 +810,11 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -678,14 +827,18 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;finite&nbsp;groups.<br>
 &nbsp;<br>
-Default:&nbsp;@,&nbsp;~,&nbsp;^<br>
-Additive:&nbsp;+,&nbsp;-,&nbsp;*<br>
-Multiplicative:&nbsp;*,&nbsp;1/&nbsp;(=&nbsp;**-1),&nbsp;**<br>&nbsp;</tt></td></tr>
+Overview&nbsp;Python&nbsp;operators&nbsp;for&nbsp;group&nbsp;operation,&nbsp;inverse,&nbsp;and&nbsp;repeated&nbsp;operation:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;default&nbsp;notation:&nbsp;@,&nbsp;~,&nbsp;^&nbsp;(matmul,&nbsp;invert,&nbsp;xor).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;additive&nbsp;notation:&nbsp;+,&nbsp;-,&nbsp;*&nbsp;(add,&nbsp;sub,&nbsp;mul)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;multiplicative&nbsp;notation:&nbsp;*,&nbsp;1/&nbsp;(or,&nbsp;**-1),&nbsp;**&nbsp;(mul,&nbsp;truediv&nbsp;(or,&nbsp;pow),&nbsp;pow)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="FiniteGroupElement-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="FiniteGroupElement-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="FiniteGroupElement-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
 
 <dl><dt><a name="FiniteGroupElement-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
@@ -697,6 +850,8 @@ Multiplicative:&nbsp;*,&nbsp;1/&nbsp;(=&nbsp;**-1),&nbsp;**<br>&nbsp;</tt></td><
 
 <dl><dt><a name="FiniteGroupElement-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
 
+<dl><dt><a name="FiniteGroupElement-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
 <dl><dt><a name="FiniteGroupElement-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="FiniteGroupElement-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
@@ -707,12 +862,12 @@ Multiplicative:&nbsp;*,&nbsp;1/&nbsp;(=&nbsp;**-1),&nbsp;**<br>&nbsp;</tt></td><
 
 <dl><dt><a name="FiniteGroupElement-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="FiniteGroupElement-equality"><strong>equality</strong></a>(a, b)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="FiniteGroupElement-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="FiniteGroupElement-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
+<dl><dt><a name="FiniteGroupElement-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
 <dl><dt><a name="FiniteGroupElement-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
 <dl><dt><a name="FiniteGroupElement-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
@@ -729,19 +884,17 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
+<dl><dt><strong>__annotations__</strong> = {'value': &lt;class 'object'&gt;}</dl>
 
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_abelian</strong> = False</dl>
+<dl><dt><strong>is_abelian</strong> = None</dl>
 
 <dl><dt><strong>is_additive</strong> = False</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>is_multiplicative</strong> = False</dl>
 
@@ -756,7 +909,7 @@ Data and other attributes defined here:<br>
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#QuadraticResidue">QuadraticResidue</a>(value=1,&nbsp;check=True)<br>
 &nbsp;<br>
-Common&nbsp;base&nbsp;class&nbsp;for&nbsp;group&nbsp;of&nbsp;quadratic&nbsp;residues&nbsp;modulo&nbsp;a&nbsp;prime.<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;groups&nbsp;of&nbsp;quadratic&nbsp;residues&nbsp;modulo&nbsp;an&nbsp;odd&nbsp;prime.<br>
 &nbsp;<br>
 Quadratic&nbsp;residues&nbsp;modulo&nbsp;p&nbsp;represented&nbsp;by&nbsp;GF(p)*&nbsp;elements.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
@@ -771,20 +924,24 @@ Methods defined here:<br>
 
 <dl><dt><a name="QuadraticResidue-__int__"><strong>__int__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="QuadraticResidue-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="QuadraticResidue-equality"><strong>equality</strong></a>(a, b)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="QuadraticResidue-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
-
 <hr>
 Class methods defined here:<br>
+<dl><dt><a name="QuadraticResidue-decode"><strong>decode</strong></a>(M, Z, gap=128)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="QuadraticResidue-encode"><strong>encode</strong></a>(m, gap=128)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;a&nbsp;quadratic&nbsp;residue.</tt></dd></dl>
+
+<dl><dt><a name="QuadraticResidue-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
 <dl><dt><a name="QuadraticResidue-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
 <dl><dt><a name="QuadraticResidue-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
+<dl><dt><a name="QuadraticResidue-repeat"><strong>repeat</strong></a>(a, n)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+
 <hr>
 Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {'_field': &lt;class 'type'&gt;}</dl>
+
 <dl><dt><strong>is_abelian</strong> = True</dl>
 
 <dl><dt><strong>is_cyclic</strong> = True</dl>
@@ -797,6 +954,8 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="QuadraticResidue-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
+<dl><dt><a name="QuadraticResidue-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+
 <dl><dt><a name="QuadraticResidue-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="QuadraticResidue-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
@@ -806,6 +965,8 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 <dl><dt><a name="QuadraticResidue-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="QuadraticResidue-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="QuadraticResidue-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
 <dl><dt><a name="QuadraticResidue-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
@@ -817,7 +978,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="QuadraticResidue-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="QuadraticResidue-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="QuadraticResidue-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -829,10 +990,6 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
@@ -850,10 +1007,11 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#SymmetricGroupElement">SymmetricGroupElement</a>(value=None,&nbsp;check=True)<br>
 &nbsp;<br>
-Symmetric&nbsp;group&nbsp;of&nbsp;all&nbsp;permutations&nbsp;of&nbsp;a&nbsp;fixed&nbsp;length&nbsp;(degree).<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;symmetric&nbsp;groups.<br>
 &nbsp;<br>
-Permutations&nbsp;of&nbsp;{0,...,n-1}&nbsp;represented&nbsp;as&nbsp;length-n&nbsp;tuples<br>
-with&nbsp;unique&nbsp;entries&nbsp;in&nbsp;{0,...,n-1},&nbsp;n&gt;=0.<br>&nbsp;</tt></td></tr>
+Symmetric&nbsp;groups&nbsp;contains&nbsp;all&nbsp;permutations&nbsp;of&nbsp;a&nbsp;fixed&nbsp;length&nbsp;(degree).<br>
+Permutations&nbsp;of&nbsp;{0,...,n-1}&nbsp;represented&nbsp;as&nbsp;length-n&nbsp;tuples&nbsp;with&nbsp;unique<br>
+entries&nbsp;in&nbsp;{0,...,n-1},&nbsp;n&gt;=0.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.fingroups.html#SymmetricGroupElement">SymmetricGroupElement</a></dd>
@@ -864,12 +1022,10 @@ with&nbsp;unique&nbsp;entries&nbsp;in&nbsp;{0,...,n-1},&nbsp;n&gt;=0.<br>&nbsp;<
 Methods defined here:<br>
 <dl><dt><a name="SymmetricGroupElement-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
-<dl><dt><a name="SymmetricGroupElement-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="SymmetricGroupElement-equality"><strong>equality</strong></a>(p, q)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
 <hr>
 Class methods defined here:<br>
+<dl><dt><a name="SymmetricGroupElement-equality"><strong>equality</strong></a>(p, q)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
 <dl><dt><a name="SymmetricGroupElement-inversion"><strong>inversion</strong></a>(p)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
 <dl><dt><a name="SymmetricGroupElement-operation"><strong>operation</strong></a>(p, q)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>First&nbsp;p&nbsp;then&nbsp;q.</tt></dd></dl>
@@ -884,6 +1040,8 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="SymmetricGroupElement-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
+<dl><dt><a name="SymmetricGroupElement-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+
 <dl><dt><a name="SymmetricGroupElement-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="SymmetricGroupElement-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
@@ -893,6 +1051,8 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 <dl><dt><a name="SymmetricGroupElement-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="SymmetricGroupElement-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="SymmetricGroupElement-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
 <dl><dt><a name="SymmetricGroupElement-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
@@ -904,7 +1064,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <dl><dt><a name="SymmetricGroupElement-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="SymmetricGroupElement-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="SymmetricGroupElement-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -920,19 +1080,17 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
+<dl><dt><strong>__annotations__</strong> = {'value': &lt;class 'object'&gt;}</dl>
 
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_abelian</strong> = False</dl>
+<dl><dt><strong>is_abelian</strong> = None</dl>
 
 <dl><dt><strong>is_additive</strong> = False</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>is_multiplicative</strong> = False</dl>
 
@@ -942,63 +1100,64 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Weierstr_Affine">class <strong>Weierstr_Affine</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="WeierstrassAffine">class <strong>WeierstrassAffine</strong></a>(<a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Weierstr_Affine">Weierstr_Affine</a>(value=None,&nbsp;check=True)<br>
+<td colspan=2><tt><a href="#WeierstrassAffine">WeierstrassAffine</a>(value=None,&nbsp;check=True)<br>
 &nbsp;<br>
-Implement&nbsp;Weierstrass&nbsp;curve&nbsp;<br>
-etic&nbsp;for&nbsp;affine&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
+Short&nbsp;Weierstrass&nbsp;curves&nbsp;with&nbsp;affine&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="mpyc.fingroups.html#Weierstr_Affine">Weierstr_Affine</a></dd>
+<dd><a href="mpyc.fingroups.html#WeierstrassAffine">WeierstrassAffine</a></dd>
+<dd><a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Weierstr_Affine-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Affine-operation"><strong>operation</strong></a> = add_weierstrass_affine(pt1, pt2)</dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;affine&nbsp;coordinates.<br>
-&nbsp;<br>
-Requires&nbsp;short&nbsp;Weierstrass&nbsp;form&nbsp;and&nbsp;affine&nbsp;coordinates.<br>
-&nbsp;<br>
-Algorithm&nbsp;documented&nbsp;in&nbsp;Silverman,&nbsp;The&nbsp;<br>
-etic&nbsp;of&nbsp;elliptic&nbsp;curves(1994)<br>
-and&nbsp;thesis&nbsp;Hisil&nbsp;(2010),&nbsp;for&nbsp;example.<br>
-Link:&nbsp;https://core.ac.uk/download/pdf/10898289.pdf&nbsp;(Algorithm&nbsp;4.1.1)</tt></dd></dl>
-
-<dl><dt><strong>to_affine</strong> <em>lambda</em> x</dt></dl>
-
-<dl><dt><a name="Weierstr_Affine-to_jacobian"><strong>to_jacobian</strong></a> = wei_affine_to_jacobian(pt)</dt><dd><tt>Map&nbsp;(x,&nbsp;y)&nbsp;to&nbsp;(x&nbsp;:&nbsp;y&nbsp;:&nbsp;&nbsp;1).</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="Weierstr_Affine-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<hr>
-Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
+<dl><dt><a name="WeierstrassAffine-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassAffine-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;affine&nbsp;coordinates.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassAffine-operation2"><strong>operation2</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;affine&nbsp;coordinates.</tt></dd></dl>
+
 <hr>
 Data and other attributes defined here:<br>
 <dl><dt><strong>oblivious</strong> = False</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><a name="Weierstr_Affine-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Affine-equality"><strong>equality</strong></a>(pt1, pt2)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Affine-on_curve"><strong>on_curve</strong></a> = on_affine_curve(pt)</dt></dl>
+Methods inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassAffine-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+Class methods inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassAffine-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>b</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassAffine-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassAffine-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="WeierstrassAffine-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
 <dl><dt><strong>x</strong></dt>
 </dl>
 <dl><dt><strong>y</strong></dt>
@@ -1007,6 +1166,8 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
 <dl><dt><strong>is_abelian</strong> = True</dl>
 
 <dl><dt><strong>is_additive</strong> = True</dl>
@@ -1015,39 +1176,39 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCu
 
 <hr>
 Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_Affine-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
-<dl><dt><a name="Weierstr_Affine-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
 
-<dl><dt><a name="Weierstr_Affine-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
-<dl><dt><a name="Weierstr_Affine-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassAffine-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_Affine-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
 
-<hr>
-Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_Affine-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassAffine-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_Affine-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -1055,15 +1216,11 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -1071,61 +1228,315 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Weierstr_HomProj">class <strong>Weierstr_HomProj</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="WeierstrassCurvePoint">class <strong>WeierstrassCurvePoint</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Weierstr_HomProj">Weierstr_HomProj</a>(value=None,&nbsp;check=True)<br>
+<td colspan=2><tt><a href="#WeierstrassCurvePoint">WeierstrassCurvePoint</a>(value=None,&nbsp;check=True)<br>
 &nbsp;<br>
-Implement&nbsp;Weierstrass&nbsp;curve&nbsp;<br>
-etic&nbsp;for&nbsp;hom.&nbsp;proj.&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;(short)&nbsp;Weierstrass&nbsp;curves.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="mpyc.fingroups.html#Weierstr_HomProj">Weierstr_HomProj</a></dd>
+<dd><a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
 <dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="Weierstr_HomProj-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_HomProj-to_affine"><strong>to_affine</strong></a> = wei_hom_proj_to_affine(pt)</dt><dd><tt>Map&nbsp;(X:Y:Z)&nbsp;to&nbsp;(X/Z,&nbsp;Y/Z,&nbsp;1),&nbsp;assumes&nbsp;hom.&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_HomProj-to_jacobian"><strong>to_jacobian</strong></a> = wei_hom_proj_to_jacobian(pt)</dt><dd><tt>Convert&nbsp;hom.&nbsp;proj.&nbsp;coordinates&nbsp;to&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="WeierstrassCurvePoint-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="Weierstr_HomProj-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_HomProj-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Implementation&nbsp;of&nbsp;complete&nbsp;addition&nbsp;formula&nbsp;from&nbsp;[RCB16].<br>
-&nbsp;<br>
-Formula&nbsp;is&nbsp;complete&nbsp;on&nbsp;every&nbsp;prime&nbsp;order&nbsp;short&nbsp;Weierstrass<br>
-curve&nbsp;defined&nbsp;over&nbsp;a&nbsp;field&nbsp;k&nbsp;with&nbsp;char(k)&nbsp;!=&nbsp;2,&nbsp;3.<br>
-Algorithm&nbsp;7.<br>
-Link:&nbsp;https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/complete-2.pdf</tt></dd></dl>
+<dl><dt><a name="WeierstrassCurvePoint-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
 
 <hr>
-Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+Data and other attributes defined here:<br>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>b</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassCurvePoint-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassCurvePoint-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>x</strong></dt>
 </dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+<dl><dt><strong>y</strong></dt>
 </dl>
+<dl><dt><strong>z</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
+<dl><dt><strong>is_abelian</strong> = True</dl>
+
+<dl><dt><strong>is_additive</strong> = True</dl>
+
+<dl><dt><strong>is_multiplicative</strong> = False</dl>
+
+<dl><dt><strong>oblivious</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="WeierstrassCurvePoint-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="WeierstrassCurvePoint-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassCurvePoint-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="WeierstrassCurvePoint-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><strong>generator</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>is_cyclic</strong> = None</dl>
+
+<dl><dt><strong>order</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="WeierstrassJacobian">class <strong>WeierstrassJacobian</strong></a>(<a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#WeierstrassJacobian">WeierstrassJacobian</a>(value=None,&nbsp;check=True)<br>
+&nbsp;<br>
+Short&nbsp;Weierstrass&nbsp;curves&nbsp;with&nbsp;Jacobian&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.fingroups.html#WeierstrassJacobian">WeierstrassJacobian</a></dd>
+<dd><a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a></dd>
+<dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
+<dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="WeierstrassJacobian-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="WeierstrassJacobian-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassJacobian-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassJacobian-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassJacobian-operation2"><strong>operation2</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>oblivious</strong> = False</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassJacobian-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassJacobian-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>b</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassJacobian-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassJacobian-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>x</strong></dt>
+</dl>
+<dl><dt><strong>y</strong></dt>
+</dl>
+<dl><dt><strong>z</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
+<dl><dt><strong>is_abelian</strong> = True</dl>
+
+<dl><dt><strong>is_additive</strong> = True</dl>
+
+<dl><dt><strong>is_multiplicative</strong> = False</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="WeierstrassJacobian-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassJacobian-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><a name="WeierstrassJacobian-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
+<dl><dt><strong>generator</strong> = None</dl>
+
+<dl><dt><strong>identity</strong> = None</dl>
+
+<dl><dt><strong>is_cyclic</strong> = None</dl>
+
+<dl><dt><strong>order</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="WeierstrassProjective">class <strong>WeierstrassProjective</strong></a>(<a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#WeierstrassProjective">WeierstrassProjective</a>(value=None,&nbsp;check=True)<br>
+&nbsp;<br>
+Short&nbsp;Weierstrass&nbsp;curves&nbsp;with&nbsp;projective&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.fingroups.html#WeierstrassProjective">WeierstrassProjective</a></dd>
+<dd><a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a></dd>
+<dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
+<dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="WeierstrassProjective-normalize"><strong>normalize</strong></a>(self)</dt><dd><tt>Convert&nbsp;to&nbsp;unique&nbsp;affine&nbsp;representation.</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="WeierstrassProjective-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassProjective-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassProjective-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+
+<dl><dt><a name="WeierstrassProjective-operation2"><strong>operation2</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+
 <hr>
 Data and other attributes defined here:<br>
 <dl><dt><strong>oblivious</strong> = True</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><a name="Weierstr_HomProj-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_HomProj-equality"><strong>equality</strong></a>(pt1, pt2)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_HomProj-on_curve"><strong>on_curve</strong></a> = on_affine_curve(pt)</dt></dl>
+Methods inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassProjective-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+Class methods inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassProjective-ysquared"><strong>ysquared</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;value&nbsp;of&nbsp;y^2&nbsp;as&nbsp;a&nbsp;function&nbsp;of&nbsp;x,&nbsp;for&nbsp;a&nbsp;point&nbsp;(x,&nbsp;y)&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="mpyc.fingroups.html#WeierstrassCurvePoint">WeierstrassCurvePoint</a>:<br>
+<dl><dt><strong>a</strong> = None</dl>
+
+<dl><dt><strong>b</strong> = None</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassProjective-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<hr>
+Class methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><a name="WeierstrassProjective-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+
+<dl><dt><a name="WeierstrassProjective-encode"><strong>encode</strong></a>(m, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;x-coordinate&nbsp;of&nbsp;a&nbsp;point&nbsp;on&nbsp;the&nbsp;curve.</tt></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
 <dl><dt><strong>x</strong></dt>
 </dl>
 <dl><dt><strong>y</strong></dt>
@@ -1134,6 +1545,8 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
+<dl><dt><strong>__annotations__</strong> = {'field': &lt;class 'type'&gt;}</dl>
+
 <dl><dt><strong>is_abelian</strong> = True</dl>
 
 <dl><dt><strong>is_additive</strong> = True</dl>
@@ -1142,39 +1555,39 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCu
 
 <hr>
 Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_HomProj-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;finite&nbsp;group&nbsp;elements&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+<dl><dt><a name="WeierstrassProjective-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Weierstr_HomProj-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
 
-<hr>
-Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_HomProj-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
+
+<dl><dt><a name="WeierstrassProjective-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;convenience.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_HomProj-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -1182,138 +1595,11 @@ Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement"
 </dl>
 <hr>
 Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
 <dl><dt><strong>generator</strong> = None</dl>
 
 <dl><dt><strong>identity</strong> = None</dl>
 
-<dl><dt><strong>is_cyclic</strong> = False</dl>
-
-<dl><dt><strong>order</strong> = None</dl>
-
-</td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Weierstr_Jacobian">class <strong>Weierstr_Jacobian</strong></a>(<a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>)</font></td></tr>
-    
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Weierstr_Jacobian">Weierstr_Jacobian</a>(value=None,&nbsp;check=True)<br>
-&nbsp;<br>
-Implement&nbsp;Weierstrass&nbsp;curve&nbsp;<br>
-etic&nbsp;for&nbsp;Jacobian&nbsp;coordinates.<br>&nbsp;</tt></td></tr>
-<tr><td>&nbsp;</td>
-<td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="mpyc.fingroups.html#Weierstr_Jacobian">Weierstr_Jacobian</a></dd>
-<dd><a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a></dd>
-<dd><a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a></dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
-</dl>
-<hr>
-Methods defined here:<br>
-<dl><dt><a name="Weierstr_Jacobian-__init__"><strong>__init__</strong></a>(self, value=None, check=True)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-operation"><strong>operation</strong></a> = add_weierstrass_jacobian(pt1, pt2)</dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;Jacobian&nbsp;coordinates.<br>
-&nbsp;<br>
-Requires&nbsp;short&nbsp;Weierstrass&nbsp;form&nbsp;and&nbsp;Jacobian&nbsp;coordinates.<br>
-Does&nbsp;not&nbsp;assume&nbsp;z1&nbsp;=&nbsp;1&nbsp;or&nbsp;z2&nbsp;=&nbsp;1.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-to_affine"><strong>to_affine</strong></a> = wei_jacobian_to_affine(pt)</dt><dd><tt>Map&nbsp;(X:Y:Z)&nbsp;to&nbsp;(X/Z^2,&nbsp;Y/Z^3,&nbsp;1),&nbsp;assumes&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
-
-<hr>
-Class methods defined here:<br>
-<dl><dt><a name="Weierstr_Jacobian-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
-
-<hr>
-Data descriptors defined here:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
-</dl>
-<hr>
-Data and other attributes defined here:<br>
-<dl><dt><strong>oblivious</strong> = False</dl>
-
-<hr>
-Methods inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><a name="Weierstr_Jacobian-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-equality"><strong>equality</strong></a>(pt1, pt2)</dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-on_curve"><strong>on_curve</strong></a> = on_affine_curve(pt)</dt></dl>
-
-<hr>
-Data descriptors inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><strong>x</strong></dt>
-</dl>
-<dl><dt><strong>y</strong></dt>
-</dl>
-<dl><dt><strong>z</strong></dt>
-</dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.fingroups.html#EllipticCurvePoint">EllipticCurvePoint</a>:<br>
-<dl><dt><strong>is_abelian</strong> = True</dl>
-
-<dl><dt><strong>is_additive</strong> = True</dl>
-
-<dl><dt><strong>is_multiplicative</strong> = False</dl>
-
-<hr>
-Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_Jacobian-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__invert__"><strong>__invert__</strong></a>(self)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__pow__"><strong>__pow__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__rmul__"><strong>__rmul__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-__xor__"><strong>__xor__</strong></a>(self, other)</dt></dl>
-
-<dl><dt><a name="Weierstr_Jacobian-inverse"><strong>inverse</strong></a>(self)</dt><dd><tt>For&nbsp;ease&nbsp;of&nbsp;use.</tt></dd></dl>
-
-<hr>
-Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_Jacobian-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
-
-<hr>
-Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="Weierstr_Jacobian-repeat"><strong>repeat</strong></a>(a, n)</dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
-
-<hr>
-Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>value</strong></dt>
-</dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><strong>__hash__</strong> = None</dl>
-
-<dl><dt><strong>generating_set</strong> = None</dl>
-
-<dl><dt><strong>generator</strong> = None</dl>
-
-<dl><dt><strong>identity</strong> = None</dl>
-
-<dl><dt><strong>is_cyclic</strong> = False</dl>
+<dl><dt><strong>is_cyclic</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -1324,84 +1610,55 @@ Data and other attributes inherited from <a href="mpyc.fingroups.html#FiniteGrou
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-ClassGroup"><strong>ClassGroup</strong></a>(disc=None, bit_length=None, gen_guess=False, gen_set=False)</dt><dd><tt>Create&nbsp;type&nbsp;for&nbsp;class&nbsp;group,&nbsp;given&nbsp;(bit&nbsp;length&nbsp;of)&nbsp;the&nbsp;discriminant.<br>
+<td width="100%"><dl><dt><a name="-ClassGroup"><strong>ClassGroup</strong></a>(Delta=None, l=None)</dt><dd><tt>Create&nbsp;type&nbsp;for&nbsp;class&nbsp;group,&nbsp;given&nbsp;(bit&nbsp;length&nbsp;l&nbsp;of)&nbsp;discriminant&nbsp;Delta.<br>
 &nbsp;<br>
-Discriminant&nbsp;is&nbsp;required&nbsp;to&nbsp;be&nbsp;negative,&nbsp;corresponding&nbsp;to&nbsp;an&nbsp;imaginary&nbsp;quadratic&nbsp;field.<br>
-By&nbsp;definition,&nbsp;the&nbsp;discriminant&nbsp;is&nbsp;0&nbsp;or&nbsp;1&nbsp;modulo&nbsp;4.<br>
-The&nbsp;discriminant&nbsp;also&nbsp;required&nbsp;to&nbsp;be&nbsp;fundamental,&nbsp;that&nbsp;is:<br>
+The&nbsp;following&nbsp;conditions&nbsp;are&nbsp;imposed&nbsp;on&nbsp;discriminant&nbsp;Delta:<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disc&nbsp;=&nbsp;1&nbsp;mod&nbsp;4&nbsp;and&nbsp;Delta&nbsp;is&nbsp;square-free,&nbsp;or,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disc&nbsp;=&nbsp;0&nbsp;mod&nbsp;4,&nbsp;Delta/4&nbsp;=&nbsp;2&nbsp;or&nbsp;3&nbsp;mod&nbsp;4&nbsp;and&nbsp;Delta/4&nbsp;is&nbsp;square-free.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Delta&nbsp;&lt;&nbsp;0,&nbsp;only&nbsp;supporting&nbsp;class&nbsp;groups&nbsp;of&nbsp;imaginary&nbsp;quadratic&nbsp;field<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Delta&nbsp;=&nbsp;1&nbsp;(mod&nbsp;4),&nbsp;preferably&nbsp;Delta&nbsp;=&nbsp;1&nbsp;(mod&nbsp;8)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;-Delta&nbsp;is&nbsp;prime<br>
 &nbsp;<br>
-gen_guess&nbsp;&nbsp;&nbsp;guess&nbsp;that&nbsp;group&nbsp;is&nbsp;cyclic&nbsp;(high&nbsp;probability),&nbsp;initialize&nbsp;attribute&nbsp;.generator.<br>
-gen_set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;create&nbsp;generating_set&nbsp;using&nbsp;generating_system,&nbsp;time:&nbsp;O(|group.discriminant|^(1/2+o(1)))</tt></dd></dl>
- <dl><dt><a name="-EllipticCurve"><strong>EllipticCurve</strong></a>(name='ED25519', affine=False)</dt><dd><tt>Create&nbsp;elliptic&nbsp;curve&nbsp;type&nbsp;for&nbsp;given&nbsp;curve&nbsp;parameters.</tt></dd></dl>
- <dl><dt><a name="-QuadraticResidues"><strong>QuadraticResidues</strong></a>(modulus)</dt><dd><tt>Create&nbsp;a&nbsp;QR&nbsp;type&nbsp;for&nbsp;given&nbsp;modulus.</tt></dd></dl>
- <dl><dt><a name="-SymmetricGroup"><strong>SymmetricGroup</strong></a>(n)</dt><dd><tt>Create&nbsp;type&nbsp;for&nbsp;symmetric&nbsp;group&nbsp;Sym_n.<br>
+This&nbsp;implies&nbsp;that&nbsp;Delta&nbsp;is&nbsp;a&nbsp;fundamental&nbsp;discriminant.</tt></dd></dl>
+ <dl><dt><a name="-EllipticCurve"><strong>EllipticCurve</strong></a>(curvename='ED25519', coordinates=None)</dt><dd><tt>Create&nbsp;elliptic&nbsp;curve&nbsp;type&nbsp;for&nbsp;a&nbsp;selection&nbsp;of&nbsp;built-in&nbsp;curves.<br>
+The&nbsp;default&nbsp;coordinates&nbsp;used&nbsp;with&nbsp;these&nbsp;curves&nbsp;are&nbsp;'affine'.<br>
 &nbsp;<br>
-Representation&nbsp;based&nbsp;on&nbsp;image&nbsp;maps,&nbsp;not&nbsp;cycle&nbsp;notation.</tt></dd></dl>
- <dl><dt><a name="-add_2007_bl"><strong>add_2007_bl</strong></a>(pt1, pt2)</dt><dd><tt>Add&nbsp;points,&nbsp;formula&nbsp;add_2007_bl&nbsp;by&nbsp;Bernstein&nbsp;and&nbsp;Lange&nbsp;(2007).<br>
+The&nbsp;following&nbsp;Edwards&nbsp;curves&nbsp;and&nbsp;Weierstrass&nbsp;curves&nbsp;are&nbsp;built-in:<br>
 &nbsp;<br>
-Link:&nbsp;<a href="http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl">http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl</a></tt></dd></dl>
- <dl><dt><a name="-add_edwards_affine"><strong>add_edwards_affine</strong></a>(pt1, pt2)</dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;using&nbsp;'mmadd-2007-bl',&nbsp;convert&nbsp;to&nbsp;affine.</tt></dd></dl>
- <dl><dt><a name="-add_edwards_hom_proj_z1"><strong>add_edwards_hom_proj_z1</strong></a>(pt1, pt2)</dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;with&nbsp;homogeneous&nbsp;projective&nbsp;coordinates.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'ED25519':&nbsp;see&nbsp;https://en.wikipedia.org/wiki/EdDSA#Ed25519<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'ED448':&nbsp;aka&nbsp;"Goldilocks",&nbsp;see&nbsp;https://en.wikipedia.org/wiki/Curve448<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256':&nbsp;Barreto-Naehrig&nbsp;curve,&nbsp;https://eprint.iacr.org/2010/186<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256_twist':&nbsp;sextic&nbsp;twist&nbsp;of&nbsp;Barreto-Naehrig&nbsp;curve<br>
 &nbsp;<br>
-Requires&nbsp;z1&nbsp;==&nbsp;1&nbsp;and&nbsp;z2&nbsp;==&nbsp;1.<br>
+Both&nbsp;curves&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;'affine'&nbsp;(default)&nbsp;and&nbsp;'projective'&nbsp;coordinates.<br>
+The&nbsp;Edwards&nbsp;curves&nbsp;can&nbsp;also&nbsp;be&nbsp;used&nbsp;with&nbsp;'extended'&nbsp;coordinates,&nbsp;and&nbsp;the<br>
+Weierstrass&nbsp;curves&nbsp;with&nbsp;'jacobian'&nbsp;coordinates.</tt></dd></dl>
+ <dl><dt><a name="-QuadraticResidues"><strong>QuadraticResidues</strong></a>(modulus=None, l=None)</dt><dd><tt>Create&nbsp;a&nbsp;QR&nbsp;type&nbsp;for&nbsp;given&nbsp;(bit&nbsp;length&nbsp;l&nbsp;of)&nbsp;odd&nbsp;prime&nbsp;modulus&nbsp;p.<br>
 &nbsp;<br>
-Addition&nbsp;law&nbsp;'mmadd-2007-bl'.<br>
-See:&nbsp;<a href="http://hyperelliptic.org/EFD/g1p/data/edwards/projective/addition/mmadd-2007-bl">http://hyperelliptic.org/EFD/g1p/data/edwards/projective/addition/mmadd-2007-bl</a></tt></dd></dl>
- <dl><dt><a name="-add_mmadd_2007_bl"><strong>add_mmadd_2007_bl</strong></a>(pt1, pt2)</dt><dd><tt>Apply&nbsp;addition&nbsp;law&nbsp;'mmadd-2007-bl'.<br>
-&nbsp;<br>
-See:&nbsp;<a href="http://hyperelliptic.org/EFD/g1p/data/edwards/projective/addition/mmadd-2007-bl">http://hyperelliptic.org/EFD/g1p/data/edwards/projective/addition/mmadd-2007-bl</a></tt></dd></dl>
- <dl><dt><a name="-add_weierstrass_affine"><strong>add_weierstrass_affine</strong></a>(pt1, pt2)</dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;affine&nbsp;coordinates.<br>
-&nbsp;<br>
-Requires&nbsp;short&nbsp;Weierstrass&nbsp;form&nbsp;and&nbsp;affine&nbsp;coordinates.<br>
-&nbsp;<br>
-Algorithm&nbsp;documented&nbsp;in&nbsp;Silverman,&nbsp;The&nbsp;<br>
-etic&nbsp;of&nbsp;elliptic&nbsp;curves(1994)<br>
-and&nbsp;thesis&nbsp;Hisil&nbsp;(2010),&nbsp;for&nbsp;example.<br>
-Link:&nbsp;https://core.ac.uk/download/pdf/10898289.pdf&nbsp;(Algorithm&nbsp;4.1.1)</tt></dd></dl>
- <dl><dt><a name="-add_weierstrass_jacobian"><strong>add_weierstrass_jacobian</strong></a>(pt1, pt2)</dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;Jacobian&nbsp;coordinates.<br>
-&nbsp;<br>
-Requires&nbsp;short&nbsp;Weierstrass&nbsp;form&nbsp;and&nbsp;Jacobian&nbsp;coordinates.<br>
-Does&nbsp;not&nbsp;assume&nbsp;z1&nbsp;=&nbsp;1&nbsp;or&nbsp;z2&nbsp;=&nbsp;1.</tt></dd></dl>
- <dl><dt><a name="-affine_tuple_to_coord"><strong>affine_tuple_to_coord</strong></a>(CurveElt_subtype, pt_tuple)</dt><dd><tt>Convert&nbsp;tuple&nbsp;in&nbsp;affine&nbsp;notation&nbsp;to&nbsp;curve&nbsp;element.<br>
-&nbsp;<br>
-Invariant:&nbsp;pt_tuple&nbsp;should&nbsp;be&nbsp;defined&nbsp;as&nbsp;(x,&nbsp;y)&nbsp;tuple&nbsp;of&nbsp;field&nbsp;elements&nbsp;in&nbsp;affine&nbsp;notation.</tt></dd></dl>
- <dl><dt><a name="-dbl_2009_l"><strong>dbl_2009_l</strong></a>(pt1)</dt><dd><tt>Double&nbsp;point,&nbsp;formula&nbsp;dbl-2009-l&nbsp;by&nbsp;Lange&nbsp;(2009).<br>
-&nbsp;<br>
-Link:&nbsp;<a href="http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l">http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l</a></tt></dd></dl>
- <dl><dt><a name="-double_weierstrass_jacobian"><strong>double_weierstrass_jacobian</strong></a>(pt1, pt2)</dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;Jacobian&nbsp;coordinates.<br>
-&nbsp;<br>
-Requires&nbsp;short&nbsp;Weierstrass&nbsp;form&nbsp;and&nbsp;Jacobian&nbsp;coordinates.<br>
-Does&nbsp;not&nbsp;assume&nbsp;z1&nbsp;=&nbsp;1.</tt></dd></dl>
- <dl><dt><a name="-ed_affine_to_extended"><strong>ed_affine_to_extended</strong></a>(pt)</dt><dd><tt>Map&nbsp;(x,&nbsp;y)&nbsp;to&nbsp;(x&nbsp;:&nbsp;y&nbsp;:&nbsp;x*y&nbsp;:&nbsp;&nbsp;1).</tt></dd></dl>
- <dl><dt><a name="-ed_affine_to_hom_proj"><strong>ed_affine_to_hom_proj</strong></a>(pt)</dt><dd><tt>Convert&nbsp;affine&nbsp;coordinates&nbsp;to&nbsp;extended&nbsp;hom.&nbsp;proj.&nbsp;coordinates.</tt></dd></dl>
- <dl><dt><a name="-ed_hom_proj_to_affine"><strong>ed_hom_proj_to_affine</strong></a>(pt)</dt><dd><tt>Map&nbsp;(X:Y:Z)&nbsp;to&nbsp;(X/Z,&nbsp;Y/Z,&nbsp;1),&nbsp;assumes&nbsp;hom.&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
- <dl><dt><a name="-ed_hom_proj_to_extended"><strong>ed_hom_proj_to_extended</strong></a>(pt)</dt><dd><tt>Convert&nbsp;hom.&nbsp;proj.&nbsp;coordinates&nbsp;to&nbsp;extended&nbsp;hom.&nbsp;proj.&nbsp;coordinates.</tt></dd></dl>
- <dl><dt><a name="-extended_to_affine"><strong>extended_to_affine</strong></a>(pt)</dt><dd><tt>Convert&nbsp;extended&nbsp;Edwards&nbsp;point&nbsp;to&nbsp;affine&nbsp;point.</tt></dd></dl>
+The&nbsp;group&nbsp;of&nbsp;quadratic&nbsp;residues&nbsp;modulo&nbsp;p&nbsp;is&nbsp;of&nbsp;order&nbsp;n=(p-1)/2.<br>
+Given&nbsp;bit&nbsp;length&nbsp;l&gt;2,&nbsp;p&nbsp;will&nbsp;be&nbsp;chosen&nbsp;such&nbsp;that&nbsp;n&nbsp;is&nbsp;also&nbsp;an&nbsp;odd&nbsp;prime.<br>
+If&nbsp;l=2,&nbsp;the&nbsp;only&nbsp;possibility&nbsp;is&nbsp;p=3,&nbsp;hence&nbsp;n=1.</tt></dd></dl>
+ <dl><dt><a name="-SymmetricGroup"><strong>SymmetricGroup</strong></a>(n)</dt><dd><tt>Create&nbsp;type&nbsp;for&nbsp;symmetric&nbsp;group&nbsp;of&nbsp;degree&nbsp;n,&nbsp;n&gt;=0.</tt></dd></dl>
  <dl><dt><a name="-gcdext"><strong>gcdext</strong></a>(...)</dt><dd><tt><a href="#-gcdext">gcdext</a>(a,&nbsp;b)&nbsp;-&nbsp;&gt;&nbsp;tuple<br>
 &nbsp;<br>
 Return&nbsp;a&nbsp;3-element&nbsp;tuple&nbsp;(g,s,t)&nbsp;such&nbsp;that<br>
 &nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;==&nbsp;gcd(a,b)&nbsp;and&nbsp;g&nbsp;==&nbsp;a*s&nbsp;+&nbsp;b*t</tt></dd></dl>
+ <dl><dt><a name="-is_prime"><strong>is_prime</strong></a>(...)</dt><dd><tt><a href="#-is_prime">is_prime</a>(x[,&nbsp;n=25])&nbsp;-&gt;&nbsp;bool<br>
+&nbsp;<br>
+Return&nbsp;True&nbsp;if&nbsp;x&nbsp;is&nbsp;_probably_&nbsp;prime,&nbsp;else&nbsp;False&nbsp;if&nbsp;x&nbsp;is<br>
+definitely&nbsp;composite.&nbsp;x&nbsp;is&nbsp;checked&nbsp;for&nbsp;small&nbsp;divisors&nbsp;and&nbsp;up<br>
+to&nbsp;n&nbsp;Miller-Rabin&nbsp;tests&nbsp;are&nbsp;performed.</tt></dd></dl>
+ <dl><dt><a name="-isqrt"><strong>isqrt</strong></a>(...)</dt><dd><tt><a href="#-isqrt">isqrt</a>(x)&nbsp;-&gt;&nbsp;mpz<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;integer&nbsp;square&nbsp;root&nbsp;of&nbsp;an&nbsp;integer&nbsp;x.&nbsp;x&nbsp;&gt;=&nbsp;0.</tt></dd></dl>
  <dl><dt><a name="-legendre"><strong>legendre</strong></a>(...)</dt><dd><tt><a href="#-legendre">legendre</a>(x,&nbsp;y)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
 Return&nbsp;the&nbsp;Legendre&nbsp;symbol&nbsp;(x|y).&nbsp;y&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;an&nbsp;odd&nbsp;prime.</tt></dd></dl>
  <dl><dt><a name="-next_prime"><strong>next_prime</strong></a>(...)</dt><dd><tt><a href="#-next_prime">next_prime</a>(x)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
 Return&nbsp;the&nbsp;next&nbsp;_probable_&nbsp;prime&nbsp;number&nbsp;&gt;&nbsp;x.</tt></dd></dl>
- <dl><dt><a name="-on_affine_curve"><strong>on_affine_curve</strong></a>(pt)</dt></dl>
- <dl><dt><a name="-on_curve_affine"><strong>on_curve_affine</strong></a>(pt)</dt></dl>
- <dl><dt><a name="-set_edwards_eq"><strong>set_edwards_eq</strong></a>(*, a=1, c=1, d=1)</dt><dd><tt>Return&nbsp;equation&nbsp;that&nbsp;defines&nbsp;Edwards&nbsp;curve.<br>
+ <dl><dt><a name="-powmod"><strong>powmod</strong></a>(...)</dt><dd><tt><a href="#-powmod">powmod</a>(x,&nbsp;y,&nbsp;m)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
-To&nbsp;check&nbsp;if&nbsp;point&nbsp;is&nbsp;on&nbsp;curve.<br>
-Edwards&nbsp;curve&nbsp;requires&nbsp;c,&nbsp;d&nbsp;params:&nbsp;x**2&nbsp;+&nbsp;y**2&nbsp;==&nbsp;c**2&nbsp;*&nbsp;(1&nbsp;+&nbsp;d&nbsp;*&nbsp;x**2&nbsp;*&nbsp;y**2)<br>
-Twisted&nbsp;curve&nbsp;requires&nbsp;a,&nbsp;d&nbsp;params:&nbsp;a&nbsp;*&nbsp;x**2&nbsp;+&nbsp;y**2&nbsp;==&nbsp;1&nbsp;+&nbsp;d&nbsp;*&nbsp;x**2&nbsp;*&nbsp;y**2</tt></dd></dl>
- <dl><dt><a name="-set_returntype_for_operation"><strong>set_returntype_for_operation</strong></a>(pt1, pt2)</dt></dl>
- <dl><dt><a name="-set_weierstrass_eq"><strong>set_weierstrass_eq</strong></a>(*, a=1, b=1)</dt><dd><tt>Return&nbsp;equation&nbsp;that&nbsp;defines&nbsp;Weierstrass&nbsp;curve.</tt></dd></dl>
- <dl><dt><a name="-wei_affine_to_jacobian"><strong>wei_affine_to_jacobian</strong></a>(pt)</dt><dd><tt>Map&nbsp;(x,&nbsp;y)&nbsp;to&nbsp;(x&nbsp;:&nbsp;y&nbsp;:&nbsp;&nbsp;1).</tt></dd></dl>
- <dl><dt><a name="-wei_hom_proj_to_affine"><strong>wei_hom_proj_to_affine</strong></a>(pt)</dt><dd><tt>Map&nbsp;(X:Y:Z)&nbsp;to&nbsp;(X/Z,&nbsp;Y/Z,&nbsp;1),&nbsp;assumes&nbsp;hom.&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
- <dl><dt><a name="-wei_hom_proj_to_jacobian"><strong>wei_hom_proj_to_jacobian</strong></a>(pt)</dt><dd><tt>Convert&nbsp;hom.&nbsp;proj.&nbsp;coordinates&nbsp;to&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
- <dl><dt><a name="-wei_jacobian_to_affine"><strong>wei_jacobian_to_affine</strong></a>(pt)</dt><dd><tt>Map&nbsp;(X:Y:Z)&nbsp;to&nbsp;(X/Z^2,&nbsp;Y/Z^3,&nbsp;1),&nbsp;assumes&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
+Return&nbsp;(x**y)&nbsp;mod&nbsp;m.&nbsp;Same&nbsp;as&nbsp;the&nbsp;three&nbsp;argument&nbsp;version&nbsp;of&nbsp;Python's<br>
+built-in&nbsp;pow(),&nbsp;but&nbsp;converts&nbsp;all&nbsp;three&nbsp;arguments&nbsp;to&nbsp;mpz.</tt></dd></dl>
 </td></tr></table>
 </body></html>
