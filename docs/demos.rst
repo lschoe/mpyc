@@ -572,7 +572,7 @@ of the numbers, compared to using secure integer arithmetic.
 See `lpsolverfxp.py <https://github.com/lschoe/mpyc/blob/master/demos/lpsolverfxp.py>`_ for more information.
 
 aes.py
---------------
+------
 
 This demo implements the `AES block cipher <https://en.wikipedia.org/wiki/Advanced_Encryption_Standard>`_
 such that AES encryptions and decryptions can be performed as a multiparty computation.
@@ -638,7 +638,7 @@ Python generators.
 See `onewayhashchains.py <https://github.com/lschoe/mpyc/blob/master/demos/onewayhashchains.py>`_ for more information.
 
 ridgeregression.py
--------------------
+------------------
 
 This demo presents an efficient solution for secure `ridge regression <https://en.wikipedia.org/wiki/Ridge_regression>`_.
 The smaller datasets are included with the demo on GitHub, but the larger ones have to be downloaded separately
@@ -680,8 +680,51 @@ remain below :math:`p`.
 
 See `ridgeregression.py <https://github.com/lschoe/mpyc/blob/master/demos/ridgeregression.py>`_ for more information.
 
+multilateration.py
+------------------
+
+This demo features a method for privacy-preserving `multilateration <https://en.wikipedia.org/wiki/Multilateration>`_.
+The goal is to localize an aircraft from its signal emitted from the sky and received by
+(in our case) five sensors on the ground.
+
+Each sensor measures the time of arrival (ToA) for the signal. Given the sensor locations as additional input,
+the position of the aircraft can then be approximated accurately using a method due to Schmidt.
+In this demo we show how to do this without revealing the sensor locations nor the ToAs in the clear.
+
+For a run with :math:`m=5` parties (sensors) we get as result::
+
+    $ python multilateration.py -M5 -i 1 2 3 4 5 6 7 8 --plot
+    2021-11-18 13:10:08,915 Start MPyC runtime v0.7.10
+    2021-11-18 13:10:10,969 All 5 parties connected.
+    Using secure 335-bit integers: SecInt335 (scale factor=1000)
+    Processing 1439 measurements from sets 1+2+3+4+5+6+7+8: 100%
+    2021-11-18 13:11:03,549 Stop MPyC runtime -- elapsed time: 0:00:54.634274
+    Location Error [m]:
+    count     1439.000000
+    mean       702.527331
+    std       1875.874072
+    min          0.304723
+    25%         67.862993
+    50%        183.571693
+    75%        487.555568
+    max      17650.578739
+    dtype: float64
+
+The error is limited to a few hundred meters, which can also be seen from the histogram and density plot:
+    
+.. image:: ./Figure_1.png
+
+Technically, our implementation of Schmidt's method reuses function :code:`linear_solve()` from the
+demo `ridgeregression.py <https://github.com/lschoe/mpyc/blob/master/demos/ridgeregression.py>`_
+to compute the required least-squares approximation entirely over the integers. In the example run shown here
+we use secure 335-bit integers for an accuracy of 3 decimal places (scale factor of 1000). Varying the accuracy
+from 6 decimal places (using 470-bit integers) to 0 decimal places (using 200-bit integers) has little
+impact on the results nor on the performance. 
+
+See `multilateration.py <https://github.com/lschoe/mpyc/blob/master/demos/multilateration.py>`_ for more information.
+
 kmsurvival.py
--------------------
+-------------
 
 This demo is about privacy-preserving Kaplan--Meier `survival analysis <https://en.wikipedia.org/wiki/Survival_analysis>`_.
 For an extensive explanation we refer to the Jupyter notebook
@@ -723,7 +766,7 @@ at the same time ensuring that the plot still gives a useful impression of the s
 See `kmsurvival.py <https://github.com/lschoe/mpyc/blob/master/demos/kmsurvival.py>`_ for more information.
 
 cnnmnist.py
--------------------
+-----------
 
 This demo shows a fully private
 `Convolutional Neural Network (CNN) <https://en.wikipedia.org/wiki/Convolutional_neural_network>`_
@@ -797,7 +840,7 @@ parts, such that the parties have sufficiently many "gates" to work on in parall
 See `cnnmnist.py <https://github.com/lschoe/mpyc/blob/master/demos/cnnmnist.py>`_ for more information.
 
 bnnmnist.py
--------------------
+-----------
 
 This demo presents an alternative fully private MNIST classifier, namely a Binarized Neural Network
 (`Multilayer Perceptron <https://en.wikipedia.org/wiki/Multilayer_perceptron>`_) classifier.
