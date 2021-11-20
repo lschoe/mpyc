@@ -97,6 +97,10 @@ optional arguments:
 
 `python ridgeregression.py -M3`
 
+`python multilateration.py -i 3 4 5`
+
+`python multilateration.py -M5 -i1 -a1 --plot`
+
 `python kmsurvival.py --plot --no-log`
 
 `python kmsurvival.py -M3 -i4 --collapse --plot`

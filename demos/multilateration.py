@@ -1,9 +1,10 @@
 """Demo Multilateration (MLAT) by means of Schmidt's localization method.
 
 This demo is based on the code and data Daniel Moser used for Chapter 5
-"The Oblivious Sensor Network" of his PhD thesis "Modern Attacker Models and
-Countermeasures in Wireless Communication Systems -- The Case of Air Traffic
-Communication", DISS. ETH No. 27621, Zurich, 2021.
+"The Oblivious Sensor Network" of his PhD thesis "Modern Attacker Models
+and Countermeasures in Wireless Communication Systems -- The Case of Air
+Traffic Communication", DISS. ETH No. 27621, Zurich, 2021.
+See https://doi.org/10.3929/ethz-b-000516026.
 
 The demo shows how to perform multilateration in a privacy-preserving manner.
 Aircrafts are located by means of a multiparty computation between five sensors.
@@ -40,7 +41,7 @@ to work with integer values only:
 
 This way we obtain a good approximation of the aircraft's latitude and longitude.
 The computed altitude is not reliable because only sensors on the ground are used,
-and therefore the airccraft's reported altitude is used instead to analyze the
+and therefore the aircraft's reported altitude is used instead to analyze the
 location error. We do so by first converting the known and computed positions from
 world geodetic (spherical) coordinates to ECEF (cartesian) coordinates and then
 taking the Euclidean distance.
@@ -181,7 +182,7 @@ async def main():
                 position_i = [int(x_i * scaling), int(y_i * scaling), int(z_i * scaling)]
                 toas_i = list(zip(*eval(row.measurements)))[1][i]
                 toas_i *= speed_of_light / 1e9
-                toas_i = int(toas_i *  scaling)
+                toas_i = int(toas_i * scaling)
             else:
                 position_i = [None] * 3
                 toas_i = None
@@ -209,9 +210,10 @@ async def main():
     if mpc.pid == 0 and args.plot:
         _, ax = plt.subplots(1, 1, figsize=(8, 5))
         ax.set_title(f'Frequency and density for {nrows} measurements')
-        distances.plot.kde(ind=range(0, 1000), secondary_y=True, color=(1, 0.55, 0.5), linewidth=3)
+        distances.plot.kde(bw_method=0.025, ind=range(0, 1000),
+                           secondary_y=True, color=(1, 0.55, 0.5), linewidth=3)
         ax.right_ax.set_yticks([])  # suppress density scale
-        distances.plot.hist(bins=5, range=(0, 1000), rwidth=.9, color=(0, 0.55, 1))
+        distances.plot.hist(bins=10, range=(0, 1000), rwidth=.9, color=(0, 0.55, 1))
         ax.set_xlim([0, 1000])
         ax.set_xlabel('Location Error [m]')
         plt.show()
