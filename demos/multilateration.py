@@ -123,14 +123,12 @@ async def schmidt_multilateration(locations, toas):
         Delta = [toas[j] - toas[k],
                  toas[k] - toas[i],
                  toas[i] - toas[j]]
-        x_i, y_i, z_i = locations[i]
-        x_j, y_j, z_j = locations[j]
-        x_k, y_k, z_k = locations[k]
-        r_x = mpc.in_prod([x_i, x_j, x_k], Delta)
-        r_y = mpc.in_prod([y_i, y_j, y_k], Delta)
-        r_z = mpc.in_prod([z_i, z_j, z_k], Delta)
+        XYZN = [locations[i] + [norm[i]],
+                locations[j] + [norm[j]],
+                locations[k] + [norm[k]]]
+        r_x, r_y, r_z, r_n = mpc.matrix_prod([Delta], XYZN)[0]
         A.append([2*r_x, 2*r_y, 2*r_z])
-        b.append(mpc.prod(Delta) + mpc.in_prod([norm[i], norm[j], norm[k]], Delta))
+        b.append(mpc.prod(Delta) + r_n)
 
     # Compute least-squares solution w satisfying A^T A w = A^T b:
     AT, bT = list(map(list, zip(*A))), [b]  # transpose of A and b
