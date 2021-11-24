@@ -1,7 +1,6 @@
 import operator
 import math
 import unittest
-import mpyc.gmpy as gmpy2
 from mpyc.runtime import mpc
 
 
@@ -279,10 +278,11 @@ class Arithmetic(unittest.TestCase):
             t = sum(t)
             self.assertEqual(mpc.run(mpc.output(mpc.in_prod(x, x))), t)
             self.assertEqual(mpc.run(mpc.output(mpc.in_prod(x, x[:]))), t)
-            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([x], [x], True)[0])), [t])
-            u = mpc.unit_vector(secfxp(3), 4)
-            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([x], [u], True)[0])), [s[3]])
-            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod([u], [x], True)[0])), [s[3]])
+            X = [x]
+            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod(X, X, True)[0])), [t])
+            U = [mpc.unit_vector(secfxp(3), 4)]
+            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod(X, U, True)[0])), [s[3]])
+            self.assertEqual(mpc.run(mpc.output(mpc.matrix_prod(U, X, True)[0])), [s[3]])
             self.assertEqual(mpc.run(mpc.output(mpc.gauss([[a]], b, [a], [b])[0])), [0])
             t = [_ for a, b, c, d in [s] for _ in [a + b, a * b, a - b]]
             self.assertEqual(mpc.run(mpc.output([a + b, a * b, a - b])), t)

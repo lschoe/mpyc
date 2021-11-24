@@ -1338,8 +1338,7 @@ class Runtime:
             return 0
 
         if x is y:
-            x = x[:]
-            y = x
+            x = y = x[:]
         else:
             x, y = x[:], y[:]
         shx = isinstance(x[0], SecureObject)
@@ -1641,8 +1640,7 @@ class Runtime:
             return []
 
         if x is y:
-            x = x[:]
-            y = x
+            x = y = x[:]
         else:
             x, y = x[:], y[:]
         n = len(x)
@@ -1676,7 +1674,10 @@ class Runtime:
     @mpc_coro
     async def matrix_prod(self, A, B, tr=False):
         """Secure matrix product of A with (transposed) B."""
-        A, B = [r[:] for r in A], [r[:] for r in B]
+        if A is B:
+            A = B = [r[:] for r in A]
+        else:
+            A, B = [r[:] for r in A], [r[:] for r in B]
         shA = isinstance(A[0][0], SecureObject)
         shB = isinstance(B[0][0], SecureObject)
         stype = type(A[0][0]) if shA else type(B[0][0])
@@ -1691,29 +1692,38 @@ class Runtime:
             B_integral = B[0][0].integral
             await returnType((stype, A_integral and B_integral), n1, n2)
 
-        if shA and shB:
+        if A is B:
+            A = B = await self.gather(A)
+        elif shA and shB:
             A, B = await self.gather(A, B)
         elif shA:
             A = await self.gather(A)
         else:
             B = await self.gather(B)
         n = len(A[0])
-        C = [None] * (n1 * n2)
-        for ia in range(n1):
-            for ib in range(n2):
+        C_symmetric = A is B and tr  # C = A A^T is symmetric
+        C = [None] * (n1*(n1+1)//2 if C_symmetric else n1 * n2)
+        for i in range(n1):
+            ni = i*(i+1)//2 if C_symmetric else i * n2
+            for j in range(i+1 if C_symmetric else n2):
                 s = 0
-                for i in range(n):
-                    s += A[ia][i].value * (B[ib][i] if tr else B[i][ib]).value
+                for k in range(n):
+                    s += A[i][k].value * (B[j][k] if tr else B[k][j]).value
                 s = field(s)
                 if f and (A_integral or B_integral):
                     s >>= f  # NB: in-place rshift
-                C[ia * n2 + ib] = s
+                C[ni + j] = s
         if shA and shB:
             C = await self.gather(self._reshare(C))
         if f and not A_integral and not B_integral:
             C = [self.trunc(c, f=f, l=stype.bit_length) for c in C]
             C = await self.gather(C)
-        return [[C[ia * n2 + ib] for ib in range(n2)] for ia in range(n1)]
+        if C_symmetric:
+            C = [[C[i*(i+1)//2 + j if j <= i else j*(j+1)//2 + i]
+                  for j in range(n1)] for i in range(n1)]
+        else:
+            C = [[C[i * n2 + j] for j in range(n2)] for i in range(n1)]
+        return C
 
     @mpc_coro
     async def gauss(self, A, d, b, c):
