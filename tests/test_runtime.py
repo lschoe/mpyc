@@ -89,8 +89,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(a * b)), 0)
 
         self.assertEqual(mpc.run(mpc.output(mpc.to_bits(secfld(0), 8))), [0, 0, 0, 0, 0, 0, 0, 0])
-        self.assertEqual(mpc.run(mpc.output(mpc.to_bits(secfld(1), 8))), [1, 0, 0, 0, 0, 0, 0, 0])
         self.assertEqual(mpc.run(mpc.output(mpc.to_bits(secfld(255), 8))), [1, 1, 1, 1, 1, 1, 1, 1])
+        self.assertEqual(mpc.run(mpc.output(mpc.to_bits(secfld(31), 17)))[:6], [1, 1, 1, 1, 1, 0])
 
         secfld = mpc.SecFld(modulus=101)
         a = secfld(1)

@@ -8,17 +8,16 @@ X = gfpx.X
 class Arithmetic(unittest.TestCase):
 
     def setUp(self):
-        global mod_2, mod_all
         gf2x = gfpx.GFpX(2)
         gf2x_ = gfpx.BinaryPolynomial
         gf3x = gfpx.GFpX(3)
         gf101x = gfpx.GFpX(101)
-        mod_2 = (gf2x, gf2x_)
-        mod_all = mod_2 + (gf3x, gf101x)
+        self.mod_2 = (gf2x, gf2x_)
+        self.mod_all = self.mod_2 + (gf3x, gf101x)
 
     def test_modall(self):
         self.assertRaises(ValueError, gfpx.GFpX, 4)
-        for poly in mod_all:
+        for poly in self.mod_all:
             self._test_modall(poly)
             self._test_errors(poly)
 
@@ -82,7 +81,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, operator.pow, poly(3), -16)
 
     def test_mod2(self):
-        for poly in mod_2:
+        for poly in self.mod_2:
             self._test_mod2(poly)
 
     def _test_mod2(self, poly):

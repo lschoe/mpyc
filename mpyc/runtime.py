@@ -565,7 +565,13 @@ class Runtime:
         d = ttype.frac_length - stype.frac_length  # TODO: use integral attribute fxp
         if d < 0:
             x = await self.trunc(x, f=-d, l=stype.bit_length)  # TODO: take minimum with ttype or so
-        offset = 1 << l-1
+        if stype.field.is_signed:
+            if issubclass(stype, sectypes.SecureFiniteField):
+                offset = stype.field.modulus // 2
+            else:
+                offset = 1 << l-1
+        else:
+            offset = 0
         r = thresha.pseudorandom_share(stype.field, m, self.pid, prfs, uci, n)
         for i in range(n):
             x[i] = x[i].value + offset + r[i]
@@ -1863,7 +1869,7 @@ class Runtime:
         stype = type(a)
         if l is None:
             l = stype.bit_length
-        # TODO: check l <= stype.bit_length (+1 for SecureFiniteField)
+        assert l <= stype.bit_length + stype.frac_length
         await returnType((stype, True), l)
         field = stype.field
         f = stype.frac_length

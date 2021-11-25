@@ -634,7 +634,7 @@ def SecGrp(group):
     """Secure version of given finite group."""
     if issubclass(group, fg.SymmetricGroupElement):
         base = SecureSymmetricGroupElement
-        sectype = runtime.SecFld(min_order=2*group.degree)  # TODO: check factor of 2
+        sectype = runtime.SecFld(min_order=group.degree)
     elif issubclass(group, fg.QuadraticResidue):
         base = SecureQuadraticResidue
         sectype = runtime.SecFld(2*group.order+1)

@@ -568,7 +568,7 @@ def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, si
 
 @functools.lru_cache(maxsize=None)
 def _SecFld(field):
-    l = field.order.bit_length() - 1
+    l = (field.order - 1).bit_length()
     name = f'SecFld{l}({field.__name__})'
     secfld = type(name, (SecureFiniteField,), {'__slots__': ()})
     secfld.__doc__ = 'Class of secret-shared finite field elements.'
