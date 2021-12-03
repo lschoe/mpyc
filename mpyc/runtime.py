@@ -2304,9 +2304,8 @@ def setup():
             flags = ['-' + flg(a) * c for a, c in flgmap.items() if flg(a)]
             # convert sys._xoptions into command line arguments
             xopts = ['-X' + a + ('' if c is True else '=' + c) for a, c in sys._xoptions.items()]
-            prog, args = argv[0], argv[1:]
             for i in range(m-1, 0, -1):
-                cmd_line = [sys.executable] + flags + xopts + [prog, '-I', str(i)] + args
+                cmd_line = [sys.executable] + flags + xopts + argv + ['-I', str(i)]
                 if options.output_windows and platform.platform().startswith('Windows'):
                     subprocess.Popen(['start'] + cmd_line, shell=True)
                 elif options.output_file:

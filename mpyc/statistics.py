@@ -2,11 +2,11 @@
 The module is modeled after the statistics module in the Python standard library, and
 as such aimed at small scale use ("at the level of graphing and scientific calculators").
 
-Functions mean, median, median_low, median_high, and mode are provided for calculating
-averages (measures of central location). Functions variance, stdev, pvariance, pstdev
-are provided for calculating variability (measures of spread). Functions covariance,
-correlation, linear_regression are provided for calculating statistics regarding
-relations between two sets of data.
+Functions mean, median, median_low, median_high, quantiles, and mode are provided
+for calculating averages (measures of central location). Functions variance, stdev,
+pvariance, pstdev are provided for calculating variability (measures of spread).
+Functions covariance, correlation, linear_regression are provided for calculating
+statistics regarding relations between two sets of data.
 
 Most of these functions work best with secure fixed-point numbers, but some effort is
 done to support the use of secure integers as well. For instance, the mean of a sample
@@ -15,8 +15,8 @@ of a sample of integers is also rounded to the nearest integer, but this will on
 useful if the sample is properly scaled.
 
 A baseline implementation is provided, favoring simplicity over efficiency. Also, the
-current implementations of mode and median favor a small privacy leak over a strict but
-less efficient approach.
+current implementations of mode, median, and quantiles favor a small privacy leak over
+a strict but less efficient approach.
 
 If these functions are called with plain data, the call is relayed to the corresponding
 function in Python's statistics module.
@@ -264,16 +264,15 @@ def _med(data, med=None):
         raise TypeError('secure fixed-point or integer type required')
 
     if n%2:
-        return _quickselect(x, (n-1)/2)
+        return _quickselect(x, [(n-1)//2])[0]
 
     if med == 'low':
-        return _quickselect(x, (n-2)/2)
+        return _quickselect(x, [(n-2)//2])[0]
 
     if med == 'high':
-        return _quickselect(x, n/2)
+        return _quickselect(x, [n//2])[0]
 
-    # average two middle values
-    s = _quickselect(x, (n-2)/2) + _quickselect(x, n/2)
+    s = sum(_quickselect(x, [(n-2)//2, n//2]))  # average two middle values
 
     if issubclass(sectype, SecureFixedPoint):
         return s/2
@@ -282,39 +281,189 @@ def _med(data, med=None):
 
 
 @asyncoro.mpc_coro
-async def _quickselect(x, k):
-    """Return kth order statistic, 0 <= k < n with n=len(x).
+async def _quickselect(x, ks):
+    """Return kth order statistics for k in ks, where 0 <= k < n with n=len(x).
 
     If all elements of x are distinct, no information on x is leaked.
     If x contains duplicate elements, ties in comparisons are broken evenly, which
     ultimately leaks some information on the distribution of duplicate elements.
 
     Average running time (dominated by number of secure comparisons, and number of
-    conversions of integer indices to unit vectors) is linear in n.
+    conversions of integer indices to unit vectors) is linear in n, for fixed ks.
     """
-    sectype = type(x[0])
-    await runtime.returnType(sectype)
+    # TODO: consider adding case ks is an int instead of a list
+    # TODO: try to make actual performance competitive with
+    #    def _quickselect(x, ks):
+    #       y = runtime.sorted(x)
+    #       return [y[k] for k in ks]
+    # Implementation below is *slower* because of expensive computation w_left (and w_right).
+    if not ks:
+        return []
+
     n = len(x)
     if n == 1:
-        return x[0]
+        return [x[0]]
+
+    sectype = type(x[0])
+    await runtime.returnType(sectype, len(ks))
 
     f = sectype.frac_length
-    y = runtime.random_bits(sectype, n)
-    p = runtime.in_prod(x, random.random_unit_vector(sectype, n))  # random pivot
-    z = [(x[i] - p)*2 < y[i] * 2**-f for i in range(n)]  # break ties x[i] == p uniformly at random
-    s = int(await runtime.output(runtime.sum(z)))
-    if k >= s:  # take complement
-        k = k - s
+    while True:
+        y = runtime.random_bits(sectype, n)
+        p = runtime.in_prod(x, random.random_unit_vector(sectype, n))  # random pivot
+        z = [2*(x[i] - p) < y[i] * 2**-f for i in range(n)]  # break ties x[i] == p evenly
+        s = int(await runtime.output(runtime.sum(z)))
+        if 0 < s < n:
+            break
+
+    ks_left = [k for k in ks if k < s]
+    ks_right = [k - s for k in ks if k >= s]
+    if not ks_left:
+        ks_left = ks_right
+        ks_right = []
         z = [1-a for a in z]
         s = n - s
-    # 0 <= k < s
-    w = [sectype(0)] * s
+    zx = runtime.schur_prod(z, x)
+    sectype_0 = sectype(0)
+    w_left = [sectype_0] * s
+    if ks_right:
+        w_right = [sectype_0] * (n - s)
     for i in range(n):
-        j = runtime.sum(z[:i+1])  # 0 <= j <= s
-        u = runtime.unit_vector(j, s)  # TODO: exploit that j <= i+1 to shorten u
-        v = runtime.scalar_mul(z[i] * x[i], u)
-        w = runtime.vector_add(w, v)
-    return _quickselect(w, k)
+        j = runtime.sum(z[:i+1])  # 0 <= j <= i+1
+        m = min(i+2, s)  # i+2 to avoid wrap around when i+1 < s still
+        u_left = runtime.unit_vector(j, m)
+        v_left = runtime.scalar_mul(zx[i], u_left)
+        v_left.extend([sectype_0] * (s - m))
+        w_left = runtime.vector_add(w_left, v_left)
+        if ks_right:  # TODO: save some work by computing w_left and w_right together
+            j = i+1 - j
+            m = min(i+2, n - s)  # i+2 to avoid wrap around when i+1 < n - s still
+            u_right = runtime.unit_vector(j, m)
+            v_right = runtime.scalar_mul(x[i] - zx[i], u_right)
+            v_right.extend([sectype_0] * (n - s - m))
+            w_right = runtime.vector_add(w_right, v_right)
+    w = _quickselect(w_left, ks_left)
+    if ks_right:
+        w.extend(_quickselect(w_right, ks_right))
+    return w
+
+
+def quantiles(data, *, n=4, method='exclusive'):
+    """Divide data into n continuous intervals with equal probability.
+
+    Returns a list of n-1 cut points separating the intervals.
+
+    Set n to 4 for quartiles (the default). Set n to 10 for deciles.
+    Set n to 100 for percentiles which gives the 99 cuts points that
+    separate data into 100 equal sized groups.
+
+    The data can be any iterable containing samples.
+    The cut points are linearly interpolated between data points.
+
+    If method is set to 'inclusive', data is treated as population data.
+    The minimum value is treated as the 0th percentile (lowest quantile) and
+    the maximum value is treated as the 100th percentile (highest quantile).
+    """
+    if n < 1:
+        raise statistics.StatisticsError('n must be at least 1')
+
+    if iter(data) is data:
+        x = list(data)
+    else:
+        x = data
+    ld = len(x)
+    if ld < 2:
+        raise statistics.StatisticsError('must have at least two data points')
+
+    sectype = type(x[0])  # all elts of x assumed of same type
+    if not issubclass(sectype, SecureObject):
+        if sys.version_info.minor >= 8:
+            return statistics.quantiles(x, n=n, method=method)
+
+        data = sorted(x)
+
+        if method == 'inclusive':
+            m = ld - 1
+            result = []
+            for i in range(1, n):
+                j, delta = divmod(i * m, n)
+                interpolated = (data[j] * (n - delta) + data[j + 1] * delta) / n
+                result.append(interpolated)
+            return result
+
+        if method == 'exclusive':
+            m = ld + 1
+            result = []
+            for i in range(1, n):
+                j = i * m // n                               # rescale i to m/n
+                j = 1 if j < 1 else ld-1 if j > ld-1 else j  # clamp to 1 .. ld-1
+                delta = i*m - j*n                            # exact integer math
+                interpolated = (data[j - 1] * (n - delta) + data[j] * delta) / n
+                result.append(interpolated)
+            return result
+
+        raise ValueError(f'Unknown method: {method!r}')
+
+    if issubclass(sectype, SecureFixedPoint):
+        div_n = lambda a: a / n
+    elif issubclass(sectype, SecureInteger):
+        div_n = lambda a: (a + n//2) // n
+    else:
+        raise TypeError('secure fixed-point or integer type required')
+
+    if method == 'inclusive':
+        m = ld - 1
+        # Determine which kth order statistics will actually be used.
+        data = {}
+        for i in range(1, n):
+            j, delta = divmod(i * m, n)
+            data[j] = None
+            if delta:
+                data[j+1] = None
+        points = _quickselect(x, list(data))
+        data = dict(zip(data, points))
+
+        # Compute the n-1 cut points for the n quantiles.
+        result = []
+        for i in range(1, n):
+            j, delta = divmod(i * m, n)
+            interpolated = data[j]
+            if delta:
+                interpolated += div_n((data[j+1] - data[j]) * delta)
+            result.append(interpolated)
+        return result
+
+    if method == 'exclusive':
+        m = ld + 1
+        # Determine which kth order statistics will actually be used.
+        data = {}
+        for i in range(1, n):
+            j = i * m // n
+            j = 1 if j < 1 else ld-1 if j > ld-1 else j
+            delta = i*m - j*n
+            if n - delta:
+                data[j-1] = None
+            if delta:
+                data[j] = None
+        points = _quickselect(x, list(data))
+        data = dict(zip(data, points))
+
+        # Compute the n-1 cut points for the n quantiles.
+        result = []
+        for i in range(1, n):
+            j = i * m // n
+            j = 1 if j < 1 else ld-1 if j > ld-1 else j
+            delta = i*m - j*n
+            if delta == 0:
+                interpolated = data[j-1]
+            elif delta == n:
+                interpolated = data[j]
+            else:  # NB: possibly delta<0 or delta>n
+                interpolated = data[j-1] + div_n((data[j] - data[j-1]) * delta)
+            result.append(interpolated)
+        return result
+
+    raise ValueError(f'Unknown method: {method!r}')
 
 
 def mode(data):

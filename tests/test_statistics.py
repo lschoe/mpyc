@@ -4,8 +4,15 @@ import random
 import statistics
 from mpyc.runtime import mpc
 from mpyc.statistics import (mean, variance, stdev, pvariance, pstdev,
-                             mode, median, median_low, median_high,
+                             mode, median, median_low, median_high, quantiles,
                              covariance, correlation, linear_regression)
+
+if sys.version_info.minor < 8:
+    statistics.quantiles = quantiles
+if sys.version_info.minor < 10:
+    statistics.covariance = covariance
+    statistics.correlation = correlation
+    statistics.linear_regression = linear_regression
 
 
 class Arithmetic(unittest.TestCase):
@@ -23,12 +30,14 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(pstdev(f()), statistics.pstdev(f()))
         self.assertEqual(mode(f()), statistics.mode(f()))
         self.assertEqual(median(f()), statistics.median(f()))
-        if sys.version_info.minor >= 10:
-            x = list(f())
-            y = list(reversed(x))
-            self.assertEqual(covariance(x, y), statistics.covariance(x, y))
-            self.assertEqual(correlation(x, y), statistics.correlation(x, y))
-            self.assertEqual(linear_regression(x, y), statistics.linear_regression(x, y))
+        self.assertEqual(quantiles(f()), statistics.quantiles(f()))
+        self.assertEqual(quantiles(f(), n=6, method='inclusive'),
+                         statistics.quantiles(f(), n=6, method='inclusive'))
+        x = list(f())
+        y = list(reversed(x))
+        self.assertEqual(covariance(x, y), statistics.covariance(x, y))
+        self.assertEqual(correlation(x, y), statistics.correlation(x, y))
+        self.assertEqual(linear_regression(x, y), statistics.linear_regression(x, y))
 
     def test_statistics_error(self):
         self.assertRaises(statistics.StatisticsError, mean, [])
@@ -38,6 +47,8 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(statistics.StatisticsError, pstdev, [])
         self.assertRaises(statistics.StatisticsError, mode, [])
         self.assertRaises(statistics.StatisticsError, median, [])
+        self.assertRaises(statistics.StatisticsError, quantiles, [1, 2], n=0)
+        self.assertRaises(statistics.StatisticsError, quantiles, [0])
         self.assertRaises(statistics.StatisticsError, covariance, [], [])
         self.assertRaises(statistics.StatisticsError, covariance, [0], [])
         self.assertRaises(statistics.StatisticsError, correlation, [], [])
@@ -55,6 +66,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, stdev, x)
         self.assertRaises(TypeError, mode, x)
         self.assertRaises(TypeError, median, x)
+        self.assertRaises(TypeError, quantiles, x)
         self.assertRaises(TypeError, covariance, x, x)
         self.assertRaises(TypeError, correlation, x, x)
         self.assertRaises(TypeError, linear_regression, x, x)
@@ -74,13 +86,18 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(median(x))), round(statistics.median(y)))
         self.assertEqual(mpc.run(mpc.output(median_low(x))), round(statistics.median_low(y)))
         self.assertEqual(mpc.run(mpc.output(median_high(x))), round(statistics.median_high(y)))
-
+        self.assertEqual(mpc.run(mpc.output(quantiles(x[:2], n=3))),
+                         statistics.quantiles(y[:2], n=3))
+        self.assertEqual(mpc.run(mpc.output(quantiles(x, n=1))), statistics.quantiles(y, n=1))
+        self.assertEqual(mpc.run(mpc.output(quantiles(x))), statistics.quantiles(y))
         x = list(range(16))
         y = list(reversed(x))
         self.assertAlmostEqual(covariance(x, y), -22.667, 3)
         x = list(map(secint, x))
         y = list(map(secint, y))
         self.assertEqual(mpc.run(mpc.output(covariance(x, y))), -23)
+
+        self.assertRaises(ValueError, quantiles, x, method='wrong')
 
     def test_secfxp(self):
         secfxp = mpc.SecFxp()
@@ -106,6 +123,9 @@ class Arithmetic(unittest.TestCase):
         self.assertAlmostEqual(mpc.run(mpc.output(pvariance(x))), statistics.pvariance(y), 2)
         self.assertAlmostEqual(mpc.run(mpc.output(pstdev(x))), statistics.pstdev(y), 3)
         self.assertAlmostEqual(mpc.run(mpc.output(median(x))), statistics.median(y), 4)
+        self.assertAlmostEqual(mpc.run(mpc.output(quantiles(x))), statistics.quantiles(y), 4)
+        self.assertAlmostEqual(mpc.run(mpc.output(quantiles(x, method='inclusive'))),
+                               statistics.quantiles(y, method='inclusive'), 4)
 
         x = list(map(secfxp, [1.0]*10))
         self.assertAlmostEqual(mpc.run(mpc.output(mode(x))), 1)
