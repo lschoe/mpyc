@@ -32,22 +32,19 @@ and [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentati
 1. Python 3.6+ (Python 3.5 or lower is not sufficient).
 
 2. Installing package `gmpy2` is optional, but will considerably enhance the performance of `mpyc`.
+As of December 12, 2021 with the release of `gmpy2 2.1.0` on PyPI, installation has been simplified greatly:
+`pip install gmpy2` is now supported on all major Linux/MacOS/Windows platforms via prebuilt wheels.
 If you use the [conda](https://docs.conda.io/) package and environment manager, `conda install gmpy2` should do the job.
-Otherwise, `pip install gmpy2` can be used on Linux (first running `apt install libmpc-dev` may be necessary too),
-but on Windows, this may fail with compiler errors.
-Fortunately, ready-to-go Python wheels for `gmpy2` can be downloaded from Christoph Gohlke's excellent
-[Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/) webpage.
-Use, for example, `pip install gmpy2-2.0.8-cp39-cp39-win_amd64.whl` to finish installation.
 
 3. Use `run-all.sh` or `run-all.bat` in the `demos` directory to have a quick look at all pure Python demos.
-The demos `bnnmnist.py` and `cnnmnist.py` require [NumPy](https://www.numpy.org/), the demo `kmsurvival.py` requires
+Demos `bnnmnist.py` and `cnnmnist.py` require [NumPy](https://www.numpy.org/), demo `kmsurvival.py` requires
 [pandas](https://pandas.pydata.org/), [Matplotlib](https://matplotlib.org/), and [lifelines](https://pypi.org/project/lifelines/),
-and the demo `ridgeregression.py` even requires [Scikit-learn](https://scikit-learn.org/). Also note the example Linux shell
-scripts and Windows batch files in the `docs` and `tests` directories.
+and demo `ridgeregression.py` (and therefore demo `multilateration.py`) even require [Scikit-learn](https://scikit-learn.org/).
+Also note the example Linux shell scripts and Windows batch files in the `docs` and `tests` directories.
 
-4. Directory `demos\.config` contains configuration info used to run MPyC with multiple parties. Also,
-Windows batch file 'gen.bat' shows how to generate fresh key material for SSL. OpenSSL is required to generate
-SSL key material of your own, use `pip install pyOpenSSL`.
+4. Directory `demos\.config` contains configuration info used to run MPyC with multiple parties. Also, Windows batch
+file `gen.bat` shows how to generate fresh key material for SSL. To generate SSL key material of your own, first run
+`pip install cryptography` (alternatively, run `pip install pyOpenSSL`, which will also install the `cryptography` package).
 
 5. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, you need to have Jupyter installed,
 e.g., using `pip install jupyter`. The latest version of Jupyter will come with IPython 7.x, which supports
