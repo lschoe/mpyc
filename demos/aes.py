@@ -1,4 +1,4 @@
-"""Demo AES cipher with 128-bit and 256-bit keys.
+"""Demo Threshold AES cipher.
 
 The demo performs an AES encryption followed by an AES decryption
 for a 128-bit AES key and a 256-bit AES key, cf. the examples in

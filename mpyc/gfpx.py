@@ -775,7 +775,7 @@ class BinaryPolynomial(Polynomial):
                 t = 2  # 2^1
             elif term.startswith(f'{x}^'):
                 t = 1 << int(term[2:], base=0)
-            else:  # illegal term
+            else:  # invalid term
                 raise ValueError('ill formatted polynomial')
 
             a ^= t

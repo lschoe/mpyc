@@ -4,7 +4,7 @@ MPyC demos
 This is an overview of all demos available from the MPyC repository on GitHub
 in `mpyc/demos <https://github.com/lschoe/mpyc/tree/master/demos>`_. Starting with
 a 'Hello world!' demo, we gradually work towards demos about
-privacy-preserving machine learning and other interesting topics.
+privacy-preserving machine learning, MPC-based threshold cryptography, and other interesting topics.
 Many of the more advanced demos are in fact based on research published at
 various cryptography conferences.
 
@@ -107,8 +107,8 @@ We run it with :math:`m=7` parties, this time suppressing the log messages::
    m!   = 5040
 
 We are computing some simple functions of :math:`m` here, hence there is no secrecy in this respect.
-The actual computations, however, are all done on secret-shared values. Let's break down the first
-oneliner which produces ``m**2 = 49`` as output:
+The actual computations, however, are all done on secret-shared values. Let's break down the
+oneliner producing ``m**2 = 49`` as output:
 
 .. code-block:: python
 
@@ -574,11 +574,11 @@ See `lpsolverfxp.py <https://github.com/lschoe/mpyc/blob/master/demos/lpsolverfx
 aes.py
 ------
 
-This demo implements the `AES block cipher <https://en.wikipedia.org/wiki/Advanced_Encryption_Standard>`_
+This demo implements a threshold version of the `AES block cipher <https://en.wikipedia.org/wiki/Advanced_Encryption_Standard>`_
 such that AES encryptions and decryptions can be performed as a multiparty computation.
 The MPyC program is designed to follow the high-level specification of AES rather closely, without sacrificing performance too much.
 
-We use the secure type ``mpc.SecFld(256)`` to represent the state of the AES algorithm. By defintion, MPyC will pick the
+We use the secure type ``mpc.SecFld(256)`` to represent the state of the AES algorithm. By definition, MPyC will pick the
 lexicographically first irreducible degree-8 polynomial over :math:`\mathbb{F}_2` to construct the finite field of order 256,
 which coincides with the choice made for the AES polynomial.
 
@@ -601,11 +601,10 @@ See `aes.py <https://github.com/lschoe/mpyc/blob/master/demos/aes.py>`_ for more
 onewayhashchains.py
 -------------------
 
-The above MPyC version of AES is used as a building block for this demo about one-way
+The above MPyC threshold version of AES is used as a building block for this demo about one-way
 `hash chains <https://en.wikipedia.org/wiki/Hash_chain>`_.
 For an extensive explanation we refer to the Jupyter notebook
 `OneWayHashChainsExplained.ipynb <https://github.com/lschoe/mpyc/blob/master/demos/OneWayHashChainsExplained.ipynb>`_.
-
 
 A run with a hash chain of length :math:`n=2^3` looks as follows::
 
@@ -637,6 +636,140 @@ Python generators.
 
 See `onewayhashchains.py <https://github.com/lschoe/mpyc/blob/master/demos/onewayhashchains.py>`_ for more information.
 
+elgamal.py
+----------
+
+This demo shows how to obtain a threshold version of the ElGamal cryptosystem.
+Where secret-shared finite fields (via ``mpc.SecFld()``) suffice in the previous MPC-based crypto demos to obtain
+a threshold version of AES, we will now use ``mpc.SecGrp()`` to create secure types for
+appropriate secret-shared finite groups, or "secure groups" for short.
+
+A sample run between 5 parties with the default elliptic curve group gives::
+
+	$ python elgamal.py -M5 --ssl
+	Using secure group: SecGrp(E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519extended)
+	2021-12-17 18:27:54,912 Start MPyC runtime v0.7.11
+	2021-12-17 18:27:55,500 All 5 parties connected via SSL.
+	Boardroom election
+	------------------
+	My vote: 1 (for "yes")
+	Referendum result: 1 "yes" / 4 "no"
+
+	Encryption/decryption tests
+	---------------------------
+	Plaintext sent: 1
+	Plaintext received: 1
+	2021-12-17 18:27:55,573 Stop MPyC runtime -- elapsed time: 0:00:00.661026
+
+The default group is a `twisted Edwards curve <https://en.wikipedia.org/wiki/EdDSA#Ed25519>`_
+over :math:`\mathbb{F}_p` with :math:`p=2^{155}-19`.
+In MPyC this group is already built in:
+
+.. code-block:: python
+
+	EC = mpyc.fingroups.EllipticCurve('Ed25519')
+
+The group :code:`EC` can then be used as follows, freely mixing additive group notation +, -, * (default for elliptic curves)
+with abstract group notation @, ~, ^:
+
+.. code-block:: python
+
+	>>> O = EC.identity
+	>>> B = EC.generator
+	>>> ell = EC.order
+	>>> {EC((0, 1)), O, -O, ~O, B - B, B @ ~B, ell*B, B^ell, B + (B^-1)}
+	{(0, 1)}
+
+The Python set computed in the last line collapses to a singleton set as we are
+writing the point :math:`(x,y)=(0,1)`, the identity element for an Edwards curve, in a couple of equivalent ways.
+
+To obtain the corresponding secure group simply set:
+
+.. code-block:: python
+
+	secgrp = mpc.SecGrp(EC)
+
+With this setup we can then implement a threshold version of the ElGamal cryptosystem in a few lines of code.
+
+Instead of the default affine coordinates, the demo actually uses Edwards curves with extended coordinates
+for better performance: the complete formula for point addition only requires 8 secure multiplications over
+:math:`\mathbb{F}_p`, which can be done in 2 rounds only (see the `MPyC source code
+<https://github.com/lschoe/mpyc/blob/master/mpyc/>`_ for details).
+
+Next to the curve :code:`'Ed25519'`, the curve :code:`'Ed448'` (aka `"Goldilocks" <https://en.wikipedia.org/wiki/Curve448>`_)
+is available. MPyC also comes with built-in Barreto-Naehrig curves (with affine, projective, or jacobian coordinates), but
+please note that these curves should not be used for ordinary public key cryptography; the curves :code:`'BN256'`
+and :code:`'BN256_twist'` are included for the implementation of
+pairing-based `verifiable MPC <https://github.com/toonsegers/verifiable_mpc>`_.
+
+The demo also covers the use of three more groups:
+
+    - `quadratic residue <https://en.wikipedia.org/wiki/Quadratic_residue>`_ groups modulo a safe prime
+
+    - `Schnorr groups <https://en.wikipedia.org/wiki/Schnorr_group>`_ (prime-order subgroups of :math:`\mathbb{F}_q^*`)
+
+    - `class groups <https://en.wikipedia.org/wiki/Ideal_class_group>`_ of imaginary quadratic (number) fields
+
+For all these groups, mappings for encoding and decoding messages are included for use with ElGamal encryption and
+decryption, respectively. Note that achieving both efficient encoding and decoding is often not that easy and can be
+pretty hard actually (e.g., for Schnorr groups): in particular, when secure versions of either encoding and decoding
+(or both) are demanded as well.
+
+The command line switch ``--no-public-output`` lets the demo run a scenario in which a given ElGamal
+ciphertext :math:`(g^u, h^u M)` is decrypted (and decoded) securely, such that message :math:`M` will only ever exist
+as a secret-shared value. This takes threshold decryption to the next level: apart from using the private key
+:math:`x=\log_g h` in secret-shared form only between the parties performing the joint decryption, also the resulting
+message :math:`M` will *not ever* be exposed in the clear!
+
+To support the ``--no-public-output`` switch, secure versions of the group operations are implemented in the
+:code:`mpyc.secgroups` module. For elliptic curves, quadratic residues, and Schnorr groups, the protocols behind
+the secure group operations are quite efficient, taking advantage of efficient secure arithmetic over
+prime-order fields.
+
+For class groups, however, efficient implementation of the group operations in the clear is already quite challenging,
+let alone for secret-shared group elements. The class group operations in the clear are implemented in
+``mpyc.fingroups.ClassGroupForm`` following Cohen's presentation of Atkin's variants of the NUDUPL and
+NUCOMP algorithms due to Shanks (see Algorithms 5.4.8-9 in Henri Cohen's book `"A Course in Computational Algebraic
+Number Theory" <https://doi.org/10.1007/978-3-662-02945-9>`_).
+
+The secure counterpart is implemented in ``mpyc.secgroups.SecureClassGroupForm``, however, relying on a set of
+entirely new developed protocols. A classic algorithm for the composition of positive definite forms also due to
+Shanks (Algorithm 5.4.7 in Cohen's book) is taken as the starting point. Together with new machinery such as
+``mpc.gcd()``, ``mpc.inverse()``, and ``mpc.gcdext()`` for advanced secure modular arithmetic, a relatively
+efficient solution for secure class groups is obtained. The most challenging part is the secure (oblivious)
+reduction of quadratic forms.
+
+See `elgamal.py <https://github.com/lschoe/mpyc/blob/master/demos/elgamal.py>`_ for more information.
+
+dsa.py
+------
+
+As another demo built with MPyC's secure groups, we show how to obtain threshold DSA signatures.
+Together with the ElGamal demo, this covers encryption and authentication from asymmetric primitives,
+nicely complementing the AES and hash chain demos, which do the same for symmetric primitives.
+
+We run the demo with :math:`m=23` parties and threshold :math:`t=5` to get a noticeable delay::
+
+	$ python dsa.py -M23 -T5 --no-log
+	Sign/verify tests
+	-----------------
+	E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519affine
+	3.5 seconds for DSA signature
+	0.5625 seconds for Schnorr signature
+	E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519projective
+	0.8125 seconds for DSA signature
+	0.53125 seconds for Schnorr signature
+	E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519extended
+	0.78125 seconds for DSA signature
+	0.546875 seconds for Schnorr signature
+
+The Edwards curve :code:`'Ed25519'` is the default group for the demo. As expected, the best performance
+is attained for :code:`'extended'` coordinates. Also, threshold Schnorr signatures turn out to be faster
+than threshold DSA signatures. The demo can also be run with Schnorr groups, in which case the lead of
+Schnorr signatures over DSA gets even larger.
+
+See `dsa.py <https://github.com/lschoe/mpyc/blob/master/demos/dsa.py>`_ for more information.
+
 ridgeregression.py
 ------------------
 
@@ -644,7 +777,7 @@ This demo presents an efficient solution for secure `ridge regression <https://e
 The smaller datasets are included with the demo on GitHub, but the larger ones have to be downloaded separately
 from the `UCI Machine Learning Repository <https://archive.ics.uci.edu/>`_.
 To find the URL of these datasets you can use the switch ``-u`` (or, ``--data-url``)
-next to ``-i7`` for instance to obtain the URL for the HIGSS dataset, which contains 11,000,000 samples (2.62 GB compressed).
+next to ``-i7`` for instance to obtain the URL for the HIGGS dataset, which contains 11,000,000 samples (2.62 GB compressed).
 
 A run for the `winequality-red.csv <https://github.com/lschoe/mpyc/blob/master/demos/data/regr/winequality-red.csv>`_
 dataset gives the following numbers::
@@ -711,7 +844,7 @@ For a run with :math:`m=5` parties (sensors) we get as result::
     dtype: float64
 
 The error is limited to a few hundred meters, which can also be seen from the histogram and density plot:
-    
+
 .. image:: ./Figure_1.png
 
 Technically, our implementation of Schmidt's method reuses function :code:`linear_solve()` from the
@@ -719,7 +852,7 @@ demo `ridgeregression.py <https://github.com/lschoe/mpyc/blob/master/demos/ridge
 to compute the required least-squares approximation entirely over the integers. In the example run shown here
 we use secure 335-bit integers for an accuracy of 3 decimal places (scale factor of 1000). Varying the accuracy
 from 6 decimal places (using 470-bit integers) to 0 decimal places (using 200-bit integers) has little
-impact on the results nor on the performance. 
+impact on the results nor on the performance.
 
 See `multilateration.py <https://github.com/lschoe/mpyc/blob/master/demos/multilateration.py>`_ for more information.
 

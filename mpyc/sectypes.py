@@ -148,7 +148,15 @@ class SecureNumber(SecureObject):
         return runtime.sub(other, self)
 
     def __mul__(self, other):
-        """Multiplication."""
+        """Multiplication.
+
+        Special case: repeat of additive group operation.
+        """
+        if isinstance(other, fingroups.FiniteGroupElement):
+            group = type(other)
+            if group.is_additive:
+                return runtime.SecGrp(type(other)).repeat(other, self)
+
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
@@ -214,6 +222,18 @@ class SecureNumber(SecureObject):
             return NotImplemented
 
         return runtime.pow(self, other)
+
+    def __rpow__(self, other):
+        """Exponentation (with reflected arguments) for secret exponent.
+
+        Special case: repeat of multiplicative group operation.
+        """
+        if isinstance(other, fingroups.FiniteGroupElement):
+            group = type(other)
+            if group.is_multiplicative:
+                return runtime.SecGrp(type(other)).repeat(other, self)
+
+        return NotImplemented
 
     def __lshift__(self, other):
         """Left shift with public integral offset."""

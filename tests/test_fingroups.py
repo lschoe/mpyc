@@ -8,6 +8,8 @@ class Arithmetic(unittest.TestCase):
     def setUp(self):
         self.S3 = fg.SymmetricGroup(3)
         self.QR11 = fg.QuadraticResidues(11)
+#        self.SG11 = fg.SchnorrGroup(11)
+        self.SG11 = fg.SchnorrGroup(11, 5, 4)
         self.Cl23 = fg.ClassGroup(Delta=-23)
 
     def test_group_caching(self):
@@ -72,12 +74,33 @@ class Arithmetic(unittest.TestCase):
         QR_768 = fg.QuadraticResidues(l=768)
         self.assertEqual(QR_768.decode(*QR_768.encode(42)), 42)
 
+    def test_SG(self):
+        QR11 = self.SG11
+        self.assertEqual(QR11.order, 5)
+        self.assertTrue(QR11.is_cyclic)
+        self.assertEqual(QR11.identity, QR11(1))
+        a = QR11(3)
+        self.assertEqual(a^5, QR11.identity)
+        b = QR11(4)
+        self.assertEqual(b^5, QR11.identity)
+        self.assertEqual(a * b, QR11.identity)
+        self.assertEqual(1/a, b)
+        self.assertRaises(TypeError, operator.truediv, 2, a)
+        self.assertRaises(TypeError, operator.add, a, b)
+        self.assertRaises(ValueError, QR11, 0)
+        self.assertRaises(ValueError, QR11, 2)
+
+        self.assertEqual({a, b, b}, {a, a, b})
+
+        QR_768 = fg.QuadraticResidues(l=768)
+        self.assertEqual(QR_768.decode(*QR_768.encode(42)), 42)
+
     def test_EC(self):
-        curves = (fg.EllipticCurve('ED25519'),  # affine coordinates
-                  fg.EllipticCurve('ED25519', coordinates='projective'),
-                  fg.EllipticCurve('ED25519', coordinates='extended'),
-                  fg.EllipticCurve('ED448'),  # affine coordinates
-                  fg.EllipticCurve('ED448', coordinates='projective'),
+        curves = (fg.EllipticCurve('Ed25519'),  # affine coordinates
+                  fg.EllipticCurve('Ed25519', coordinates='projective'),
+                  fg.EllipticCurve('Ed25519', coordinates='extended'),
+                  fg.EllipticCurve('Ed448'),  # affine coordinates
+                  fg.EllipticCurve('Ed448', coordinates='projective'),
                   fg.EllipticCurve('BN256'),  # affine coordinates
                   fg.EllipticCurve('BN256', coordinates='projective'),
                   fg.EllipticCurve('BN256', coordinates='jacobian'),

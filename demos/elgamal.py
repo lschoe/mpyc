@@ -1,72 +1,80 @@
-"""Demo Threshold ElGamal.
+"""Demo Threshold ElGamal Cryptosystem.
 
-This demo shows the use of secure groups in MPyC. Three types of groups are used,
-namely quadratic residue groups, elliptic curve groups, and class groups.
+This demo shows the use of secure groups in MPyC. Four types of groups are used:
+quadratic residue groups, Schnorr groups, elliptic curve groups, and class groups.
 
 The parties jointly generate a key pair for the ElGamal cryptosystem, consisting
 of a private key x and a public key h=g^x, where g is a generator of the group.
 Throughout the entire protocol, private key x will only exist in secret-shared form.
 
 The demo runs a boardroom election, where each party will enter a (random) bit v
-representing a (random) yes/no vote. Each party encrypts its vote v using homomorphic
-ElGamal, hence puts c = (g^u, h^u g^v) as ciphertext for a random nonce u (generated
-privately by each party). The parties then broadcast their ciphertexts, and multiply
-everything together to obtain a ciphertext representing the sum of their votes.
-Finally, the sum is decrypted, and the total number of "yes" votes is obtained.
+representing a (random) yes/no vote. Each party encrypts its vote v using additively
+homomorphic ElGamal, hence puts c = (g^u, h^u g^v) as ciphertext for a random nonce u
+(generated privately by each party). The parties then broadcast their ciphertexts,
+and multiply everything together to obtain a ciphertext representing the sum of their
+votes. Finally, the sum is decrypted, and the total number of "yes" votes is obtained.
 
 In this demo we apply the default notation for finite groups in MPyC, writing @ for
 the group operation, ~ for group inversion, and ^ for the repeated group operation.
 
-Demo still under construction.
+See also the demo dsa.py for threshold signatures from secure groups.
 """
 
-import math
 import random
 import argparse
-from mpyc.gmpy import is_prime
+from mpyc.gmpy import is_prime, isqrt
 from mpyc.runtime import mpc
-from mpyc.fingroups import QuadraticResidues, EllipticCurve, ClassGroup
+from mpyc.fingroups import QuadraticResidues, SchnorrGroup, EllipticCurve, ClassGroup
 
 
 async def keygen(g):
-    """ElGamal key generation."""
+    """Threshold ElGamal key generation."""
     group = type(g)
     secgrp = mpc.SecGrp(group)
     n = group.order
     if n is not None and is_prime(n):
-        # QuadraticResidues/EllipticCurve group
-        secnum = mpc.SecFld(modulus=n)
+        secnum = mpc.SecFld(n)
     else:
-        # Class group
-        secnum = mpc.SecInt((int(math.sqrt(-group.discriminant))).bit_length())
-    x = mpc._random(secnum)
-    h = await secgrp.repeat_public(g, x)  # g^x
-    return x, h
+        l = isqrt(-group.discriminant).bit_length()
+        secnum = mpc.SecInt(l)
+
+    while True:
+        x = mpc._random(secnum)
+        h = await secgrp.repeat_public(g, x)  # g^x
+        if h != group.identity:
+            # NB: this branch will always be followed unless n is artificially small
+            return x, h
 
 
-def encrypt(g, h, m):
+def encrypt(g, h, M):
     """ElGamal encryption."""
     group = type(g)
     n = group.order
     if n is None:
-        n = int(math.sqrt(-group.discriminant))
+        n = isqrt(-group.discriminant)
     u = random.randrange(n)
-    c = (g^u, (h^u) @ m)
+    c = (g^u, (h^u) @ M)
     return c
 
 
-async def decrypt(c, x,  public_out=True):
-    """ElGamal threshold decryption."""
-    a, b = c
-    group = type(a)
+async def decrypt(C, x, public_out=True):
+    """Threshold ElGamal decryption.
+
+    The given ciphertext C=(A,B) consists of two group elements.
+    If public_out is set (default), the decrypted message M will also be a group element;
+    otherwise, the decrypted message M will be a secure (secret-shared) group element.
+    """
+    A, B = C
+    group = type(A)
     secgrp = mpc.SecGrp(group)
     if public_out:
-        a_x = await secgrp.repeat_public(a, x)
+        A_x = await secgrp.repeat_public(A, -x)  # A^-x
+        assert isinstance(A_x, group)
     else:
-        a_x = a^x
-    # TODO: optimization use -x above to avoid ~a_x below
-    m = ~a_x @ b
-    return m
+        A_x = A^-x
+        assert isinstance(A_x, secgrp)
+    M = A_x @ B
+    return M
 
 
 async def election(group):
@@ -77,7 +85,7 @@ async def election(group):
 
     # Each party encrypts a random vote:
     v = random.randint(0, 1)
-    print('My vote:', v)
+    print(f'''My vote: {v} (for {'"yes"' if v else '"no"'})''')
     c = encrypt(g, h, g^v)  # additive homomorphic ElGamal
     c = await mpc.transfer(c)
 
@@ -92,57 +100,62 @@ async def election(group):
     T, t = group.identity, 0  # T = g^t
     while T != M:
         T, t = T @ g, t+1
-    print('Election result:', t)
+    print(f'Referendum result: {t} "yes" / {len(c) - t} "no"')
 
 
-async def crypt_cycle(group, m, public_out=True):
-    """Encrypt/decrypt cycle for message m."""
+async def crypt_cycle(group, M, public_out=True):
+    """Encrypt/decrypt cycle for message M."""
     # Create ElGamal key pair:
     g = group.generator
     x, h = await keygen(g)
 
-    # Party 0 encrypts message m and broadcasts ciphertext c:
+    # Party 0 encrypts message M and broadcasts ciphertext C:
     if mpc.pid == 0:
-        m, z = group.encode(m)
-        c_m = encrypt(g, h, m)
-        c_z = encrypt(g, h, z)
-        c = c_m, c_z
+        M, Z = group.encode(M)
+        C_M = encrypt(g, h, M)
+        C_Z = encrypt(g, h, Z)
+        C = C_M, C_Z
     else:
-        c = None
-    c = await mpc.transfer(c, senders=0)
+        C = None
+    C = await mpc.transfer(C, senders=0)
 
-    # Threshold decrypt c:
-    c_m, c_z = c
-    M = await decrypt(c_m, x, public_out=public_out)
-    Z = await decrypt(c_z, x, public_out=public_out)
+    # Threshold decrypt C:
+    C_M, C_Z = C
+    M = await decrypt(C_M, x, public_out=public_out)
+    Z = await decrypt(C_Z, x, public_out=public_out)
     if public_out:
-        m = group.decode(M, Z)
+        M = group.decode(M, Z)
     else:
         secgrp = mpc.SecGrp(group)
-        m = secgrp.decode(M, Z)
-    return m
+        M = secgrp.decode(M, Z)
+    return M
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--index', type=int, metavar='I',
-                        help=('group 0=QR (default) 1=EC 2=Cl'))
+    parser.add_argument('-g', '--group', type=int, metavar='G',
+                        help=('1=EC (default), 2=QR, 3=SG, 4=Cl'))
     parser.add_argument('-b', '--batch-size', type=int, metavar='B',
-                        help='number of messages')
+                        help='number of messages B in batch, B>=1')
     parser.add_argument('-o', '--offset', type=int, metavar='O',
-                        help='offset for batch')
+                        help='offset O for batch of messages, O>=0')
     parser.add_argument('--no-public-output', action='store_true',
-                        default=False, help='force secure (secret-shared) output upon decryption')
-    parser.set_defaults(index=0, batch_size=1, offset=0)
+                        default=False, help='force secure (secret-shared) message upon decryption')
+    parser.set_defaults(group=1, batch_size=1, offset=0)
     args = parser.parse_args()
 
-    if args.index == 0:
-        group = QuadraticResidues(l=1024)
-    elif args.index == 1:
-        group = EllipticCurve('ED25519', 'extended')
-    elif args.index == 2:
-        group = ClassGroup(l=1024)
-    print(f'Group = {group.__name__}')
+    if args.group == 1:
+        group = EllipticCurve('Ed25519', 'extended')
+    elif args.group == 2:
+        group = QuadraticResidues(l=2048)
+    elif args.group == 3:
+        group = SchnorrGroup(l=1024)
+    elif args.group == 4:
+        if args.no_public_output:
+            group = ClassGroup(l=32)
+        else:
+            group = ClassGroup(l=1024)
+    print(f'Using secure group: {mpc.SecGrp(group).__name__}')
 
     mpc.run(mpc.start())
     print('Boardroom election')
@@ -150,14 +163,15 @@ if __name__ == '__main__':
     mpc.run(election(group))
     print()
 
-    print('Encrytpion/decryption tests')
+    print('Encryption/decryption tests')
     print('---------------------------')
     for m in range(args.batch_size):
         m += 1 + args.offset
-        print("Plaintext sent: ", m)
+        print(f'Plaintext sent: {m}')
         p = mpc.run(crypt_cycle(group, m, not args.no_public_output))
         if args.no_public_output:
+            # p is a secure
             p = mpc.run(mpc.output(p))
-        print("Plaintext received: ", p)
+        print(f'Plaintext received: {p}')
         assert m == p, (m, p)
     mpc.run(mpc.shutdown())

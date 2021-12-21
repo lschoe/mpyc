@@ -31,8 +31,8 @@ and [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentati
 
 1. Python 3.6+ (Python 3.5 or lower is not sufficient).
 
-2. Installing package `gmpy2` is optional, but will considerably enhance the performance of `mpyc`.
-As of December 12, 2021 with the release of `gmpy2 2.1.0` on PyPI, installation has been simplified greatly:
+2. Installing package [gmpy2](https://pypi.org/project/gmpy2/) is optional, but will considerably enhance the performance of `mpyc`.
+As of December 12, 2021 with the release of gmpy2 2.1, installation has been simplified greatly:
 `pip install gmpy2` is now supported on all major Linux/MacOS/Windows platforms via prebuilt wheels.
 If you use the [conda](https://docs.conda.io/) package and environment manager, `conda install gmpy2` should do the job.
 

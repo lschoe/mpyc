@@ -143,6 +143,9 @@ class SecureFiniteGroup(SecureObject):
 
         return secgrp.equality(self, other)
 
+    def __ne__(self, other):
+        return 1 - self.__eq__(other)
+
     @classmethod
     def operation(cls, a, b):
         """Return a @ b."""
@@ -230,7 +233,8 @@ class SecureFiniteGroup(SecureObject):
         """
         secgrp = cls
 
-        if isinstance(a, SecureQuadraticResidue) and isinstance(x, int):
+        if (isinstance(a, (SecureQuadraticResidue, SecureSchnorrGroupElement))
+           and isinstance(x, int)):
             return type(a)(a.share**x)  # special case for fast exp
 
         # Case: Public exponent, secret output.
@@ -303,7 +307,10 @@ class SecureSymmetricGroupElement(SecureFiniteGroup):
     __slots__ = ()
 
     def __init__(self, value=None):
-        """Ensure all coefficients of value are of secure field type."""
+        """Ensure all coefficients of value are of secure field type.
+
+        Enforce value is a tuple.
+        """
         n = self.group.degree
         if value is None:
             value = [None] * n
@@ -369,18 +376,50 @@ class SecureQuadraticResidue(SecureFiniteGroup):
     def equality(cls, a, b):
         return a.share == b.share
 
-    # @classmethod
-    # def inversion(cls, a):
-        # c = cls.group.inversion(cls.group(a.share, check=False))
-        # return cls(c)
-
-#    @classmethod
-#    def repeat(cls, a, n):   n int
-#        return cls(a.share**n)    ## case a public a
-
     @classmethod
     def decode(cls, M, Z, gap=128):
         return (M.share - Z.share) / gap
+
+
+class SecureSchnorrGroupElement(SecureFiniteGroup):
+    """Common base class for secure (secret-shared) Schnorr group elements."""
+
+    __slots__ = ()
+
+    def __init__(self, value=None):
+        """Ensure value is of secure field type."""
+        if isinstance(value, self.group):
+            value = value.value
+        secfld = self.sectype
+        if not isinstance(value, secfld):
+            value = secfld(value)
+        super().__init__(value)
+
+    def set_share(self, value):
+        self.share.set_share(value.share)
+
+    @classmethod
+    def operation(cls, a, b):
+        return cls(a.share * b.share)
+
+    @classmethod
+    def inversion(cls, a):
+        return cls(1/a.share)
+
+    @classmethod
+    def equality(cls, a, b):
+        return a.share == b.share
+
+    @classmethod
+    def decode(cls, M, Z):
+        g = cls.group.generator
+        h = cls.group.identity
+        x = [h]
+        for _ in range(15):  # TODO: get rid of hard-coded 15 bound
+            h = cls.group.operation(h, g)
+            x.append(h)
+        m = runtime.find(x, M, bits=False)
+        return m  # M = g^m
 
 
 class SecureEllipticCurvePoint(SecureFiniteGroup):
@@ -388,7 +427,7 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
 
     __slots__ = ()
 
-    def __init__(self, value=None):    # TODO: finalize this
+    def __init__(self, value=None):
         """Ensure all coefficients are of secure field type.
 
         Enforce value is a tuple.
@@ -638,10 +677,12 @@ def SecGrp(group):
     elif issubclass(group, fg.QuadraticResidue):
         base = SecureQuadraticResidue
         sectype = runtime.SecFld(2*group.order+1)
+    elif issubclass(group, fg.SchnorrGroupElement):
+        base = SecureSchnorrGroupElement
+        sectype = runtime.SecFld(group.field.order)
     elif issubclass(group, fg.EllipticCurvePoint):
         base = SecureEllipticCurvePoint
-        field = group.field
-        sectype = runtime.SecFld(field.order)
+        sectype = runtime.SecFld(group.field.order)
         assert group.oblivious
     elif issubclass(group, fg.ClassGroupForm):
         base = SecureClassGroupForm

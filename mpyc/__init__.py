@@ -24,5 +24,5 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.7.10'
+__version__ = '0.7.11'
 __license__ = 'MIT License'

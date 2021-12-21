@@ -42,26 +42,26 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output((secgrp(a)^6) @ secgrp.identity)), a6)
         self.assertEqual(mpc.run(mpc.output(secgrp.repeat(a6, secfld(2)))), a12)
 
-    def test_QR(self):
-        group = fg.QuadraticResidues(l=768)
-        secgrp = mpc.SecGrp(group)
-        g = group.generator
-        g2 = mpc.run(mpc.output(secgrp(g) * g))
-        self.assertEqual(int(g), int(group.identity * g))
-        self.assertEqual(g2, g * g)
-        secfld = mpc.SecFld(modulus=secgrp.group.order)
-        self.assertEqual(mpc.run(mpc.output(secgrp.repeat(g, secfld(2)))), g2)
-        self.assertEqual(mpc.run(mpc.output(secgrp.repeat(secgrp(g), 2))), g2)
-        m, z = group.encode(42)
-        self.assertEqual(mpc.run(mpc.output(secgrp.decode(secgrp(m), secgrp(z)))), 42)
-        h = secgrp.if_else(secgrp.sectype(0), g, secgrp(g2))
-        self.assertEqual(mpc.run(mpc.output(h)), g2)
+    def test_QR_SG(self):
+        for group in fg.QuadraticResidues(l=768), fg.SchnorrGroup(l=768):
+            secgrp = mpc.SecGrp(group)
+            g = group.generator
+            g2 = mpc.run(mpc.output(secgrp(g) * g))
+            self.assertEqual(int(g), int(group.identity * g))
+            self.assertEqual(g2, g * g)
+            secfld = mpc.SecFld(modulus=secgrp.group.order)
+            self.assertEqual(mpc.run(mpc.output(secgrp.repeat(g, -secfld(2)))), 1/g2)
+            self.assertEqual(mpc.run(mpc.output(secgrp.repeat(secgrp(g), 2))), g2)
+            m, z = group.encode(15)
+            self.assertEqual(mpc.run(mpc.output(secgrp.decode(secgrp(m), secgrp(z)))), 15)
+            h = secgrp.if_else(secgrp.sectype(0), g, secgrp(g2))
+            self.assertEqual(mpc.run(mpc.output(h)), g2)
 
     def test_EC(self):
-        curves = (fg.EllipticCurve('ED25519'),  # affine coordinates
-                  fg.EllipticCurve('ED25519', coordinates='projective'),
-                  fg.EllipticCurve('ED25519', coordinates='extended'),
-                  fg.EllipticCurve('ED448', coordinates='projective'),
+        curves = (fg.EllipticCurve('Ed25519'),  # affine coordinates
+                  fg.EllipticCurve('Ed25519', coordinates='projective'),
+                  fg.EllipticCurve('Ed25519', coordinates='extended'),
+                  fg.EllipticCurve('Ed448', coordinates='projective'),
                   fg.EllipticCurve('BN256', coordinates='projective'),
                   fg.EllipticCurve('BN256_twist', coordinates='projective'))
         for group in curves:
@@ -72,7 +72,8 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(b - b)), group.identity)
             c = secgrp(g)
             self.assertEqual(mpc.run(mpc.output(b)), mpc.run(mpc.output(c)))
-            self.assertEqual(mpc.run(mpc.output(g^secfld(2))), g^2)
+            self.assertEqual(mpc.run(secgrp.repeat_public(g, -secfld(2))), g^-2)
+            self.assertEqual(mpc.run(mpc.output(secfld(2)*g)), g^2)
             bp4 = 4*g
             sec_bp4 = 4*secgrp(g) + secgrp.identity
             self.assertEqual(mpc.run(mpc.output(sec_bp4)), bp4)
@@ -87,9 +88,10 @@ class Arithmetic(unittest.TestCase):
     def test_Cl(self):
         Cl23 = fg.ClassGroup(Delta=-23)
         secgrp = mpc.SecGrp(Cl23)
-        secfld = secgrp.sectype
+        secint = secgrp.sectype
         g = Cl23.generator
-        self.assertEqual(mpc.run(mpc.output(g^secfld(3))), Cl23.identity)
+        self.assertEqual(mpc.run(secgrp.repeat_public(g, -secint(2))), g)
+        self.assertEqual(mpc.run(mpc.output(g**secint(-2))), g)
         self.assertEqual(mpc.run(mpc.output(g * secgrp(g))), Cl23((2, -1, 3)))
 
         Cl227 = fg.ClassGroup(Delta=-227)  # Example 9.6.2 from Buchman&Vollmer

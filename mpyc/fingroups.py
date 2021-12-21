@@ -16,11 +16,12 @@ multiplicative notation are:
 
 for arbitrary group elements a, b, and integer n.
 
-Four types of groups are currently supported, aimed mainly at applications
+Five types of groups are currently supported, aimed mainly at applications
 in cryptography:
 
     - symmetric groups of any degree n (n>=0)
     - quadratic residue groups modulo a safe prime
+    - Schnorr groups (prime-order subgroups of the multiplicative group of a finite field)
     - elliptic curve groups (Edwards curves and Barreto-Naehrig curves)
     - class groups of imaginary quadratic fields
 
@@ -33,7 +34,7 @@ hardness assumptions.
 import math
 import decimal
 import functools
-from mpyc.gmpy import powmod, gcdext, is_prime, next_prime, legendre, isqrt
+from mpyc.gmpy import powmod, gcdext, is_prime, next_prime, legendre, isqrt, iroot
 from mpyc.gfpx import GFpX
 from mpyc.finfields import GF
 
@@ -271,13 +272,14 @@ class QuadraticResidue(FiniteGroupElement):
     is_multiplicative = True
     is_abelian = True
     is_cyclic = True
-    _field: type  # multiplicative group of this prime field is used
+    field: type  # multiplicative group of this prime field is used
+    gap = None
 
     def __init__(self, value=1, check=True):
         if check:
-            if not isinstance(value, self._field):
+            if not isinstance(value, self.field):
                 if isinstance(value, int):
-                    value = self._field(value)
+                    value = self.field(value)
                 else:
                     raise TypeError('int or prime field element required')
 
@@ -306,9 +308,10 @@ class QuadraticResidue(FiniteGroupElement):
         return int(self.value)
 
     @classmethod
-    def encode(cls, m, gap=128):
+    def encode(cls, m):
         """Encode message m in a quadratic residue."""
-        field = cls._field
+        gap = cls.gap
+        field = cls.field
         modulus = field.modulus
         for i in range(1, gap):
             if legendre(i, modulus) == 1:
@@ -321,7 +324,8 @@ class QuadraticResidue(FiniteGroupElement):
         raise ValueError('message encoding failed, try larger gap')
 
     @classmethod
-    def decode(cls, M, Z, gap=128):
+    def decode(cls, M, Z):
+        gap = cls.gap
         return int((M.value - Z.value) / gap)
 
 
@@ -366,40 +370,173 @@ def _find_safe_prime(l):
     return p
 
 
-def QuadraticResidues(modulus=None, l=None):
-    """Create a QR type for given (bit length l of) odd prime modulus p.
+def QuadraticResidues(p=None, l=None):
+    """Create type for quadratic residues group given (bit length l of) odd prime modulus p.
 
     The group of quadratic residues modulo p is of order n=(p-1)/2.
     Given bit length l>2, p will be chosen such that n is also an odd prime.
     If l=2, the only possibility is p=3, hence n=1.
     """
     if l is not None:
-        if modulus is None:
-            modulus = _find_safe_prime(l)
-    elif modulus is None:
-        modulus = 3
-    if modulus%2 == 0:
+        if p is None:
+            p = _find_safe_prime(l)
+    elif p is None:
+        p = 3
+    if p%2 == 0:
         raise ValueError('odd prime modulus required')
 
-    return _QuadraticResidues(modulus)
+    return _QuadraticResidues(p)
 
 
 @functools.lru_cache(maxsize=None)
-def _QuadraticResidues(modulus):
-    field = GF(modulus)  # raises if modulus is not prime
+def _QuadraticResidues(p):
+    field = GF(p)  # raises if p is not prime
     g = 2
-    while legendre(g, modulus) != 1:
+    while legendre(g, p) != 1:
         g += 1
-    # g is generator if modulus is a safe prime
+    # g is generator if p is a safe prime
 
-    name = f'QR({modulus})'
+    l = p.bit_length()
+    name = f'QR{l}({p})'
     QR = type(name, (QuadraticResidue,), {'__slots__': ()})
-    QR._field = field
-    QR.order = modulus >> 1
+    QR.field = field
+    QR.gap = 128  # TODO: calculate gap as a function of bit length of p
+    QR.order = p >> 1
     QR.identity = QR()
     QR.generator = QR(g)
     globals()[name] = QR  # NB: exploit (almost?) unique name dynamic QR type
     return QR
+
+
+class SchnorrGroupElement(FiniteGroupElement):
+    """Common base class for prime-order subgroups of the multiplicative group of a finite field."""
+    # TODO: consider merging with QuadraticResidues class
+
+    __slots__ = ()
+
+    is_multiplicative = True
+    is_abelian = True
+    is_cyclic = True
+    field: type  # multiplicative group of this (prime) field is used
+
+    def __init__(self, value=1, check=True):
+        if check:
+            if not isinstance(value, self.field):
+                if isinstance(value, int):
+                    value = self.field(value)
+                else:
+                    raise TypeError('int or prime field element required')
+
+            if value**self.order != 1:
+                raise ValueError('subgroup elt required')
+
+        self.value = value
+
+    @classmethod
+    def operation(cls, a, b):
+        return cls(a.value * b.value, check=False)
+
+    @classmethod
+    def inversion(cls, a):
+        return cls(1/a.value, check=False)
+
+    @classmethod
+    def equality(cls, a, b):
+        return a.value == b.value
+
+    @classmethod
+    def repeat(cls, a, n):
+        return cls(a.value**n, check=False)
+
+    def __int__(self):
+        return int(self.value)
+
+    @classmethod
+    def encode(cls, m):
+        """Encode message m in group element g^m."""
+        g = cls.generator
+        return cls(g.value**m, check=False), g
+
+    @classmethod
+    def decode(cls, M, Z):
+        g = cls.generator
+        h = cls.identity
+        for m in range(1024):  # TODO: get rid of hard-coded 1024 bound (also in secgroups module)
+            if h != M:
+                h = cls.operation(g, h)
+            else:
+                break
+        return m
+
+
+def SchnorrGroup(p=None, q=None, g=None, l=None, n=None):
+    """Create type for Schnorr group of odd prime order q.
+
+    If q is not given, q will be the smallest n-bit prime, n>=2.
+    If p is not given, p will be the least l-bit prime, l>n, such that q divides p-1.
+
+    If l and/or n are not given, default bit lengths will be set (2<=n<l).
+    """
+    n_l = ((160, 1024), (192, 1536), (224, 2048), (256, 3072), (384, 7680))
+    if p is None:
+        if q is None:
+            if n is None:
+                if l is None:
+                    l = 2048
+                n = next((n for n, _ in n_l if _ >= l), 512)
+            q = next_prime(1 << n-1)
+        else:
+            if n is None:
+                n = q.bit_length()
+            assert q%2 and is_prime(q)
+        if l is None:
+            l = next((l for _, l in n_l if _ >= n), 15360)
+
+        # n-bit prime q
+        w = (1 << l-2) // q + 1  # w*q >= 2^(l-2), so p = 2*w*q + 1 > 2^(l-1)
+        p = 2*w*q + 1
+        while not is_prime(p):
+            p += 2*q
+        # 2^(l-1) < p < 2^l
+    else:
+        assert q is not None  # if p is given, q must be given as well
+        assert (p - 1) % q == 0
+        assert q%2 and is_prime(q)
+        assert is_prime(p)
+        if l is None:
+            l = p.bit_length()
+        if n is None:
+            n = q.bit_length()
+    assert l == p.bit_length()
+    assert n == q.bit_length()
+
+    p = int(p)
+    q = int(q)
+    if g is None:
+        w = (p-1) // q
+        i = 2
+        while True:
+            g = powmod(i, w, p)
+            if g != 1 and powmod(g, q, p) == 1:
+                break
+            i += 1
+        g = int(g)
+    return _SchnorrGroup(p, q, g)
+
+
+@functools.lru_cache(maxsize=None)
+def _SchnorrGroup(p, q, g):
+    field = GF(p)  # raises if modulus is not prime
+    l = p.bit_length()
+    n = q.bit_length()
+    name = f'SG{l}:{n}({p}:{q})'
+    SG = type(name, (SchnorrGroupElement,), {'__slots__': ()})
+    SG.field = field
+    SG.order = q
+    SG.identity = SG()
+    SG.generator = SG(g)
+    globals()[name] = SG  # NB: exploit (almost?) unique name dynamic SG type
+    return SG
 
 
 class EllipticCurvePoint(FiniteGroupElement):
@@ -413,11 +550,12 @@ class EllipticCurvePoint(FiniteGroupElement):
     oblivious = None  # set oblivious=True if arithmetic works in MPC setting
     field: type  # elliptic curve is defined over this field
     _identity = None
+    gap = None
 
     def __getitem__(self, key):  # NB:  no __setitem__ to prevent mutability
         return self.value[key]
 
-    # TODO: reconsider use of x, y, z (t properties) ... currently used for pairings
+    # TODO: reconsider use of properties x, y, z (and t) ... currently used for pairings
     @property
     def x(self):
         return self.value[0]
@@ -440,9 +578,10 @@ class EllipticCurvePoint(FiniteGroupElement):
         raise NotImplementedError
 
     @classmethod
-    def encode(cls, m, gap=256):
+    def encode(cls, m):
         """Encode message m in x-coordinate of a point on the curve."""
         field = cls.field  # TODO: extend this to non-prime fields
+        gap = cls.gap
         modulus = field.modulus
         for i in range(gap):
             x_0 = field(i)
@@ -458,7 +597,8 @@ class EllipticCurvePoint(FiniteGroupElement):
         raise ValueError('message encoding failed, try larger gap')
 
     @classmethod
-    def decode(cls, M, Z, gap=256):
+    def decode(cls, M, Z):
+        gap = cls.gap
         return int((M.normalize()[0] - Z.normalize()[0]) / gap)
 
 
@@ -875,14 +1015,14 @@ class WeierstrassJacobian(WeierstrassCurvePoint):
         return x1 * z22 == x2 * z12 and y1 * z2 * z22 == y2 * z1 * z12
 
 
-def EllipticCurve(curvename='ED25519', coordinates=None):
+def EllipticCurve(curvename='Ed25519', coordinates=None):
     """Create elliptic curve type for a selection of built-in curves.
     The default coordinates used with these curves are 'affine'.
 
     The following Edwards curves and Weierstrass curves are built-in:
 
-        - 'ED25519': see https://en.wikipedia.org/wiki/EdDSA#Ed25519
-        - 'ED448': aka "Goldilocks", see https://en.wikipedia.org/wiki/Curve448
+        - 'Ed25519': see https://en.wikipedia.org/wiki/EdDSA#Ed25519
+        - 'Ed448': aka "Goldilocks", see https://en.wikipedia.org/wiki/Curve448
         - 'BN256': Barreto-Naehrig curve, https://eprint.iacr.org/2010/186
         - 'BN256_twist': sextic twist of Barreto-Naehrig curve
 
@@ -897,11 +1037,11 @@ def EllipticCurve(curvename='ED25519', coordinates=None):
 
 @functools.lru_cache(maxsize=None)
 def _EllipticCurve(curvename, coordinates):
-    if curvename.startswith('ED'):
-        if curvename == 'ED25519':
+    if curvename.startswith('Ed'):
+        if curvename == 'Ed25519':
             p = 2**255 - 19
             gf = GF(p)
-        elif curvename == 'ED448':
+        elif curvename == 'Ed448':
             p = 2**448 - 2**224 - 1
             gf = GF(p)
         else:
@@ -920,7 +1060,7 @@ def _EllipticCurve(curvename, coordinates):
         EC = type(name, (base,), {'__slots__': ()})
         EC.field = gf
 
-        if curvename == 'ED25519':
+        if curvename == 'Ed25519':
             EC.a = gf(-1)  # twisted
             EC.d = gf(-121665) / gf(121666)
             y = gf(4) / gf(5)
@@ -929,7 +1069,7 @@ def _EllipticCurve(curvename, coordinates):
             x = x if x.value%2 == 0 else -x  # enforce "positive" (even) x coordinate
             base_pt = (x, y)
             EC.order = 2**252 + 27742317777372353535851937790883648493
-        else:  # 'ED448'
+        else:  # 'Ed448'
             EC.a = gf(1)
             EC.d = gf(-39081)
             y = gf(19)
@@ -982,6 +1122,7 @@ def _EllipticCurve(curvename, coordinates):
     EC.curvename = curvename
     EC.field.is_signed = False  # for consistency between sectypes and regular types
     EC.is_cyclic = True  # these EC groups are cyclic (but not all EC groups are)
+    EC.gap = 256  # TODO: optimize gap value
     EC.identity = EC(check=False)
     EC.generator = EC(base_pt, check=False)
     globals()[name] = EC  # NB: exploit (almost?) unique name dynamic EC type
@@ -1086,7 +1227,7 @@ class ClassGroupForm(FiniteGroupElement):
         d, v3 = a1, A
         v2, v = 1, 0
         z = 0
-        L = (-cls.discriminant/4)**(1/4)
+        L = iroot(-cls.discriminant//4, 4)[0]
         while abs(v3) > L:  # partial Euclid
             d, (q, v3) = v3, divmod(d, v3)
             v, v2, = v2, v - q * v2
@@ -1131,7 +1272,7 @@ class ClassGroupForm(FiniteGroupElement):
         d, v3 = A, C
         v2, v = 1, 0
         z = 0
-        L = (-cls.discriminant/4)**(1/4)
+        L = iroot(-cls.discriminant//4, 4)[0]
         while abs(v3) > L:  # partial Euclid
             d, (q, v3) = v3, divmod(d, v3)
             v, v2, = v2, v - q * v2
@@ -1168,7 +1309,7 @@ class ClassGroupForm(FiniteGroupElement):
         """Encode message m in the first coefficient of a form."""
         D = cls.discriminant
         gap = cls.gap
-        assert (m+1) * gap <= math.sqrt(-D)/2  # ensure M (and Z) will be reduced
+        assert (m+1) * gap <= isqrt(-D)/2  # ensure M (and Z) will be reduced
         assert gap%4 == 0
         for i in range(0, gap, 4):
             a_0 = i + 3
