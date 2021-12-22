@@ -289,9 +289,6 @@ async def repeat_public_base_public_output(a, x) -> asyncio.Future:
     if not isinstance(a, list):
         a, x = [a], [x]
     group = type(a[0])
-    if isinstance(x[0], int):  # TODO: get rid of this hack
-        return group.identity  # assume x=0
-
     m = len(runtime.parties)
     lambda_i = _recombination_vector(x[0].field, range(1, m+1), 0)[runtime.pid]
     x_i = await runtime.gather(x)
@@ -618,8 +615,8 @@ class SecureClassGroupForm(SecureFiniteGroup):
         m, _ = _divmod(a - b, 2*a)
         a, b, c = right_action_Tm(m, (a, b, c))
         a, b, c = (a > c).if_else([c, -b, a], [a, b, c])
-        b = ((b < 0) * (a - c == 0)).if_else(-b, b)
-        b = ((b < 0) * (a + b == 0)).if_else(-b, b)
+        b = ((b < 0) * (a == c)).if_else(-b, b)
+        b = (b == -a).if_else(-b, b)
         return a, b, c
 
     # See Henri Cohen's book "A Course in Computational Algebraic Number Theory", Chapter 5.
@@ -654,7 +651,8 @@ class SecureClassGroupForm(SecureFiniteGroup):
     @classmethod
     def inversion(cls, f):
         a, b, c = f
-        return cls(cls._reduce((a, -b, c)))  # TODO: avoid full _reduce(), skipping the for loop
+        b = ((b != a) * (a != c)).if_else(-b, b)
+        return cls((a, b, c))
 
     @classmethod
     def equality(cls, a, b):
