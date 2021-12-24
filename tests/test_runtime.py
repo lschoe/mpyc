@@ -15,6 +15,16 @@ class Arithmetic(unittest.TestCase):
     def tearDownClass(cls):
         mpc.run(mpc.shutdown())
 
+    def test_async(self):
+        mpc.options.no_async = False
+#        mpc.run(mpc.transfer('hello'))
+        a = mpc.SecInt()(7)
+        b = a * a
+        mpc.run(mpc.barrier())
+        self.assertEqual(mpc.run(mpc.output(b)), 49)
+        self.assertEqual(mpc.run(mpc.output(mpc.scalar_mul(a, [-a, a]))), [-49, 49])
+        mpc.options.no_async = True
+
     def test_io(self):
         x = ({4, 3}, [1 - 1j, 2.5], 0, range(7))
         self.assertEqual(mpc.run(mpc.transfer(x))[0], x)
@@ -386,8 +396,8 @@ class Arithmetic(unittest.TestCase):
         a = secint(-1)
         b = secint(1)
         c = secint(1)
-        self.assertEqual(mpc.run(mpc.output(c.if_swap(a, b))), [1, -1])
-        self.assertEqual(mpc.run(mpc.output(mpc.if_else(1-c, a, b))), 1)
+        self.assertEqual(mpc.run(mpc.output(c.if_swap([a, b], [b, a])[0])), [1, -1])
+        self.assertEqual(mpc.run(mpc.output(mpc.if_else(1-c, b, b))), 1)
         self.assertEqual(mpc.run(mpc.output(mpc.if_swap(c, a, b))), [1, -1])
         self.assertEqual(mpc.run(mpc.output((1-c).if_else([a, b], [b, a]))), [1, -1])
         secfxp = mpc.SecFxp()

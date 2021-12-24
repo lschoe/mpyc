@@ -2,8 +2,9 @@
 
 Parties perform computations on secret-shared values by exchanging messages.
 Shamir's threshold secret sharing scheme is used for finite fields of any order
-exceeding the number of parties. MPyC provides secure number types and operations,
-many of which are available through Python's mechanism for operator overloading.
+exceeding the number of parties. MPyC provides many secure data types, ranging
+from numeric types to more advanced types, for which the corresponding operations
+are made available through Python's mechanism for operator overloading.
 """
 
 import os
@@ -30,11 +31,8 @@ import mpyc.statistics
 import mpyc.seclists
 
 Future = asyncio.Future
-SecureObject = sectypes.SecureObject
-SecureFiniteField = sectypes.SecureFiniteField
 mpc_coro = asyncoro.mpc_coro
 mpc_coro_no_pc = asyncoro._mpc_coro_no_pc
-returnType = asyncoro.returnType
 
 
 class Runtime:
@@ -48,12 +46,31 @@ class Runtime:
     to enable distributed computation (without secret sharing).
     """
 
-    version = mpyc.__version__
-    random = mpyc.random
-    statistics = mpyc.statistics
-
 #    __slots__ = ('pid', 'parties', 'options', '_threshold', '_logging_enabled', '_program_counter',
 #                 '_pc_level', '_loop', 'start_time', 'aggregate_load', '_prss_keys', '_bincoef')
+    version = mpyc.__version__
+    SecureObject = sectypes.SecureObject
+    SecureNumber = sectypes.SecureNumber
+    SecureFiniteField = sectypes.SecureFiniteField
+    SecureInteger = sectypes.SecureInteger
+    SecureFixedPoint = sectypes.SecureFixedPoint
+    SecureFloat = sectypes.SecureFloat
+    SecureFiniteGroup = mpyc.secgroups.SecureFiniteGroup
+    SecFld = staticmethod(sectypes.SecFld)
+    SecInt = staticmethod(sectypes.SecInt)
+    SecFxp = staticmethod(sectypes.SecFxp)
+    SecFlt = staticmethod(sectypes.SecFlt)
+    coroutine = staticmethod(mpc_coro)
+    returnType = staticmethod(asyncoro.returnType)
+    seclist = mpyc.seclists.seclist
+    SecGrp = staticmethod(mpyc.secgroups.SecGrp)
+    SecSymmetricGroup = staticmethod(mpyc.secgroups.SecSymmetricGroup)
+    SecQuadraticResidues = staticmethod(mpyc.secgroups.SecQuadraticResidues)
+    SecSchnorrGroup = staticmethod(mpyc.secgroups.SecSchnorrGroup)
+    SecEllipticCurve = staticmethod(mpyc.secgroups.SecEllipticCurve)
+    SecClassGroup = staticmethod(mpyc.secgroups.SecClassGroup)
+    random = mpyc.random
+    statistics = mpyc.statistics
 
     def __init__(self, pid, parties, options):
         """Initialize runtime."""
@@ -64,6 +81,9 @@ class Runtime:
         self._logging_enabled = not options.no_log
         self._program_counter = [0, 0]  # [hopping-counter, program-depth]
         self._pc_level = 0  # used for implementation of barriers
+        # For PyPy3.8 v7.3.7 on Windows the ProactorEventLoop (default in Python 3.8+) needs to be
+        # disabled when run with multiple parties by including the following line:
+        # asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         self._loop = asyncio.get_event_loop()  # cache running loop
         self._loop.set_exception_handler(asyncoro.exception_handler)  # exceptions re MPyC coroutine
         self.start_time = None
@@ -275,21 +295,6 @@ class Runtime:
 
         await self.shutdown()
 
-    Object = sectypes.SecureObject
-    Number = sectypes.SecureNumber
-    FiniteField = sectypes.SecureFiniteField
-    Integer = sectypes.SecureInteger
-    FixedPoint = sectypes.SecureFixedPoint
-    Float = sectypes.SecureFloat
-    FiniteGroup = mpyc.secgroups.SecureFiniteGroup
-    SecFld = staticmethod(sectypes.SecFld)
-    SecInt = staticmethod(sectypes.SecInt)
-    SecFxp = staticmethod(sectypes.SecFxp)
-    SecFlt = staticmethod(sectypes.SecFlt)
-    SecGrp = staticmethod(mpyc.secgroups.SecGrp)
-    coroutine = staticmethod(mpc_coro)
-    returnType = staticmethod(returnType)
-
     @mpc_coro
     async def transfer(self, obj, senders=None, receivers=None, sender_receivers=None) -> Future:
         """Transfer pickable Python objects between specified parties.
@@ -391,9 +396,9 @@ class Runtime:
             return stype._input(x, senders)
 
         if not stype.frac_length:
-            await returnType(stype, len(senders), len(x))
+            await self.returnType(stype, len(senders), len(x))
         else:
-            await returnType((stype, x[0].integral), len(senders), len(x))
+            await self.returnType((stype, x[0].integral), len(senders), len(x))
 
         shares = [None] * len(senders)
         for i, peer_pid in enumerate(senders):
@@ -445,7 +450,7 @@ class Runtime:
             receivers = range(m)  # default
         receivers = [receivers] if isinstance(receivers, int) else list(receivers)
         sftype = type(x[0])  # all elts assumed of same type
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             field = getattr(sftype, 'field', None)  # TODO: avoid this use of 'field' attr
             if not field:
                 y = await sftype._output(x, receivers, threshold)
@@ -469,7 +474,7 @@ class Runtime:
             points = [((self.pid - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
             points.append((self.pid + 1, x))
             y = thresha.recombine(field, points)
-            if issubclass(sftype, SecureObject):
+            if issubclass(sftype, self.SecureObject):
                 f = sftype._output_conversion
                 if not raw and f is not None:
                     y = [f(a) for a in y]
@@ -488,18 +493,18 @@ class Runtime:
             return []
 
         sftype = type(x[0])  # all elts assumed of same type
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             if not sftype.frac_length:
-                await returnType(sftype, len(x))
+                await self.returnType(sftype, len(x))
             else:
                 if x_is_list:
-                    await returnType((sftype, x[0].integral), len(x))
+                    await self.returnType((sftype, x[0].integral), len(x))
                 else:
-                    await returnType((sftype, x[0].integral))
+                    await self.returnType((sftype, x[0].integral))
             x = await self.gather(x)
             field = sftype.field
         else:
-            await returnType(Future)
+            await self.returnType(Future)
             field = sftype
 
         t = self.threshold
@@ -511,7 +516,7 @@ class Runtime:
         points = [(j+1, field.from_bytes(s)) for j, s in enumerate(out_shares)]
         y = thresha.recombine(field, points)
 
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             y = [sftype(s) for s in y]
         if not x_is_list:
             y = y[0]
@@ -531,8 +536,8 @@ class Runtime:
         if x == []:
             return []
 
-        if (isinstance(x[0], sectypes.SecureFiniteField)
-                and issubclass(ttype, sectypes.SecureFiniteField)):
+        if (isinstance(x[0], self.SecureFiniteField)
+                and issubclass(ttype, self.SecureFiniteField)):
             # conversion via secure integers
             stype = type(x[0])
             size = max(stype.field.order, ttype.field.order)
@@ -550,11 +555,11 @@ class Runtime:
     async def _convert(self, x, ttype):
         stype = type(x[0])  # source type
         n = len(x)
-        await returnType((ttype, not stype.frac_length), n)  # target type
+        await self.returnType((ttype, not stype.frac_length), n)  # target type
         m = len(self.parties)
         k = self.options.sec_param
         l = min(stype.bit_length, ttype.bit_length)
-        if issubclass(stype, sectypes.SecureFiniteField):
+        if issubclass(stype, self.SecureFiniteField):
             bound = stype.field.order
         else:
             bound = (1<<(k + l)) // self._bincoef + 1
@@ -566,7 +571,7 @@ class Runtime:
         if d < 0:
             x = await self.trunc(x, f=-d, l=stype.bit_length)  # TODO: take minimum with ttype or so
         if stype.field.is_signed:
-            if issubclass(stype, sectypes.SecureFiniteField):
+            if issubclass(stype, self.SecureFiniteField):
                 offset = stype.field.modulus // 2
             else:
                 offset = 1 << l-1
@@ -580,10 +585,10 @@ class Runtime:
         r = thresha.pseudorandom_share(ttype.field, m, self.pid, prfs, uci, n)
         for i in range(n):
             x[i] = x[i].value - r[i]
-            if issubclass(stype, sectypes.SecureFiniteField):
+            if issubclass(stype, self.SecureFiniteField):
                 x[i] = self._mod(ttype(x[i]), stype.field.modulus)
             x[i] = x[i] - offset
-        if d > 0 and not issubclass(stype, sectypes.SecureFiniteField):
+        if d > 0 and not issubclass(stype, self.SecureFiniteField):
             for i in range(n):
                 x[i] <<= d
         return x
@@ -599,17 +604,17 @@ class Runtime:
             x = [x]
         n = len(x)
         sftype = type(x[0])  # all elts assumed of same type
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             if x_is_list:
-                await returnType(sftype, n)
+                await self.returnType(sftype, n)
             else:
-                await returnType(sftype)
+                await self.returnType(sftype)
             Zp = sftype.field
             l = sftype.bit_length
             if f is None:
                 f = sftype.frac_length
         else:
-            await returnType(Future)
+            await self.returnType(Future)
             Zp = sftype
 
         k = self.options.sec_param
@@ -622,7 +627,7 @@ class Runtime:
                 s += r_bits[f * j + i].value
             r_modf[j] = Zp(s)
         r_divf = self._randoms(Zp, n, 1 << k + l)
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             x = await self.gather(x)
         c = await self.output([a + ((1 << l - 1 + f) + (q.value << f) + r.value)
                                for a, q, r in zip(x, r_divf, r_modf)])
@@ -669,9 +674,9 @@ class Runtime:
         """Secure negation (additive inverse) of a."""
         stype = type(a)
         if not stype.frac_length:
-            await returnType(stype)
+            await self.returnType(stype)
         else:
-            await returnType((stype, a.integral))
+            await self.returnType((stype, a.integral))
         a = await self.gather(a)
         return -a
 
@@ -680,9 +685,9 @@ class Runtime:
         """Secure unary + applied to a."""
         stype = type(a)
         if not stype.frac_length:
-            await returnType(stype)
+            await self.returnType(stype)
         else:
-            await returnType((stype, a.integral))
+            await self.returnType((stype, a.integral))
         a = await self.gather(a)
         return +a
 
@@ -691,20 +696,20 @@ class Runtime:
         """Secure addition of a and b."""
         stype = type(a)
         if not stype.frac_length:
-            await returnType(stype)
+            await self.returnType(stype)
         else:
-            await returnType((stype, a.integral and b.integral))
+            await self.returnType((stype, a.integral and b.integral))
         a, b = await self.gather(a, b)
         return a + b
 
     @mpc_coro_no_pc
     async def sub(self, a, b):
         """Secure subtraction of a and b."""
-        stype = type(b) if isinstance(b, SecureObject) else type(a)
+        stype = type(b) if isinstance(b, self.SecureObject) else type(a)
         if not stype.frac_length:
-            await returnType(stype)
+            await self.returnType(stype)
         else:
-            await returnType((stype, a.integral and b.integral))
+            await self.returnType((stype, a.integral and b.integral))
         a, b = await self.gather(a, b)
         return a - b
 
@@ -714,15 +719,15 @@ class Runtime:
         stype = type(a)
         f = stype.frac_length
         if not f:
-            await returnType(stype)
+            await self.returnType(stype)
         else:
             a_integral = a.integral
-            b_integral = isinstance(b, int) or isinstance(b, SecureObject) and b.integral
+            b_integral = isinstance(b, int) or isinstance(b, self.SecureObject) and b.integral
             if isinstance(b, float):
                 b = round(b * 2**f)
-            await returnType((stype, a_integral and b_integral))
+            await self.returnType((stype, a_integral and b_integral))
 
-        shb = isinstance(b, SecureObject)
+        shb = isinstance(b, self.SecureObject)
         if not shb:
             a = await self.gather(a)
         elif a is b:
@@ -742,7 +747,7 @@ class Runtime:
 
     def div(self, a, b):
         """Secure division of a by b, for nonzero b."""
-        b_is_SecureObject = isinstance(b, SecureObject)
+        b_is_SecureObject = isinstance(b, self.SecureObject)
         stype = type(b) if b_is_SecureObject else type(a)
         field = stype.field
         f = stype.frac_length
@@ -753,7 +758,7 @@ class Runtime:
                 c = self.reciprocal(b)
             return self.mul(c, a)
 
-        # isinstance(a, SecureObject) ensured
+        # isinstance(a, self.SecureObject) ensured
         if f:
             if isinstance(b, (int, float)):
                 c = 1/b
@@ -772,7 +777,7 @@ class Runtime:
         """Secure reciprocal (multiplicative inverse) of a, for nonzero a."""
         stype = type(a)
         field = stype.field
-        await returnType(stype)
+        await self.returnType(stype)
         a = await self.gather(a)
         while True:
             r = self._random(field)
@@ -847,7 +852,7 @@ class Runtime:
 
     def is_zero(self, a):
         """Secure zero test a == 0."""
-        if isinstance(a, SecureFiniteField):
+        if isinstance(a, self.SecureFiniteField):
             return 1 - self.pow(a, a.field.order - 1)
 
         if a.bit_length/2 > self.options.sec_param >= 8 and a.field.order%4 == 3:
@@ -859,7 +864,7 @@ class Runtime:
     async def _is_zero(self, a):
         """Probabilistic zero test."""
         stype = type(a)
-        await returnType((stype, True))
+        await self.returnType((stype, True))
         Zp = stype.field
 
         k = self.options.sec_param
@@ -897,7 +902,7 @@ class Runtime:
         """
         assert not (LT and EQ)
         stype = type(a)
-        await returnType((stype, True))
+        await self.returnType((stype, True))
         Zp = stype.field
 
         l = l or stype.bit_length
@@ -1116,7 +1121,7 @@ class Runtime:
     async def lsb(self, a):
         """Secure least significant bit of a."""  # a la [ST06]
         stype = type(a)
-        await returnType((stype, True))
+        await self.returnType((stype, True))
         Zp = stype.field
         l = stype.bit_length
         k = self.options.sec_param
@@ -1136,7 +1141,7 @@ class Runtime:
         """Secure modulo reduction."""
         # TODO: optimize for integral a of type secfxp
         stype = type(a)
-        await returnType(stype)
+        await self.returnType(stype)
         b = await self.gather(b)
         b = b.value
         assert isinstance(b, int)
@@ -1153,7 +1158,7 @@ class Runtime:
     async def _mod(self, a, b):
         """Secure modulo reduction, for public b."""  # a la [GMS10]
         stype = type(a)
-        await returnType(stype)
+        await self.returnType(stype)
         Zp = stype.field
         l = stype.bit_length
         k = self.options.sec_param
@@ -1185,7 +1190,7 @@ class Runtime:
         secint = type(a)  # TODO: extend this to secure fixed-point numbers
         if l is None:
             l = secint.bit_length
-        await returnType(secint, l)
+        await self.returnType(secint, l)
         field = secint.field
 
         r_bits = await self.random_bits(field, l)
@@ -1329,9 +1334,9 @@ class Runtime:
         x[0] = x[0] + start  # NB: also updates x[0].integral if applicable
         stype = type(x[0])  # all elts assumed of same type
         if not stype.frac_length:
-            await returnType(stype)
+            await self.returnType(stype)
         else:
-            await returnType((stype, all(a.integral for a in x)))
+            await self.returnType((stype, all(a.integral for a in x)))
 
         x = await self.gather(x)
         s = sum(a.value for a in x)
@@ -1347,16 +1352,16 @@ class Runtime:
             x = y = x[:]
         else:
             x, y = x[:], y[:]
-        shx = isinstance(x[0], SecureObject)
-        shy = isinstance(y[0], SecureObject)
+        shx = isinstance(x[0], self.SecureObject)
+        shy = isinstance(y[0], self.SecureObject)
         stype = type(x[0]) if shx else type(y[0])
         f = stype.frac_length
         if not f:
-            await returnType(stype)
+            await self.returnType(stype)
         else:
             x_integral = all(a.integral for a in x)
             y_integral = all(a.integral for a in y)
-            await returnType((stype, x_integral and y_integral))
+            await self.returnType((stype, x_integral and y_integral))
 
         if x is y:
             x = y = await self.gather(x)
@@ -1394,17 +1399,17 @@ class Runtime:
 
         x[0] = x[0] * start  # NB: also updates x[0].integral if applicable
         sftype = type(x[0])  # all elts assumed of same type
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             f = sftype.frac_length
             if not f:
-                await returnType(sftype)
+                await self.returnType(sftype)
             else:
                 integral = [a.integral for a in x]
-                await returnType((sftype, all(integral)))
+                await self.returnType((sftype, all(integral)))
             x = await self.gather(x)
         else:
             f = 0
-            await returnType(Future)
+            await self.returnType(Future)
 
         n = len(x)
         while n > 1:
@@ -1443,19 +1448,19 @@ class Runtime:
             return 1
 
         sftype = type(x[0])  # all elts assumed of same type
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             f = sftype.frac_length
             if not f:
-                await returnType(sftype)
+                await self.returnType(sftype)
             else:
                 if not all(a.integral for a in x):
                     raise ValueError('nonintegral fixed-point number')
 
-                await returnType((sftype, True))
+                await self.returnType((sftype, True))
             x = await self.gather(x)
         else:
             f = 0
-            await returnType(Future)
+            await self.returnType(Future)
 
         n = len(x)  # TODO: for sufficiently large n use mpc.eq(mpc.sum(x), n) instead
         while n > 1:
@@ -1486,10 +1491,11 @@ class Runtime:
         stype = type(x[0])  # all elts assumed of same type
         n = len(x)
         if not stype.frac_length:
-            await returnType(stype, n)
+            await self.returnType(stype, n)
         else:
-            y0_integral = isinstance(y[0], int) or isinstance(y[0], SecureObject) and y[0].integral
-            await returnType((stype, x[0].integral and y0_integral), n)
+            y0_integral = (isinstance(y[0], int) or
+                           isinstance(y[0], self.SecureObject) and y[0].integral)
+            await self.returnType((stype, x[0].integral and y0_integral), n)
 
         x, y = await self.gather(x, y)
         for i in range(n):
@@ -1506,10 +1512,11 @@ class Runtime:
         stype = type(x[0])  # all elts assumed of same type
         n = len(x)
         if not stype.frac_length:
-            await returnType(stype, n)
+            await self.returnType(stype, n)
         else:
-            y0_integral = isinstance(y[0], int) or isinstance(y[0], SecureObject) and y[0].integral
-            await returnType((stype, x[0].integral and y0_integral), n)
+            y0_integral = (isinstance(y[0], int) or
+                           isinstance(y[0], self.SecureObject) and y[0].integral)
+            await self.returnType((stype, x[0].integral and y0_integral), n)
 
         x, y = await self.gather(x, y)
         for i in range(n):
@@ -1521,7 +1528,7 @@ class Runtime:
         """Secure addition of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
         n1, n2 = len(A), len(A[0])
-        await returnType(type(A[0][0]), n1, n2)
+        await self.returnType(type(A[0][0]), n1, n2)
         A, B = await self.gather(A, B)
         for i in range(n1):
             for j in range(n2):
@@ -1533,7 +1540,7 @@ class Runtime:
         """Secure subtraction of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
         n1, n2 = len(A), len(A[0])
-        await returnType(type(A[0][0]), n1, n2)
+        await self.returnType(type(A[0][0]), n1, n2)
         A, B = await self.gather(A, B)
         for i in range(n1):
             for j in range(n2):
@@ -1551,10 +1558,10 @@ class Runtime:
         stype = type(a)  # a and all elts of x assumed of same type
         f = stype.frac_length
         if not f:
-            await returnType(stype, n)
+            await self.returnType(stype, n)
         else:
             a_integral = a.integral
-            await returnType((stype, a_integral and x[0].integral), n)
+            await self.returnType((stype, a_integral and x[0].integral), n)
 
         a, x = await self.gather(a, x)
         if f and a_integral:
@@ -1575,9 +1582,9 @@ class Runtime:
         field = stype.field
         f = stype.frac_length
         if not f:
-            await returnType(stype, n)
+            await self.returnType(stype, n)
         else:  # NB: a is integral
-            await returnType((stype, x[0].integral and y[0].integral), n)
+            await self.returnType((stype, x[0].integral and y[0].integral), n)
 
         a, x, y = await self.gather(a, x, y)
         if f:
@@ -1610,9 +1617,9 @@ class Runtime:
         field = stype.field
         f = stype.frac_length
         if not f:
-            await returnType(stype, 2, n)
+            await self.returnType(stype, 2, n)
         else:  # NB: a is integral
-            await returnType((stype, x[0].integral and y[0].integral), 2, n)
+            await self.returnType((stype, x[0].integral and y[0].integral), 2, n)
 
         a, x, y = await self.gather(a, x, y)
         if f:
@@ -1651,21 +1658,21 @@ class Runtime:
             x, y = x[:], y[:]
         n = len(x)
         sftype = type(x[0])  # all elts of x and y assumed of same type
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             f = sftype.frac_length
             if not f:
-                await returnType(sftype, n)
+                await self.returnType(sftype, n)
             else:
                 x_integral = x[0].integral
                 y_integral = y[0].integral
-                await returnType((sftype, x_integral and y_integral), n)
+                await self.returnType((sftype, x_integral and y_integral), n)
             if x is y:
                 x = y = await self.gather(x)
             else:
                 x, y = await self.gather(x, y)
         else:
             f = 0
-            await returnType(Future)
+            await self.returnType(Future)
 
         for i in range(n):
             x[i] = x[i] * y[i]
@@ -1684,19 +1691,19 @@ class Runtime:
             A = B = [r[:] for r in A]
         else:
             A, B = [r[:] for r in A], [r[:] for r in B]
-        shA = isinstance(A[0][0], SecureObject)
-        shB = isinstance(B[0][0], SecureObject)
+        shA = isinstance(A[0][0], self.SecureObject)
+        shB = isinstance(B[0][0], self.SecureObject)
         stype = type(A[0][0]) if shA else type(B[0][0])
         field = stype.field
         f = stype.frac_length
         n1 = len(A)
         n2 = len(B) if tr else len(B[0])
         if not f:
-            await returnType(stype, n1, n2)
+            await self.returnType(stype, n1, n2)
         else:
             A_integral = A[0][0].integral
             B_integral = B[0][0].integral
-            await returnType((stype, A_integral and B_integral), n1, n2)
+            await self.returnType((stype, A_integral and B_integral), n1, n2)
 
         if A is B:
             A = B = await self.gather(A)
@@ -1738,7 +1745,7 @@ class Runtime:
         stype = type(A[0][0])
         field = stype.field
         n1, n2 = len(A), len(A[0])
-        await returnType(stype, n1, n2)
+        await self.returnType(stype, n1, n2)
         A, d, b, c = await self.gather(A, d, b, c)
         d = d.value
         for i in range(n1):
@@ -1768,7 +1775,7 @@ class Runtime:
 
     def _randoms(self, sftype, n, bound=None):
         """n secure random values of the given type in the given range."""
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             field = sftype.field
         else:
             field = sftype
@@ -1779,7 +1786,7 @@ class Runtime:
         m = len(self.parties)
         prfs = self.prfs(bound)
         shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
-        if issubclass(sftype, SecureObject):
+        if issubclass(sftype, self.SecureObject):
             shares = [sftype(s) for s in shares]
         return shares
 
@@ -1791,14 +1798,14 @@ class Runtime:
     async def random_bits(self, sftype, n, signed=False):
         """n secure uniformly random bits of the given type."""
         prss0 = False
-        if issubclass(sftype, SecureObject):
-            if issubclass(sftype, SecureFiniteField):
+        if issubclass(sftype, self.SecureObject):
+            if issubclass(sftype, self.SecureFiniteField):
                 prss0 = True
-            await returnType((sftype, True), n)
+            await self.returnType((sftype, True), n)
             field = sftype.field
             f = sftype.frac_length
         else:
-            await returnType(Future)
+            await self.returnType(Future)
             field = sftype
             f = 0
 
@@ -1870,7 +1877,7 @@ class Runtime:
         if l is None:
             l = stype.bit_length
         assert l <= stype.bit_length + stype.frac_length
-        await returnType((stype, True), l)
+        await self.returnType((stype, True), l)
         field = stype.field
         f = stype.frac_length
         rshift_f = f and a.integral  # optimization for integral fixed-point numbers
@@ -1887,7 +1894,7 @@ class Runtime:
             r_modl <<= 1
             r_modl += r_i.value
 
-        if issubclass(stype, sectypes.SecureFiniteField):
+        if issubclass(stype, self.SecureFiniteField):
             if field.characteristic == 2:
                 a = await self.gather(a)
                 c = await self.output(a + r_modl)
@@ -1924,7 +1931,7 @@ class Runtime:
 
         x = x[:]
         stype = type(x[0])
-        await returnType((stype, True))
+        await self.returnType((stype, True))
         x = await self.gather(x)
         s = 0
         for a in reversed(x):
@@ -2259,7 +2266,8 @@ def setup():
         if options.config:
             # from ini configuration file
             config = configparser.ConfigParser()
-            config.read_file(open(os.path.join('.config', options.config), 'r'))
+            with open(os.path.join('.config', options.config), 'r') as f:
+                config.read_file(f)
             for party in config.sections():
                 host = config.get(party, 'host')
                 port = config.get(party, 'port')
@@ -2327,10 +2335,10 @@ def setup():
     rt = Runtime(pid, parties, options)
     sectypes.runtime = rt
     asyncoro.runtime = rt
+    mpyc.seclists.runtime = rt
     mpyc.secgroups.runtime = rt
     mpyc.random.runtime = rt
     mpyc.statistics.runtime = rt
-    mpyc.seclists.runtime = rt
     return rt
 
 

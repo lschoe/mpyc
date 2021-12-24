@@ -216,6 +216,5 @@ async def main():
         ax.set_xlabel('Location Error [m]')
         plt.show()
 
-
 if __name__ == '__main__':
     mpc.run(main())

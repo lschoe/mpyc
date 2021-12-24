@@ -1,14 +1,13 @@
 """Demo oblivious sorting in MPyC, with full secrecy.
 
 Randomly generated secret-shared lists of numbers (integers or fixed-point numbers)
-are sorted using MPyC's built-in functions mcp.sorted() and seclist.sort(),
+are sorted using MPyC's built-in functions mcp.sorted() and mpc.seclist.sort(),
 which are the secure counterparts of Python's built-in function sorted() and
 list.sort(), respectively.
 """
 
 import sys
 from mpyc.runtime import mpc
-from mpyc.seclists import seclist
 
 
 async def main():
@@ -35,7 +34,7 @@ async def main():
     async with mpc:
         mpc.random.shuffle(secnum, x)  # secret in-place random shuffle
         print('Randomly shuffled input:', await mpc.output(x))
-        x = seclist(x)
+        x = mpc.seclist(x)
         x.sort(reverse=True)  # in-place sort in descending order
         print('Sorted by descending value:', await mpc.output(list(x)))
 

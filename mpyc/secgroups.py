@@ -7,6 +7,7 @@ symmetric groups, quadratic residues, elliptic curve groups, and class groups.
 import operator
 import itertools
 import functools
+import inspect
 import asyncio
 from mpyc.finfields import FiniteFieldElement
 import mpyc.fingroups as fg
@@ -92,7 +93,7 @@ class SecureFiniteGroup(SecureObject):
             return type(self).__matmul__(self, other)
 
         if self.group.is_additive:
-            return type(self).__xor__(self, other)
+            return NotImplemented
 
         raise TypeError('* not defined for group')
 
@@ -693,6 +694,34 @@ def SecGrp(group):
     secgrp.__doc__ = 'Class of secret-shared finite group elements.'
     secgrp.group = group
     secgrp.sectype = sectype
-    secgrp.identity = secgrp(group.identity)
+    secgrp.identity = secgrp(group.identity)  # TODO: how much is gained by avoiding secgrp() here?
     globals()[name] = secgrp  # NB: exploit (almost) unique name dynamic SecureGroup type
     return secgrp
+
+
+def _toSecGrpFunc(GroupFunc):
+    """Create secure group constructor for given GroupFunc."""
+    name = f'Sec{GroupFunc.__name__}'
+    sig = inspect.signature(GroupFunc)
+    # docstring based on GroupFunc's signature and docstring
+    doc = f'''Call {name}(...) is equivalent to SecGrp({GroupFunc.__name__}(...)),
+    returning secure version of {GroupFunc.__name__} from mpyc.fingroups.
+
+    {GroupFunc.__name__}{sig}:
+
+    {GroupFunc.__doc__}
+'''
+
+    def SecGrpFunc(*args, **kwargs):
+        return SecGrp(GroupFunc(*args, **kwargs))
+    SecGrpFunc.__name__ = name
+    SecGrpFunc.__doc__ = doc
+    SecGrpFunc.__signature__ = sig
+    globals()[name] = SecGrpFunc
+
+
+_toSecGrpFunc(fg.SymmetricGroup)     # make SecSymmetricGroup as secure SymmetricGroup version
+_toSecGrpFunc(fg.QuadraticResidues)  # make SecQuadraticResidues as secure QuadraticResidues version
+_toSecGrpFunc(fg.SchnorrGroup)       # make SecSchnorrGroup as secure SchnorrGroup version
+_toSecGrpFunc(fg.EllipticCurve)      # make SecEllipticCurve as secure EllipticCurve version
+_toSecGrpFunc(fg.ClassGroup)         # make SecClassGroup as secure ClassGroup version

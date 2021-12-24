@@ -223,7 +223,7 @@ async def random_derangement(sectype, x):
     if isinstance(x, int):
         x = range(x)
     x = list(x)
-    if issubclass(sectype, runtime.FixedPoint):
+    if issubclass(sectype, runtime.SecureFixedPoint):
         # all elts assumed of same type as x[0]
         if not isinstance(x[0], sectype):
             x = [sectype(a) for a in x]  # NB: original x is not modified

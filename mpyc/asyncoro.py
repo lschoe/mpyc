@@ -1,5 +1,5 @@
-"""This module provides the basic support for asynchronous communication and
-computation of secret-shared values.
+"""This module provides basic support for asynchronous communication
+and computation of secret-shared values.
 """
 
 import sys
@@ -361,7 +361,6 @@ def mpc_coro(func, pc=True):
     of the form "-> expression" or by the first await expression in func.
     Return annotations can only be used for static types.
     """
-
     rettype = typing.get_type_hints(func).get('return')
 
     @functools.wraps(func)

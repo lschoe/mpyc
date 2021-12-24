@@ -292,11 +292,13 @@ async def _quickselect(x, ks):
     conversions of integer indices to unit vectors) is linear in n, for fixed ks.
     """
     # TODO: consider adding case ks is an int instead of a list
-    # TODO: try to make actual performance competitive with
-    #    def _quickselect(x, ks):
-    #       y = runtime.sorted(x)
-    #       return [y[k] for k in ks]
-    # Implementation below is *slower* because of expensive computation w_left (and w_right).
+    # TODO: try to make implementation below competitive with straightforward "sort and pick"
+    # approach; slowness due to expensive computation of w_left (and w_right). Also note
+    # advantage of sorting that there is no privacy leakage.
+    if len(ks) >= 3:
+        y = runtime.sorted(x)
+        return [y[k] for k in ks]
+
     if not ks:
         return []
 

@@ -24,7 +24,6 @@ import random
 import argparse
 from mpyc.gmpy import is_prime, isqrt
 from mpyc.runtime import mpc
-from mpyc.fingroups import QuadraticResidues, SchnorrGroup, EllipticCurve, ClassGroup
 
 
 async def keygen(g):
@@ -77,8 +76,9 @@ async def decrypt(C, x, public_out=True):
     return M
 
 
-async def election(group):
+async def election(secgrp):
     """Boardroom election between all MPC parties."""
+    group = secgrp.group
     # Create ElGamal key pair:
     g = group.generator
     x, h = await keygen(g)
@@ -103,8 +103,9 @@ async def election(group):
     print(f'Referendum result: {t} "yes" / {len(c) - t} "no"')
 
 
-async def crypt_cycle(group, M, public_out=True):
+async def crypt_cycle(secgrp, M, public_out=True):
     """Encrypt/decrypt cycle for message M."""
+    group = secgrp.group
     # Create ElGamal key pair:
     g = group.generator
     x, h = await keygen(g)
@@ -126,10 +127,8 @@ async def crypt_cycle(group, M, public_out=True):
     if public_out:
         M = group.decode(M, Z)
     else:
-        secgrp = mpc.SecGrp(group)
         M = secgrp.decode(M, Z)
     return M
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -145,22 +144,22 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.group == 1:
-        group = EllipticCurve('Ed25519', 'extended')
+        secgrp = mpc.SecEllipticCurve('Ed25519', 'extended')
     elif args.group == 2:
-        group = QuadraticResidues(l=2048)
+        secgrp = mpc.SecQuadraticResidues(l=2048)
     elif args.group == 3:
-        group = SchnorrGroup(l=1024)
+        secgrp = mpc.SecSchnorrGroup(l=1024)
     elif args.group == 4:
         if args.no_public_output:
-            group = ClassGroup(l=32)
+            secgrp = mpc.SecClassGroup(l=32)
         else:
-            group = ClassGroup(l=1024)
-    print(f'Using secure group: {mpc.SecGrp(group).__name__}')
+            secgrp = mpc.SecClassGroup(l=1024)
+    print(f'Using secure group: {secgrp.__name__}')
 
     mpc.run(mpc.start())
     print('Boardroom election')
     print('------------------')
-    mpc.run(election(group))
+    mpc.run(election(secgrp))
     print()
 
     print('Encryption/decryption tests')
@@ -168,7 +167,7 @@ if __name__ == '__main__':
     for m in range(args.batch_size):
         m += 1 + args.offset
         print(f'Plaintext sent: {m}')
-        p = mpc.run(crypt_cycle(group, m, not args.no_public_output))
+        p = mpc.run(crypt_cycle(secgrp, m, not args.no_public_output))
         if args.no_public_output:
             # p is a secure
             p = mpc.run(mpc.output(p))

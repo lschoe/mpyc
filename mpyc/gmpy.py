@@ -1,10 +1,8 @@
 """This module collects all gmpy2 functions used by MPyC.
 
-Plus a function for factoring prime powers,
-and a function for rational reconstruction.
+Stubs only using Python built-ins are provided in case the gmpy2 package is not available.
 
-Stubs of limited functionality and efficiency are provided
-in case the gmpy2 package is not available.
+In addition, a function for factoring prime powers, and a function for rational reconstruction.
 """
 
 import os

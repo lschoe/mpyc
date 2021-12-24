@@ -14,12 +14,21 @@ Besides setting mpc as a handle for the MPyC runtime, also three secure
     from mpyc.runtime import mpc
     secint = mpc.SecInt()
     secfxp = mpc.SecFxp()
-    secfld256 = mpc.SecFld(256)
+    secflt = mpc.SecFlt()
+    secfld127 = mpc.SecFld(127)
+    secfld256 = mpc.SecFld(2**8)
+    secsym = mpc.SecSymmetricGroup(5)
+    secqr = mpc.SecQuadraticResidues(11)
+    secsg = mpc.SecSchnorrGroup(l=1024)
+    secec = mpc.SecEllipticCurve('Ed25519')
+    seccl = mpc.SecClassGroup(-23)
 
-Type secint represents secure integers and type secfxp represents secure
-fixed-point numbers, both of default bit lengths. Type secfld256 represents
-secure GF(256)-elements. Other "popular" types etc. can easily be added
-here in the future.
+Type secint represents secure integers and types secfxp and secflt represent
+secure fixed-point/floating-point numbers, all of default bit lengths. Types
+secfld127 and secfld256 represent secure prime field GF(127)-elements and
+secure binary field GF(2^8)-elements. Types secsym, secqr, secsg, secec, and
+seccl represent secure finite group elements for five particular groups.
+Other "popular" types etc. can easily be added here in the future.
 """
 
 # The implementation is copied as much as possible from asyncio's  __main__
@@ -187,5 +196,12 @@ if __name__ == '__main__':
     preamble = ('from mpyc.runtime import mpc',
                 'secint = mpc.SecInt()',
                 'secfxp = mpc.SecFxp()',
-                'secfld256 = mpc.SecFld(256)')
+                'secflt = mpc.SecFlt()',
+                'secfld127 = mpc.SecFld(127)',
+                'secfld256 = mpc.SecFld(2**8)',
+                'secsym = mpc.SecSymmetricGroup(5)',
+                'secqr = mpc.SecQuadraticResidues(11)',
+                'secsg = mpc.SecSchnorrGroup(l=1024)',
+                "secec = mpc.SecEllipticCurve('Ed25519')",
+                'seccl = mpc.SecClassGroup(-23)')
     main(preamble)

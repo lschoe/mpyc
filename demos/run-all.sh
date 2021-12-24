@@ -12,4 +12,4 @@ python lpsolverfxp.py "$@"
 python aes.py "$@" -1
 python onewayhashchains.py --no-barrier "$@"
 python elgamal.py -b2 -o3 "$@"
-python dsa.py "$@"
+python dsa.py --no-barrier "$@"

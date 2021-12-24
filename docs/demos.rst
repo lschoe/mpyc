@@ -689,9 +689,18 @@ To obtain the corresponding secure group simply set:
 
 	secgrp = mpc.SecGrp(EC)
 
-With this setup we can then implement a threshold version of the ElGamal cryptosystem in a few lines of code.
+With this setup a threshold version of the ElGamal cryptosystem can be implemented in a few lines of code.
 
-Instead of the default affine coordinates, the demo actually uses Edwards curves with extended coordinates
+Instead of first creating group :code:`EC` and then turning it into a secure group ``secgrp``, the
+demo actually uses the convenience function ``mpc.SecEllipticCurve()`` to perform these steps in one go:
+
+.. code-block:: python
+
+	secgrp = mpc.SecEllipticCurve('Ed25519')
+
+The group :code:`EC` is now available as class attribute :code:`secgrp.group`.
+
+Also, instead of the default affine coordinates, the demo actually uses Edwards curves with extended coordinates
 for better performance: the complete formula for point addition only requires 8 secure multiplications over
 :math:`\mathbb{F}_p`, which can be done in 2 rounds only (see the `MPyC source code
 <https://github.com/lschoe/mpyc/blob/master/mpyc/>`_ for details).

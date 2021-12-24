@@ -23,7 +23,7 @@ secnum = None
 
 
 def scale_to_int(f):
-    if issubclass(secnum, mpc.Integer):
+    if issubclass(secnum, mpc.SecureInteger):
         scale = lambda a: secnum(int(round(a * f)))  # force Python integers
     else:
         scale = lambda a: secnum(float(a))  # force Python floats
@@ -75,7 +75,7 @@ async def convolvetensor(x, W, b):
             for im in range(m):
                 Y[i][j][im] = mpc._reshare(Y[i][j][im])
     Y = await mpc.gather(Y)
-    if issubclass(stype, mpc.FixedPoint):
+    if issubclass(stype, mpc.SecureFixedPoint):
         l = stype.bit_length
         Y = [[[mpc.trunc(y, f=stype.frac_length, l=l) for y in _] for _ in _] for _ in Y]
     Y = await mpc.gather(Y)
@@ -165,7 +165,7 @@ async def main():
     W, b = load('conv1', f)
     x = convolvetensor(x, W, b)
     await mpc.barrier()
-    if issubclass(secnum, mpc.Integer):
+    if issubclass(secnum, mpc.SecureInteger):
         secnum.bit_length = 16
     x = maxpool(x)
     await mpc.barrier()
@@ -176,7 +176,7 @@ async def main():
     W, b = load('conv2', f, 3)
     x = convolvetensor(x, W, b)
     await mpc.barrier()
-    if issubclass(secnum, mpc.Integer):
+    if issubclass(secnum, mpc.SecureInteger):
         secnum.bit_length = 23
     x = maxpool(x)
     await mpc.barrier()
@@ -187,7 +187,7 @@ async def main():
     x = x.reshape(batch_size, 64 * 7**2)
     W, b = load('fc1', f, 4)
     x = tensormatrix_prod(x, W, b)
-    if issubclass(secnum, mpc.Integer):
+    if issubclass(secnum, mpc.SecureInteger):
         secnum.bit_length = 30
     x = ReLU(x)
     await mpc.barrier()
@@ -197,7 +197,7 @@ async def main():
     x = tensormatrix_prod(x, W, b)
 
     logging.info('--------------- OUTPUT  -------------')
-    if issubclass(secnum, mpc.Integer):
+    if issubclass(secnum, mpc.SecureInteger):
         secnum.bit_length = 37
     for i in range(batch_size):
         prediction = int(await mpc.output(mpc.argmax(x[i])[0]))

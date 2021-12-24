@@ -108,7 +108,7 @@ class FiniteGroupElement:
             return group.__matmul__(self, other)
 
         if group.is_additive:
-            return group.__xor__(self, other)
+            return NotImplemented
 
         raise TypeError('* not defined for group')
 
@@ -455,7 +455,7 @@ class SchnorrGroupElement(FiniteGroupElement):
     def encode(cls, m):
         """Encode message m in group element g^m."""
         g = cls.generator
-        return cls(g.value**m, check=False), g
+        return cls(g.value**m, check=False), g  # g as dummy Z
 
     @classmethod
     def decode(cls, M, Z):
@@ -1168,9 +1168,6 @@ class ClassGroupForm(FiniteGroupElement):
 
             if a <= 0:
                 raise ValueError('positive definite form required')
-
-            if math.gcd(math.gcd(a, b), c) != 1:  # Python 3.9+ gcd arbitrary number of args
-                raise ValueError('primitive form required')
 
             value = ClassGroupForm._reduce((a, b, c))
         self.value = value

@@ -23,9 +23,9 @@ import time
 import argparse
 from hashlib import sha1, sha224, sha256, sha384, sha512
 from elgamal import keygen  # reuse key generation from threshold ElGamal cryptosystem
+from mpyc.gmpy import invert
 from mpyc.fingroups import SchnorrGroup, EllipticCurve, EllipticCurvePoint
 from mpyc.runtime import mpc
-from mpyc.gmpy import invert
 
 
 class DSA:

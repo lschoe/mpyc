@@ -5,11 +5,11 @@
 1. [gmpy](https://lschoe.github.io/mpyc/mpyc.gmpy.html): some basic number theoretic algorithms (using GMP via Python package gmpy2, if installed)
 2. [gfpx](https://lschoe.github.io/mpyc/mpyc.gfpx.html): polynomial arithmetic over arbitrary prime fields
 3. [finfields](https://lschoe.github.io/mpyc/mpyc.finfields.html): arbitrary finite fields, including binary fields and prime fields
-4. [fingroups](https://lschoe.github.io/mpyc/mpyc.fingroups.html): finite groups, in particular for use in cryptography (elliptic curves, etc.)
+4. [fingroups](https://lschoe.github.io/mpyc/mpyc.fingroups.html): finite groups, in particular for use in cryptography (elliptic curves, Schnorr groups, etc.)
 5. [thresha](https://lschoe.github.io/mpyc/mpyc.thresha.html): threshold Shamir (and also pseudorandom) secret sharing
-6. [sectypes](https://lschoe.github.io/mpyc/mpyc.sectypes.html): SecInt/Fxp/Fld/Flt types for secret-shared integer/fixed-point/finite-field/floating-point values
+6. [sectypes](https://lschoe.github.io/mpyc/mpyc.sectypes.html): SecInt/Fld/Fxp/Flt types for secure (secret-shared) integer/finite-field/fixed-/floating-point values
 7. [asyncoro](https://lschoe.github.io/mpyc/mpyc.asyncoro.html): asynchronous communication and computation of secret-shared values
-8. [runtime](https://lschoe.github.io/mpyc/mpyc.runtime.html): core MPC protocols (mostly hidden by Python's operator overloading)
+8. [runtime](https://lschoe.github.io/mpyc/mpyc.runtime.html): core MPC protocols (many hidden by Python's operator overloading)
 9. [mpctools](https://lschoe.github.io/mpyc/mpyc.mpctools.html): reduce and accumulate with log round complexity
 10. [seclists](https://lschoe.github.io/mpyc/mpyc.seclists.html): secure lists with oblivious access and updates
 11. [secgroups](https://lschoe.github.io/mpyc/mpyc.secgroups.html): SecGrp types for secure (secret-shared) finite group elements

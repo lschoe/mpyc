@@ -343,8 +343,6 @@ class SecureFiniteField(SecureNumber):
                 value = self.field(value)
             elif isinstance(value, self.field):
                 pass
-#            elif isinstance(value, Future):
-#                pass  # NB: for internal use in runtime only
             else:
                 if isinstance(value, finfields.FiniteFieldElement):
                     raise TypeError(f'incompatible finite field {type(value).__name__} '
