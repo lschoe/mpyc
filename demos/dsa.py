@@ -145,14 +145,13 @@ class Schnorr:
 
     @staticmethod
     def to_bytes(a):
-        """Map group element a to a byte string."""
+        """Map group element a to fixed-length byte string."""
         if isinstance(a, EllipticCurvePoint):  # cf. ECDSA
             z = int(a.normalize().x)           # x-coordinate of point a on elliptic curve
         else:           # cf. DSA
             z = int(a)  # Schnorr group element a
-        N = (z.bit_length() + 7) // 8
+        N = (a.field.order.bit_length() + 7) // 8
         return z.to_bytes(length=N, byteorder='big')
-        # TODO: check details
 
 
 async def test_sig(sig, group, M):

@@ -166,7 +166,7 @@ class Runtime:
             return
 
         self.aggregate_load -= 10000
-        await mpc.barrier(name=name)
+        await self.barrier(name=name)
 
     def run(self, f):
         """Run the given coroutine or future until it is done."""
@@ -1112,7 +1112,7 @@ class Runtime:
                 for i in range(n - d):  # NB: all n-d comparisons can be done in parallel
                     if i & p == r:
                         a, b = x[i], x[i + d]
-                        x[i], x[i + d] = mpc.if_swap(key(a) >= key(b), a, b)
+                        x[i], x[i + d] = self.if_swap(key(a) >= key(b), a, b)
                 d, q, r = q - p, q >> 1, p
             p >>= 1
         return x

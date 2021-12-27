@@ -27,7 +27,7 @@ in cryptography:
 
 The structure of most of these groups will be trivial, preferably cyclic or even
 of prime order. Where applicable, a generator of the group (or a sufficiently
-large subgroup) is provided to accomodate discrete log and Diffie-Hellman
+large subgroup) is provided to accommodate discrete log and Diffie-Hellman
 hardness assumptions.
 """
 

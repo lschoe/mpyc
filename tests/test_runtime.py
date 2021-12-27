@@ -17,7 +17,6 @@ class Arithmetic(unittest.TestCase):
 
     def test_async(self):
         mpc.options.no_async = False
-#        mpc.run(mpc.transfer('hello'))
         a = mpc.SecInt()(7)
         b = a * a
         mpc.run(mpc.barrier())
@@ -71,20 +70,23 @@ class Arithmetic(unittest.TestCase):
         secint = mpc.SecInt()
         secfxp = mpc.SecFxp()
         secflt = mpc.SecFlt()
+        seccl = mpc.SecClassGroup(-23)
+        a = seccl.group((2, 1))
         # NB: mpc.transfer() calls pickle.dumps() and pickle.loads()
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(xsecfld(12), senders=0)))), 12)
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(psecfld(12), senders=0)))), 12)
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secint(12), senders=0)))), 12)
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secfxp(12.5), senders=0)))), 12.5)
         self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(secflt(12.5), senders=0)))), 12.5)
+        self.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(seccl((2, 1, 3)), senders=0)))), a)
         self.assertEqual(mpc.run(mpc.transfer(xsecfld.field(12), senders=0)), 12)
         self.assertEqual(mpc.run(mpc.transfer(psecfld.field(12), senders=0)), 12)
         self.assertEqual(mpc.run(mpc.transfer(secint.field(12), senders=0)), 12)
         self.assertEqual(mpc.run(mpc.transfer(secfxp.field(13), senders=0)), 13)
         self.assertEqual(mpc.run(mpc.transfer(xsecfld.field.modulus, 0)), xsecfld.field.modulus)
 
-        x = [(xsecfld(12), psecfld(12), secint(12), secfxp(12.5), secflt(12.5)),
-             [xsecfld.field(12), psecfld.field(12), secint.field(12), secfxp.field(13)],
+        x = [(xsecfld(12), psecfld(12), secint(12), secfxp(12.5), secflt(12.5), seccl((2, 1, 3))),
+             [xsecfld.field(12), psecfld.field(12), secint.field(12), secfxp.field(13), a],
              xsecfld.field.modulus]
         y = mpc.run(mpc.transfer(x, senders=0))
         self.assertTrue(all(mpc.run(mpc.output(a == b)) for a, b in zip(y[0], x[0])))

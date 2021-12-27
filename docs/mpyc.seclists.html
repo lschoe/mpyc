@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.seclists</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.7/mpyc/seclists.py">github.com/lschoe/mpyc/blob/v0.7/mpyc/seclists.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/seclists.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/seclists.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;a&nbsp;secure&nbsp;(oblivious)&nbsp;alternative&nbsp;to&nbsp;Python&nbsp;lists.<br>
 &nbsp;<br>
 A&nbsp;secure&nbsp;<a href="https://docs.python.org/3/library/stdtypes.html#list">list</a>&nbsp;contains&nbsp;secret-shared&nbsp;numbers.&nbsp;Apart&nbsp;from&nbsp;hiding&nbsp;the&nbsp;contents&nbsp;of&nbsp;the<br>
@@ -31,8 +31,8 @@ in&nbsp;a&nbsp;<a href="https://docs.python.org/3/library/stdtypes.html#list">li
 is&nbsp;computed&nbsp;by:<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;s&nbsp;=&nbsp;<a href="#seclist">seclist</a>([0]*n,&nbsp;secint)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;a&nbsp;in&nbsp;x:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s[a]&nbsp;+=&nbsp;1<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;a&nbsp;in&nbsp;x:&nbsp;s[a]&nbsp;+=&nbsp;1<br>
 &nbsp;<br>
 Current&nbsp;implementation&nbsp;is&nbsp;basic,&nbsp;taking&nbsp;advantage&nbsp;of&nbsp;cheap&nbsp;secure&nbsp;dot&nbsp;products,&nbsp;as<br>
 provided&nbsp;by&nbsp;runtime.in_prod().&nbsp;Performance&nbsp;for&nbsp;modestly&nbsp;sized&nbsp;lists&nbsp;of&nbsp;lengths&nbsp;10&nbsp;to&nbsp;1000<br>
@@ -107,10 +107,7 @@ Data descriptors defined here:<br>
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#seclist">seclist</a>(x=(),&nbsp;sectype=None)<br>
 &nbsp;<br>
-Built-in&nbsp;mutable&nbsp;sequence.<br>
-&nbsp;<br>
-If&nbsp;no&nbsp;argument&nbsp;is&nbsp;given,&nbsp;the&nbsp;constructor&nbsp;creates&nbsp;a&nbsp;new&nbsp;empty&nbsp;<a href="https://docs.python.org/3/library/stdtypes.html#list">list</a>.<br>
-The&nbsp;argument&nbsp;must&nbsp;be&nbsp;an&nbsp;iterable&nbsp;if&nbsp;specified.<br>&nbsp;</tt></td></tr>
+<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.seclists.html#seclist">seclist</a></dd>
@@ -240,6 +237,10 @@ Methods inherited from <a href="https://docs.python.org/3/library/stdtypes.html#
 <dl><dt><a name="seclist-clear"><strong>clear</strong></a>(self, /)</dt><dd><tt>Remove&nbsp;all&nbsp;items&nbsp;from&nbsp;<a href="https://docs.python.org/3/library/stdtypes.html#list">list</a>.</tt></dd></dl>
 
 <dl><dt><a name="seclist-reverse"><strong>reverse</strong></a>(self, /)</dt><dd><tt>Reverse&nbsp;*IN&nbsp;PLACE*.</tt></dd></dl>
+
+<hr>
+Class methods inherited from <a href="https://docs.python.org/3/library/stdtypes.html#list">builtins.list</a>:<br>
+<dl><dt><a name="seclist-__class_getitem__"><strong>__class_getitem__</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>See&nbsp;<a href="https://www.python.org/dev/peps/pep-0585/">PEP&nbsp;585</a></tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="https://docs.python.org/3/library/stdtypes.html#list">builtins.list</a>:<br>

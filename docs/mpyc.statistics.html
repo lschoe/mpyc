@@ -8,14 +8,16 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.statistics</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.7/mpyc/statistics.py">github.com/lschoe/mpyc/blob/v0.7/mpyc/statistics.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/statistics.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/statistics.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;common&nbsp;mathematical&nbsp;statistics&nbsp;functions.<br>
 The&nbsp;module&nbsp;is&nbsp;modeled&nbsp;after&nbsp;the&nbsp;statistics&nbsp;module&nbsp;in&nbsp;the&nbsp;Python&nbsp;standard&nbsp;library,&nbsp;and<br>
 as&nbsp;such&nbsp;aimed&nbsp;at&nbsp;small&nbsp;scale&nbsp;use&nbsp;("at&nbsp;the&nbsp;level&nbsp;of&nbsp;graphing&nbsp;and&nbsp;scientific&nbsp;calculators").<br>
 &nbsp;<br>
-Functions&nbsp;mean,&nbsp;median,&nbsp;median_low,&nbsp;median_high,&nbsp;and&nbsp;mode&nbsp;are&nbsp;provided&nbsp;for&nbsp;calculating<br>
-averages&nbsp;(measures&nbsp;of&nbsp;central&nbsp;location).&nbsp;Functions&nbsp;variance,&nbsp;stdev,&nbsp;pvariance,&nbsp;pstdev<br>
-are&nbsp;provided&nbsp;for&nbsp;calculating&nbsp;variability&nbsp;(measures&nbsp;of&nbsp;spread).<br>
+Functions&nbsp;mean,&nbsp;median,&nbsp;median_low,&nbsp;median_high,&nbsp;quantiles,&nbsp;and&nbsp;mode&nbsp;are&nbsp;provided<br>
+for&nbsp;calculating&nbsp;averages&nbsp;(measures&nbsp;of&nbsp;central&nbsp;location).&nbsp;Functions&nbsp;variance,&nbsp;stdev,<br>
+pvariance,&nbsp;pstdev&nbsp;are&nbsp;provided&nbsp;for&nbsp;calculating&nbsp;variability&nbsp;(measures&nbsp;of&nbsp;spread).<br>
+Functions&nbsp;covariance,&nbsp;correlation,&nbsp;linear_regression&nbsp;are&nbsp;provided&nbsp;for&nbsp;calculating<br>
+statistics&nbsp;regarding&nbsp;relations&nbsp;between&nbsp;two&nbsp;sets&nbsp;of&nbsp;data.<br>
 &nbsp;<br>
 Most&nbsp;of&nbsp;these&nbsp;functions&nbsp;work&nbsp;best&nbsp;with&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;but&nbsp;some&nbsp;effort&nbsp;is<br>
 done&nbsp;to&nbsp;support&nbsp;the&nbsp;use&nbsp;of&nbsp;secure&nbsp;integers&nbsp;as&nbsp;well.&nbsp;For&nbsp;instance,&nbsp;the&nbsp;mean&nbsp;of&nbsp;a&nbsp;sample<br>
@@ -24,8 +26,8 @@ of&nbsp;a&nbsp;sample&nbsp;of&nbsp;integers&nbsp;is&nbsp;also&nbsp;rounded&nbsp;
 useful&nbsp;if&nbsp;the&nbsp;sample&nbsp;is&nbsp;properly&nbsp;scaled.<br>
 &nbsp;<br>
 A&nbsp;baseline&nbsp;implementation&nbsp;is&nbsp;provided,&nbsp;favoring&nbsp;simplicity&nbsp;over&nbsp;efficiency.&nbsp;Also,&nbsp;the<br>
-current&nbsp;implementations&nbsp;of&nbsp;mode&nbsp;and&nbsp;median&nbsp;favor&nbsp;a&nbsp;small&nbsp;privacy&nbsp;leak&nbsp;over&nbsp;a&nbsp;strict&nbsp;but<br>
-less&nbsp;efficient&nbsp;approach.<br>
+current&nbsp;implementations&nbsp;of&nbsp;mode,&nbsp;median,&nbsp;and&nbsp;quantiles&nbsp;favor&nbsp;a&nbsp;small&nbsp;privacy&nbsp;leak&nbsp;over<br>
+a&nbsp;strict&nbsp;but&nbsp;less&nbsp;efficient&nbsp;approach.<br>
 &nbsp;<br>
 If&nbsp;these&nbsp;functions&nbsp;are&nbsp;called&nbsp;with&nbsp;plain&nbsp;data,&nbsp;the&nbsp;call&nbsp;is&nbsp;relayed&nbsp;to&nbsp;the&nbsp;corresponding<br>
 function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</tt></p>
@@ -38,8 +40,8 @@ function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</tt></p>
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="mpyc.asyncoro.html">mpyc.asyncoro</a><br>
 </td><td width="25%" valign=top><a href="mpyc.random.html">mpyc.random</a><br>
-</td><td width="25%" valign=top><a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
 </td><td width="25%" valign=top><a href="https://docs.python.org/3/library/statistics.html">statistics</a><br>
+</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/sys.html">sys</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
@@ -47,7 +49,31 @@ function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</tt></p>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-mean"><strong>mean</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;mean&nbsp;(average)&nbsp;of&nbsp;data&nbsp;which&nbsp;can&nbsp;be&nbsp;a&nbsp;sequence&nbsp;or&nbsp;an&nbsp;iterable.<br>
+<td width="100%"><dl><dt><a name="-correlation"><strong>correlation</strong></a>(x, y)</dt><dd><tt>Return&nbsp;Pearson's&nbsp;correlation&nbsp;coefficient&nbsp;for&nbsp;x&nbsp;and&nbsp;y.<br>
+&nbsp;<br>
+Pearson's&nbsp;correlation&nbsp;coefficient&nbsp;takes&nbsp;values&nbsp;between&nbsp;-1&nbsp;and&nbsp;+1.<br>
+It&nbsp;measures&nbsp;the&nbsp;strength&nbsp;and&nbsp;direction&nbsp;of&nbsp;the&nbsp;linear&nbsp;relationship<br>
+between&nbsp;x&nbsp;and&nbsp;y,&nbsp;where&nbsp;+1&nbsp;means&nbsp;very&nbsp;strong,&nbsp;positive&nbsp;linear&nbsp;relationship,<br>
+-1&nbsp;very&nbsp;strong,&nbsp;negative&nbsp;linear&nbsp;relationship,&nbsp;and&nbsp;0&nbsp;no&nbsp;linear&nbsp;relationship.</tt></dd></dl>
+ <dl><dt><a name="-covariance"><strong>covariance</strong></a>(x, y)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;covariance&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+ <dl><dt><a name="-fsum"><strong>fsum</strong></a>(seq, /)</dt><dd><tt>Return&nbsp;an&nbsp;accurate&nbsp;floating&nbsp;point&nbsp;sum&nbsp;of&nbsp;values&nbsp;in&nbsp;the&nbsp;iterable&nbsp;seq.<br>
+&nbsp;<br>
+Assumes&nbsp;IEEE-754&nbsp;floating&nbsp;point&nbsp;arithmetic.</tt></dd></dl>
+ <dl><dt><a name="-linear_regression"><strong>linear_regression</strong></a>(x, y)</dt><dd><tt>Return&nbsp;a&nbsp;(simple)&nbsp;linear&nbsp;regression&nbsp;model&nbsp;for&nbsp;x&nbsp;and&nbsp;y.<br>
+&nbsp;<br>
+The&nbsp;parameters&nbsp;of&nbsp;the&nbsp;model&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;named&nbsp;LinearRegression&nbsp;tuple,<br>
+with&nbsp;two&nbsp;fields&nbsp;called&nbsp;"slope"&nbsp;and&nbsp;"intercept",&nbsp;respectively.<br>
+&nbsp;<br>
+A&nbsp;linear&nbsp;regression&nbsp;model&nbsp;describes&nbsp;the&nbsp;relationship&nbsp;between&nbsp;independent<br>
+variable&nbsp;x&nbsp;and&nbsp;dependent&nbsp;variable&nbsp;y&nbsp;in&nbsp;terms&nbsp;of&nbsp;a&nbsp;linear&nbsp;function:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;=&nbsp;slope&nbsp;*&nbsp;x&nbsp;+&nbsp;intercept&nbsp;+&nbsp;noise<br>
+&nbsp;<br>
+Here,&nbsp;slope&nbsp;and&nbsp;intercept&nbsp;are&nbsp;the&nbsp;regression&nbsp;parameters&nbsp;estimated&nbsp;using<br>
+ordinary&nbsp;least&nbsp;squares,&nbsp;and&nbsp;noise&nbsp;represents&nbsp;the&nbsp;variability&nbsp;of&nbsp;the&nbsp;data<br>
+not&nbsp;explained&nbsp;by&nbsp;the&nbsp;linear&nbsp;regression&nbsp;(it&nbsp;is&nbsp;equal&nbsp;to&nbsp;the&nbsp;difference<br>
+between&nbsp;predicted&nbsp;and&nbsp;actual&nbsp;values&nbsp;of&nbsp;the&nbsp;dependent&nbsp;variable).</tt></dd></dl>
+ <dl><dt><a name="-mean"><strong>mean</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;mean&nbsp;(average)&nbsp;of&nbsp;data&nbsp;which&nbsp;can&nbsp;be&nbsp;a&nbsp;sequence&nbsp;or&nbsp;an&nbsp;iterable.<br>
 &nbsp;<br>
 If&nbsp;the&nbsp;data&nbsp;points&nbsp;are&nbsp;secure&nbsp;integers&nbsp;or&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;the&nbsp;mean<br>
 value&nbsp;returned&nbsp;is&nbsp;of&nbsp;the&nbsp;same&nbsp;secure&nbsp;type,&nbsp;rounded&nbsp;to&nbsp;the&nbsp;nearest&nbsp;number.<br>
@@ -93,6 +119,21 @@ Use&nbsp;this&nbsp;function&nbsp;to&nbsp;calculate&nbsp;the&nbsp;variance&nbsp;f
 the&nbsp;variance&nbsp;from&nbsp;a&nbsp;sample,&nbsp;the&nbsp;<a href="#-variance">variance</a>()&nbsp;function&nbsp;is&nbsp;usually&nbsp;a&nbsp;better&nbsp;choice.<br>
 &nbsp;<br>
 Raises&nbsp;StatisticsError&nbsp;if&nbsp;data&nbsp;is&nbsp;empty.</tt></dd></dl>
+ <dl><dt><a name="-quantiles"><strong>quantiles</strong></a>(data, *, n=4, method='exclusive')</dt><dd><tt>Divide&nbsp;data&nbsp;into&nbsp;n&nbsp;continuous&nbsp;intervals&nbsp;with&nbsp;equal&nbsp;probability.<br>
+&nbsp;<br>
+Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;n-1&nbsp;cut&nbsp;points&nbsp;separating&nbsp;the&nbsp;intervals.<br>
+&nbsp;<br>
+Set&nbsp;n&nbsp;to&nbsp;4&nbsp;for&nbsp;quartiles&nbsp;(the&nbsp;default).&nbsp;Set&nbsp;n&nbsp;to&nbsp;10&nbsp;for&nbsp;deciles.<br>
+Set&nbsp;n&nbsp;to&nbsp;100&nbsp;for&nbsp;percentiles&nbsp;which&nbsp;gives&nbsp;the&nbsp;99&nbsp;cuts&nbsp;points&nbsp;that<br>
+separate&nbsp;data&nbsp;into&nbsp;100&nbsp;equal&nbsp;sized&nbsp;groups.<br>
+&nbsp;<br>
+The&nbsp;data&nbsp;can&nbsp;be&nbsp;any&nbsp;iterable&nbsp;containing&nbsp;samples.<br>
+The&nbsp;cut&nbsp;points&nbsp;are&nbsp;linearly&nbsp;interpolated&nbsp;between&nbsp;data&nbsp;points.<br>
+&nbsp;<br>
+If&nbsp;method&nbsp;is&nbsp;set&nbsp;to&nbsp;'inclusive',&nbsp;data&nbsp;is&nbsp;treated&nbsp;as&nbsp;population&nbsp;data.<br>
+The&nbsp;minimum&nbsp;value&nbsp;is&nbsp;treated&nbsp;as&nbsp;the&nbsp;0th&nbsp;percentile&nbsp;(lowest&nbsp;quantile)&nbsp;and<br>
+the&nbsp;maximum&nbsp;value&nbsp;is&nbsp;treated&nbsp;as&nbsp;the&nbsp;100th&nbsp;percentile&nbsp;(highest&nbsp;quantile).</tt></dd></dl>
+ <dl><dt><a name="-sqrt"><strong>sqrt</strong></a>(x, /)</dt><dd><tt>Return&nbsp;the&nbsp;square&nbsp;root&nbsp;of&nbsp;x.</tt></dd></dl>
  <dl><dt><a name="-stdev"><strong>stdev</strong></a>(data, xbar=None)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;standard&nbsp;deviation&nbsp;(square&nbsp;root&nbsp;of&nbsp;the&nbsp;sample&nbsp;variance).<br>
 &nbsp;<br>
 See&nbsp;<a href="#-variance">variance</a>()&nbsp;for&nbsp;arguments&nbsp;and&nbsp;other&nbsp;details.</tt></dd></dl>

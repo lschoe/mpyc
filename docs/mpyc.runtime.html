@@ -8,13 +8,14 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.runtime</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.7/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.7/mpyc/runtime.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/runtime.py</a></font></td></tr></table>
     <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
 &nbsp;<br>
 Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
 Shamir's&nbsp;threshold&nbsp;secret&nbsp;sharing&nbsp;scheme&nbsp;is&nbsp;used&nbsp;for&nbsp;finite&nbsp;fields&nbsp;of&nbsp;any&nbsp;order<br>
-exceeding&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;MPyC&nbsp;provides&nbsp;secure&nbsp;number&nbsp;types&nbsp;and&nbsp;operations,<br>
-many&nbsp;of&nbsp;which&nbsp;are&nbsp;available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&nbsp;operator&nbsp;overloading.</tt></p>
+exceeding&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;MPyC&nbsp;provides&nbsp;many&nbsp;secure&nbsp;data&nbsp;types,&nbsp;ranging<br>
+from&nbsp;numeric&nbsp;types&nbsp;to&nbsp;more&nbsp;advanced&nbsp;types,&nbsp;for&nbsp;which&nbsp;the&nbsp;corresponding&nbsp;operations<br>
+are&nbsp;made&nbsp;available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&nbsp;operator&nbsp;overloading.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -108,7 +109,7 @@ to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;
 
 <dl><dt><a name="Runtime-__init__"><strong>__init__</strong></a>(self, pid, parties, options)</dt><dd><tt>Initialize&nbsp;runtime.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-abs"><strong>abs</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;absolute&nbsp;value&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-abs"><strong>abs</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;absolute&nbsp;value&nbsp;of&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-add"><strong>add</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
@@ -147,29 +148,115 @@ Converted&nbsp;values&nbsp;assumed&nbsp;to&nbsp;fit&nbsp;in&nbsp;target&nbsp;typ
 
 <dl><dt><a name="Runtime-eq_public"><strong>eq_public</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;public&nbsp;equality&nbsp;test&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-find"><strong>find</strong></a>(self, x, a, bits=True, e='len(x)', f=None, cs_f=None)</dt><dd><tt>Return&nbsp;index&nbsp;ix&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;a&nbsp;in&nbsp;list&nbsp;x.<br>
+&nbsp;<br>
+The&nbsp;elements&nbsp;of&nbsp;x&nbsp;and&nbsp;a&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;{0,&nbsp;1},&nbsp;by&nbsp;default.<br>
+Set&nbsp;Boolean&nbsp;flag&nbsp;bits=False&nbsp;for&nbsp;arbitrary&nbsp;inputs.<br>
+&nbsp;<br>
+If&nbsp;a&nbsp;is&nbsp;not&nbsp;present&nbsp;in&nbsp;x,&nbsp;then&nbsp;ix=len(x)&nbsp;by&nbsp;default.<br>
+Set&nbsp;flag&nbsp;e=E&nbsp;to&nbsp;get&nbsp;ix=E&nbsp;instead&nbsp;if&nbsp;a&nbsp;is&nbsp;not&nbsp;present&nbsp;in&nbsp;x.<br>
+Set&nbsp;e=None&nbsp;to&nbsp;get&nbsp;the&nbsp;"raw"&nbsp;output&nbsp;as&nbsp;a&nbsp;pair&nbsp;(nf,&nbsp;ix),&nbsp;where<br>
+the&nbsp;indicator&nbsp;bit&nbsp;nf=1&nbsp;if&nbsp;and&nbsp;only&nbsp;if&nbsp;a&nbsp;is&nbsp;not&nbsp;found&nbsp;in&nbsp;x.<br>
+&nbsp;<br>
+For&nbsp;instance,&nbsp;E=-1&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;mimic&nbsp;Python's&nbsp;<a href="#Runtime-find">find</a>()&nbsp;methods.<br>
+If&nbsp;E&nbsp;is&nbsp;a&nbsp;string,&nbsp;i=eval(E)&nbsp;will&nbsp;be&nbsp;returned&nbsp;where&nbsp;E&nbsp;is&nbsp;an&nbsp;expression<br>
+in&nbsp;terms&nbsp;of&nbsp;len(x).&nbsp;As&nbsp;a&nbsp;simple&nbsp;example,&nbsp;E='len(x)-1'&nbsp;will&nbsp;enforce<br>
+that&nbsp;a&nbsp;is&nbsp;considered&nbsp;to&nbsp;be&nbsp;present&nbsp;in&nbsp;any&nbsp;case&nbsp;as&nbsp;the&nbsp;last&nbsp;element<br>
+of&nbsp;x,&nbsp;if&nbsp;not&nbsp;earlier.<br>
+&nbsp;<br>
+The&nbsp;return&nbsp;value&nbsp;is&nbsp;index&nbsp;ix,&nbsp;by&nbsp;default.<br>
+If&nbsp;function&nbsp;f&nbsp;is&nbsp;set,&nbsp;the&nbsp;value&nbsp;of&nbsp;f(ix)&nbsp;is&nbsp;returned&nbsp;instead.<br>
+Even&nbsp;though&nbsp;index&nbsp;ix&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;however,&nbsp;the&nbsp;computation&nbsp;of&nbsp;f(ix)<br>
+does&nbsp;not&nbsp;incur&nbsp;any&nbsp;communication&nbsp;costs,&nbsp;requiring&nbsp;local&nbsp;computation&nbsp;only.<br>
+For&nbsp;example,&nbsp;with&nbsp;f=lambda&nbsp;i:&nbsp;2^i&nbsp;we&nbsp;would&nbsp;save&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure<br>
+exponentiation,&nbsp;which&nbsp;would&nbsp;otherwise&nbsp;require&nbsp;a&nbsp;call&nbsp;to&nbsp;runtime.<a href="#Runtime-to_bits">to_bits</a>(ix),&nbsp;say.<br>
+&nbsp;<br>
+Also,&nbsp;function&nbsp;cs_f&nbsp;can&nbsp;be&nbsp;set&nbsp;instead&nbsp;of&nbsp;specifying&nbsp;function&nbsp;f&nbsp;directly.<br>
+Function&nbsp;cs_f(b,&nbsp;i)&nbsp;will&nbsp;take&nbsp;as&nbsp;input&nbsp;a&nbsp;(secure)&nbsp;bit&nbsp;b&nbsp;and&nbsp;a&nbsp;(public)&nbsp;index&nbsp;i.<br>
+The&nbsp;relationship&nbsp;between&nbsp;function&nbsp;f&nbsp;and&nbsp;its&nbsp;"conditional-step&nbsp;function"&nbsp;cs_f<br>
+is&nbsp;given&nbsp;by:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cs_f(b,&nbsp;i)&nbsp;=&nbsp;f(i+b),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;b&nbsp;in&nbsp;{0,&nbsp;1}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(*)<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;for&nbsp;f(i)&nbsp;=&nbsp;i,&nbsp;we&nbsp;get&nbsp;cs_f(b,&nbsp;i)&nbsp;=&nbsp;i+b.<br>
+And,&nbsp;for&nbsp;f(i)&nbsp;=&nbsp;2^i,&nbsp;we&nbsp;get&nbsp;cs_f(b,&nbsp;i)&nbsp;=&nbsp;2^(i+b)&nbsp;=&nbsp;(b+1)&nbsp;2^i.<br>
+In&nbsp;general,&nbsp;we&nbsp;have:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cs_f(b,&nbsp;i)&nbsp;=&nbsp;b&nbsp;(f(i+1)&nbsp;-&nbsp;f(i))&nbsp;+&nbsp;f(i),&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;b&nbsp;in&nbsp;{0,&nbsp;1}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(**)<br>
+&nbsp;<br>
+For&nbsp;this&nbsp;reason,&nbsp;cs_f(b,&nbsp;i)&nbsp;can&nbsp;be&nbsp;computed&nbsp;locally&nbsp;indeed.<br>
+&nbsp;<br>
+A&nbsp;few&nbsp;more&nbsp;examples:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f(i)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;i&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;2^i&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;n-i&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;2^-i&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(i,&nbsp;2^i)<br>
+&nbsp;<br>
+&nbsp;cs_f(b,&nbsp;i)&nbsp;=&nbsp;&nbsp;i+b&nbsp;|&nbsp;(b+1)&nbsp;2^i&nbsp;|&nbsp;n-i-b&nbsp;|&nbsp;(2-b)&nbsp;2^-(i+1)&nbsp;|&nbsp;(i+b,&nbsp;(b+1)&nbsp;2^i)<br>
+&nbsp;<br>
+In&nbsp;the&nbsp;last&nbsp;example,&nbsp;f(i)&nbsp;is&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;two&nbsp;values.&nbsp;In&nbsp;general,&nbsp;f(i)<br>
+can&nbsp;be&nbsp;a&nbsp;single&nbsp;number&nbsp;or&nbsp;a&nbsp;tuple/list&nbsp;of&nbsp;numbers.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;it&nbsp;suffices&nbsp;to&nbsp;specify&nbsp;either&nbsp;f&nbsp;or&nbsp;cs_f,&nbsp;as&nbsp;(*)&nbsp;implies&nbsp;that<br>
+f(i)&nbsp;=&nbsp;cs_f(0,&nbsp;i).&nbsp;If&nbsp;cs_f&nbsp;is&nbsp;not&nbsp;set,&nbsp;it&nbsp;will&nbsp;be&nbsp;computed&nbsp;from&nbsp;f&nbsp;using&nbsp;(**),<br>
+incurring&nbsp;some&nbsp;overhead.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-from_bits"><strong>from_bits</strong></a>(self, x)</dt><dd><tt>Recover&nbsp;secure&nbsp;number&nbsp;from&nbsp;its&nbsp;binary&nbsp;representation&nbsp;x.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-gather"><strong>gather</strong></a>(self, *obj)</dt></dl>
 
 <dl><dt><a name="Runtime-gauss"><strong>gauss</strong></a>(self, A, d, b, c)</dt><dd><tt>Secure&nbsp;Gaussian&nbsp;elimination&nbsp;A&nbsp;d&nbsp;-&nbsp;b&nbsp;c.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-gcd"><strong>gcd</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
+&nbsp;<br>
+If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-gcdext"><strong>gcdext</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;extended&nbsp;GCD&nbsp;of&nbsp;secure&nbsp;integers&nbsp;a&nbsp;and&nbsp;b.<br>
+Return&nbsp;triple&nbsp;(g,&nbsp;s,&nbsp;t)&nbsp;such&nbsp;that&nbsp;g&nbsp;=&nbsp;<a href="#Runtime-gcd">gcd</a>(a,b)&nbsp;=&nbsp;s*a&nbsp;+&nbsp;t*b.<br>
+&nbsp;<br>
+If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-gcp2"><strong>gcp2</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;greatest&nbsp;common&nbsp;power&nbsp;of&nbsp;2&nbsp;dividing&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-ge"><strong>ge</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;&gt;=&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-if_else"><strong>if_else</strong></a>(self, c, x, y)</dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;condition&nbsp;c&nbsp;between&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+<dl><dt><a name="Runtime-if_else"><strong>if_else</strong></a>(self, c, x, y)</dt><dd><tt>Secure&nbsp;selection&nbsp;between&nbsp;x&nbsp;and&nbsp;y&nbsp;based&nbsp;on&nbsp;condition&nbsp;c.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-if_swap"><strong>if_swap</strong></a>(self, c, x, y)</dt><dd><tt>Secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;based&nbsp;on&nbsp;condition&nbsp;c.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-in_prod"><strong>in_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;dot&nbsp;product&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;(one&nbsp;resharing).</tt></dd></dl>
 
+<dl><dt><a name="Runtime-indexOf"><strong>indexOf</strong></a>(self, x, a, bits=False)</dt><dd><tt>Return&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;a&nbsp;in&nbsp;x.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError&nbsp;if&nbsp;a&nbsp;is&nbsp;not&nbsp;present.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-input"><strong>input</strong></a>(self, x, senders=None)</dt><dd><tt>Input&nbsp;x&nbsp;to&nbsp;the&nbsp;computation.<br>
 &nbsp;<br>
-Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
+Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;objects.<br>
 The&nbsp;senders&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;provide&nbsp;an&nbsp;input.<br>
-The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;sender.</tt></dd></dl>
+The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;sender.<br>
+&nbsp;<br>
+Except&nbsp;for&nbsp;secure&nbsp;integers,&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;and<br>
+secure&nbsp;finite&nbsp;field&nbsp;elements,&nbsp;which&nbsp;are&nbsp;handled&nbsp;directly,&nbsp;the<br>
+input&nbsp;of&nbsp;secure&nbsp;objects&nbsp;is&nbsp;controlled&nbsp;by&nbsp;their&nbsp;_input()&nbsp;method.<br>
+For&nbsp;instance,&nbsp;mpyc.sectypes.SecureFloat._input()&nbsp;does&nbsp;this&nbsp;for<br>
+secure&nbsp;floating-point&nbsp;numbers.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-inverse"><strong>inverse</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;inverse&nbsp;of&nbsp;a&nbsp;modulo&nbsp;b,&nbsp;assuming&nbsp;a&gt;=0,&nbsp;b&gt;0,&nbsp;and&nbsp;<a href="#Runtime-gcd">gcd</a>(a,b)=1.<br>
+The&nbsp;result&nbsp;is&nbsp;nonnegative&nbsp;and&nbsp;less&nbsp;than&nbsp;b&nbsp;(inverse&nbsp;is&nbsp;0&nbsp;only&nbsp;when&nbsp;b=1).<br>
+&nbsp;<br>
+If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.<br>
+&nbsp;<br>
+To&nbsp;compute&nbsp;inverses&nbsp;for&nbsp;negative&nbsp;b,&nbsp;use&nbsp;-b&nbsp;instead&nbsp;of&nbsp;b,&nbsp;and<br>
+to&nbsp;compute&nbsp;inverses&nbsp;for&nbsp;arbitrary&nbsp;nonzero&nbsp;b,&nbsp;use&nbsp;<a href="#Runtime-abs">abs</a>(b)&nbsp;instead&nbsp;of&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-invert"><strong>invert</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;bitwise&nbsp;inverse&nbsp;(not)&nbsp;of&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-is_zero"><strong>is_zero</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;zero&nbsp;test&nbsp;a&nbsp;==&nbsp;0.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-is_zero_public"><strong>is_zero_public</strong></a>(self, a) -&gt; _asyncio.Future</dt><dd><tt>Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-lcm"><strong>lcm</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;least&nbsp;common&nbsp;multiple&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
+&nbsp;<br>
+If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-logging"><strong>logging</strong></a>(self, enable=None)</dt><dd><tt>Toggle/enable/disable&nbsp;logging.</tt></dd></dl>
 
@@ -208,14 +295,19 @@ Communications&nbsp;of&nbsp;the&nbsp;ACM&nbsp;15(6),&nbsp;pp.&nbsp;462-464,&nbsp
 
 <dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, x, receivers=None, threshold=None, raw=False) -&gt; _asyncio.Future</dt><dd><tt>Output&nbsp;the&nbsp;value&nbsp;of&nbsp;x&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.<br>
 &nbsp;<br>
-Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
+Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;objects.<br>
 The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;the&nbsp;output.<br>
 The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;receiver.<br>
 &nbsp;<br>
 A&nbsp;secure&nbsp;integer&nbsp;is&nbsp;output&nbsp;as&nbsp;a&nbsp;Python&nbsp;int,&nbsp;a&nbsp;secure<br>
 fixed-point&nbsp;number&nbsp;is&nbsp;output&nbsp;as&nbsp;a&nbsp;Python&nbsp;float,&nbsp;and&nbsp;a&nbsp;secure<br>
 finite&nbsp;field&nbsp;element&nbsp;is&nbsp;output&nbsp;as&nbsp;an&nbsp;MPyC&nbsp;finite&nbsp;field&nbsp;element.<br>
-Set&nbsp;flag&nbsp;raw=True&nbsp;to&nbsp;suppress&nbsp;output&nbsp;conversion.</tt></dd></dl>
+Set&nbsp;flag&nbsp;raw=True&nbsp;to&nbsp;suppress&nbsp;output&nbsp;conversion.<br>
+&nbsp;<br>
+For&nbsp;all&nbsp;other&nbsp;types&nbsp;of&nbsp;secure&nbsp;objects&nbsp;their&nbsp;_output()&nbsp;method&nbsp;controls<br>
+what&nbsp;is&nbsp;output.&nbsp;For&nbsp;instance,&nbsp;mpyc.sectypes.SecureFloat._output()<br>
+outputs&nbsp;secure&nbsp;floating-point&nbsp;numbers&nbsp;as&nbsp;Python&nbsp;floats.<br>
+The&nbsp;flag&nbsp;raw&nbsp;is&nbsp;ignored&nbsp;for&nbsp;these&nbsp;types.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-pos"><strong>pos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;unary&nbsp;+&nbsp;applied&nbsp;to&nbsp;a.</tt></dd></dl>
 
@@ -277,11 +369,26 @@ Open&nbsp;connections&nbsp;with&nbsp;other&nbsp;parties,&nbsp;if&nbsp;any.</tt><
 
 <dl><dt><a name="Runtime-to_bits"><strong>to_bits</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;(or&nbsp;all)&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-trailing_zeros"><strong>trailing_zeros</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;least&nbsp;significant&nbsp;(or&nbsp;all)&nbsp;bits&nbsp;of&nbsp;a,<br>
+only&nbsp;correct&nbsp;up&nbsp;to&nbsp;and&nbsp;including&nbsp;the&nbsp;least&nbsp;significant&nbsp;1&nbsp;(if&nbsp;any).</tt></dd></dl>
+
 <dl><dt><a name="Runtime-transfer"><strong>transfer</strong></a>(self, obj, senders=None, receivers=None, sender_receivers=None) -&gt; _asyncio.Future</dt><dd><tt>Transfer&nbsp;pickable&nbsp;Python&nbsp;objects&nbsp;between&nbsp;specified&nbsp;parties.<br>
 &nbsp;<br>
 The&nbsp;senders&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;provide&nbsp;input.<br>
 The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;output.<br>
-The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;sender&nbsp;as&nbsp;well&nbsp;as&nbsp;a&nbsp;receiver.</tt></dd></dl>
+The&nbsp;default&nbsp;is&nbsp;to&nbsp;let&nbsp;every&nbsp;party&nbsp;be&nbsp;a&nbsp;sender&nbsp;as&nbsp;well&nbsp;as&nbsp;a&nbsp;receiver.<br>
+&nbsp;<br>
+The&nbsp;(directed)&nbsp;communication&nbsp;graph&nbsp;specifying&nbsp;which&nbsp;parties&nbsp;sends&nbsp;their&nbsp;message<br>
+given&nbsp;as&nbsp;obj&nbsp;to&nbsp;which&nbsp;receivers&nbsp;is&nbsp;represented&nbsp;by:<br>
+&nbsp;<br>
+&nbsp;-&nbsp;either&nbsp;the&nbsp;senders/receivers&nbsp;arguments&nbsp;for&nbsp;a&nbsp;complete&nbsp;bipartite&nbsp;graph,<br>
+&nbsp;-&nbsp;or&nbsp;the&nbsp;sender_receivers&nbsp;argument&nbsp;for&nbsp;an&nbsp;arbitrary&nbsp;graph.<br>
+&nbsp;<br>
+Each&nbsp;party&nbsp;i&nbsp;corresponds&nbsp;to&nbsp;a&nbsp;node&nbsp;in&nbsp;the&nbsp;communication&nbsp;graph.<br>
+The&nbsp;senders/receivers&nbsp;arguments&nbsp;represent&nbsp;subsets&nbsp;of&nbsp;nodes,&nbsp;in&nbsp;the&nbsp;form<br>
+of&nbsp;a&nbsp;list,&nbsp;a&nbsp;Python&nbsp;range&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>,&nbsp;or&nbsp;a&nbsp;Python&nbsp;int.<br>
+The&nbsp;sender_receivers&nbsp;argument&nbsp;represents&nbsp;a&nbsp;set&nbsp;of&nbsp;arcs,&nbsp;in&nbsp;the&nbsp;form&nbsp;of&nbsp;a<br>
+list&nbsp;of&nbsp;node&nbsp;pairs&nbsp;or&nbsp;as&nbsp;a&nbsp;Python&nbsp;dict&nbsp;mapping&nbsp;nodes&nbsp;to&nbsp;subsets&nbsp;of&nbsp;nodes.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-trunc"><strong>trunc</strong></a>(self, x, f=None, l=None)</dt><dd><tt>Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x.<br>
 &nbsp;<br>
@@ -299,6 +406,40 @@ NB:&nbsp;If&nbsp;a&nbsp;=&nbsp;n,&nbsp;unit&nbsp;vector&nbsp;[1]&nbsp;+&nbsp;[0]
 
 <hr>
 Static methods defined here:<br>
+<dl><dt><a name="Runtime-SecClassGroup"><strong>SecClassGroup</strong></a>(Delta=None, l=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecClassGroup">SecClassGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(ClassGroup(...)),<br>
+returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;ClassGroup&nbsp;from&nbsp;mpyc.fingroups.<br>
+&nbsp;<br>
+ClassGroup(Delta=None,&nbsp;l=None):<br>
+&nbsp;<br>
+Create&nbsp;type&nbsp;for&nbsp;class&nbsp;group,&nbsp;given&nbsp;(bit&nbsp;length&nbsp;l&nbsp;of)&nbsp;discriminant&nbsp;Delta.<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;conditions&nbsp;are&nbsp;imposed&nbsp;on&nbsp;discriminant&nbsp;Delta:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Delta&nbsp;&lt;&nbsp;0,&nbsp;only&nbsp;supporting&nbsp;class&nbsp;groups&nbsp;of&nbsp;imaginary&nbsp;quadratic&nbsp;field<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Delta&nbsp;=&nbsp;1&nbsp;(mod&nbsp;4),&nbsp;preferably&nbsp;Delta&nbsp;=&nbsp;1&nbsp;(mod&nbsp;8)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;-Delta&nbsp;is&nbsp;prime<br>
+&nbsp;<br>
+This&nbsp;implies&nbsp;that&nbsp;Delta&nbsp;is&nbsp;a&nbsp;fundamental&nbsp;discriminant.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-SecEllipticCurve"><strong>SecEllipticCurve</strong></a>(curvename='Ed25519', coordinates=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecEllipticCurve">SecEllipticCurve</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(EllipticCurve(...)),<br>
+returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;EllipticCurve&nbsp;from&nbsp;mpyc.fingroups.<br>
+&nbsp;<br>
+EllipticCurve(curvename='Ed25519',&nbsp;coordinates=None):<br>
+&nbsp;<br>
+Create&nbsp;elliptic&nbsp;curve&nbsp;type&nbsp;for&nbsp;a&nbsp;selection&nbsp;of&nbsp;built-in&nbsp;curves.<br>
+The&nbsp;default&nbsp;coordinates&nbsp;used&nbsp;with&nbsp;these&nbsp;curves&nbsp;are&nbsp;'affine'.<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;Edwards&nbsp;curves&nbsp;and&nbsp;Weierstrass&nbsp;curves&nbsp;are&nbsp;built-in:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'Ed25519':&nbsp;see&nbsp;<a href="https://en.wikipedia.org/wiki/EdDSA#Ed25519">https://en.wikipedia.org/wiki/EdDSA#Ed25519</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'Ed448':&nbsp;aka&nbsp;"Goldilocks",&nbsp;see&nbsp;<a href="https://en.wikipedia.org/wiki/Curve448">https://en.wikipedia.org/wiki/Curve448</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256':&nbsp;Barreto-Naehrig&nbsp;curve,&nbsp;<a href="https://eprint.iacr.org/2010/186">https://eprint.iacr.org/2010/186</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256_twist':&nbsp;sextic&nbsp;twist&nbsp;of&nbsp;Barreto-Naehrig&nbsp;curve<br>
+&nbsp;<br>
+Both&nbsp;curves&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;'affine'&nbsp;(default)&nbsp;and&nbsp;'projective'&nbsp;coordinates.<br>
+The&nbsp;Edwards&nbsp;curves&nbsp;can&nbsp;also&nbsp;be&nbsp;used&nbsp;with&nbsp;'extended'&nbsp;coordinates,&nbsp;and&nbsp;the<br>
+Weierstrass&nbsp;curves&nbsp;with&nbsp;'jacobian'&nbsp;coordinates.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-SecFld"><strong>SecFld</strong></a>(order=None, modulus=None, char=None, ext_deg=None, min_order=None, signed=False)</dt><dd><tt>Secure&nbsp;finite&nbsp;field&nbsp;of&nbsp;order&nbsp;q&nbsp;=&nbsp;p**d.<br>
 &nbsp;<br>
 Order&nbsp;q&nbsp;&gt;=&nbsp;min_order.<br>
@@ -307,11 +448,50 @@ Extension&nbsp;degree&nbsp;d&nbsp;&gt;&nbsp;1&nbsp;if&nbsp;order&nbsp;is&nbsp;a&
 if&nbsp;modulus&nbsp;is&nbsp;a&nbsp;polynomial&nbsp;or&nbsp;a&nbsp;string&nbsp;or&nbsp;an&nbsp;integer&nbsp;&gt;&nbsp;char,<br>
 or&nbsp;if&nbsp;ext_deg&nbsp;is&nbsp;an&nbsp;integer&nbsp;&gt;&nbsp;1,&nbsp;or&nbsp;if&nbsp;min_order&nbsp;&gt;&nbsp;char.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-SecFlt"><strong>SecFlt</strong></a>(l=None, s=None, e=None)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;floating-point&nbsp;number&nbsp;with&nbsp;s-bit&nbsp;significand&nbsp;and&nbsp;e-bit&nbsp;exponent,&nbsp;where&nbsp;l=s+e.<br>
+&nbsp;<br>
+The&nbsp;significand&nbsp;is&nbsp;an&nbsp;(s+1)-bit&nbsp;secure&nbsp;(signed)&nbsp;fixed-point&nbsp;number.&nbsp;The&nbsp;absolute&nbsp;value<br>
+of&nbsp;a&nbsp;nonzero&nbsp;significand&nbsp;is&nbsp;normalized&nbsp;between&nbsp;0.5&nbsp;and&nbsp;1.0.&nbsp;Here,&nbsp;both&nbsp;0.5&nbsp;and&nbsp;1.0&nbsp;are<br>
+included&nbsp;and&nbsp;therefore&nbsp;one&nbsp;extra&nbsp;bit&nbsp;is&nbsp;used.<br>
+The&nbsp;exponent&nbsp;is&nbsp;an&nbsp;e-bit&nbsp;secure&nbsp;(signed)&nbsp;integer.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-SecFxp"><strong>SecFxp</strong></a>(l=None, f=None, p=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;fixed-point&nbsp;numbers&nbsp;with&nbsp;f-bit&nbsp;fractional&nbsp;part.<br>
 &nbsp;<br>
 NB:&nbsp;if&nbsp;dividing&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;make&nbsp;sure&nbsp;that&nbsp;l&nbsp;=~&nbsp;2f.</tt></dd></dl>
 
+<dl><dt><a name="Runtime-SecGrp"><strong>SecGrp</strong></a>(group)</dt><dd><tt>Secure&nbsp;version&nbsp;of&nbsp;given&nbsp;finite&nbsp;group.</tt></dd></dl>
+
 <dl><dt><a name="Runtime-SecInt"><strong>SecInt</strong></a>(l=None, p=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;integers.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-SecQuadraticResidues"><strong>SecQuadraticResidues</strong></a>(p=None, l=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecQuadraticResidues">SecQuadraticResidues</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(QuadraticResidues(...)),<br>
+returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;QuadraticResidues&nbsp;from&nbsp;mpyc.fingroups.<br>
+&nbsp;<br>
+QuadraticResidues(p=None,&nbsp;l=None):<br>
+&nbsp;<br>
+Create&nbsp;type&nbsp;for&nbsp;quadratic&nbsp;residues&nbsp;group&nbsp;given&nbsp;(bit&nbsp;length&nbsp;l&nbsp;of)&nbsp;odd&nbsp;prime&nbsp;modulus&nbsp;p.<br>
+&nbsp;<br>
+The&nbsp;group&nbsp;of&nbsp;quadratic&nbsp;residues&nbsp;modulo&nbsp;p&nbsp;is&nbsp;of&nbsp;order&nbsp;n=(p-1)/2.<br>
+Given&nbsp;bit&nbsp;length&nbsp;l&gt;2,&nbsp;p&nbsp;will&nbsp;be&nbsp;chosen&nbsp;such&nbsp;that&nbsp;n&nbsp;is&nbsp;also&nbsp;an&nbsp;odd&nbsp;prime.<br>
+If&nbsp;l=2,&nbsp;the&nbsp;only&nbsp;possibility&nbsp;is&nbsp;p=3,&nbsp;hence&nbsp;n=1.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-SecSchnorrGroup"><strong>SecSchnorrGroup</strong></a>(p=None, q=None, g=None, l=None, n=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecSchnorrGroup">SecSchnorrGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(SchnorrGroup(...)),<br>
+returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;SchnorrGroup&nbsp;from&nbsp;mpyc.fingroups.<br>
+&nbsp;<br>
+SchnorrGroup(p=None,&nbsp;q=None,&nbsp;g=None,&nbsp;l=None,&nbsp;n=None):<br>
+&nbsp;<br>
+Create&nbsp;type&nbsp;for&nbsp;Schnorr&nbsp;group&nbsp;of&nbsp;odd&nbsp;prime&nbsp;order&nbsp;q.<br>
+&nbsp;<br>
+If&nbsp;q&nbsp;is&nbsp;not&nbsp;given,&nbsp;q&nbsp;will&nbsp;be&nbsp;the&nbsp;smallest&nbsp;n-bit&nbsp;prime,&nbsp;n&gt;=2.<br>
+If&nbsp;p&nbsp;is&nbsp;not&nbsp;given,&nbsp;p&nbsp;will&nbsp;be&nbsp;the&nbsp;least&nbsp;l-bit&nbsp;prime,&nbsp;l&gt;n,&nbsp;such&nbsp;that&nbsp;q&nbsp;divides&nbsp;p-1.<br>
+&nbsp;<br>
+If&nbsp;l&nbsp;and/or&nbsp;n&nbsp;are&nbsp;not&nbsp;given,&nbsp;default&nbsp;bit&nbsp;lengths&nbsp;will&nbsp;be&nbsp;set&nbsp;(2&lt;=n&lt;l).</tt></dd></dl>
+
+<dl><dt><a name="Runtime-SecSymmetricGroup"><strong>SecSymmetricGroup</strong></a>(n)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecSymmetricGroup">SecSymmetricGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(SymmetricGroup(...)),<br>
+returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;SymmetricGroup&nbsp;from&nbsp;mpyc.fingroups.<br>
+&nbsp;<br>
+SymmetricGroup(n):<br>
+&nbsp;<br>
+Create&nbsp;type&nbsp;for&nbsp;symmetric&nbsp;group&nbsp;of&nbsp;degree&nbsp;n,&nbsp;n&gt;=0.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-coroutine"><strong>coroutine</strong></a> = mpc_coro(func, pc=True)</dt><dd><tt>Decorator&nbsp;turning&nbsp;coroutine&nbsp;func&nbsp;into&nbsp;an&nbsp;MPyC&nbsp;coroutine.<br>
 &nbsp;<br>
@@ -337,17 +517,31 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>FiniteField</strong> = &lt;class 'mpyc.sectypes.SecureFiniteField'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;field&nbsp;elements.<br>
+<dl><dt><strong>SecureFiniteField</strong> = &lt;class 'mpyc.sectypes.SecureFiniteField'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;field&nbsp;elements.<br>
 &nbsp;<br>
 NB:&nbsp;bit-oriented&nbsp;operations&nbsp;will&nbsp;be&nbsp;supported&nbsp;for&nbsp;prime&nbsp;fields.</tt></dl>
 
-<dl><dt><strong>FixedPoint</strong> = &lt;class 'mpyc.sectypes.SecureFixedPoint'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;fixed-point&nbsp;numbers.</tt></dl>
+<dl><dt><strong>SecureFiniteGroup</strong> = &lt;class 'mpyc.secgroups.SecureFiniteGroup'&gt;<dd><tt>Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;groups&nbsp;elements.</tt></dl>
 
-<dl><dt><strong>Integer</strong> = &lt;class 'mpyc.sectypes.SecureInteger'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;integers.</tt></dl>
+<dl><dt><strong>SecureFixedPoint</strong> = &lt;class 'mpyc.sectypes.SecureFixedPoint'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;fixed-point&nbsp;numbers.</tt></dl>
 
-<dl><dt><strong>Number</strong> = &lt;class 'mpyc.sectypes.SecureNumber'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;numbers.</tt></dl>
+<dl><dt><strong>SecureFloat</strong> = &lt;class 'mpyc.sectypes.SecureFloat'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;floating-point&nbsp;numbers.<br>
+&nbsp;<br>
+Basic&nbsp;arithmetic&nbsp;+,-,*,/&nbsp;and&nbsp;comparisons&nbsp;&lt;,&lt;=,--,&gt;,&gt;=,!=&nbsp;are&nbsp;supported&nbsp;for&nbsp;secure&nbsp;floats,<br>
+as&nbsp;well&nbsp;as&nbsp;<a href="#Runtime-input">input</a>()/<a href="#Runtime-output">output</a>()&nbsp;and&nbsp;sorting&nbsp;operations&nbsp;like&nbsp;<a href="#Runtime-min">min</a>()/<a href="#Runtime-argmax">argmax</a>()/<a href="#Runtime-sorted">sorted</a>().<br>
+Other&nbsp;operations&nbsp;like&nbsp;<a href="#Runtime-sum">sum</a>()/<a href="#Runtime-prod">prod</a>()/<a href="#Runtime-all">all</a>()/<a href="#Runtime-any">any</a>()/<a href="#Runtime-in_prod">in_prod</a>()&nbsp;are&nbsp;currently&nbsp;not&nbsp;supported&nbsp;for<br>
+secure&nbsp;floats.<br>
+&nbsp;<br>
+Implementation&nbsp;is&nbsp;kept&nbsp;simple,&nbsp;representing&nbsp;a&nbsp;secure&nbsp;float&nbsp;as&nbsp;a&nbsp;pair&nbsp;consisting&nbsp;of<br>
+a&nbsp;secure&nbsp;fixed-point&nbsp;number&nbsp;for&nbsp;the&nbsp;significand&nbsp;and&nbsp;a&nbsp;secure&nbsp;integer&nbsp;for&nbsp;the&nbsp;exponent.<br>
+Note,&nbsp;however,&nbsp;that&nbsp;even&nbsp;basic&nbsp;arithmetic&nbsp;+,-,*,/&nbsp;with&nbsp;secure&nbsp;floats&nbsp;is&nbsp;very<br>
+demanding&nbsp;performance-wise&nbsp;(due&nbsp;to&nbsp;dependence&nbsp;on&nbsp;secure&nbsp;bitwise&nbsp;operations).</tt></dl>
 
-<dl><dt><strong>Object</strong> = &lt;class 'mpyc.sectypes.SecureObject'&gt;<dd><tt>A&nbsp;secret-shared&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
+<dl><dt><strong>SecureInteger</strong> = &lt;class 'mpyc.sectypes.SecureInteger'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;integers.</tt></dl>
+
+<dl><dt><strong>SecureNumber</strong> = &lt;class 'mpyc.sectypes.SecureNumber'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;numbers.</tt></dl>
+
+<dl><dt><strong>SecureObject</strong> = &lt;class 'mpyc.sectypes.SecureObject'&gt;<dd><tt>A&nbsp;secret-shared&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
 &nbsp;<br>
 An&nbsp;MPC&nbsp;protocol&nbsp;operates&nbsp;on&nbsp;secret-shared&nbsp;objects&nbsp;of&nbsp;type&nbsp;SecureObject.<br>
 The&nbsp;basic&nbsp;Python&nbsp;operators&nbsp;are&nbsp;overloaded&nbsp;by&nbsp;SecureObject&nbsp;classes.<br>
@@ -355,11 +549,53 @@ An&nbsp;expression&nbsp;like&nbsp;a&nbsp;*&nbsp;b&nbsp;will&nbsp;create&nbsp;a&n
 eventually&nbsp;contain&nbsp;the&nbsp;product&nbsp;of&nbsp;a&nbsp;and&nbsp;b.&nbsp;The&nbsp;product&nbsp;is&nbsp;computed<br>
 asynchronously,&nbsp;using&nbsp;an&nbsp;instance&nbsp;of&nbsp;a&nbsp;specific&nbsp;cryptographic&nbsp;protocol.</tt></dl>
 
-<dl><dt><strong>random</strong> = &lt;module 'mpyc.random' from 'github.com/lschoe/mpyc/blob/v0.6/mpyc/random.py'&gt;</dl>
+<dl><dt><strong>random</strong> = &lt;module 'mpyc.random'&gt;<dd><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;several&nbsp;functions&nbsp;for<br>
+generating&nbsp;pseudorandom&nbsp;numbers,&nbsp;cf.&nbsp;the&nbsp;random&nbsp;module&nbsp;of&nbsp;Python's<br>
+standard&nbsp;library.&nbsp;Each&nbsp;function&nbsp;behaves&nbsp;like&nbsp;its&nbsp;Python&nbsp;counterpart,<br>
+except&nbsp;that&nbsp;a&nbsp;secure&nbsp;type&nbsp;is&nbsp;required&nbsp;as&nbsp;additional&nbsp;(first)&nbsp;argument.<br>
+&nbsp;<br>
+Additionally,&nbsp;random_unit_vector()&nbsp;generates&nbsp;a&nbsp;random&nbsp;bit&nbsp;vector<br>
+with&nbsp;exactly&nbsp;one&nbsp;bit&nbsp;set&nbsp;to&nbsp;1,&nbsp;using&nbsp;approximately&nbsp;log_2&nbsp;n&nbsp;secure<br>
+random&nbsp;bits&nbsp;for&nbsp;a&nbsp;bit&nbsp;vector&nbsp;of&nbsp;length&nbsp;n.<br>
+&nbsp;<br>
+Also,&nbsp;random_permutation()&nbsp;and&nbsp;random_derangement()&nbsp;are&nbsp;provided&nbsp;as<br>
+convenience&nbsp;functions.<br>
+&nbsp;<br>
+Main&nbsp;concern&nbsp;for&nbsp;the&nbsp;implementations&nbsp;is&nbsp;to&nbsp;minimize&nbsp;the&nbsp;randomness<br>
+complexity,&nbsp;that&nbsp;is,&nbsp;to&nbsp;limit&nbsp;the&nbsp;usage&nbsp;of&nbsp;secure&nbsp;random&nbsp;bits&nbsp;as<br>
+provided&nbsp;by&nbsp;runtime.<a href="#Runtime-random_bits">random_bits</a>().&nbsp;Other&nbsp;than&nbsp;this,&nbsp;the&nbsp;code&nbsp;is<br>
+relatively&nbsp;simple&nbsp;for&nbsp;now.<br>
+&nbsp;<br>
+NB:&nbsp;runtime._random(sectype,&nbsp;n)&nbsp;cannot&nbsp;be&nbsp;used&nbsp;as&nbsp;an&nbsp;alternative&nbsp;to<br>
+_randbelow(sectype,&nbsp;n)&nbsp;as&nbsp;its&nbsp;output&nbsp;is&nbsp;not&nbsp;uniformly&nbsp;random,&nbsp;except<br>
+when&nbsp;n&nbsp;is&nbsp;equal&nbsp;to&nbsp;the&nbsp;order&nbsp;of&nbsp;sectype's&nbsp;finite&nbsp;field.</tt></dl>
 
-<dl><dt><strong>statistics</strong> = &lt;module 'mpyc.statistics' from 'github.com/lschoe/mpyc/blob/v0.6/mpyc/statistics.py'&gt;</dl>
+<dl><dt><strong>seclist</strong> = &lt;class 'mpyc.seclists.seclist'&gt;</dl>
 
-<dl><dt><strong>version</strong> = '0.7'</dl>
+<dl><dt><strong>statistics</strong> = &lt;module 'mpyc.statistics'&gt;<dd><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;common&nbsp;mathematical&nbsp;statistics&nbsp;functions.<br>
+The&nbsp;module&nbsp;is&nbsp;modeled&nbsp;after&nbsp;the&nbsp;statistics&nbsp;module&nbsp;in&nbsp;the&nbsp;Python&nbsp;standard&nbsp;library,&nbsp;and<br>
+as&nbsp;such&nbsp;aimed&nbsp;at&nbsp;small&nbsp;scale&nbsp;use&nbsp;("at&nbsp;the&nbsp;level&nbsp;of&nbsp;graphing&nbsp;and&nbsp;scientific&nbsp;calculators").<br>
+&nbsp;<br>
+Functions&nbsp;mean,&nbsp;median,&nbsp;median_low,&nbsp;median_high,&nbsp;quantiles,&nbsp;and&nbsp;mode&nbsp;are&nbsp;provided<br>
+for&nbsp;calculating&nbsp;averages&nbsp;(measures&nbsp;of&nbsp;central&nbsp;location).&nbsp;Functions&nbsp;variance,&nbsp;stdev,<br>
+pvariance,&nbsp;pstdev&nbsp;are&nbsp;provided&nbsp;for&nbsp;calculating&nbsp;variability&nbsp;(measures&nbsp;of&nbsp;spread).<br>
+Functions&nbsp;covariance,&nbsp;correlation,&nbsp;linear_regression&nbsp;are&nbsp;provided&nbsp;for&nbsp;calculating<br>
+statistics&nbsp;regarding&nbsp;relations&nbsp;between&nbsp;two&nbsp;sets&nbsp;of&nbsp;data.<br>
+&nbsp;<br>
+Most&nbsp;of&nbsp;these&nbsp;functions&nbsp;work&nbsp;best&nbsp;with&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;but&nbsp;some&nbsp;effort&nbsp;is<br>
+done&nbsp;to&nbsp;support&nbsp;the&nbsp;use&nbsp;of&nbsp;secure&nbsp;integers&nbsp;as&nbsp;well.&nbsp;For&nbsp;instance,&nbsp;the&nbsp;mean&nbsp;of&nbsp;a&nbsp;sample<br>
+of&nbsp;integers&nbsp;is&nbsp;rounded&nbsp;to&nbsp;the&nbsp;nearest&nbsp;integer,&nbsp;which&nbsp;may&nbsp;still&nbsp;be&nbsp;useful.&nbsp;The&nbsp;variance<br>
+of&nbsp;a&nbsp;sample&nbsp;of&nbsp;integers&nbsp;is&nbsp;also&nbsp;rounded&nbsp;to&nbsp;the&nbsp;nearest&nbsp;integer,&nbsp;but&nbsp;this&nbsp;will&nbsp;only&nbsp;be<br>
+useful&nbsp;if&nbsp;the&nbsp;sample&nbsp;is&nbsp;properly&nbsp;scaled.<br>
+&nbsp;<br>
+A&nbsp;baseline&nbsp;implementation&nbsp;is&nbsp;provided,&nbsp;favoring&nbsp;simplicity&nbsp;over&nbsp;efficiency.&nbsp;Also,&nbsp;the<br>
+current&nbsp;implementations&nbsp;of&nbsp;mode,&nbsp;median,&nbsp;and&nbsp;quantiles&nbsp;favor&nbsp;a&nbsp;small&nbsp;privacy&nbsp;leak&nbsp;over<br>
+a&nbsp;strict&nbsp;but&nbsp;less&nbsp;efficient&nbsp;approach.<br>
+&nbsp;<br>
+If&nbsp;these&nbsp;functions&nbsp;are&nbsp;called&nbsp;with&nbsp;plain&nbsp;data,&nbsp;the&nbsp;call&nbsp;is&nbsp;relayed&nbsp;to&nbsp;the&nbsp;corresponding<br>
+function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</tt></dl>
+
+<dl><dt><strong>version</strong> = '0.8'</dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -378,12 +614,5 @@ Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;ConfigParser&nbsp;instances,&nbsp;which&nb
 in&nbsp;m&nbsp;separate&nbsp;INI-files.&nbsp;The&nbsp;party&nbsp;owning&nbsp;an&nbsp;INI-file&nbsp;is<br>
 indicated&nbsp;by&nbsp;not&nbsp;specifying&nbsp;its&nbsp;hostname&nbsp;(host='').</tt></dd></dl>
  <dl><dt><a name="-setup"><strong>setup</strong></a>()</dt><dd><tt>Setup&nbsp;a&nbsp;runtime.</tt></dd></dl>
-</td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#55aa55">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
-    
-<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>mpc</strong> = &lt;mpyc.runtime.Runtime object&gt;</td></tr></table>
+</td></tr></table>
 </body></html>
