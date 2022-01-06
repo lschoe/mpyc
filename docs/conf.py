@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'MPyC'
-copyright = '2018 - 2021, Berry Schoenmakers'
+copyright = '2018 - 2022, Berry Schoenmakers'
 author = 'Berry Schoenmakers'
 
 from mpyc.__init__ import __version__

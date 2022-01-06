@@ -8,7 +8,7 @@ This causes Python's asyncio to be preloaded as well, allowing code with
 top-level await expressions to be evaluated directly (instead of using
 calls to mpc.run() or asyncio.run() in top-level code).
 
-Besides setting mpc as a handle for the MPyC runtime, also three secure
+Besides setting mpc as a handle for the MPyC runtime, also several secure
 (secret-shared) types are predefined, effectively executing the following code:
 
     from mpyc.runtime import mpc

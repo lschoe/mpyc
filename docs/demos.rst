@@ -1,7 +1,7 @@
 MPyC demos
 ==========
 
-This is an overview of all demos available from the MPyC repository on GitHub
+This is an overview of the demos available from the MPyC repository on GitHub
 in `mpyc/demos <https://github.com/lschoe/mpyc/tree/master/demos>`_. Starting with
 a 'Hello world!' demo, we gradually work towards demos about
 privacy-preserving machine learning, MPC-based threshold cryptography, and other interesting topics.
@@ -16,7 +16,7 @@ detailed usage instructions. With any demo you can also use the ``-H`` (or, ``--
 to consult the built-in help message for the MPyC framework; this help message is also accessible
 without any demo at hand, namely by running::
 
-   $ python -m mpyc -H
+   python -m mpyc -H
 
 If you leave out the ``-H`` here, you directly enter an asyncio REPL with MPyC preloaded
 together with some standard secure types.
@@ -55,17 +55,17 @@ This causes the demo to be run with :math:`m=5` parties, using a local TCP/IP co
 each pair of parties, for a total of :math:`{m \choose 2}=10` connections. This way, the number of connections can go to
 quite extreme levels, e.g., for :math:`m=300` there will be a whopping 44,850 connections created on your local machine::
 
-   $ python helloworld.py -M300 --no-prss
+   python helloworld.py -M300 --no-prss
 
 provided you've granted your OS enough resources to handle this kind of load.
 
 To engage in a protocol with someone else on a remote machine you can run::
 
-   $ python helloworld.py -P localhost -P 192.168.1.22 -I0
+   python helloworld.py -P localhost -P 192.168.1.22 -I0
 
 and your peer would run::
 
-   $ python helloworld.py -P 192.168.1.11 -P localhost -I1
+   python helloworld.py -P 192.168.1.11 -P localhost -I1
 
 The ``-P`` switches are used to set the IPv4 addresses for the two parties, where the order is significant and must be consistent.
 To run the demo with more parties just keep adding ``-P`` switches. The port numbers will be set automatically, but can
@@ -124,7 +124,8 @@ To understand the mechanics of this oneliner, we look at all intermediate result
    b = mpc.sum(s)              # sum of secret-shared entries of s
    f = mpc.output(b)           # value of secret-shared sum in the clear
 
-We start off with ``secint`` created dynamically as a type of "secure integers" of bit length :math:`2l+1`.
+We start off with ``secint`` created dynamically as a type of "secure integers" of bit length :math:`2l+1`,
+where :math:`l` is the bit length of :math:`m`.
 We could have used the simpler call ``mpc.SecInt()`` here, which defaults to 32-bit secure integers.
 But for better performance we limit the bit length to :math:`2l+1`, which is chosen to be just large enough to hold
 the values that we are about to compute.
@@ -149,7 +150,7 @@ the MPyC runtime to let the parties exchange their shares pertaining to the secu
 in all parties seeing :math:`1+3+5+7+9+11+13=49`.
 
 Technically, the value of ``f`` is a Python ``Future()`` instance, whose result will hold the value 49 as a
-Python integer of type `int` once the evaluation of ``f`` is done. To obtain this value we can use ``await f``
+Python integer of type ``int`` once the evaluation of ``f`` is done. To obtain this value we can use ``await f``
 if we are inside a Python coroutine, and otherwise the call ``mpc.run(f)`` will make sure that ``f`` is evaluated.
 
 The other oneliners can be broken down similarly. For instance, the oneliner responsible for output ``2**m = 128``
@@ -219,7 +220,7 @@ runs between :math:`m=2t+1` in total, of which :math:`t+1` parties cast a vote, 
 act as trusted helpers. The main privacy-preserving property is that even a collusion of :math:`t` voters cannot
 find out what the remaining vote is, of course, unless all colluding voters input a 1.
 
-With ``voters = list(range(1, t+1))``, where :math:`t=\lfloor m/2\rfloor`, the core of the program is formed by these two lines:
+With ``voters = list(range(t+1))``, where :math:`t=\lfloor m/2\rfloor`, the core of the program is formed by these two lines:
 
 .. code-block:: python
 
@@ -584,7 +585,7 @@ which coincides with the choice made for the AES polynomial.
 
 An encryption with a 128-bit AES key runs as follows::
 
-   $python aes.py -M3 -1
+   $ python aes.py -M3 -1
    AES-128 encryption only.
    AES polynomial: x^8+x^4+x^3+x+1
    2021-06-24 14:08:35,605 Start MPyC runtime v0.7.7
@@ -994,7 +995,7 @@ the activation functions.
 
 A run for a batch of 8 digits looks as follows::
 
-   $python bnnmnist.py -M3 -o2830 -b8
+   $ python bnnmnist.py -M3 -o2830 -b8
    2021-06-24 18:36:19,458 Start MPyC runtime v0.7.7
    2021-06-24 18:36:19,974 All 3 parties connected.
    2021-06-24 18:36:19,974 --------------- INPUT   -------------
@@ -1041,7 +1042,7 @@ See `bnnmnist.py <https://github.com/lschoe/mpyc/blob/master/demos/bnnmnist.py>`
 run-all.{bat,sh}
 ----------------
 
-All the demos from ``helloworld.py`` up to ``onewayhashchains.py`` can be run in one go using
+All the demos from ``helloworld.py`` up to ``dsa.py`` can be run in one go using
 `run-all.bat <https://github.com/lschoe/mpyc/blob/master/demos/run-all.bat>`_ or
 `run-all.sh <https://github.com/lschoe/mpyc/blob/master/demos/run-all.sh>`_.
 These demos have no dependencies other than MPyC itself.

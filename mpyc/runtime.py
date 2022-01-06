@@ -268,16 +268,22 @@ class Runtime:
         # Wait for all parties behind a barrier.
         while self._pc_level > self._program_counter[1]:
             await asyncio.sleep(0)
-        m = len(self.parties)
-        if m > 1:
-            await self.gather(self.transfer(self.pid))
-            # Close connections to all parties.
-            for peer in self.parties:
-                if peer.pid != self.pid:
-                    peer.protocol.close_connection()
-
         elapsed = time.time() - self.start_time
         logging.info(f'Stop MPyC runtime -- elapsed time: {datetime.timedelta(seconds=elapsed)}')
+        m = len(self.parties)
+        if m == 1:
+            return
+
+        # m > 1
+        self.parties[self.pid].protocol = Future(loop=self._loop)
+        logging.debug('Synchronize with all parties before shutdown')
+        await self.gather(self.transfer(self.pid))
+
+        # Close connections to all parties > self.pid.
+        logging.debug('Closing connections with other parties')
+        for peer in self.parties[self.pid + 1:]:
+            peer.protocol.close_connection()
+        await self.parties[self.pid].protocol
 
     async def __aenter__(self):
         """Start MPyC runtime when entering async with context."""

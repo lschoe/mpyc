@@ -11,6 +11,8 @@ import typing
 from asyncio import Protocol, Future, Task
 from mpyc.sectypes import SecureObject
 
+runtime = None
+
 
 class MessageExchanger(Protocol):
     """Send and receive messages.
@@ -20,33 +22,43 @@ class MessageExchanger(Protocol):
 
     __slots__ = 'runtime', 'peer_pid', 'bytes', 'buffers', 'transport'
 
-    def __init__(self, runtime, peer_pid=None):
-        self.runtime = runtime
+    def __init__(self, rt, peer_pid=None):
+        """Initialize protocol for runtime rt between this party and a peer.
+
+        The connection between the two parties will be set up with one party
+        listening (as server) for the other party to connect (as client).
+        If peer_pid=None, party rt.pid starts as server and the peer start as
+        client, and the other way around otherwise. Once the connection is made,
+        the client will immediately send its pid to the server.
+        """
+        self.runtime = rt
         self.peer_pid = peer_pid
         self.bytes = bytearray()
         self.buffers = {}
         self.transport = None
 
     def _key_transport_done(self):
-        self.runtime.parties[self.peer_pid].protocol = self
-        if all(p.protocol is not None for p in self.runtime.parties):
-            self.runtime.parties[self.runtime.pid].protocol.set_result(self.runtime)
+        rt = self.runtime
+        rt.parties[self.peer_pid].protocol = self
+        if all(p.protocol is not None for p in rt.parties):
+            rt.parties[rt.pid].protocol.set_result(None)
 
     def connection_made(self, transport):
         """Called when a connection is made.
 
-        If the party is a client for this connection, it sends its identity
+        If this party is a client for this connection, it sends its identity
         to the peer as well as any PRSS keys.
         """
         self.transport = transport
-        if self.peer_pid is not None:  # party is client (peer is server)
-            m = len(self.runtime.parties)
-            t = self.runtime.threshold
-            pid_keys = [self.runtime.pid.to_bytes(2, 'little')]  # send pid
-            if not self.runtime.options.no_prss:
+        if self.peer_pid is not None:  # this party is client (peer is server)
+            rt = self.runtime
+            m = len(rt.parties)
+            t = rt.threshold
+            pid_keys = [rt.pid.to_bytes(2, 'little')]  # send pid
+            if not rt.options.no_prss:
                 for subset in itertools.combinations(range(m), m - t):
-                    if subset[0] == self.runtime.pid and self.peer_pid in subset:
-                        pid_keys.append(self.runtime._prss_keys[subset])  # send PRSS keys
+                    if subset[0] == rt.pid and self.peer_pid in subset:
+                        pid_keys.append(rt._prss_keys[subset])  # send PRSS keys
             transport.writelines(pid_keys)
             self._key_transport_done()
 
@@ -71,29 +83,30 @@ class MessageExchanger(Protocol):
         First message from peer is processed differently if peer is a client.
         """
         self.bytes.extend(data)
-        if self.peer_pid is None:  # peer is client (party is server)
+        if self.peer_pid is None:  # peer is client (this party is server)
             if len(self.bytes) < 2:
                 return
 
             peer_pid = int.from_bytes(self.bytes[:2], 'little')
             len_packet = 2
-            if not self.runtime.options.no_prss:
-                m = len(self.runtime.parties)
-                t = self.runtime.threshold
+            rt = self.runtime
+            if not rt.options.no_prss:
+                m = len(rt.parties)
+                t = rt.threshold
                 for subset in itertools.combinations(range(m), m - t):
-                    if subset[0] == peer_pid and self.runtime.pid in subset:
+                    if subset[0] == peer_pid and rt.pid in subset:
                         len_packet += 16
                 if len(self.bytes) < len_packet:
                     return
 
             # record new protocol peer
             self.peer_pid = peer_pid
-            if not self.runtime.options.no_prss:
+            if not rt.options.no_prss:
                 # store keys received from peer
                 len_packet = 2
                 for subset in itertools.combinations(range(m), m - t):
-                    if subset[0] == peer_pid and self.runtime.pid in subset:
-                        self.runtime._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
+                    if subset[0] == peer_pid and rt.pid in subset:
+                        rt._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
                         len_packet += 16
             del self.bytes[:len_packet]
             self._key_transport_done()
@@ -131,7 +144,14 @@ class MessageExchanger(Protocol):
         """
         if exc:
             raise exc
-        # TODO: also raise an exception if exc is None and no shutdown in progress
+
+        if self.transport.is_closing():
+            rt = self.runtime
+            rt.parties[self.peer_pid].protocol = None
+            if all(p.protocol is None for p in rt.parties if p.pid != rt.pid):
+                rt.parties[rt.pid].protocol.set_result(None)
+        else:
+            raise RuntimeWarning(f'Connection with party {self.peer_pid} lost unexpectedly')
 
     def close_connection(self):
         """Close connection with the peer."""
@@ -239,11 +259,11 @@ class _ProgramCounterWrapper:
 
     __slots__ = 'runtime', 'coro', 'pc'
 
-    def __init__(self, runtime, coro):
-        self.runtime = runtime
+    def __init__(self, rt, coro):
+        self.runtime = rt
         self.coro = coro
-        runtime._program_counter[0] += 1
-        self.pc = [_hop(runtime._program_counter), runtime._program_counter[1]+1]  # fork
+        rt._program_counter[0] += 1
+        self.pc = [_hop(rt._program_counter), rt._program_counter[1]+1]  # fork
 
     def __await__(self):
         while True:
@@ -282,9 +302,6 @@ def _nested_list(rt, n, dims):
     else:
         s = [rt() for _ in range(n)]
     return s
-
-
-runtime = None
 
 
 def returnType(*args, wrap=True):
