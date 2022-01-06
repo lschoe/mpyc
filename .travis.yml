@@ -5,7 +5,7 @@ python:
     - 3.7
     - 3.8
     - 3.9
-    - 3.10
+    - 3.10.1
     - pypy3
 install: pip install codecov
 script: coverage run --source mpyc -m unittest discover tests
