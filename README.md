@@ -20,12 +20,15 @@ in the cloud, without any install.
 
 ## Installation:
 
-Just run: `python setup.py install` (pure Python, no dependencies).
+Pure Python, no dependencies.
+
+Run `pip install .` in the root directory (containing file `setup.py`).\
+Or, run `pip install -e .`, if you want to edit the MPyC source files.
 
 See `demos` for Python programs and Jupyter notebooks with lots of example code.
 
-See [Read the Docs](https://mpyc.readthedocs.io/) for `Sphinx`-based documentation, including an overview of the `demos`,
-and [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
+See [Read the Docs](https://mpyc.readthedocs.io/) for `Sphinx`-based documentation, including an overview of the `demos`.\
+See [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentation.
 
 ## Notes:
 

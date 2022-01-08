@@ -1,9 +1,7 @@
 """MPyC setup script.
 
-Options:                python setup.py --help
-Install by admin/root:  python setup.py install
-Install by user:        python setup.py install --user
-Install options:        python setup.py install --help
+Run: "pip install ."
+Or:  "pip install -e ."
 """
 
 from setuptools import setup

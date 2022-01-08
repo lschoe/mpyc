@@ -44,7 +44,7 @@ is also available as a ZIP file `mpyc-master.zip <https://github.com/lschoe/mpyc
 
 From the root directory of your local copy (containing ``setup.py``) you may then run::
 
-   python setup.py install
+   pip install .
 
 to (re)install MPyC.
 
