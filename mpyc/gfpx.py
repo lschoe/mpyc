@@ -48,10 +48,12 @@ class Polynomial:
 
     p = None
 
-    def __init__(self, value=0):
+    def __init__(self, value=0, check=True):
         """Initialize polynomial to given value (zero polynomial, by default)."""
-        cls = type(self)
-        self.value = cls._intern(value)
+        if check:
+            cls = type(self)
+            value = cls._intern(value)
+        self.value = value
 
     @classmethod
     def _intern(cls, a):
@@ -410,12 +412,12 @@ class Polynomial:
             if cls._is_irreducible(_a):
                 break
 
-        return a
+        return _a
 
     @classmethod
     def from_terms(cls, s, x=X):
         """Convert string s with sum of powers of x to a polynomial."""
-        return cls(cls._from_terms(s, x))
+        return cls(cls._from_terms(s, x), check=False)
 
     @classmethod
     def to_terms(cls, a, x=X):
@@ -436,18 +438,18 @@ class Polynomial:
 
     def __neg__(self):
         cls = type(self)
-        return cls(cls._neg(self.value))
+        return cls(cls._neg(self.value), check=False)
 
     def __pos__(self):
         cls = type(self)
-        return cls(cls._pos(self.value))
+        return cls(cls._pos(self.value), check=False)
 
     @classmethod
     def add(cls, a, b):
         """Add polynomials a and b."""
         a = cls._intern(a)
         b = cls._intern(b)
-        return cls(cls._add(a, b))
+        return cls(cls._add(a, b), check=False)
 
     def __add__(self, other):
         cls = type(self)
@@ -455,7 +457,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._add(self.value, other))
+        return cls(cls._add(self.value, other), check=False)
 
     __radd__ = __add__
 
@@ -464,7 +466,7 @@ class Polynomial:
         """Subtract polynomials a and b."""
         a = cls._intern(a)
         b = cls._intern(b)
-        return cls(cls._sub(a, b))
+        return cls(cls._sub(a, b), check=False)
 
     def __sub__(self, other):
         cls = type(self)
@@ -472,7 +474,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._sub(self.value, other))
+        return cls(cls._sub(self.value, other), check=False)
 
     def __rsub__(self, other):
         cls = type(self)
@@ -480,14 +482,14 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._sub(other, self.value))
+        return cls(cls._sub(other, self.value), check=False)
 
     @classmethod
     def mul(cls, a, b):
         """Multiply polynomials a and b."""
         a = cls._intern(a)
         b = cls._intern(b)
-        return cls(cls._mul(a, b))
+        return cls(cls._mul(a, b), check=False)
 
     def __mul__(self, other):
         cls = type(self)
@@ -495,7 +497,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._mul(self.value, other))
+        return cls(cls._mul(self.value, other), check=False)
 
     __rmul__ = __mul__
 
@@ -503,14 +505,14 @@ class Polynomial:
     def lshift(cls, a, n):
         """Multiply polynomial a by X^n."""
         a = cls._intern(a)
-        return cls(cls._lshift(a, n))
+        return cls(cls._lshift(a, n), check=False)
 
     def __lshift__(self, other):
         if not isinstance(other, int):
             return NotImplemented
 
         cls = type(self)
-        return cls(cls._lshift(self.value, other))
+        return cls(cls._lshift(self.value, other), check=False)
 
     def __rlshift__(self, other):
         return NotImplemented
@@ -519,14 +521,14 @@ class Polynomial:
     def rshift(cls, a, n):
         """Quotient for polynomial a divided by X^n, assuming a is multiple of X^n."""
         a = cls._intern(a)
-        return cls(cls._rshift(a, n))
+        return cls(cls._rshift(a, n), check=False)
 
     def __rshift__(self, other):
         if not isinstance(other, int):
             return NotImplemented
 
         cls = type(self)
-        return cls(cls._rshift(self.value, other))
+        return cls(cls._rshift(self.value, other), check=False)
 
     def __rrshift__(self, other):
         return NotImplemented
@@ -537,7 +539,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._divmod(self.value, other)[0])
+        return cls(cls._divmod(self.value, other)[0], check=False)
 
     def __rfloordiv__(self, other):
         cls = type(self)
@@ -545,14 +547,14 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._divmod(other, self.value)[0])
+        return cls(cls._divmod(other, self.value)[0], check=False)
 
     @classmethod
     def mod(cls, a, b):
         """Reduce polynomial a modulo polynomial b, for nonzero b."""
         a = cls._intern(a)
         b = cls._intern(b)
-        return cls(cls._mod(a, b))
+        return cls(cls._mod(a, b), check=False)
 
     def __mod__(self, other):
         cls = type(self)
@@ -560,7 +562,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._mod(self.value, other))
+        return cls(cls._mod(self.value, other), check=False)
 
     def __rmod__(self, other):
         cls = type(self)
@@ -568,7 +570,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return cls(cls._mod(other, self.value))
+        return cls(cls._mod(other, self.value), check=False)
 
     @classmethod
     def divmod(cls, a, b):
@@ -576,7 +578,7 @@ class Polynomial:
         a = cls._intern(a)
         b = cls._intern(b)
         q, r = cls._divmod(a, b)
-        return cls(q), cls(r)
+        return cls(q, check=False), cls(r, check=False)
 
     def __divmod__(self, other):
         cls = type(self)
@@ -585,7 +587,7 @@ class Polynomial:
             return NotImplemented
 
         q, r = cls._divmod(self.value, other)
-        return cls(q), cls(r)
+        return cls(q, check=False), cls(r, check=False)
 
     def __rdivmod__(self, other):
         cls = type(self)
@@ -594,25 +596,25 @@ class Polynomial:
             return NotImplemented
 
         q, r = cls._divmod(other, self.value)
-        return cls(q), cls(r)
+        return cls(q, check=False), cls(r, check=False)
 
     @classmethod
     def powmod(cls, a, n, b):
         """Polynomial a to the power of n modulo polynomial b, for nonzero b."""
         a = cls._intern(a)
         b = cls._intern(b)
-        return cls(cls._powmod(a, n, modulus=b))
+        return cls(cls._powmod(a, n, modulus=b), check=False)
 
     def __pow__(self, other):
         cls = type(self)
-        return cls(cls._powmod(self.value, other))
+        return cls(cls._powmod(self.value, other), check=False)
 
     @classmethod
     def gcd(cls, a, b):
         """Greatest common divisor of polynomials a and b."""
         a = cls._intern(a)
         b = cls._intern(b)
-        return cls(cls._gcd(a, b))
+        return cls(cls._gcd(a, b), check=False)
 
     @classmethod
     def gcdext(cls, a, b):
@@ -623,14 +625,14 @@ class Polynomial:
         a = cls._intern(a)
         b = cls._intern(b)
         d, s, t = cls._gcdext(a, b)
-        return cls(d), cls(s), cls(t)
+        return cls(d, check=False), cls(s, check=False), cls(t, check=False)
 
     @classmethod
     def invert(cls, a, b):
         """Inverse of polynomial a modulo polynomial b, for nonzero b."""
         a = cls._intern(a)
         b = cls._intern(b)
-        return cls(cls._invert(a, b))
+        return cls(cls._invert(a, b), check=False)
 
     @classmethod
     def is_irreducible(cls, a):
@@ -645,7 +647,7 @@ class Polynomial:
         E.g., X < X+1 < X^2+X+1 < X^3+X+1 < X^3+X^2+1 < ... for p=2.
         """
         a = cls._intern(a)
-        return cls(cls._next_irreducible(a))
+        return cls(cls._next_irreducible(a), check=False)
 
     def __repr__(self):
         cls = type(self)
