@@ -16,7 +16,7 @@ setup(
     author='Berry Schoenmakers',
     author_email='berry@win.tue.nl',
     url='https://github.com/lschoe/mpyc',
-    description='MPyC -- Secure Multiparty Computation in Python',
+    description='MPyC for Multiparty Computation in Python',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     keywords=['crypto', 'cryptography', 'multiparty computation', 'MPC',
