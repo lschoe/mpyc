@@ -34,6 +34,8 @@ To get the latest `minor` version from `GitHub <https://github.com>`_ use::
 With ``pip show mpyc`` you will see that both ways the package source files are installed in Python's
 ``site-packages`` directory.
 
+.. _github clone:
+
 GitHub clone
 ------------
 
@@ -82,3 +84,27 @@ For instance, ``nuitka --follow-imports aes.py`` generates an executable
 ``aes.exe`` for the AES demo with competitive performance. And
 ``nuitka --onefile aes.py`` even builds a standalone executable, which may be
 a simple alternative to `Docker <https://www.docker.com/>`_.
+
+Hacking MPyC
+------------
+
+A really nice thing about Python is that programs are run in an interpreter.
+This means you can make changes to Python programs and (core) libraries at all
+levels, and these changes will take effect immediately upon the next run.
+
+To "hack" MPyC in this way, just do::
+
+   pip install -e .
+
+in the root directory of your MPyC project, assuming you are working with a local
+copy as explained above in :ref:`GitHub clone <github clone>`. The ``-e`` option
+makes your copy `editable`.
+
+Now you can make changes to the source code of MPyC, and see the effect. Which means
+that if you run a program in an arbitrary directory on your computer, your
+"hacked" version of MPyC will be used. In combination with ``git`` you can easily
+undo your changes, and work on your own ``git`` branch (or fork on GitHub).
+
+If you are often switching between different versions of Python, then append
+the root directory of your MPyC project to the environment variable ``PYTHONPATH``.
+This way, any Python version you may be using will run with your version of MPyC.
