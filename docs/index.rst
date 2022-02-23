@@ -12,6 +12,7 @@ Welcome to MPyC's documentation!
    :caption: Contents:
 
    install
+   basics
    demos
    mpyc
 

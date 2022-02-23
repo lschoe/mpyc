@@ -1,3 +1,5 @@
+.. _mpyc demos:
+
 MPyC demos
 ==========
 
