@@ -81,10 +81,7 @@ class Runtime:
         self._logging_enabled = not options.no_log
         self._program_counter = [0, 0]  # [hopping-counter, program-depth]
         self._pc_level = 0  # used for implementation of barriers
-        # For PyPy3.8 v7.3.7 on Windows the ProactorEventLoop (default in Python 3.8+) needs to be
-        # disabled when run with multiple parties by including the following line:
-        # asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        self._loop = asyncio.get_event_loop()  # cache running loop
+        self._loop = asyncio.get_event_loop()  # cache event loop
         self._loop.set_exception_handler(asyncoro.exception_handler)  # exceptions re MPyC coroutine
         self.start_time = None
         self.aggregate_load = 0.0 * 10000  # unit: basis point 0.0001 = 0.01%
