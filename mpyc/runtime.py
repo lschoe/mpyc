@@ -170,7 +170,7 @@ class Runtime:
         """Run the given coroutine or future until it is done."""
         if self._loop.is_running():
             if not asyncio.iscoroutine(f):
-                asyncoro._wrap_in_coro(f)
+                f = asyncoro._wrap_in_coro(f)
             while True:
                 try:
                     f.send(None)
