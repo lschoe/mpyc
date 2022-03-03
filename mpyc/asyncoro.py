@@ -246,7 +246,7 @@ def gather_shares(rt, *obj):
 
 
 def _hop(a):  # NB: redefined in MPyC setup if mix of 32-bit/64-bit platforms enabled
-    """Simple and efficient pseudorandom program counter hop for Python 3.6+.
+    """Simple and efficient pseudorandom program counter hop for Python 3.7+.
 
     Compatible between all 64-bit platforms.
     Compatible between all 32-bit platforms.
@@ -271,9 +271,11 @@ class _ProgramCounterWrapper:
             self.runtime._program_counter = self.pc
             try:
                 val = self.coro.send(None)
-                self.pc = self.runtime._program_counter
             except StopIteration as exc:
-                return exc.value  # NB: required for Python 3.7
+                return exc.value
+
+            else:
+                self.pc = self.runtime._program_counter
             finally:
                 self.runtime._program_counter = pc
             yield val
@@ -436,7 +438,7 @@ def exception_handler(loop, context):
     elif 'task' in context:
         cb = context['task']._callbacks[0]
         if isinstance(cb, tuple):
-            cb = cb[0]  # NB: drop context paramater for Python 3.7+
+            cb = cb[0]  # NB: drop context parameter
         if 'mpc_coro' in cb.__qualname__:
             if not loop.get_debug():  # Unless asyncio debug mode is enabled,
                 return  # suppress 'Task was destroyed but it is pending!' message.

@@ -19,6 +19,7 @@ import itertools
 import functools
 import configparser
 import argparse
+from dataclasses import dataclass
 import pickle
 import asyncio
 import ssl
@@ -169,9 +170,7 @@ class Runtime:
         """Run the given coroutine or future until it is done."""
         if self._loop.is_running():
             if not asyncio.iscoroutine(f):
-                async def _wrap(fut):
-                    return await fut
-                f = _wrap(f)
+                asyncoro._wrap_in_coro(f)
             while True:
                 try:
                     f.send(None)
@@ -1104,7 +1103,7 @@ class Runtime:
     def _sort(self, x, key):
         """Batcher's merge-exchange sort, see Knuth TAOCP Algorithm 5.2.2M.
 
-        In-place sort in roughly 1/2(log_2 n)^2 rounds of about n/2 comparions each.
+        In-place sort in roughly 1/2(log_2 n)^2 rounds of about n/2 comparisons each.
         """
         n = len(x)  # n >= 2
         t = (n-1).bit_length()
@@ -2120,17 +2119,14 @@ class Runtime:
         return [type(a)(1) - self.sum(u)] + u
 
 
+@dataclass
 class Party:
-    """Information about a party in the MPC protocol."""
+    """Information about party with identity pid in the MPC protocol."""
 
-    __slots__ = 'pid', 'host', 'port', 'protocol'
-
-    def __init__(self, pid, host=None, port=None):
-        """Initialize a party with given party identity pid."""
-        self.pid = pid
-        self.host = host
-        self.port = port
-        self.protocol = None
+    pid: int  # party identity
+    host: str = None
+    port: int = None
+    protocol = None
 
     def __repr__(self):
         """String representation of the party."""
@@ -2252,13 +2248,12 @@ def setup():
         from hashlib import sha1
 
         def hop(a):
-            """Simple and portable pseudorandom program counter hop for Python 3.6+.
+            """Simple and portable pseudorandom program counter hop for Python 3.7+.
 
-            Compatible across all (mixes of) 32-bit and 64-bit Python 3.6+ versions. Let's
+            Compatible across all (mixes of) 32-bit and 64-bit Python 3.7+ versions. Let's
             you run MPyC with some parties on 64-bit platforms and others on 32-bit platforms.
             Useful when working with standard 64-bit installations on Linux/MacOS/Windows and
-            installations currently restricted to 32-bit such as pypy3 on Windows and Python on
-            Raspberry Pi OS.
+            32-bit installations on Raspberry Pi OS, for instance.
             """
             return int.from_bytes(sha1(str(a).encode()).digest()[:8], 'little', signed=True)
         asyncoro._hop = hop

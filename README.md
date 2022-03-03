@@ -32,7 +32,7 @@ See [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentati
 
 ## Notes:
 
-1. Python 3.6+ (Python 3.5 or lower is not sufficient).
+1. Python 3.7+ (Python 3.6 or lower is not sufficient).
 
 2. Installing package [gmpy2](https://pypi.org/project/gmpy2/) is optional, but will considerably enhance the performance of `mpyc`.
 As of December 12, 2021 with the release of gmpy2 2.1, installation has been simplified greatly:

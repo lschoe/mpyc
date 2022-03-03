@@ -9,8 +9,8 @@ Use `-H`, `--HELP` option with any demo to see the MPyC help message.
 ```
 usage: secretsanta.py [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t] [-B b]
                       [--ssl] [-L l] [-K k] [--no-log] [--no-async]
-                      [--no-barrier] [--no-gmpy2] [--output-windows]
-                      [--output-file] [-f F]
+                      [--no-barrier] [--no-gmpy2] [--no-prss] [--mix32-64bit]
+                      [--output-windows] [--output-file] [-f F]
 
 optional arguments:
   -H, --HELP            show this help message for MPyC and exit
@@ -32,6 +32,8 @@ MPyC parameters:
   --no-async            disable asynchronous evaluation
   --no-barrier          disable barriers
   --no-gmpy2            disable use of gmpy2 package
+  --no-prss             disable use of PRSS (pseudorandom secret sharing)
+  --mix32-64bit         enable mix of 32-bit and 64-bit platforms
 
 MPyC misc:
   --output-windows      screen output for parties i>0 (only on Windows)

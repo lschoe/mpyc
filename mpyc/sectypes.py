@@ -216,7 +216,7 @@ class SecureNumber(SecureObject):
         return NotImplemented
 
     def __pow__(self, other):
-        """Exponentation for public integral exponent."""
+        """Exponentiation for public integral exponent."""
         # TODO: extend to secret exponent
         if not isinstance(other, int):
             return NotImplemented
@@ -224,7 +224,7 @@ class SecureNumber(SecureObject):
         return runtime.pow(self, other)
 
     def __rpow__(self, other):
-        """Exponentation (with reflected arguments) for secret exponent.
+        """Exponentiation (with reflected arguments) for secret exponent.
 
         Special case: repeat of multiplicative group operation.
         """

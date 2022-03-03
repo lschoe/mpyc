@@ -7,7 +7,7 @@ Traffic Communication", DISS. ETH No. 27621, Zurich, 2021.
 See https://doi.org/10.3929/ethz-b-000516026.
 
 The demo shows how to perform multilateration in a privacy-preserving manner.
-Aircrafts are located by means of a multiparty computation between five sensors.
+Aircraft are located by means of a multiparty computation between five sensors.
 To localize a given aircraft at a given moment, each sensor provides its location
 as well as its measurement of the time of arrival (ToA) as private input.
 

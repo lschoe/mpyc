@@ -390,7 +390,7 @@ An example run looks as follows::
    Randomly shuffled input: [25.0, 49.0, -16.0, -64.0, -36.0, 9.0]
    Sorted by descending value: [49.0, 25.0, 9.0, -16.0, -36.0, -64.0]
 
-To show what is happening we use ``mpc.ouput()`` and print the intermediate results.
+To show what is happening we use ``mpc.output()`` and print the intermediate results.
 The sorting is done on the secret-shared values, however, using either the
 function ``mpc.sorted()``, which mimics the Python function ``sorted()``,
 or the method ``seclist.sort()`` from the ``mpyc.seclists`` module,

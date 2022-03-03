@@ -52,7 +52,7 @@ import types
 import warnings
 
 if __name__ == '__main__':
-    from mpyc.runtime import mpc  # NB: included here for -H --HELP for Python 3.7-
+    from mpyc.runtime import mpc  # NB: included here for -H --HELP for Python 3.7
     assert sys.version_info.minor >= 8, 'Python 3.8+ required for asyncio REPL'
 
 

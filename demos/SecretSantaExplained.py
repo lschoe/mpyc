@@ -3,7 +3,7 @@
 
 # # Secret Santa explained
 # 
-# Step by step, we develop a secure MPC protocol for the [Secret Santa](https://en.wikipedia.org/wiki/Secret_Santa) problem. Traditionally, a group of family and friends gathers to put all their names in a hat and then randomly draw names from the hat. If someone draws their own name, they have to start all over again. 
+# Step by step, we develop an MPC protocol for the [Secret Santa](https://en.wikipedia.org/wiki/Secret_Santa) problem. Traditionally, a group of family and friends gathers to put all their names in a hat and then randomly draw names from the hat. If someone draws their own name, they have to start all over again. 
 # 
 # Mathematically, the Secret Santa problem is about generating so-called [derangements](https://en.wikipedia.org/wiki/Derangement), which are permutations without fixed points. A permutation is a one-to-one mapping on a set of numbers, and a fixed-point is a number that is mapped to itself. 
 # 
@@ -24,11 +24,11 @@ from mpyc.runtime import mpc
 # 
 # Represented as Python lists, the 12 smallest derangements are:
 # 
-# |$n$| <p align="justify">length-$n$ derangements|
-# |---|:----------------------|
-# | 2 | <p align="left">[1,0]  |
-# | 3 | <p align="left">[1,2,0], [2,0,1]  |
-# | 4 | <p align="left">[1,0,3,2], [1,2,3,0], [1,3,0,2], [2,0,3,1], [2,3,0,1], [2,3,1,0], [3,0,1,2], [3,2,0,1], [3,2,1,0]  |
+# | n | length-n derangements|
+# |---| :----------------------|
+# | 2 | [1,0]  |
+# | 3 | [1,2,0], [2,0,1]  |
+# | 4 | [1,0,3,2], [1,2,3,0], [1,3,0,2], [2,0,3,1], [2,3,0,1], [2,3,1,0], [3,0,1,2], [3,2,0,1], [3,2,1,0]  |
 # 
 # To represent *secret-shared* derangements, we will use a secure MPyC type of integers. For simplicity, we choose 32-bit (default) secure integers.
 
@@ -233,7 +233,7 @@ for n in range(2, N + 1):
 mpc.run(mpc.shutdown())   # required only when run with multiple parties  
 
 
-# In[ ]:
+# In[13]:
 
 
 import sys; sys.exit()    # stop execution here when this notebook is run as a Python script, see below
@@ -249,7 +249,7 @@ import sys; sys.exit()    # stop execution here when this notebook is run as a P
 # 
 # 
 
-# In[13]:
+# In[ ]:
 
 
 get_ipython().system('python SecretSantaExplained.py')
@@ -257,7 +257,7 @@ get_ipython().system('python SecretSantaExplained.py')
 
 # Any MPyC program comes with several built-in command line options. So, let's take a look at the help message for [SecretSantaExplained.py](SecretSantaExplained.py).
 
-# In[14]:
+# In[ ]:
 
 
 get_ipython().system('python SecretSantaExplained.py -H')
@@ -265,18 +265,18 @@ get_ipython().system('python SecretSantaExplained.py -H')
 
 # Now for the "real thing". Let's do a run with three parties, in which three processes will be launched communicating via local tcp-connections. Let's set a few options as well. We enable SSL for the occasion, and we enforce that tcp port numbers will be used starting from 11443 (arbitrary choice). We also set the default bit length to $l=10$, which is large enough for our examples anyway. The default length of $l=10$ is now used because we use secure integers of type `mpc.SecInt()`; for secure integers of type `mpc.SecInt(32)`, say, changing $l$ has no effect.
 
-# In[15]:
+# In[ ]:
 
 
 get_ipython().system('python SecretSantaExplained.py -M3 --ssl -B 11443 -L10')
 
 
-# The code can be run with any number of parties $m=1,2,3,4,5,6,7,...$ of which no more than $t$ are assumed to be corrupt, with $0\leq t\leq \lfloor (m-1)/2 \rfloor$. As a final example, we show a run with $m=8$ parties, with the treshold set to $t=2$.
+# The code can be run with any number of parties $m=1,2,3,4,5,6,7,...$ of which no more than $t$ are assumed to be corrupt, with $0\leq t\leq \lfloor (m-1)/2 \rfloor$. As a final example, we show a run with $m=8$ parties, with the threshold set to $t=2$.
 
-# In[16]:
+# In[ ]:
 
 
 get_ipython().system('python SecretSantaExplained.py -M8 -T2')
 
 
-# This concludes the explanation of our MPyC protocol for the Secret Santa problem. The Python script [secretsanta.py](secretsanta.py) contains a slightly more extensive demo, showing how secure fixed-point arithmetic or secure finite fields can be used instead of secure integers.
+# This concludes the explanation of our MPyC solution for the Secret Santa problem. The Python script [secretsanta.py](secretsanta.py) contains a slightly more extensive demo, showing how secure fixed-point arithmetic or secure finite fields can be used instead of secure integers.

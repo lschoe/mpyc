@@ -215,7 +215,7 @@ async def main():
         iteration += 1
         mx = await mpc.output(T[0][-1])
         cd = await mpc.output(previous_pivot)
-        p = await mpc.output(pivot)  # NB: no await in f-strings in Python 3.6
+        p = await mpc.output(pivot)
         logging.info(f'Iteration {iteration}/{n_iter}: {mx / cd} pivot={p / cd}')
 
         # swap basis entries
