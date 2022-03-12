@@ -77,7 +77,7 @@ async def main():
         for j in range(n+1):
             T[i][j] = secfxp(float(T[i][j]), integral=False)
 
-    c = T[0][:-1]  # maximize c.x subject to A.x <= b, x >= 0
+    c = [-T[0][j] for j in range(n)]  # maximize c.x subject to A.x <= b, x >= 0
     A = [T[i+1][:-1] for i in range(m)]
     b = [T[i+1][-1] for i in range(m)]
 
@@ -140,17 +140,18 @@ async def main():
     for j in range(n):
         u = mpc.unit_vector(cobasis[j], m + n)[n:]
         v = mpc.scalar_mul(T[0][j], u)
-        y = mpc.vector_sub(y, v)
+        y = mpc.vector_add(y, v)
     yb = mpc.in_prod(y, b)
     yA = mpc.matrix_prod([y], A)[0]
-    approx = lambda a: mpc.if_else(a < 0, 1/1.01, 1.01) * a + 0.0001
-    yA_bounded_by_c = mpc.all(yA[j] <= approx(c[j]) for j in range(n))
-    y_nonpositive = mpc.all(y[i] <= 0 for i in range(m))
+    approx = lambda a: mpc.if_else(a > 0, 1/1.01, 1.01) * a - 0.0001
+    yA_bounded_by_c = mpc.all(yA[j] >= approx(c[j]) for j in range(n))
+    y_nonnegative = mpc.all(y[i] >= 0 for i in range(m))
 
     cx_eq_yb = abs(cx - yb) <= 0.01 * abs(cx)
-    check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonpositive])
+    print(bool(await mpc.output(yA_bounded_by_c)))
+    check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonnegative])
     check = bool(await mpc.output(check))
-    print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A <= c, y <= 0: {check}')
+    print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A >= c, y >= 0: {check}')
 
     x = await mpc.output(x)
     print(f'solution = {x}')

@@ -522,15 +522,15 @@ gives the following result::
    $ python lpsolver.py -M3 -i1
    Using secure 6-bit integers: SecInt6
    dataset: wiki with 2 constraints and 3 variables (scale factor 1)
-   2021-06-24 09:17:39,885 Start MPyC runtime v0.7.7
-   2021-06-24 09:17:40,405 All 3 parties connected.
-   2021-06-24 09:17:40,458 Iteration 1/2: 0.0 pivot=3.0
+   2022-03-12 13:55:17,131 Start MPyC runtime v0.8.2
+   2022-03-12 13:55:17,652 All 3 parties connected.
+   2022-03-12 13:55:17,667 Iteration 1/2: 0.0 pivot=3.0
    max = 60 / 3 / 1 = 20.0 in 1 iterations
-   2021-06-24 09:17:40,475 Solution x
-   2021-06-24 09:17:40,476 Dual solution y
-   verification c.x == y.b, A.x <= b, x >= 0, y.A <= c, y <= 0: True
+   2022-03-12 13:55:17,699 Solution x
+   2022-03-12 13:55:17,699 Dual solution y
+   verification c.x == y.b, A.x <= b, x >= 0, y.A >= c, y >= 0: True
    solution = [0.0, 0.0, 5.0]
-   2021-06-24 09:17:40,500 Stop MPyC runtime -- elapsed time: 0:00:00.614656
+   2022-03-12 13:55:17,730 Stop MPyC runtime -- elapsed time: 0:00:00.598679
 
 This corresponds to the `example on Wikipedia <https://en.wikipedia.org/wiki/Simplex_algorithm#Example>`_.
 The required bit lengths for the secure integers are preset by the demo program for each dataset.
@@ -540,7 +540,7 @@ In this simple case it suffices to work with 6-bit integers; this includes the s
 Next to the optimal solution :math:`\boldsymbol{x}`, the program also outputs the dual solution :math:`\boldsymbol{y}`,
 which is used as a *certificate of optimality*. If the verification
 :math:`\boldsymbol{c} \cdot \boldsymbol{x} = \boldsymbol{y} \cdot \boldsymbol{b}`, :math:`A \boldsymbol{x} \leq \boldsymbol{b}`,
-:math:`\boldsymbol{x} \geq 0`, :math:`\boldsymbol{y}^T A \leq \boldsymbol{c}`, :math:`\boldsymbol{y} \leq 0`
+:math:`\boldsymbol{x} \geq 0`, :math:`\boldsymbol{y}^T A \geq \boldsymbol{c}`, :math:`\boldsymbol{y} \geq 0`
 is passed, it follows that :math:`\boldsymbol{x}` is indeed a solution that maximizes :math:`\boldsymbol{c} \cdot \boldsymbol{x}`
 under the constraints :math:`A \boldsymbol{x} \leq \boldsymbol{b}` and :math:`\boldsymbol{x} \geq 0`.
 
@@ -559,15 +559,15 @@ dataset as above gives::
    $ python lpsolverfxp.py -M3 -i1
    Using secure 24-bit fixed-point numbers: SecFxp24:12
    dataset: wiki with 2 constraints and 3 variables
-   2021-06-24 09:45:34,054 Start MPyC runtime v0.7.7
-   2021-06-24 09:45:34,586 All 3 parties connected.
-   2021-06-24 09:45:34,648 Iteration 1: 0.0 pivot=3.0
+   2022-03-12 13:55:33,114 Start MPyC runtime v0.8.2
+   2022-03-12 13:55:33,646 All 3 parties connected.
+   2022-03-12 13:55:33,677 Iteration 1: 0.0 pivot=3.0
    max = 19.9951171875 (error -0.024%) in 1 iterations
-   2021-06-24 09:45:34,695 Solution x
-   2021-06-24 09:45:34,695 Dual solution y
-   verification c.x == y.b, A.x <= b, x >= 0, y.A <= c, y <= 0: True
+   2022-03-12 13:55:33,755 Solution x
+   2022-03-12 13:55:33,755 Dual solution y
+   verification c.x == y.b, A.x <= b, x >= 0, y.A >= c, y >= 0: True
    solution = [0.0, 0.0, 5.00244140625]
-   2021-06-24 09:45:34,757 Stop MPyC runtime -- elapsed time: 0:00:00.703063
+   2022-03-12 13:55:33,833 Stop MPyC runtime -- elapsed time: 0:00:00.703076
 
 The use of secure fixed-point numbers also has the potential of limiting the overall size
 of the numbers, compared to using secure integer arithmetic.

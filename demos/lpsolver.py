@@ -12,7 +12,7 @@ but note that a solution x is in general not integral.
 
 As a certificate of optimality, a solution y to the dual problem is computed
 as well, that is, y is a length-m vector minimizing b.y subject to y A >= c
-and y <= 0. The solutions are represented by integer vectors, and one additional
+and y >= 0. The solutions are represented by integer vectors, and one additional
 integer, which is the common denominator of all (rational) entries of the
 solution vectors x and y.
 
@@ -181,7 +181,7 @@ async def main():
         for j in range(n+1):
             T[i][j] = secint(T[i][j] // g)
 
-    c = T[0][:-1]  # maximize c.x subject to A.x <= b, x >= 0
+    c = [-T[0][j] for j in range(n)]  # maximize c.x subject to A.x <= b, x >= 0
     A = [T[i+1][:-1] for i in range(m)]
     b = [T[i+1][-1] for i in range(m)]
 
@@ -261,16 +261,15 @@ async def main():
     for i in range(m):
         coefs = [w_powers[((n + i) * k) % N] for k in range(N)]
         y[i] = mpc.in_prod(coefs, sum_x_powers)
-        y[i] = -y[i]
     yb = mpc.in_prod(y, b)
     yA = mpc.matrix_prod([y], A)[0]
-    yA_bounded_by_c = mpc.all(yA[j] <= c[j] * cd for j in range(n))
-    y_nonpositive = mpc.all(y[i] <= 0 for i in range(m))
+    yA_bounded_by_c = mpc.all(yA[j] >= c[j] * cd for j in range(n))
+    y_nonnegative = mpc.all(y[i] >= 0 for i in range(m))
 
     cx_eq_yb = cx == yb
-    check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonpositive])
+    check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonnegative])
     check = bool(await mpc.output(check))
-    print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A <= c, y <= 0: {check}')
+    print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A >= c, y >= 0: {check}')
 
     x = await mpc.output(x)
     print(f'solution = {[a / cd for a in x]}')
