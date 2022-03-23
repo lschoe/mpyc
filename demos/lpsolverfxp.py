@@ -148,7 +148,6 @@ async def main():
     y_nonnegative = mpc.all(y[i] >= 0 for i in range(m))
 
     cx_eq_yb = abs(cx - yb) <= 0.01 * abs(cx)
-    print(bool(await mpc.output(yA_bounded_by_c)))
     check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonnegative])
     check = bool(await mpc.output(check))
     print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A >= c, y >= 0: {check}')

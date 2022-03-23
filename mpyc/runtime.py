@@ -1731,35 +1731,36 @@ class Runtime:
         if shA and shB:
             C = await self.gather(self._reshare(C))
         if f and not A_integral and not B_integral:
-            C = [self.trunc(c, f=f, l=stype.bit_length) for c in C]
+            C = self.trunc(C, f=f, l=stype.bit_length)
             C = await self.gather(C)
         if C_symmetric:
-            C = [[C[i*(i+1)//2 + j if j <= i else j*(j+1)//2 + i]
+            C = [[C[i*(i+1)//2 + j if j < i else j*(j+1)//2 + i]
                   for j in range(n1)] for i in range(n1)]
         else:
-            C = [[C[i * n2 + j] for j in range(n2)] for i in range(n1)]
+            C = [C[ni:ni + n2] for ni in range(0, n1 * n2, n2)]
         return C
 
     @mpc_coro
     async def gauss(self, A, d, b, c):
         """Secure Gaussian elimination A d - b c."""
-        A, b, c = [r[:] for r in A], b[:], c[:]
-        stype = type(A[0][0])
-        field = stype.field
         n1, n2 = len(A), len(A[0])
+        A, b, c = [_ for r in A for _ in r], b[:], c[:]  # flat copy of A
+        stype = type(A[0])
+        field = stype.field
         await self.returnType(stype, n1, n2)
         A, d, b, c = await self.gather(A, d, b, c)
         d = d.value
         for i in range(n1):
+            ni = i * n2
             b_i = b[i].value
             for j in range(n2):
-                A[i][j] = field(A[i][j].value * d - b_i * c[j].value)
-            A[i] = self._reshare(A[i])
-        A = await self.gather(A)
+                A[ni + j] = field(A[ni + j].value * d - b_i * c[j].value)
+        A = await self.gather(self._reshare(A))
         f = stype.frac_length
         if f:
-            A = [self.trunc(a, f=f, l=stype.bit_length) for a in A]
+            A = self.trunc(A, f=f, l=stype.bit_length)
             A = await self.gather(A)
+        A = [A[ni:ni + n2] for ni in range(0, n1 * n2, n2)]
         return A
 
     def _prss_uci(self):
@@ -1847,8 +1848,6 @@ class Runtime:
 
     def add_bits(self, x, y):
         """Secure binary addition of bit vectors x and y."""
-        x, y = x[:], y[:]
-
         def f(i, j, high=False):
             n = j - i
             if n == 1:
@@ -1862,6 +1861,7 @@ class Runtime:
                 c[h:j] = self.vector_add(c[h:j], self.scalar_mul(c[h-1], d[h:j]))
                 if high:
                     d[h:j] = self.scalar_mul(d[h-1], d[h:j])
+
         n = len(x)
         c = [None] * n
         if n >= 1:
