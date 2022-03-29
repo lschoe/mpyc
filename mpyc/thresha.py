@@ -26,18 +26,17 @@ def random_split(s, t, m):
     field = type(s[0])
     p = field.modulus
     order = field.order
-    T = type(p)  # T is int or gfpx.Polynomial
+    _0 = type(p)(0)  # _0 is int(0) or gfpx.Polynomial(0)
     n = len(s)
     shares = [[None] * n for _ in range(m)]
     for h in range(n):
         c = [secrets.randbelow(order) for _ in range(t)]
         # polynomial f(X) = s[h] + c[t-1] X + c[t-2] X^2 + ... + c[0] X^t
-        for i in range(m):
-            y = 0 if T is int else T(0)
+        for i1 in range(1, m+1):
+            y = _0
             for c_j in c:
-                y += c_j
-                y *= i+1
-            shares[i][h] = (y + s[h].value) % p
+                y = (y + c_j) * i1
+            shares[i1-1][h] = (y + s[h].value) % p
     return shares
 
 
@@ -52,13 +51,13 @@ def _recombination_vector(field, xs, x_r):
     x_r = field(x_r).value
     vector = []
     for i, x_i in enumerate(xs):
-        coefficient_d = field(1)
         coefficient_n = field(1)
+        coefficient_d = field(1)
         for j, x_j in enumerate(xs):
             if i != j:
-                coefficient_d *= (x_r - x_j)
-                coefficient_n *= (x_i - x_j)
-        vector.append((coefficient_d / coefficient_n).value)
+                coefficient_n *= (x_r - x_j)
+                coefficient_d *= (x_i - x_j)
+        vector.append((coefficient_n / coefficient_d).value)
     return vector
 
 
@@ -127,7 +126,8 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
     given in prfs, which maps subsets of parties to PRF instances.
     Input uci is used to evaluate the PRFs on a unique common input.
     """
-    T = type(field.modulus)  # T is int or T is gfpx.Polynomial
+    _0 = type(field.modulus)(0)  # _0 is int(0) or gfpx.Polynomial(0)
+    i1 = i + 1
     sums = [0] * n
     # iterate over (m-1 choose t) subsets for degree t.
     for S, prf_S in prfs.items():
@@ -135,10 +135,9 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
         d = m - len(S)
         prl = prf_S(uci, n * d)
         for h in range(n):
-            y = 0 if T is int else T(0)
+            y = _0
             for j in range(d):
-                y += prl[h * d + j]
-                y *= i+1
+                y = (y + prl[h * d + j]) * i1
             sums[h] += y * f_S_i
     for h in range(n):
         sums[h] = field(sums[h])
