@@ -139,19 +139,15 @@ class MessageExchanger(Protocol):
         """Called when the connection with the peer is lost or closed.
 
         If the connection is closed normally (during shutdown) then exc is None.
-        Otherwise, if the connection is lost unexpectedly, exc may indicate the
-        cause (but exc is None is still possible).
+        Otherwise, if the connection is lost unexpectedly, exc may indicate the cause.
         """
         if exc:
             raise exc
 
-        if self.transport.is_closing():
-            rt = self.runtime
-            rt.parties[self.peer_pid].protocol = None
-            if all(p.protocol is None for p in rt.parties if p.pid != rt.pid):
-                rt.parties[rt.pid].protocol.set_result(None)
-        else:
-            raise RuntimeWarning(f'Connection with party {self.peer_pid} lost unexpectedly')
+        rt = self.runtime
+        rt.parties[self.peer_pid].protocol = None
+        if all(p.protocol is None for p in rt.parties if p.pid != rt.pid):
+            rt.parties[rt.pid].protocol.set_result(None)
 
     def close_connection(self):
         """Close connection with the peer."""
