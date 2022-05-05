@@ -305,7 +305,7 @@ class Polynomial:
     @classmethod
     def _powmod(cls, a, n, modulus=None):
         if n == 0:
-            return 1
+            return cls._intern(1)
 
         if n < 0:
             if modulus is None:

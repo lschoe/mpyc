@@ -50,6 +50,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(1 - poly(1), 0)
         self.assertEqual(1 * poly(0), 0 * poly(1))
         self.assertEqual(poly(0) + (), 0)
+        self.assertEqual(poly(1)**0, 1)
 
     def _test_errors(self, poly):
         self.assertRaises(ValueError, poly.from_terms, 'x**2')
