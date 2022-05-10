@@ -626,14 +626,12 @@ class SecureClassGroupForm(SecureFiniteGroup):
         a1, b1, c1 = f1
         a2, b2, c2 = f2
         s = (b1 + b2)/2
-        a1, a2, b2, c2 = runtime.if_else(a1 > a2, [a2, a1, b1, c1], [a1, a2, b2, c2])
         _d, _, y1 = runtime.gcdext(a1, a2, l=type(a1).bit_length//2)
         d, x2, y2 = runtime.gcdext(s, _d, l=type(a1).bit_length//2)
         v1 = a1 / d
         v2 = a2 / d
-#        _, r = _divmod(y1*y2*(s - b2) - x2*c2, v1)
-        _, r = _divmod(y1*y2, v1)
-        _, r = _divmod(r*(s - b2) - x2*c2, v1)
+        # Set r = y1 y2 (s - b2) - x2 c2 (mod v1) in two steps:
+        r = _divmod(_divmod(y1*y2, v1)[1] * (s - b2) - x2 * c2, v1)[1]
         a3 = v1*v2
         b3 = b2 + 2*v2*r
         c3 = (b3**2 - cls.group.discriminant) / (4*a3)
