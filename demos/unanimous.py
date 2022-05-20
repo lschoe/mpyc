@@ -61,7 +61,7 @@ if mpc.pid in voters:
 else:
     vote = None  # no input
 
-secbit = mpc.SecInt(1)  # 1-bit integers suffice
+secbit = mpc.SecFld(2)  # secure bits over GF(2)
 
 mpc.run(mpc.start())
 votes = mpc.input(secbit(vote), senders=voters)

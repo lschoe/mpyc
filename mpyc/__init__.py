@@ -7,12 +7,12 @@ and withstand passive adversaries controlling less than half of the parties.
 
 Secure integer and fixed-point arithmetic is supported for parameterized
 number ranges, also including support for comparison and bitwise operations.
-Secure finite field arithmetic is supported for fields of arbitrary order, as
-long as the order exceeds the number of parties. Basic support for secure
-floating-point arithmetic is provided as well. Moreover, support for secure
-finite group operations is built-in for a range of groups, particularly for
-use in threshold cryptography (e.g., Schnorr groups and elliptic curves).
-These operations are all available via Python's operator overloading.
+Secure finite field arithmetic is supported for fields of arbitrary order.
+Basic support for secure floating-point arithmetic is provided as well.
+Moreover, support for secure finite group operations is built-in for a range
+of groups, particularly for use in threshold cryptography (e.g., Schnorr groups
+and elliptic curves). These operations are all available via Python's operator
+overloading.
 
 Secure drop-in replacements for lots of Python built-in functions, such as
 all(), any(), sum(), min(), max(), sorted() are provided, mimicking the Python
@@ -26,5 +26,5 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.8.2'
+__version__ = '0.8.3'
 __license__ = 'MIT License'

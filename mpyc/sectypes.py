@@ -330,6 +330,7 @@ class SecureFiniteField(SecureNumber):
 
     frac_length = 0
     field: type
+    subfield: type
 
     _output_conversion = None
 
@@ -340,9 +341,13 @@ class SecureFiniteField(SecureNumber):
         """
         if value is not None:
             if isinstance(value, int):
+                if self.subfield is not None:
+                    value %= self.subfield.modulus
                 value = self.field(value)
             elif isinstance(value, self.field):
                 pass
+            elif self.subfield is not None and isinstance(value, self.subfield):
+                value = self.field(value.value)
             else:
                 if isinstance(value, finfields.FiniteFieldElement):
                     raise TypeError(f'incompatible finite field {type(value).__name__} '
@@ -577,9 +582,6 @@ def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, si
     min_order = min_order or order
     assert min_order <= order
     field = finfields.GF(modulus)
-    assert runtime.threshold == 0 or field.order > len(runtime.parties), \
-        'Field order must exceed number of parties, unless threshold is 0.'
-    # TODO: field.order >= number of parties for MDS
     field.is_signed = signed
     return _SecFld(field)
 
@@ -590,7 +592,25 @@ def _SecFld(field):
     name = f'SecFld{l}({field.__name__})'
     secfld = type(name, (SecureFiniteField,), {'__slots__': ()})
     secfld.__doc__ = 'Class of secret-shared finite field elements.'
-    secfld.field = field
+    t = runtime.threshold
+    m = len(runtime.parties)
+    q = field.order
+    if t == 0 or m < q:  # TODO: cover case m=q using MDS codes
+        secfld.subfield = None
+        secfld.field = field
+    else:
+        secfld.subfield = field
+        assert field.ext_deg == 1  # TODO: cover case ext_deg > 1
+        e = math.ceil(math.log(m+1, q))  # ensure q**e > m with e>=2
+        modulus = finfields.find_irreducible(field.characteristic, e)
+        secfld.field = finfields.GF(modulus)
+
+        @classmethod
+        def out_conv(cls, a):  # field -> subfield
+            assert a.value.degree() <= 0
+            return cls.subfield(int(a))
+
+        secfld._output_conversion = out_conv
     secfld.bit_length = l
     globals()[name] = secfld  # TODO: check name dynamic SecureFiniteField type sufficiently unique
     return secfld
@@ -603,7 +623,9 @@ def _pfield(l, f, p, n):
     elif p.bit_length() <= l + f + k + 1:
         raise ValueError(f'Prime {p} too small.')
 
-    return finfields.GF(p, f)
+    field = finfields.GF(p, f)
+    assert runtime.threshold == 0 or len(runtime.parties) < field.order  # for Shamir secret sharing
+    return field
 
 
 def SecInt(l=None, p=None, n=2):

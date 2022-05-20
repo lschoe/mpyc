@@ -272,12 +272,17 @@ def repeat_secret_base_secret_output(a, x, secgrp):
 async def repeat_public_base_secret_output(a, x, secgrp):
     """Compute a^[x]->[a^x]."""
     # a in prime order group, x in Z.
-    # x is a (secure) prime field element or (secure) int.
+    # x is a secure prime field element or secure int.
     await runtime.returnType(secgrp)
+    field = x.field
     m = len(runtime.parties)
-    lambda_i = _recombination_vector(x.field, range(1, m+1), 0)[runtime.pid]
+    lambda_i = _recombination_vector(field, range(1, m+1), 0)[runtime.pid]
     x_i = await runtime.gather(x)
-    c_i = secgrp.group.repeat(a, int(lambda_i * x_i))
+    e_i = int(lambda_i * x_i)
+    if isinstance(x, SecureFiniteField) and x.subfield is not None:
+        # value of x in prime field
+        e_i %= field.characteristic
+    c_i = secgrp.group.repeat(a, e_i)
     c = runtime.input(secgrp(c_i))
     return mpyc.mpctools.reduce(secgrp.operation, c)
 
@@ -289,11 +294,16 @@ async def repeat_public_base_public_output(a, x) -> asyncio.Future:
     # x is secure number (prime field element, or integer), or a list of secure numbers.
     if not isinstance(a, list):
         a, x = [a], [x]
+    field = x[0].field
     group = type(a[0])
     m = len(runtime.parties)
-    lambda_i = _recombination_vector(x[0].field, range(1, m+1), 0)[runtime.pid]
+    lambda_i = _recombination_vector(field, range(1, m+1), 0)[runtime.pid]
     x_i = await runtime.gather(x)
     e_i = [int(lambda_i * s_i) for s_i in x_i]
+    if isinstance(x, SecureFiniteField) and x.subfield is not None:
+        # values in x in prime field
+        for j in range(len(x)):
+            e_i[j] %= field.characteristic
     c_i = functools.reduce(group.operation, map(group.repeat, a, e_i))
     c = await runtime.transfer(c_i)
     return functools.reduce(group.operation, c)
