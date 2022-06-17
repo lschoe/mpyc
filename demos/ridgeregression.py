@@ -252,7 +252,7 @@ async def main():
     parser.add_argument('-i', '--dataset', type=int, metavar='I',
                         help=('dataset 0=synthetic (default), 1=student, 2=wine-red, '
                               '3=wine-white, 4=year, 5=gas-methane, 6=gas-CO, 7=higgs'))
-    parser.add_argument('-u', '--data-url', action='store_true', default=False,
+    parser.add_argument('-u', '--data-url', action='store_true',
                         help='show URL for downloading dataset I')
     parser.add_argument('-l', '--lambda_', type=float, metavar='L',
                         help='regularization L>=0.0 (default=1.0)')
@@ -265,7 +265,7 @@ async def main():
     parser.add_argument('-e', '--targets', type=int, metavar='E',
                         help='number of targets in synthetic data (default=1)')
     parser.add_argument('--ratrec', action='store_true',
-                        default=False, help='use rational reconstruction to hide determinant')
+                        help='use rational reconstruction to hide determinant')
     parser.set_defaults(dataset=0, lambda_=1.0, accuracy=-1,
                         samples=1000, features=10, targets=1)
     args = parser.parse_args()

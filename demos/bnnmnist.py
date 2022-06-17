@@ -292,9 +292,9 @@ async def main():
     parser.add_argument('-d', '--d-k-star', type=int, metavar='D',
                         help='k=D=0,1,2 for Legendre-based comparison using d_k^*')
     parser.add_argument('--no-legendre', action='store_true',
-                        default=False, help='disable Legendre-based comparison')
+                        help='disable Legendre-based comparison')
     parser.add_argument('--no-vectorization', action='store_true',
-                        default=False, help='disable vectorization of comparisons')
+                        help='disable vectorization of comparisons')
     parser.set_defaults(batch_size=1, offset=-1, d_k_star=1)
     args = parser.parse_args()
 

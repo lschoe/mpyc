@@ -106,9 +106,9 @@ async def main():
     parser.add_argument('--recursive', action='store_true',
                         help='use recursive pebbler')
     parser.add_argument('--no-one-way', action='store_true',
-                        default=False, help='use dummy one-way function')
+                        help='use dummy one-way function')
     parser.add_argument('--no-random-seed', action='store_true',
-                        default=False, help='use fixed seed')
+                        help='use fixed seed')
     parser.set_defaults(order=1)
     args = parser.parse_args()
 

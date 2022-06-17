@@ -136,9 +136,9 @@ async def main():
     parser.add_argument('-a', '--alpha', type=int, metavar='A',
                         help='scale factor A to prevent division by zero, A>=1')
     parser.add_argument('--parallel-subtrees', action='store_true',
-                        default=False, help='process subtrees in parallel (rather than in series)')
+                        help='process subtrees in parallel (rather than in series)')
     parser.add_argument('--no-pretty-tree', action='store_true',
-                        default=False, help='print raw flat tree instead of pretty tree')
+                        help='print raw flat tree instead of pretty tree')
     parser.set_defaults(dataset=0, bit_length=0, alpha=8, epsilon=0.05)
     args = parser.parse_args()
 

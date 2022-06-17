@@ -13,21 +13,21 @@ various cryptography conferences.
 We give usage examples and also provide some high-level explanations. The Python code
 for these demos contains many detailed examples of how to program with MPyC.
 
-For the more advanced demos you can use the ``-h`` (or, ``--help``) switch for more
-detailed usage instructions. With any demo you can also use the ``-H`` (or, ``--HELP``) switch
-to consult the built-in help message for the MPyC framework; this help message is also accessible
+For the more advanced demos you can use the ``-h`` switch for more detailed usage instructions.
+With any demo you can also use the ``-H`` switch to consult the built-in help message for the MPyC
+runtime (see :ref:`MPyC command line <command line>` for all options); this help message is also accessible
 without any demo at hand, namely by running::
 
    python -m mpyc -H
 
-If you leave out the ``-H`` here, you directly enter an asyncio REPL with MPyC preloaded
+If you leave out ``-H`` here, you directly enter an asyncio REPL with MPyC preloaded
 together with some standard secure types.
 This way you can quickly experiment with all kinds of MPyC functions:
 
 .. code-block:: python
 
-	>>> await mpc.output(list(mpc.min_max(secint(7), 8, secint(-3), 3)))
-	[-3, 8]
+   >>> await mpc.output(list(mpc.min_max(secint(7), 8, secint(-3), 3)))
+   [-3, 8]
 
 The results can be viewed immediately through top-level ``await`` expressions, which you may know
 already from Jupyter notebooks. Note that the asyncio REPL requires Python 3.8 or higher.
@@ -80,11 +80,11 @@ The actual code of the 'Hello world!' demo is very simple:
 
 .. code-block:: python
 
-	from mpyc.runtime import mpc
+   from mpyc.runtime import mpc
 
-	mpc.run(mpc.start())
-	print(''.join(mpc.run(mpc.transfer('Hello world!'))))
-	mpc.run(mpc.shutdown())
+   mpc.run(mpc.start())
+   print(''.join(mpc.run(mpc.transfer('Hello world!'))))
+   mpc.run(mpc.shutdown())
 
 There is not much secrecy in this program, as the hello messages are broadcast using ``mpc.transfer()`` such that
 each party gets a hello message from all other parties (including one from itself).
@@ -257,30 +257,30 @@ Here's an example run with :math:`m=5` parties:
 
 .. code-block::
 
-  $ python ot.py -M5 -I0
-  You are the trusted third party.
+   $ python ot.py -M5 -I0
+   You are the trusted third party.
 
 .. code-block::
 
-  $ python ot.py -M5 -I1
-  You are sender 1 holding messages 46 and 10.
+   $ python ot.py -M5 -I1
+   You are sender 1 holding messages 46 and 10.
 
 .. code-block::
 
-  $ python ot.py -M5 -I2
-  You are sender 2 holding messages 28 and 17.
+   $ python ot.py -M5 -I2
+   You are sender 2 holding messages 28 and 17.
 
 .. code-block::
 
-  $ python ot.py -M5 -I3
-  You are receiver 1 with random choice bit 1.
-  You have received message 10.
+   $ python ot.py -M5 -I3
+   You are receiver 1 with random choice bit 1.
+   You have received message 10.
 
 .. code-block::
 
-  $ python ot.py -M5 -I4
-  You are receiver 2 with random choice bit 0.
-  You have received message 28.
+   $ python ot.py -M5 -I4
+   You are receiver 2 with random choice bit 0.
+   You have received message 28.
 
 So, party :math:`0` is the trusted helper, parties :math:`1, 2` are senders, and parties :math:`3, 4` are receivers.
 In 1-out-of-2 OT, a sender holds two messages ``x[0], x[1]`` say of which the receiver will get exactly one, namely ``x[b]`` as
@@ -677,11 +677,11 @@ with abstract group notation @, ~, ^:
 
 .. code-block:: python
 
-	>>> O = EC.identity
-	>>> B = EC.generator
-	>>> ell = EC.order
-	>>> {EC((0, 1)), O, -O, ~O, B - B, B @ ~B, ell*B, B^ell, B + (B^-1)}
-	{(0, 1)}
+   >>> O = EC.identity
+   >>> B = EC.generator
+   >>> ell = EC.order
+   >>> {EC((0, 1)), O, -O, ~O, B - B, B @ ~B, ell*B, B^ell, B + (B^-1)}
+   {(0, 1)}
 
 The Python set computed in the last line collapses to a singleton set as we are
 writing the point :math:`(x,y)=(0,1)`, the identity element for an Edwards curve, in a couple of equivalent ways.
@@ -690,7 +690,7 @@ To obtain the corresponding secure group simply set:
 
 .. code-block:: python
 
-	secgrp = mpc.SecGrp(EC)
+   secgrp = mpc.SecGrp(EC)
 
 With this setup a threshold version of the ElGamal cryptosystem can be implemented in a few lines of code.
 
@@ -699,7 +699,7 @@ demo actually uses the convenience function ``mpc.SecEllipticCurve()`` to perfor
 
 .. code-block:: python
 
-	secgrp = mpc.SecEllipticCurve('Ed25519')
+   secgrp = mpc.SecEllipticCurve('Ed25519')
 
 The group :code:`EC` is now available as class attribute :code:`secgrp.group`.
 

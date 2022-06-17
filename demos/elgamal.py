@@ -139,7 +139,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--offset', type=int, metavar='O',
                         help='offset O for batch of messages, O>=0')
     parser.add_argument('--no-public-output', action='store_true',
-                        default=False, help='force secure (secret-shared) message upon decryption')
+                        help='force secure (secret-shared) message upon decryption')
     parser.set_defaults(group=1, batch_size=1, offset=0)
     args = parser.parse_args()
 

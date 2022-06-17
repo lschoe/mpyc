@@ -178,11 +178,11 @@ async def main():
     parser.add_argument('-a', '--accuracy', type=int, metavar='A',
                         help='number of fractional bits')
     parser.add_argument('--collapse', action='store_true',
-                        default=False, help='days->weeks->month->years')
+                        help='days->weeks->month->years')
     parser.add_argument('--print-tables', action='store_true',
-                        default=False, help='print survival tables')
+                        help='print survival tables')
     parser.add_argument('--plot-curves', action='store_true',
-                        default=False, help='plot survival curves')
+                        help='plot survival curves')
     parser.set_defaults(dataset=0)
     args = parser.parse_args()
 

@@ -148,7 +148,7 @@ async def main():
                         help='accuracy A (number of decimal places), A>=0')
     parser.add_argument('-l', '--bit-length', type=int, metavar='L',
                         help='override automatically set bit length')
-    parser.add_argument('-p', '--plot', action='store_true', default=False,
+    parser.add_argument('-p', '--plot', action='store_true',
                         help='plot histogram and density')
     parser.set_defaults(datasets=('1', '3'), accuracy=3)
     args = parser.parse_args()

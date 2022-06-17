@@ -14,6 +14,7 @@ Welcome to MPyC's documentation!
    install
    basics
    demos
+   cli
    mpyc
 
 
