@@ -22,7 +22,7 @@ in cryptography:
     - symmetric groups of any degree n (n>=0)
     - quadratic residue groups modulo a safe prime
     - Schnorr groups (prime-order subgroups of the multiplicative group of a finite field)
-    - elliptic curve groups (Edwards curves and Barreto-Naehrig curves)
+    - elliptic curve groups (Edwards curves, a Koblitz curve, and Barreto-Naehrig curves)
     - class groups of imaginary quadratic fields
 
 The structure of most of these groups will be trivial, preferably cyclic or even
@@ -783,7 +783,7 @@ class WeierstrassCurvePoint(EllipticCurvePoint):
             value = list(map(field, self._identity))
         elif 2 == len(value) < len(self._identity):  # convert affine to target
             value = list(value) + [field(1)]  # z = 1
-        if check:
+        if check and value:
             value = list(value)
             for i in range(len(value)):
                 if not isinstance(value[i], field):
@@ -1023,6 +1023,7 @@ def EllipticCurve(curvename='Ed25519', coordinates=None):
 
         - 'Ed25519': see https://en.wikipedia.org/wiki/EdDSA#Ed25519
         - 'Ed448': aka "Goldilocks", see https://en.wikipedia.org/wiki/Curve448
+        - 'secp256k1': Bitcoin's Koblitz curve from https://www.secg.org/sec2-v2.pdf
         - 'BN256': Barreto-Naehrig curve, https://eprint.iacr.org/2010/186
         - 'BN256_twist': sextic twist of Barreto-Naehrig curve
 
@@ -1115,6 +1116,29 @@ def _EllipticCurve(curvename, coordinates):
                     20666913350058776956210519119118544732556678129809273996262322366050359951122])
             base_pt = (x, y)
         EC.order = p - 6*u**2
+    elif curvename == 'secp256k1':
+        p = 2**256 - 2**32 - 2**9 - 2**8 - 2**7 - 2**6 - 2**4 - 1  # p = 3 (mod 4)
+        gf = GF(p)
+
+        name = f'E({gf.__name__}){curvename}{coordinates}'
+        if coordinates == 'jacobian':
+            base = WeierstrassJacobian
+        elif coordinates == 'affine':
+            base = WeierstrassAffine
+        elif coordinates == 'projective':
+            base = WeierstrassProjective
+        else:
+            raise ValueError('invalid coordinates')
+
+        EC = type(name, (base,), {'__slots__': ()})
+        EC.field = gf
+
+        EC.a = gf(0)
+        EC.b = gf(7)
+        x = gf(int('79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798', 16))
+        y = gf(int('483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8', 16))
+        base_pt = (x, y)
+        EC.order = int('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16)
     else:
         raise ValueError('curve not supported')
 

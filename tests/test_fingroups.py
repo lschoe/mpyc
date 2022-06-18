@@ -90,6 +90,9 @@ class Arithmetic(unittest.TestCase):
                   fg.EllipticCurve('Ed25519', coordinates='extended'),
                   fg.EllipticCurve('Ed448'),  # affine coordinates
                   fg.EllipticCurve('Ed448', coordinates='projective'),
+                  fg.EllipticCurve('secp256k1'),  # affine coordinates
+                  fg.EllipticCurve('secp256k1', coordinates='projective'),
+                  fg.EllipticCurve('secp256k1', coordinates='jacobian'),
                   fg.EllipticCurve('BN256'),  # affine coordinates
                   fg.EllipticCurve('BN256', coordinates='projective'),
                   fg.EllipticCurve('BN256', coordinates='jacobian'),

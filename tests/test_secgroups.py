@@ -82,6 +82,7 @@ class Arithmetic(unittest.TestCase):
                   fg.EllipticCurve('Ed25519', coordinates='projective'),
                   fg.EllipticCurve('Ed25519', coordinates='extended'),
                   fg.EllipticCurve('Ed448', coordinates='projective'),
+                  fg.EllipticCurve('secp256k1', coordinates='projective'),
                   fg.EllipticCurve('BN256', coordinates='projective'),
                   fg.EllipticCurve('BN256_twist', coordinates='projective'))
         for group in curves:

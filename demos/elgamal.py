@@ -144,7 +144,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.group == 1:
-        secgrp = mpc.SecEllipticCurve('Ed25519', 'extended')
+        secgrp = mpc.SecEllipticCurve('secp256k1', 'projective')
     elif args.group == 2:
         secgrp = mpc.SecQuadraticResidues(l=2048)
     elif args.group == 3:

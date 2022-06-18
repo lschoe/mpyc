@@ -173,7 +173,8 @@ async def main():
     if args.group == 1:
         groups = (EllipticCurve('Ed25519'),
                   EllipticCurve('Ed25519', 'projective'),
-                  EllipticCurve('Ed25519', 'extended'))
+                  EllipticCurve('Ed25519', 'extended'),
+                  EllipticCurve('secp256k1', 'projective'))
     else:
         groups = (SchnorrGroup(p=9739, q=541),
                   SchnorrGroup(n=160),

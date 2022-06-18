@@ -649,28 +649,28 @@ appropriate secret-shared finite groups, or "secure groups" for short.
 
 A sample run between 5 parties with the default elliptic curve group gives::
 
-	$ python elgamal.py -M5 --ssl
-	Using secure group: SecGrp(E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519extended)
-	2021-12-17 18:27:54,912 Start MPyC runtime v0.7.11
-	2021-12-17 18:27:55,500 All 5 parties connected via SSL.
-	Boardroom election
-	------------------
-	My vote: 1 (for "yes")
-	Referendum result: 1 "yes" / 4 "no"
+   $ python elgamal.py -M5 --ssl
+   Using secure group: SecGrp(E(GF(115792089237316195423570985008687907853269984665640564039457584007908834671663))secp256k1projective)
+   2022-06-18 11:42:14,713 Start MPyC runtime v0.8.4
+   2022-06-18 11:42:15,416 All 5 parties connected via SSL.
+   Boardroom election
+   ------------------
+   My vote: 1 (for "yes")
+   Referendum result: 2 "yes" / 3 "no"
 
-	Encryption/decryption tests
-	---------------------------
-	Plaintext sent: 1
-	Plaintext received: 1
-	2021-12-17 18:27:55,573 Stop MPyC runtime -- elapsed time: 0:00:00.661026
+   Encryption/decryption tests
+   ---------------------------
+   Plaintext sent: 1
+   Plaintext received: 1
+   2022-06-18 11:42:15,557 Stop MPyC runtime -- elapsed time: 0:00:00.828082
 
-The default group is a `twisted Edwards curve <https://en.wikipedia.org/wiki/EdDSA#Ed25519>`_
-over :math:`\mathbb{F}_p` with :math:`p=2^{155}-19`.
+The default group is Certicom's Koblitz curve `secp256k1 <https://en.bitcoin.it/wiki/Secp256k1>`_
+over :math:`\mathbb{F}_p` with :math:`p=2^{256} - 2^{32} - 2^9 - 2^8 - 2^7 - 2^6 - 2^4 - 1` (used in Bitcoin's ECDSA).
 In MPyC this group is already built in:
 
 .. code-block:: python
 
-	EC = mpyc.fingroups.EllipticCurve('Ed25519')
+	EC = mpyc.fingroups.EllipticCurve('secp256k1')
 
 The group :code:`EC` can then be used as follows, freely mixing additive group notation +, -, * (default for elliptic curves)
 with abstract group notation @, ~, ^:
@@ -680,36 +680,36 @@ with abstract group notation @, ~, ^:
    >>> O = EC.identity
    >>> B = EC.generator
    >>> ell = EC.order
-   >>> {EC((0, 1)), O, -O, ~O, B - B, B @ ~B, ell*B, B^ell, B + (B^-1)}
-   {(0, 1)}
+   >>> {EC(()), O, -O, ~O, B - B, B @ ~B, ell*B, B^ell, B + (B^-1)}
+   {()}
 
 The Python set computed in the last line collapses to a singleton set as we are
-writing the point :math:`(x,y)=(0,1)`, the identity element for an Edwards curve, in a couple of equivalent ways.
+writing the point at infinity, the identity element for a Weierstrass curve, in a couple of equivalent ways.
 
-To obtain the corresponding secure group simply set:
+To obtain the corresponding secure group for :code:`EC`, a call like :code:`mpc.SecGrp(EC)` can be used.
+However, the demo actually uses the convenience function ``mpc.SecEllipticCurve()`` to perform everything in one go:
 
 .. code-block:: python
 
-   secgrp = mpc.SecGrp(EC)
+   secgrp = mpc.SecEllipticCurve('secp256k1', 'projective')
+
+Here we switch to projective coordinates as this allows for an efficient complete formula for point addition.
+The original elliptic curve group is then available as class attribute:
+
+.. code-block:: python
+
+   >>> secgrp.group
+   <class 'mpyc.fingroups.E(GF(115792089237316195423570985008687907853269984665640564039457584007908834671663))secp256k1projective'>
 
 With this setup a threshold version of the ElGamal cryptosystem can be implemented in a few lines of code.
 
-Instead of first creating group :code:`EC` and then turning it into a secure group ``secgrp``, the
-demo actually uses the convenience function ``mpc.SecEllipticCurve()`` to perform these steps in one go:
+Next to curve :code:`'secp256k1'`, Edwards curves :code:`'Ed25519'` and `"Goldilocks"
+<https://en.wikipedia.org/wiki/Curve448>`_ :code:`'Ed448'` are available (with affine, projective, or extended coordinates).
+The advantage of Edwards curves is that with extended coordinates, the complete formula for point addition only
+requires 8 secure multiplications over :math:`\mathbb{F}_p` with :math:`p=2^{255}-19`, which can be done
+in 2 rounds only (see the `MPyC source code <https://github.com/lschoe/mpyc/blob/master/mpyc/>`_ for details).
 
-.. code-block:: python
-
-   secgrp = mpc.SecEllipticCurve('Ed25519')
-
-The group :code:`EC` is now available as class attribute :code:`secgrp.group`.
-
-Also, instead of the default affine coordinates, the demo actually uses Edwards curves with extended coordinates
-for better performance: the complete formula for point addition only requires 8 secure multiplications over
-:math:`\mathbb{F}_p`, which can be done in 2 rounds only (see the `MPyC source code
-<https://github.com/lschoe/mpyc/blob/master/mpyc/>`_ for details).
-
-Next to the curve :code:`'Ed25519'`, the curve :code:`'Ed448'` (aka `"Goldilocks" <https://en.wikipedia.org/wiki/Curve448>`_)
-is available. MPyC also comes with built-in Barreto-Naehrig curves (with affine, projective, or jacobian coordinates), but
+MPyC also comes with built-in Barreto-Naehrig curves (with affine, projective, or jacobian coordinates), but
 please note that these curves should not be used for ordinary public key cryptography; the curves :code:`'BN256'`
 and :code:`'BN256_twist'` are included for the implementation of
 pairing-based `verifiable MPC <https://github.com/toonsegers/verifiable_mpc>`_.
@@ -762,21 +762,24 @@ nicely complementing the AES and hash chain demos, which do the same for symmetr
 
 We run the demo with :math:`m=23` parties and threshold :math:`t=5` to get a noticeable delay::
 
-	$ python dsa.py -M23 -T5 --no-log
-	Sign/verify tests
-	-----------------
-	E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519affine
-	3.5 seconds for DSA signature
-	0.5625 seconds for Schnorr signature
-	E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519projective
-	0.8125 seconds for DSA signature
-	0.53125 seconds for Schnorr signature
-	E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519extended
-	0.78125 seconds for DSA signature
-	0.546875 seconds for Schnorr signature
+   $ python dsa.py -M23 -T5 --no-log
+   Sign/verify tests
+   -----------------
+   E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519affine
+   3.359375 seconds for DSA signature
+   0.625 seconds for Schnorr signature
+   E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519projective
+   1.015625 seconds for DSA signature
+   0.65625 seconds for Schnorr signature
+   E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519extended
+   1.0 seconds for DSA signature
+   0.625 seconds for Schnorr signature
+   E(GF(115792089237316195423570985008687907853269984665640564039457584007908834671663))secp256k1projective
+   3.953125 seconds for DSA signature
+   0.6875 seconds for Schnorr signature
 
-The Edwards curve :code:`'Ed25519'` is the default group for the demo. As expected, the best performance
-is attained for :code:`'extended'` coordinates. Also, threshold Schnorr signatures turn out to be faster
+Elliptic curves are used as the default group for the demo. As expected, the best performance
+is attained for Edwards curves with :code:`'extended'` coordinates. Also, threshold Schnorr signatures turn out to be faster
 than threshold DSA signatures. The demo can also be run with Schnorr groups, in which case the lead of
 Schnorr signatures over DSA gets even larger.
 
