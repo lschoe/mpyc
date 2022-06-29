@@ -242,13 +242,13 @@ def gather_shares(rt, *obj):
 
 
 def _hop(a):  # NB: redefined in MPyC setup if mix of 32-bit/64-bit platforms enabled
-    """Simple and efficient pseudorandom program counter hop for Python 3.7+.
+    """Simple and efficient pseudorandom program counter hop.
 
     Compatible between all 64-bit platforms.
     Compatible between all 32-bit platforms.
     Not compatible between mix of 32-bit and 64-bit platforms.
     """
-    return hash(frozenset(a))
+    return hash(tuple(a))
 
 
 class _ProgramCounterWrapper:

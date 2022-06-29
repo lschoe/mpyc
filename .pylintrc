@@ -9,9 +9,6 @@ const-naming-style=any
 function-naming-style=any
 method-naming-style=any
 
-[CLASSES]
-disable=arguments-renamed  # see {fingroups,secgroups}.py (remove for Python 3.8+)
-
 [DESIGN]
 # Maximum number of arguments for function / method.
 max-args=6

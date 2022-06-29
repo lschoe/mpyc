@@ -30,7 +30,7 @@ This way you can quickly experiment with all kinds of MPyC functions:
    [-3, 8]
 
 The results can be viewed immediately through top-level ``await`` expressions, which you may know
-already from Jupyter notebooks. Note that the asyncio REPL requires Python 3.8 or higher.
+already from Jupyter notebooks.
 
 helloworld.py
 -------------

@@ -63,10 +63,8 @@ class seclist(list):
 
         i = 0
         while t:
-            a = parent.__getitem__(i)
-            while isinstance(a, SecureObject):
+            while isinstance(a := parent.__getitem__(i), SecureObject):
                 i += 1
-                a = parent.__getitem__(i)
             parent.__setitem__(i, sectype(a))
             t -= 1
         self.sectype = sectype

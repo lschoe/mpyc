@@ -1,7 +1,7 @@
 MPyC installation
 =================
 
-MPyC runs on Windows/Mac/Linux platforms supporting Python 3.7+.
+MPyC runs on Windows/Mac/Linux platforms supporting Python 3.8+.
 There are no dependencies on other Python packages.
 
 If you first want to try MPyC online, click
@@ -59,7 +59,7 @@ See the ``README.md`` files in these directories for more information.
 Deployment
 ----------
 
-Currently Python 3.7+ is the only requirement.
+Currently Python 3.8+ is the only requirement.
 
 Written in pure Python, without any dependencies, MPyC should run on common
 Windows/Mac/Linux platforms, including the 32-bit Raspberry Pi, if you like.

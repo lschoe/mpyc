@@ -235,16 +235,7 @@ except ImportError:
 
     def isqrt(x):
         """Return integer square root of nonnegative x."""
-        if x == 0:
-            return x
-
-        k = (x.bit_length() - 1) // 2
-        y = 1<<k
-        for i in range(k-1, -1, -1):
-            z = y | 1<<i
-            if z**2 <= x:
-                y = z
-        return y
+        return math.isqrt(x)
 
     def iroot(x, n):
         """Return (y, b) where y is the integer nth root of x and b is True if y is exact."""

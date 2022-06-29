@@ -148,22 +148,22 @@ class SecureFiniteGroup(SecureObject):
         return 1 - self.__eq__(other)
 
     @classmethod
-    def operation(cls, a, b):
+    def operation(cls, a, b, /):
         """Return a @ b."""
         raise NotImplementedError
 
     @classmethod
-    def operation2(cls, a):
+    def operation2(cls, a, /):
         """Return a @ a."""
         return cls.operation(a, a)
 
     @classmethod
-    def inversion(cls, a):
+    def inversion(cls, a, /):
         """Return @-inverse of a (written ~a)."""
         raise NotImplementedError
 
     @classmethod
-    def equality(cls, a, b):
+    def equality(cls, a, b, /):
         """Return a == b."""
         raise NotImplementedError
 
@@ -337,13 +337,13 @@ class SecureSymmetricGroupElement(SecureFiniteGroup):
             a.set_share(b.share)
 
     @classmethod
-    def operation(cls, p, q):
+    def operation(cls, p, q, /):
         """First p then q."""
         q = seclist(q.share)
         return cls(tuple(q[j] for j in p.share))
 
     @classmethod
-    def inversion(cls, p):
+    def inversion(cls, p, /):
         n = len(p.share)
         q = seclist(p.share)  # use p.share as dummy of the right type
         for i in range(n):
@@ -351,7 +351,7 @@ class SecureSymmetricGroupElement(SecureFiniteGroup):
         return cls(tuple(q))
 
     @classmethod
-    def equality(cls, p, q):  # return type is self.sectype
+    def equality(cls, p, q, /):  # return type is self.sectype
         return seclist(p.share) == seclist(q.share)
 
 
@@ -373,15 +373,15 @@ class SecureQuadraticResidue(SecureFiniteGroup):
         self.share.set_share(value.share)
 
     @classmethod
-    def operation(cls, a, b):
+    def operation(cls, a, b, /):
         return cls(a.share * b.share)
 
     @classmethod
-    def inversion(cls, a):
+    def inversion(cls, a, /):
         return cls(1/a.share)
 
     @classmethod
-    def equality(cls, a, b):
+    def equality(cls, a, b, /):
         return a.share == b.share
 
     @classmethod
@@ -407,15 +407,15 @@ class SecureSchnorrGroupElement(SecureFiniteGroup):
         self.share.set_share(value.share)
 
     @classmethod
-    def operation(cls, a, b):
+    def operation(cls, a, b, /):
         return cls(a.share * b.share)
 
     @classmethod
-    def inversion(cls, a):
+    def inversion(cls, a, /):
         return cls(1/a.share)
 
     @classmethod
-    def equality(cls, a, b):
+    def equality(cls, a, b, /):
         return a.share == b.share
 
     @classmethod
@@ -461,13 +461,13 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
         return self.share[key]
 
     @classmethod
-    def operation(cls, a, b):
+    def operation(cls, a, b, /):
         group = cls.group
         c = group.operation(group(a.share, check=False), group(b.share, check=False))
         return cls(c)
 
     @classmethod
-    def inversion(cls, a):
+    def inversion(cls, a, /):
         group = cls.group
         c = group.inversion(group(a.share, check=False))
         return cls(c)
@@ -488,7 +488,7 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
         return cls(c)
 
     @classmethod
-    def equality(cls, a, b):
+    def equality(cls, a, b, /):
         return runtime.all(u == v for u, v in zip(a.normalize(), b.normalize()))
 
     @classmethod
@@ -632,7 +632,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
 
     # See Henri Cohen's book "A Course in Computational Algebraic Number Theory", Chapter 5.
     @classmethod
-    def operation(cls, f1, f2):  # Cohen: Algorithm 5.4.7 (Shanks 1969)
+    def operation(cls, f1, f2, /):  # Cohen: Algorithm 5.4.7 (Shanks 1969)
         a1, b1, c1 = f1
         a2, b2, c2 = f2
         s = (b1 + b2)/2
@@ -648,7 +648,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
         return cls(cls._reduce((a3, b3, c3)))
 
     @classmethod
-    def operation2(cls, f):
+    def operation2(cls, f, /):
         a, b, c = f  # NB: a>0, b!=0, and gcd(a,b)=1 because -discriminant is prime
         x2 = runtime.inverse(b, a, l=type(a).bit_length//2)
         _, r = _divmod(x2*c, a)
@@ -658,15 +658,15 @@ class SecureClassGroupForm(SecureFiniteGroup):
         return cls(cls._reduce((a2, b2, c2)))
 
     @classmethod
-    def inversion(cls, f):
+    def inversion(cls, f, /):
         a, b, c = f
         b = ((b != a) * (a != c)).if_else(-b, b)
         return cls((a, b, c))
 
     @classmethod
-    def equality(cls, a, b):
-        v0 = a.share[0] == b.share[0]
-        v1 = a.share[1] == b.share[1]
+    def equality(cls, f1, f2, /):
+        v0 = f1.share[0] == f2.share[0]
+        v1 = f1.share[1] == f2.share[1]
         return v0 * v1  # TODO: optimize batch test eq. with random r in field
 
     @classmethod

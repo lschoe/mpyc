@@ -286,11 +286,9 @@ def find_prime_root(l, blum=True, n=1):
         while not gmpy2.is_prime(p):
             p += 4*n
 
-        a = 1
-        w = 1
-        while w == 1:
+        a = 2
+        while (w := gmpy2.powmod(a, (p-1) // n, p)) == 1:
             a += 1
-            w = gmpy2.powmod(a, (p-1) // n, p)
         p, w = int(p), int(w)
     return p, n, w
 
@@ -559,11 +557,11 @@ class ExtensionFieldElement(FiniteFieldElement):
         # q - 1 = t 2^s, t odd
         z = field._least_qnr
         if z is None:
-            c = 1
             i = 2
-            while c == 1:
+            while True:
                 z = cls.powmod(i, t, field.modulus)
-                c = cls.powmod(z, 1 << s-1, field.modulus)
+                if cls.powmod(z, 1 << s-1, field.modulus) != 1:
+                    break
                 i += 1
             field._least_qnr = z  # cache least QNR raised to power t
 

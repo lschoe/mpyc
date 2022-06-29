@@ -1,6 +1,6 @@
 """Support for natively asynchronous REPL with MPyC preloaded.
 
-To launch a natively asynch REPL (in Python 3.8+) with MPyC preloaded, run:
+To launch a natively asynch REPL with MPyC preloaded, run:
 
     python -m mpyc
 
@@ -50,10 +50,6 @@ import sys
 import threading
 import types
 import warnings
-
-if __name__ == '__main__':
-    from mpyc.runtime import mpc  # NB: included here for -H --HELP for Python 3.7
-    assert sys.version_info.minor >= 8, 'Python 3.8+ required for asyncio REPL'
 
 
 class AsyncIOInteractiveConsole(code.InteractiveConsole):

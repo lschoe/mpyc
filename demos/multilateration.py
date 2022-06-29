@@ -65,7 +65,7 @@ however, run the demo with m=5 parties, to let each party correspond to one of
 the five sensors assumed for the application of Schmidt's multilateration method.
 """
 import os
-from math import sqrt, sin, cos, atan2, degrees, radians
+from math import sqrt, dist, hypot, sin, cos, atan2, degrees, radians
 import itertools
 import argparse
 import matplotlib.pyplot as plt
@@ -103,7 +103,7 @@ class DatumTransformation:
         Formula from Section 2.2 "ECEF to LLA" in "Datum Transformations of
         GPS Positions", see https://microem.ru/files/2012/08/GPS.G1-X-00006.pdf.
         """
-        p = sqrt(x**2 + y**2)
+        p = hypot(x, y)
         theta = atan2(z * cls.a, p * cls.b)
         phi = atan2(z + cls.e_2 * cls.b * sin(theta)**3, p - cls.e2 * cls.a * cos(theta)**3)
         lambda_ = atan2(y, x)
@@ -191,9 +191,8 @@ async def main():
         x, y, z = x / scaling, y / scaling, z / scaling
         latitude, longitude, _ = DatumTransformation.ecef_to_wgs(x, y, z)
         altitude = row.geoAltitude  # fix altitude to reported altitude
-        x, y, z = DatumTransformation.wgs_to_ecef(latitude, longitude, altitude)
-        X, Y, Z = DatumTransformation.wgs_to_ecef(row.latitude, row.longitude, altitude)
-        d = sqrt((x - X)**2 + (y - Y)**2 + (z - Z)**2)
+        d = dist(DatumTransformation.wgs_to_ecef(latitude, longitude, altitude),
+                 DatumTransformation.wgs_to_ecef(row.latitude, row.longitude, altitude))
         distances[ix] = d  # distance between computed and known aircraft position
         print(f'Processing {len(df)} measurements from sets {"+".join(args.datasets)}: '
               f'{round(100*(ix + 1)/nrows)}%', end='\r')

@@ -26,7 +26,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.8.4'
+__version__ = '0.8.5'
 __license__ = 'MIT License'
 
 import argparse
@@ -78,9 +78,9 @@ def get_arg_parser():
 
     group = parser.add_argument_group('MPyC misc')
     group.add_argument('--output-windows', action='store_true',
-                       help='screen output for parties i>0 (only on Windows)')
+                       help='screen output for parties 0<i<m (only on Windows)')
     group.add_argument('--output-file', action='store_true',
-                       help='append output for parties i>0 to party{m}_{i}.log')
+                       help='append output of parties 0<i<m to party{m}_{i}.log')
     group.add_argument('-f', type=str, default='',
                        help='consume IPython\'s -f argument F')
 

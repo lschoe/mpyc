@@ -96,7 +96,7 @@ class Runtime:
         m = len(self.parties)
         self._threshold = t
         # caching (m choose t):
-        self._bincoef = math.factorial(m) // math.factorial(t) // math.factorial(m - t)
+        self._bincoef = math.comb(m, t)
         if self.options.no_prss:
             return
 
@@ -463,11 +463,13 @@ class Runtime:
         else:
             field = sftype
         x = [a.value for a in x]
+        if t:
+            share = field.to_bytes(x)
 
         # Send share to all successors in receivers.
         for peer_pid in receivers:
             if 0 < (peer_pid - self.pid) % m <= t:
-                self._send_message(peer_pid, field.to_bytes(x))
+                self._send_message(peer_pid, share)
         # Receive and recombine shares if this party is a receiver.
         if self.pid in receivers:
             shares = [self._receive_message((self.pid - t + j) % m) for j in range(t)]
@@ -2199,9 +2201,9 @@ def setup():
         from hashlib import sha1
 
         def hop(a):
-            """Simple and portable pseudorandom program counter hop for Python 3.7+.
+            """Simple and portable pseudorandom program counter hop.
 
-            Compatible across all (mixes of) 32-bit and 64-bit Python 3.7+ versions. Let's
+            Compatible across all (mixes of) 32-bit and 64-bit supported Python versions. Let's
             you run MPyC with some parties on 64-bit platforms and others on 32-bit platforms.
             Useful when working with standard 64-bit installations on Linux/MacOS/Windows and
             32-bit installations on Raspberry Pi OS, for instance.

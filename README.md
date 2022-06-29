@@ -32,7 +32,7 @@ See [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentati
 
 ## Notes:
 
-1. Python 3.7+ (Python 3.6 or lower is not sufficient).
+1. Python 3.8+ (following NymPy's [deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html#support-table)).
 
 2. Installing package [gmpy2](https://pypi.org/project/gmpy2/) is optional, but will considerably enhance the performance of `mpyc`.
 As of December 12, 2021 with the release of gmpy2 2.1, installation has been simplified greatly:
@@ -50,11 +50,11 @@ file `gen.bat` shows how to generate fresh key material for SSL. To generate SSL
 `pip install cryptography` (alternatively, run `pip install pyOpenSSL`, which will also install the `cryptography` package).
 
 5. To use the [Jupyter](https://jupyter.org/) notebooks `demos\*.ipynb`, you need to have Jupyter installed,
-e.g., using `pip install jupyter`. The latest version of Jupyter will come with IPython 7.x, which supports
-top-level `await`. For example, instead of `mpc.run(mpc.start())` one can now simply write `await mpc.start()` anywhere in
+e.g., using `pip install jupyter`. An interesting feature of Jupyter is the support of top-level `await`.
+For example, instead of `mpc.run(mpc.start())` you can simply use `await mpc.start()` anywhere in
 a notebook cell, even outside a coroutine.
 
-6. For Python 3.8+, you also get top-level `await` by running `python -m asyncio` to launch a natively async REPL.
+6. For Python, you also get top-level `await` by running `python -m asyncio` to launch a natively async REPL.
 By running `python -m mpyc` instead you even get this REPL with the MPyC runtime preloaded!
 
 Copyright &copy; 2018-2022 Berry Schoenmakers

@@ -164,17 +164,17 @@ class FiniteGroupElement:
         return repr(self.value)
 
     @classmethod
-    def operation(cls, a, b):  # TODO: ",/" for positional-only arguments in Python 3.8+ (pylintrc)
+    def operation(cls, a, b, /):
         """Return a @ b."""
         raise NotImplementedError
 
     @classmethod
-    def operation2(cls, a):
+    def operation2(cls, a, /):
         """Return a @ a."""
         return cls.operation(a, a)
 
     @classmethod
-    def inversion(cls, a):
+    def inversion(cls, a, /):
         """Return @-inverse of a (written ~a)."""
         raise NotImplementedError
 
@@ -183,7 +183,7 @@ class FiniteGroupElement:
         return type(self).inversion(self)
 
     @classmethod
-    def equality(cls, a, b):
+    def equality(cls, a, b, /):
         """Return a == b."""
         raise NotImplementedError
 
@@ -230,12 +230,12 @@ class SymmetricGroupElement(FiniteGroupElement):
         self.value = value
 
     @classmethod
-    def operation(cls, p, q):
+    def operation(cls, p, q, /):
         """First p then q."""
         return cls(tuple(q.value[j] for j in p.value), check=False)
 
     @classmethod
-    def inversion(cls, p):
+    def inversion(cls, p, /):
         n = len(p.value)
         q = [None] * n
         for i in range(n):
@@ -243,7 +243,7 @@ class SymmetricGroupElement(FiniteGroupElement):
         return cls(tuple(q), check=False)
 
     @classmethod
-    def equality(cls, p, q):
+    def equality(cls, p, q, /):
         return p.value == q.value
 
 
@@ -289,15 +289,15 @@ class QuadraticResidue(FiniteGroupElement):
         self.value = value
 
     @classmethod
-    def operation(cls, a, b):
+    def operation(cls, a, b, /):
         return cls(a.value * b.value, check=False)
 
     @classmethod
-    def inversion(cls, a):
+    def inversion(cls, a, /):
         return cls(1/a.value, check=False)
 
     @classmethod
-    def equality(cls, a, b):
+    def equality(cls, a, b, /):
         return a.value == b.value
 
     @classmethod
@@ -433,15 +433,15 @@ class SchnorrGroupElement(FiniteGroupElement):
         self.value = value
 
     @classmethod
-    def operation(cls, a, b):
+    def operation(cls, a, b, /):
         return cls(a.value * b.value, check=False)
 
     @classmethod
-    def inversion(cls, a):
+    def inversion(cls, a, /):
         return cls(1/a.value, check=False)
 
     @classmethod
-    def equality(cls, a, b):
+    def equality(cls, a, b, /):
         return a.value == b.value
 
     @classmethod
@@ -652,12 +652,12 @@ class EdwardsAffine(EdwardsCurvePoint):
     oblivious = True
 
     @classmethod
-    def inversion(cls, pt):
+    def inversion(cls, pt, /):
         x, y = pt
         return cls((-x, y), check=False)
 
     @classmethod
-    def operation(cls, pt1, pt2):
+    def operation(cls, pt1, pt2, /):
         """Add Edwards points using affine coordinates (projective with z=1)."""
         # see https://hyperelliptic.org/EFD/g1p/data/edwards/projective/addition/mmadd-2007-bl
         x1, y1 = pt1
@@ -676,7 +676,7 @@ class EdwardsAffine(EdwardsCurvePoint):
         return self
 
     @classmethod
-    def equality(cls, pt1, pt2):
+    def equality(cls, pt1, pt2, /):
         return pt1.value == pt2.value
 
 
@@ -689,12 +689,12 @@ class EdwardsProjective(EdwardsCurvePoint):
     oblivious = True
 
     @classmethod
-    def inversion(cls, pt):
+    def inversion(cls, pt, /):
         x, y, z = pt
         return cls((-x, y, z), check=False)
 
     @classmethod
-    def operation(cls, pt1, pt2):
+    def operation(cls, pt1, pt2, /):
         """Add Edwards points with (homogeneous) projective coordinates."""
         # see https://www.hyperelliptic.org/EFD/g1p/data/twisted/projective/addition/add-2008-bbjlp
         x1, y1, z1 = pt1
@@ -719,7 +719,7 @@ class EdwardsProjective(EdwardsCurvePoint):
         return cls((x, y, cls.field(1)), check=False)
 
     @classmethod
-    def equality(cls, pt1, pt2):
+    def equality(cls, pt1, pt2, /):
         x1, y1, z1 = pt1
         x2, y2, z2 = pt2
         return x1 * z2 == x2 * z1 and y1 * z2 == y2 * z1
@@ -734,12 +734,12 @@ class EdwardsExtended(EdwardsCurvePoint):
     oblivious = True
 
     @classmethod
-    def inversion(cls, pt):
+    def inversion(cls, pt, /):
         x, y, z, t = pt
         return cls((-x, y, z, -t), check=False)
 
     @classmethod
-    def operation(cls, pt1, pt2):
+    def operation(cls, pt1, pt2, /):
         """Add (twisted a=-1) Edwards points in extended projective coordinates."""
         # see https://eprint.iacr.org/2008/522 Hisil et al., Section 4.2 for 4 processors
         x1, y1, z1, t1 = pt1
@@ -758,7 +758,7 @@ class EdwardsExtended(EdwardsCurvePoint):
         return cls((x, y, cls.field(1), x * y), check=False)
 
     @classmethod
-    def equality(cls, pt1, pt2):
+    def equality(cls, pt1, pt2, /):
         x1, y1, z1, _ = pt1
         x2, y2, z2, _ = pt2
         return x1 * z2 == x2 * z1 and y1 * z2 == y2 * z1
@@ -810,7 +810,7 @@ class WeierstrassAffine(WeierstrassCurvePoint):
     oblivious = False
 
     @classmethod
-    def inversion(cls, pt):
+    def inversion(cls, pt, /):
         if pt == cls.identity:
             return pt
 
@@ -818,7 +818,7 @@ class WeierstrassAffine(WeierstrassCurvePoint):
         return cls((x, -y), check=False)
 
     @classmethod
-    def operation(cls, pt1, pt2):
+    def operation(cls, pt1, pt2, /):
         """Add Weierstrass points with affine coordinates."""
         if pt1 == cls.identity:
             return pt2
@@ -840,7 +840,7 @@ class WeierstrassAffine(WeierstrassCurvePoint):
         return cls((x3, y3), check=False)
 
     @classmethod
-    def operation2(cls, pt):
+    def operation2(cls, pt, /):
         """Double Weierstrass point with affine coordinates."""
         if pt == cls.identity:
             return cls.identity
@@ -858,7 +858,7 @@ class WeierstrassAffine(WeierstrassCurvePoint):
         return self
 
     @classmethod
-    def equality(cls, pt1, pt2):
+    def equality(cls, pt1, pt2, /):
         return pt1.value == pt2.value
 
 
@@ -871,12 +871,12 @@ class WeierstrassProjective(WeierstrassCurvePoint):
     oblivious = True
 
     @classmethod
-    def inversion(cls, pt):
+    def inversion(cls, pt, /):
         x, y, z = pt
         return cls((x, -y, z), check=False)
 
     @classmethod
-    def operation(cls, pt1, pt2):
+    def operation(cls, pt1, pt2, /):
         """Add Weierstrass points with projective coordinates."""
         # see https://eprint.iacr.org/2015/1060  Renes et al., Algorithm 7
         x1, y1, z1 = pt1
@@ -897,7 +897,7 @@ class WeierstrassProjective(WeierstrassCurvePoint):
         return cls((x3, y3, z3), check=False)
 
     @classmethod
-    def operation2(cls, pt):
+    def operation2(cls, pt, /):
         """Double Weierstrass point with projective coordinates."""
         # see https://eprint.iacr.org/2015/1060  Renes et al., Algorithm 9
         x, y, z = pt
@@ -923,7 +923,7 @@ class WeierstrassProjective(WeierstrassCurvePoint):
         return cls((x, y, cls.field(1)), check=False)
 
     @classmethod
-    def equality(cls, pt1, pt2):
+    def equality(cls, pt1, pt2, /):
         x1, y1, z1 = pt1
         x2, y2, z2 = pt2
         if z1 == 0 and z2 == 0:
@@ -941,12 +941,12 @@ class WeierstrassJacobian(WeierstrassCurvePoint):
     oblivious = False
 
     @classmethod
-    def inversion(cls, pt):
+    def inversion(cls, pt, /):
         x, y, z = pt
         return cls((x, -y, z), check=False)
 
     @classmethod
-    def operation(cls, pt1, pt2):
+    def operation(cls, pt1, pt2, /):
         """Add Weierstrass points with Jacobian coordinates."""
         # see https://hyperelliptic.org/EFD/g1p/data/shortw/jacobian-0/addition/add-2007-bl
         if pt1[2] == 0:
@@ -978,7 +978,7 @@ class WeierstrassJacobian(WeierstrassCurvePoint):
         return cls((x3, y3, z3), check=False)
 
     @classmethod
-    def operation2(cls, pt):
+    def operation2(cls, pt, /):
         """Double Weierstrass point with Jacobian coordinates."""
         # see https://hyperelliptic.org/EFD/g1p/data/shortw/jacobian-0/doubling/dbl-2009-l
         x1, y1, z1 = pt
@@ -1005,7 +1005,7 @@ class WeierstrassJacobian(WeierstrassCurvePoint):
         return cls((x, y, cls.field(1)), check=False)
 
     @classmethod
-    def equality(cls, pt1, pt2):
+    def equality(cls, pt1, pt2, /):
         x1, y1, z1 = pt1
         x2, y2, z2 = pt2
         if z1 == 0 and z2 == 0:
@@ -1213,7 +1213,7 @@ class ClassGroupForm(FiniteGroupElement):
         return a, b, c
 
     @classmethod
-    def operation(cls, f1, f2):  # Cohen: Algorithm 5.4.9 (NUCOMP)
+    def operation(cls, f1, f2, /):  # Cohen: Algorithm 5.4.9 (NUCOMP)
         if f1[0] < f2[0]:
             f1, f2 = f2, f1
         a1, b1, c1 = f1
@@ -1279,7 +1279,7 @@ class ClassGroupForm(FiniteGroupElement):
         return cls(cls._reduce(f3), check=False)
 
     @classmethod
-    def operation2(cls, f):  # Cohen: Algorithm 5.4.8 (NUDUPL)
+    def operation2(cls, f, /):  # Cohen: Algorithm 5.4.8 (NUDUPL)
         a, b, c = f
         d1, u, _ = gcdext(b, a)
         assert d1 == 1  # because -discriminant is prime
@@ -1317,13 +1317,13 @@ class ClassGroupForm(FiniteGroupElement):
         return cls(cls._reduce(f2), check=False)
 
     @classmethod
-    def inversion(cls, f):
+    def inversion(cls, f, /):
         a, b, c = f
         return cls(cls._reduce((a, -b, c)), check=False)
 
     @classmethod
-    def equality(cls, a, b):
-        return a.value == b.value
+    def equality(cls, f1, f2, /):
+        return f1.value == f2.value
 
     @classmethod
     def encode(cls, m):

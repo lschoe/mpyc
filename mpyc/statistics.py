@@ -379,32 +379,7 @@ def quantiles(data, *, n=4, method='exclusive'):
 
     sectype = type(x[0])  # all elts of x assumed of same type
     if not issubclass(sectype, SecureObject):
-        if sys.version_info.minor >= 8:
-            return statistics.quantiles(x, n=n, method=method)
-
-        data = sorted(x)
-
-        if method == 'inclusive':
-            m = ld - 1
-            result = []
-            for i in range(1, n):
-                j, delta = divmod(i * m, n)
-                interpolated = (data[j] * (n - delta) + data[j + 1] * delta) / n
-                result.append(interpolated)
-            return result
-
-        if method == 'exclusive':
-            m = ld + 1
-            result = []
-            for i in range(1, n):
-                j = i * m // n                               # rescale i to m/n
-                j = 1 if j < 1 else ld-1 if j > ld-1 else j  # clamp to 1 .. ld-1
-                delta = i*m - j*n                            # exact integer math
-                interpolated = (data[j - 1] * (n - delta) + data[j] * delta) / n
-                result.append(interpolated)
-            return result
-
-        raise ValueError(f'Unknown method: {method!r}')
+        return statistics.quantiles(x, n=n, method=method)
 
     if issubclass(sectype, SecureFixedPoint):
         div_n = lambda a: a / n
@@ -441,7 +416,7 @@ def quantiles(data, *, n=4, method='exclusive'):
         data = {}
         for i in range(1, n):
             j = i * m // n
-            j = 1 if j < 1 else ld-1 if j > ld-1 else j
+            j = 1 if j < 1 else ld-1 if j > ld-1 else j  # clamp to 1 .. ld-1
             delta = i*m - j*n
             if n - delta:
                 data[j-1] = None
@@ -490,7 +465,7 @@ def mode(data):
     if isinstance(x[0], SecureObject):
         return _mode(x, PRIV=runtime.options.sec_param//6)
 
-    return statistics.mode(x)  # NB: raises StatisticsError in Python < 3.8 if x is multimodal
+    return statistics.mode(x)
 
 
 @asyncoro.mpc_coro
