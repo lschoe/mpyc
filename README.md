@@ -32,7 +32,7 @@ See [GitHub Pages](https://lschoe.github.io/mpyc/) for `pydoc`-based documentati
 
 ## Notes:
 
-1. Python 3.8+ (following NymPy's [deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html#support-table)).
+1. Python 3.8+ (following NumPy's [deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html#support-table)).
 
 2. Installing package [gmpy2](https://pypi.org/project/gmpy2/) is optional, but will considerably enhance the performance of `mpyc`.
 As of December 12, 2021 with the release of gmpy2 2.1, installation has been simplified greatly:

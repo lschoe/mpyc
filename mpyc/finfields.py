@@ -161,28 +161,27 @@ class FiniteFieldElement:
     def __truediv__(self, other):
         """Division."""
         if isinstance(other, type(self)):
-            return self * other.reciprocal()
+            other = other.value
+        elif not isinstance(other, self._mix_types):
+            return NotImplemented
 
-        if isinstance(other, self._mix_types):
-            return self * type(self)(other).reciprocal()
-
-        return NotImplemented
+        return self * type(self)._reciprocal(other)
 
     def __rtruediv__(self, other):
         """Division (with reflected arguments)."""
         if isinstance(other, self._mix_types):
-            return type(self)(other) * self.reciprocal()
+            return self.reciprocal() * other
 
         return NotImplemented
 
     def __itruediv__(self, other):
         """In-place division."""
-        if isinstance(other, self._mix_types):
-            other = type(self)(other)
-        elif not isinstance(other, type(self)):
+        if isinstance(other, type(self)):
+            other = other.value
+        elif not isinstance(other, self._mix_types):
             return NotImplemented
 
-        self.value *= other.reciprocal().value
+        self.value *= type(self)._reciprocal(other)
         self.value %= self.modulus
         return self
 
@@ -190,9 +189,15 @@ class FiniteFieldElement:
         """Exponentiation."""
         raise NotImplementedError('abstract method')
 
-    def reciprocal(self):
+    @classmethod
+    def _reciprocal(cls, a):
         """Multiplicative inverse."""
         raise NotImplementedError('abstract method')
+
+    def reciprocal(self):
+        """Multiplicative inverse."""
+        cls = type(self)
+        return cls(cls._reciprocal(self.value))
 
     def __lshift__(self, other):
         """Left shift."""
@@ -226,13 +231,24 @@ class FiniteFieldElement:
         """In-place right shift."""
         raise NotImplementedError('abstract method')
 
+    @classmethod
+    def _is_sqr(cls, a):
+        """Test for quadratic residuosity (0 is also square)."""
+        raise NotImplementedError('abstract method')
+
     def is_sqr(self):
         """Test for quadratic residuosity (0 is also square)."""
+        return self._is_sqr(self.value)
+
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        """Modular (inverse) square roots."""
         raise NotImplementedError('abstract method')
 
     def sqrt(self, INV=False):
         """Modular (inverse) square roots."""
-        raise NotImplementedError('abstract method')
+        cls = type(self)
+        return cls(cls._sqrt(self.value, INV=INV))
 
     def __eq__(self, other):
         """Equality test."""
@@ -307,7 +323,7 @@ def pGF(p, f, n, w):
     GFp.ext_deg = 1
     GFp.byte_length = (GFp.order.bit_length() + 7) >> 3
     GFp._frac_length = f
-    GFp._rshift_factor = int(gmpy2.invert(1<<f, p))  # cache (1/2)^f mod p
+    GFp._rshift_factor = GFp._reciprocal(1<<f)  # cache (1/2)^f mod p
     GFp.is_signed = True
     GFp.nth = n
     GFp.root = w % p
@@ -355,20 +371,21 @@ class PrimeFieldElement(FiniteFieldElement):
 
         return type(self)(int(gmpy2.powmod(self.value, other, self.modulus)))
 
-    def reciprocal(self):
-        """Multiplicative inverse."""
-        return type(self)(int(gmpy2.invert(self.value, self.modulus)))
+    @classmethod
+    def _reciprocal(cls, a):
+        return int(gmpy2.invert(a, cls.modulus))
 
     def __rshift__(self, other):
         """Right shift."""
         if not isinstance(other, int):
             return NotImplemented
 
+        cls = type(self)
         if other == self._frac_length:
             rsf = self._rshift_factor
         else:
-            rsf = int(gmpy2.invert(1 << other, self.modulus))
-        return type(self)(self.value * rsf)
+            rsf = cls._reciprocal(1 << other)
+        return cls(self.value * rsf)
 
     def __irshift__(self, other):
         if not isinstance(other, int):
@@ -377,37 +394,37 @@ class PrimeFieldElement(FiniteFieldElement):
         if other == self._frac_length:
             rsf = self._rshift_factor
         else:
-            rsf = int(gmpy2.invert(1 << other, self.modulus))
+            rsf = self._reciprocal(1 << other)
         self.value *= rsf
         self.value %= self.modulus
         return self
 
-    def is_sqr(self):
-        p = self.modulus
+    @classmethod
+    def _is_sqr(cls, a):
+        p = cls.modulus
         if p == 2:
             return True
 
-        return gmpy2.legendre(self.value, p) != -1
+        return gmpy2.legendre(a, p) != -1
 
-    def sqrt(self, INV=False):
-        a = self.value
-        field = type(self)
-        p = field.modulus
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        p = cls.modulus
         if a == 0:
             if INV:
                 raise ZeroDivisionError('no inverse sqrt of 0')
 
-            return field(a)
+            return a
 
         if p == 2:
-            return field(a)
+            return a
 
         if p&3 == 3:
             if INV:
                 p4 = (p*3 - 5) >> 2  # a**p4 == a**(-1/2) == 1/sqrt(a) mod p
             else:
                 p4 = (p+1) >> 2
-            return field(int(gmpy2.powmod(a, p4, p)))
+            return int(gmpy2.powmod(a, p4, p))
 
         # 1 (mod 4) primes are covered using Cipolla-Lehmer's algorithm.
         # find b s.t. b^2 - 4*a is not a square
@@ -425,9 +442,9 @@ class PrimeFieldElement(FiniteFieldElement):
             if (e >> i) & 1:
                 u, v = (v + b * u) % p, (-a * u) % p
         if INV:
-            return field(v).reciprocal()
+            v = cls._reciprocal(v)
 
-        return field(v)
+        return v
 
     def signed_(self):
         """Return signed integer representation, symmetric around zero."""
@@ -499,91 +516,89 @@ class ExtensionFieldElement(FiniteFieldElement):
         if not isinstance(other, int):
             return NotImplemented
 
-        cls = type(self.value)
-        return type(self)(cls.powmod(self.value, other, self.modulus))
+        poly = type(self.value)
+        return type(self)(poly.powmod(self.value, other, self.modulus))
 
-    def reciprocal(self):
-        cls = type(self.value)
-        return type(self)(cls.invert(self.value, self.modulus))
+    @classmethod
+    def _reciprocal(cls, a):
+        return type(cls.modulus).invert(a, cls.modulus)
 
     def __rshift__(self, other):
         if not isinstance(other, int):
             return NotImplemented
 
-        return self * type(self)(1 << other).reciprocal()
+        return self * self._reciprocal(1 << other)
 
     def __irshift__(self, other):
         if not isinstance(other, int):
             return NotImplemented
 
-        self.value *= type(self)(1 << other).reciprocal().value
+        self.value *= self._reciprocal(1 << other)
         self.value %= self.modulus
         return self
 
-    def is_sqr(self):
-        cls = type(self.value)
-        field = type(self)
-        q = field.order
+    @classmethod
+    def _is_sqr(cls, a):
+        poly = type(a)
+        q = cls.order
         if q%2 == 0:
             return True
 
-        return cls.powmod(self.value, (q-1) >> 1, field.modulus) != [cls.p - 1]
+        return poly.powmod(a, (q-1) >> 1, cls.modulus) != [poly.p - 1]
 
-    def sqrt(self, INV=False):
-        a = self.value
-        cls = type(a)
-        field = type(self)
-        q = field.order
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        poly = type(a)
+        q = cls.order
         if a == []:
             if INV:
                 raise ZeroDivisionError('no inverse sqrt of 0')
 
-            return field(a)
+            return a
 
         if q%2 == 0:
-            return field(cls.powmod(a, q>>1, field.modulus))
+            return poly.powmod(a, q>>1, cls.modulus)
 
         if q&3 == 3:
             if INV:
                 q4 = (q*3 - 5) >> 2  # a**q4 == a**(-1/2) == 1/sqrt(a) in GF(q)
             else:
                 q4 = (q+1) >> 2
-            return field(cls.powmod(a, q4, field.modulus))
+            return poly.powmod(a, q4, cls.modulus)
 
         # Tonelli-Shanks
         n = q-1
         s = (n & -n).bit_length() - 1  # number of times 2 divides n
         t = n >> s
         # q - 1 = t 2^s, t odd
-        z = field._least_qnr
+        z = cls._least_qnr
         if z is None:
             i = 2
             while True:
-                z = cls.powmod(i, t, field.modulus)
-                if cls.powmod(z, 1 << s-1, field.modulus) != 1:
+                z = poly.powmod(i, t, cls.modulus)
+                if poly.powmod(z, 1 << s-1, cls.modulus) != 1:
                     break
                 i += 1
-            field._least_qnr = z  # cache least QNR raised to power t
+            cls._least_qnr = z  # cache least QNR raised to power t
 
         # TODO: improve following code a bit
-        w = cls.powmod(a, t>>1, field.modulus)
-        x = a * w % field.modulus
-        b = x * w % field.modulus
+        w = poly.powmod(a, t>>1, cls.modulus)
+        x = a * w % cls.modulus
+        b = x * w % cls.modulus
         v = s
         while b != 1:
             b2 = b
             k = 0
             while b2 != 1:
-                b2 = b2 * b2 % field.modulus
+                b2 = b2 * b2 % cls.modulus
                 k += 1
-            w = cls.powmod(z, 1 << v - k - 1, field.modulus)
-            z = w * w % field.modulus
-            b = b * z % field.modulus
-            x = x * w % field.modulus
+            w = poly.powmod(z, 1 << v - k - 1, cls.modulus)
+            z = w * w % cls.modulus
+            b = b * z % cls.modulus
+            x = x * w % cls.modulus
             v = k
-        x = field(x)
         if INV:
-            return x.reciprocal()
+            x = cls._reciprocal(x)
 
         return x
 
@@ -599,18 +614,18 @@ class BinaryFieldElement(ExtensionFieldElement):
     characteristic = 2
     _mix_types = (int, gfpx.BinaryPolynomial)
 
-    def is_sqr(self):
+    @classmethod
+    def _is_sqr(cls, a):
         return True
 
-    def sqrt(self, INV=False):
-        a = self.value
-        cls = type(a)
-        field = type(self)
-        q = field.order
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        poly = type(a)
+        q = cls.order
         if a == 0:
             if INV:
                 raise ZeroDivisionError('no inverse sqrt of 0')
 
-            return field(a)
+            return a
 
-        return field(cls.powmod(self.value, q>>1, field.modulus))
+        return poly.powmod(a, q>>1, cls.modulus)

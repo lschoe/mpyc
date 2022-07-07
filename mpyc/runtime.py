@@ -770,9 +770,9 @@ class Runtime:
             else:
                 c = b.reciprocal() << f
         else:
-            if not isinstance(b, field):
-                b = field(b)
-            c = b.reciprocal()
+            if isinstance(b, field):
+                b = b.value
+            c = field(field._reciprocal(b))
         return self.mul(a, c)
 
     @mpc_coro
@@ -1839,7 +1839,7 @@ class Runtime:
             for r, r2 in zip(rs, r2s):
                 if r2.value != 0:
                     h -= 1
-                    s = r.value * r2.sqrt(INV=True).value
+                    s = r.value * field._sqrt(r2.value, INV=True)
                     if not signed:
                         s %= modulus
                         s += 1
