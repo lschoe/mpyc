@@ -12,7 +12,7 @@ from mpyc import gmpy as gmpy2
 from mpyc import gfpx
 
 
-def GF(modulus, f=0):
+def GF(modulus):
     """Create a finite (Galois) field for given modulus (prime number or irreducible polynomial)."""
     if isinstance(modulus, gfpx.Polynomial):
         return xGF(modulus)
@@ -25,7 +25,7 @@ def GF(modulus, f=0):
             n, w = 1, 1
         else:
             n, w = 2, p-1
-    return pGF(p, f, n, w)
+    return pGF(p, n, w)
 
 
 class FiniteFieldElement:
@@ -310,7 +310,7 @@ def find_prime_root(l, blum=True, n=1):
 
 
 @functools.lru_cache(maxsize=None)
-def pGF(p, f, n, w):
+def pGF(p, n, w):
     """Create a finite field for given prime modulus p."""
     if not gmpy2.is_prime(p):
         raise ValueError('modulus is not a prime')
@@ -322,8 +322,6 @@ def pGF(p, f, n, w):
     GFp.characteristic = p
     GFp.ext_deg = 1
     GFp.byte_length = (GFp.order.bit_length() + 7) >> 3
-    GFp._frac_length = f
-    GFp._rshift_factor = GFp._reciprocal(1<<f)  # cache (1/2)^f mod p
     GFp.is_signed = True
     GFp.nth = n
     GFp.root = w % p
@@ -335,21 +333,19 @@ class PrimeFieldElement(FiniteFieldElement):
 
     __slots__ = ()
 
-    _frac_length = 0
-    _rshift_factor = 1
     is_signed = None
     nth = None
     root = None
     _mix_types = int
 
     @staticmethod
-    def createGF(p, f, n, w):
+    def createGF(p, n, w):
         """Create new object for use by pickle module."""
-        obj = pGF(p, f, n, w)
+        obj = pGF(p, n, w)
         return PrimeFieldElement.__new__(obj)
 
     def __reduce__(self):
-        return (PrimeFieldElement.createGF, (self.modulus, self._frac_length, self.nth, self.root),
+        return (PrimeFieldElement.createGF, (self.modulus, self.nth, self.root),
                 (None, {'value': self.value}))
 
     def __int__(self):
@@ -375,27 +371,25 @@ class PrimeFieldElement(FiniteFieldElement):
     def _reciprocal(cls, a):
         return int(gmpy2.invert(a, cls.modulus))
 
+    @classmethod
+    @functools.lru_cache(maxsize=1)  # NB: 1-place cache to speed up rshift for secure trunc() etc.
+    def _reciprocal2(cls, n):
+        """Return multiplicative inverse of 2**n, n>=0."""
+        return cls._reciprocal(1 << n)
+
     def __rshift__(self, other):
         """Right shift."""
         if not isinstance(other, int):
             return NotImplemented
 
         cls = type(self)
-        if other == self._frac_length:
-            rsf = self._rshift_factor
-        else:
-            rsf = cls._reciprocal(1 << other)
-        return cls(self.value * rsf)
+        return cls(self.value * cls._reciprocal2(other))
 
     def __irshift__(self, other):
         if not isinstance(other, int):
             return NotImplemented
 
-        if other == self._frac_length:
-            rsf = self._rshift_factor
-        else:
-            rsf = self._reciprocal(1 << other)
-        self.value *= rsf
+        self.value *= self._reciprocal2(other)
         self.value %= self.modulus
         return self
 

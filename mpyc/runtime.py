@@ -1132,11 +1132,13 @@ class Runtime:
 
         b = self.random_bit(stype)
         a, b = await self.gather(a, b)
-        b >>= f
+        if f:
+            b >>= f
         r = self._random(Zp, 1 << (l + k - 1)).value
         c = await self.output(a + ((1<<l) + (r << 1) + b.value))
         x = 1 - b if c.value & 1 else b  # xor
-        x <<= f
+        if f:
+            x <<= f
         return x
 
     @mpc_coro_no_pc
@@ -1169,7 +1171,7 @@ class Runtime:
 
         r_bits = self.random._randbelow(stype, b, bits=True)
         a, r_bits = await self.gather(a, r_bits)
-        r_bits = [(r >> f).value for r in r_bits]
+        r_bits = [(r >> f if f else r).value for r in r_bits]
         r_modb = 0
         for r_i in reversed(r_bits):
             r_modb <<= 1

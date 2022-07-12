@@ -623,7 +623,7 @@ def _pfield(l, f, p, n):
     elif p.bit_length() <= l + f + k + 1:
         raise ValueError(f'Prime {p} too small.')
 
-    field = finfields.GF(p, f)
+    field = finfields.GF(p)
     assert runtime.threshold == 0 or len(runtime.parties) < field.order  # for Shamir secret sharing
     return field
 
