@@ -31,7 +31,7 @@ def GF(modulus):
 class FiniteFieldElement:
     """Abstract base class for finite field elements.
 
-    Invariant: attribute 'value' nonnegative and below modulus.
+    Invariant: 'value' is reduced w.r.t. modulus.
     """
 
     __slots__ = 'value'
@@ -45,7 +45,7 @@ class FiniteFieldElement:
     _mix_types: type  # or, a tuple of types
 
     def __init__(self, value):
-        self.value = value % self.modulus  # TODO: make this more direct for efficiency
+        self.value = value
 
     def __int__(self):
         """Extract field element as an integer value."""
@@ -338,6 +338,14 @@ class PrimeFieldElement(FiniteFieldElement):
     root = None
     _mix_types = int
 
+    def __init__(self, value):
+        if not isinstance(value, int):
+            raise TypeError(f'int required, got {type(value).__name__}')
+
+        # Directly call int.__mod__() for efficiency:
+        value = value.__mod__(self.modulus)
+        super().__init__(value)
+
     @staticmethod
     def createGF(p, n, w):
         """Create new object for use by pickle module."""
@@ -486,12 +494,14 @@ class ExtensionFieldElement(FiniteFieldElement):
 
     __slots__ = ()
 
+    modulus: gfpx.Polynomial
     _least_qnr = None
     _mix_types = (int, gfpx.Polynomial)
 
     def __init__(self, value):
-        if isinstance(value, str):
-            value = type(self.modulus)(value)  # to prevent % is used for string formatting
+        cls = type(self.modulus)
+        # Directly call gfpx.Polynomial._mod() for efficiency:
+        value = cls(cls._mod(cls(value).value, self.modulus.value), check=False)
         super().__init__(value)
 
     @staticmethod

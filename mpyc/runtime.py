@@ -1165,27 +1165,36 @@ class Runtime:
         stype = type(a)
         await self.returnType(stype)
         Zp = stype.field
-        l = stype.bit_length
-        k = self.options.sec_param
         f = stype.frac_length
 
+        l = stype.bit_length
+        k = self.options.sec_param
         r_bits = self.random._randbelow(stype, b, bits=True)
-        a, r_bits = await self.gather(a, r_bits)
+        r_bits = await self.gather(r_bits)
         r_bits = [(r >> f if f else r).value for r in r_bits]
         r_modb = 0
         for r_i in reversed(r_bits):
             r_modb <<= 1
             r_modb += r_i
-        r_modb = Zp(r_modb)
         r_divb = self._random(Zp, 1 << k).value
-        c = await self.output(a + ((1<<l) - ((1<<l) % b) + b * r_divb - r_modb.value))
+        a = await self.gather(a)
+        c = await self.output(a + ((1<<l) - ((1<<l) % b) + b * r_divb - r_modb))
         c = c.value % b
-        c_bits = [(c >> i) & 1 for i in range(len(r_bits))]
-        c_bits.append(0)
-        r_bits = [stype(r) for r in r_bits]
-        r_bits.append(stype(0))
-        z = stype(r_modb - (b - c)) >= 0  # TODO: avoid full comparison (use r_bits)
-        return self.from_bits(self.add_bits(r_bits, c_bits)) - z * b
+
+        # Secure comparison z <=> c + r_modb >= b <=> r_modb >= b - c:
+        l = len(r_bits)
+        s_sign = (await self.random_bits(Zp, 1, signed=True))[0].value
+        e = [None] * (l+1)
+        sumXors = 0
+        for i in range(l-1, -1, -1):
+            c_i = ((b - c) >> i) & 1
+            r_i = r_bits[i]
+            e[i] = Zp(s_sign + r_i - c_i + 3*sumXors)
+            sumXors += 1 - r_i if c_i else r_i
+        e[l] = Zp(s_sign + 1 + 3*sumXors)
+        g = await self.is_zero_public(stype(self.prod(e)))
+        z = Zp(1 - s_sign if g else 1 + s_sign)/2
+        return (c + r_modb - z * b)<<f
 
     @mpc_coro
     async def trailing_zeros(self, a, l=None):

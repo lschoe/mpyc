@@ -293,6 +293,7 @@ class Arithmetic(unittest.TestCase):
         f2p = self.f2p
         f256 = self.f256
         f19 = self.f19
+        self.assertRaises(TypeError, f19, 3.14)
         self.assertRaises(TypeError, operator.add, f2(1), f2p(2))
         self.assertRaises(TypeError, operator.iadd, f2(1), f2p(2))
         self.assertRaises(TypeError, operator.sub, f2(1), f256(2))
@@ -306,6 +307,7 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.ilshift, f2(1), f2(1))
         self.assertRaises(TypeError, operator.lshift, 1, f2(1))
         self.assertRaises(TypeError, operator.rshift, f19(1), f19(1))
+        self.assertRaises(TypeError, operator.rshift, 1, f19(1))
         self.assertRaises(TypeError, operator.irshift, f19(1), f19(1))
         self.assertRaises(TypeError, operator.irshift, f256(1), f256(1))
         self.assertRaises(TypeError, operator.pow, f2(1), f19(2))

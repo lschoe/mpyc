@@ -848,16 +848,17 @@ class BinaryPolynomial(Polynomial):
         if b == 0:
             raise ZeroDivisionError('division by zero polynomial')
 
-        m = BinaryPolynomial._deg(a)
-        n = BinaryPolynomial._deg(b)
+        m = a.bit_length()
+        n = b.bit_length()
         if m < n:
             return a
 
         b <<= m - n
-        for i in range(m - n + 1):
-            if (a >> m - i) & 1:
-                a ^= b
+        a ^= b
+        for i in range(m-2, n-2, -1):
             b >>= 1
+            if (a >> i) & 1:
+                a ^= b
         return a
 
     @staticmethod
@@ -865,19 +866,20 @@ class BinaryPolynomial(Polynomial):
         if b == 0:
             raise ZeroDivisionError('division by zero polynomial')
 
-        m = BinaryPolynomial._deg(a)
-        n = BinaryPolynomial._deg(b)
+        m = a.bit_length()
+        n = b.bit_length()
         if m < n:
             return 0, a
 
         b <<= m - n
-        q = 0
-        for i in range(m - n + 1):
-            q <<= 1
-            if (a >> m - i) & 1:
-                a ^= b
-                q ^= 1
+        q = 1
+        a ^= b
+        for i in range(m-2, n-2, -1):
             b >>= 1
+            q <<= 1
+            if (a >> i) & 1:
+                q ^= 1
+                a ^= b
         return q, a
 
     @staticmethod
