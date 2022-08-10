@@ -51,8 +51,7 @@ class Polynomial:
     def __init__(self, value=0, check=True):
         """Initialize polynomial to given value (zero polynomial, by default)."""
         if check:
-            cls = type(self)
-            value = cls._intern(value)
+            value = self._intern(value)
         self.value = value
 
     @classmethod
@@ -90,8 +89,7 @@ class Polynomial:
         return NotImplemented
 
     def __int__(self):
-        cls = type(self)
-        return cls._to_int(self.value)
+        return self._to_int(self.value)
 
     def __call__(self, x):
         """Evaluate polynomial at given x."""
@@ -107,8 +105,7 @@ class Polynomial:
     def to_bytes(self, length, byteorder):
         """Return a bytes object representing a polynomial."""
         # TODO: consider coefficient-wise serialization (via numpy arrays)
-        cls = type(self)
-        return cls._to_int(self.value).to_bytes(length, byteorder)
+        return self._to_int(self.value).to_bytes(length, byteorder)
 
     @classmethod
     def _from_int(cls, a):
@@ -433,8 +430,7 @@ class Polynomial:
 
     def degree(self):
         """Degree of polynomial (-1 for zero polynomial)."""
-        cls = type(self)
-        return cls._deg(self.value)
+        return self._deg(self.value)
 
     def __neg__(self):
         cls = type(self)
@@ -650,31 +646,27 @@ class Polynomial:
         return cls(cls._next_irreducible(a), check=False)
 
     def __repr__(self):
-        cls = type(self)
-        return cls._to_terms(self.value)
+        return self._to_terms(self.value)
 
     def __lt__(self, other):
         """Strictly less-than comparison."""
-        cls = type(self)
-        other = cls._coerce(other)
+        other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
 
-        return cls._to_int(self.value) <= cls._to_int(other)
+        return self._to_int(self.value) <= self._to_int(other)
 
     def __le__(self, other):
         """Less-than or equal comparison."""
-        cls = type(self)
-        other = cls._coerce(other)
+        other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
 
-        return cls._to_int(self.value) < cls._to_int(other)
+        return self._to_int(self.value) < self._to_int(other)
 
     def __eq__(self, other):
         """Equality test."""
-        cls = type(self)
-        other = cls._coerce(other)
+        other = self._coerce(other)
         if other is NotImplemented:
             return False
 
@@ -682,26 +674,23 @@ class Polynomial:
 
     def __ge__(self, other):
         """Greater-than or equal comparison."""
-        cls = type(self)
-        other = cls._coerce(other)
+        other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
 
-        return cls._to_int(self.value) >= cls._to_int(other)
+        return self._to_int(self.value) >= self._to_int(other)
 
     def __gt__(self, other):
         """Strictly greater-than comparison."""
-        cls = type(self)
-        other = cls._coerce(other)
+        other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
 
-        return cls._to_int(self.value) > cls._to_int(other)
+        return self._to_int(self.value) > self._to_int(other)
 
     def __ne__(self, other):
         """Negated equality test."""
-        cls = type(self)
-        other = cls._coerce(other)
+        other = self._coerce(other)
         if other is NotImplemented:
             return True
 

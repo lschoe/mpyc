@@ -2186,11 +2186,6 @@ def setup():
         print(f'Showing help message for {sys.argv[0]}, if available:')
         print()
     sys.argv = [sys.argv[0]] + args
-    if options.no_log:
-        logging.basicConfig(level=logging.WARNING)
-    else:
-        logging.basicConfig(format='{asctime} {message}', style='{',
-                            level=logging.INFO, stream=sys.stdout)
 
     env_no_gmpy2 = os.getenv('MPYC_NOGMPY') == '1'  # check if variable MPYC_NOGMPY is set
     if not importlib.util.find_spec('gmpy2'):
@@ -2306,6 +2301,7 @@ def setup():
 
 if os.getenv('READTHEDOCS') != 'True':
     try:
+        logging.debug('Run MPyC runtime.setup()')
         mpc = setup()
     except Exception as exc:
         # suppress exceptions for pydoc etc.

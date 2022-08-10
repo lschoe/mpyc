@@ -5,6 +5,7 @@ Efficient functions for factoring prime powers and rational reconstruction are a
 """
 
 import os
+import logging
 import math
 
 
@@ -82,10 +83,12 @@ try:
     if os.getenv('MPYC_NOGMPY') == '1':
         raise ImportError  # stubs will be loaded
 
-    from gmpy2 import (is_prime, next_prime, powmod, gcdext, invert,
+    from gmpy2 import (version, is_prime, next_prime, powmod, gcdext, invert,
                        legendre, jacobi, kronecker, is_square, isqrt, iroot)
+    logging.debug(f'Load gmpy2 version {version()}')
 except ImportError:
     # load stubs, if MPYC_NOGMPY is set, or if gmpy2 import fails
+    logging.debug(f'Load pure Python stubs for gmpy2')
     import random
 
     def is_prime(x, n=25):

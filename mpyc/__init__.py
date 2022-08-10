@@ -26,10 +26,13 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.8.5'
+__version__ = '0.8.6'
 __license__ = 'MIT License'
 
+import os
+import sys
 import argparse
+import logging
 
 
 def get_arg_parser():
@@ -63,6 +66,8 @@ def get_arg_parser():
                        help='default bit length l for secure numbers')
     group.add_argument('-K', '--sec-param', type=int, metavar='k',
                        help='security parameter k, leakage probability 2**-k')
+    group.add_argument('--log-level', type=str, metavar='ll',
+                       help='logging level ll=debug/info(default)/warning/error')
     group.add_argument('--no-log', action='store_true',
                        help='disable logging messages')
     group.add_argument('--no-async', action='store_true',
@@ -84,5 +89,23 @@ def get_arg_parser():
     group.add_argument('-f', type=str, default='',
                        help='consume IPython\'s -f argument F')
 
-    parser.set_defaults(bit_length=32, sec_param=30)
+    parser.set_defaults(bit_length=32, sec_param=30, log_level='info')
     return parser
+
+
+# Set logging level as early as possible.
+if os.getenv('READTHEDOCS') != 'True':
+    options, _ = get_arg_parser().parse_known_args()
+    if options.no_log:
+        logging.basicConfig(level=logging.WARNING)
+    else:
+        ch = options.log_level[0].upper()
+        ch = {'N': '0', 'D': '1', 'I': '2', 'W': '3', 'E': '4', 'C': '5'}.get(ch, ch)
+        ch = ch if '0' <= ch <= '5' else '0'  # default to '0'
+        level = int(ch)
+        level = (logging.NOTSET, logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR,
+                 logging.CRITICAL)[level]
+        logging.basicConfig(format='{asctime} {message}', style='{', level=level, stream=sys.stdout)
+        logging.debug(f'Set logging level to {level}: {logging.getLevelName(level)}')
+        del ch, level
+    del options
