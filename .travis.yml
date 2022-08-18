@@ -1,10 +1,10 @@
-dist: focal
+dist: jammy
 language: python
 python:
     - 3.8
     - 3.9
     - 3.10
     - pypy3.8-7.3.9
-install: pip install codecov numpy
+install: pip install coverage==6.4.2 codecov numpy
 script: coverage run --source mpyc -m unittest discover tests
 after_success: codecov
