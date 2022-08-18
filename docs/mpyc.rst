@@ -10,6 +10,12 @@ mpyc.gmpy
 .. automodule:: mpyc.gmpy
     :members:
 
+mpyc.numpy
+----------
+
+.. automodule:: mpyc.numpy
+    :members:
+
 mpyc.gfpx
 ---------
 

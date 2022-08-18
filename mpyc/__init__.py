@@ -26,7 +26,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.8.6'
+__version__ = '0.8.7'
 __license__ = 'MIT License'
 
 import os
@@ -76,6 +76,8 @@ def get_arg_parser():
                        help='disable barriers')
     group.add_argument('--no-gmpy2', action='store_true',
                        help='disable use of gmpy2 package')
+    group.add_argument('--no-numpy', action='store_true',
+                       help='disable use of numpy package')
     group.add_argument('--no-prss', action='store_true',
                        help='disable use of PRSS (pseudorandom secret sharing)')
     group.add_argument('--mix32-64bit', action='store_true',
@@ -95,7 +97,7 @@ def get_arg_parser():
 
 # Set logging level as early as possible.
 if os.getenv('READTHEDOCS') != 'True':
-    options, _ = get_arg_parser().parse_known_args()
+    options = get_arg_parser().parse_known_args()[0]
     if options.no_log:
         logging.basicConfig(level=logging.WARNING)
     else:
@@ -105,6 +107,9 @@ if os.getenv('READTHEDOCS') != 'True':
         level = int(ch)
         level = (logging.NOTSET, logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR,
                  logging.CRITICAL)[level]
+        if sys.flags.dev_mode:
+            # Switch to debug mode, just like asyncio does in development mode.
+            level = logging.DEBUG
         logging.basicConfig(format='{asctime} {message}', style='{', level=level, stream=sys.stdout)
         logging.debug(f'Set logging level to {level}: {logging.getLevelName(level)}')
         del ch, level

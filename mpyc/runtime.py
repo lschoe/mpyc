@@ -2187,6 +2187,20 @@ def setup():
         print()
     sys.argv = [sys.argv[0]] + args
 
+    env_no_numpy = os.getenv('MPYC_NONUMPY') == '1'  # check if variable MPYC_NONUMPY is set
+    if not importlib.util.find_spec('numpy'):
+        # numpy package not available
+        if not (options.no_numpy or env_no_numpy):
+            logging.info('Install package numpy for more functionality.')
+    else:
+        # numpy package available
+        if options.no_numpy or env_no_numpy:
+            logging.info('Use of package numpy disabled.')
+            if not env_no_numpy:
+                os.environ['MPYC_NONUMPY'] = '1'  # NB: MPYC_NONUMPY also set for subprocesses
+                from importlib import reload
+                reload(mpyc.numpy)  # sets mpyc.numpy.np=None etc.
+
     env_no_gmpy2 = os.getenv('MPYC_NOGMPY') == '1'  # check if variable MPYC_NOGMPY is set
     if not importlib.util.find_spec('gmpy2'):
         # gmpy2 package not available
