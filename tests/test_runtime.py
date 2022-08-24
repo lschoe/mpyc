@@ -501,6 +501,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.gcd(secint(0), secint(0)))), 0)
         self.assertEqual(mpc.run(mpc.output(mpc.gcd(secint(0), secint(3), l=3))), 3)
         self.assertEqual(mpc.run(mpc.output(mpc.gcd(secint(-33), secint(30)))), 3)
+        self.assertEqual(mpc.run(mpc.output(mpc.gcd(secint(-2**15), secint(1)))), 1)
         self.assertEqual(mpc.run(mpc.output(mpc.lcm(secint(0), secint(0)))), 0)
         self.assertEqual(mpc.run(mpc.output(mpc.lcm(secint(-33), secint(0)))), 0)
         self.assertEqual(mpc.run(mpc.output(mpc.lcm(secint(-66), secint(30)))), 330)

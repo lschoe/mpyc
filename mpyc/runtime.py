@@ -392,10 +392,10 @@ class Runtime:
     async def _distribute(self, x, senders):
         """Distribute shares for each x provided by a sender."""
         stype = type(x[0])  # all elts assumed of same type
-        field = getattr(stype, 'field', None)  # TODO: avoid this use of 'field' attr
-        if not field:
+        if hasattr(stype, '_input'):
             return stype._input(x, senders)
 
+        field = stype.field
         if not stype.frac_length:
             await self.returnType(stype, len(senders), len(x))
         else:
@@ -452,23 +452,24 @@ class Runtime:
         receivers = [receivers] if isinstance(receivers, int) else list(receivers)
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, self.SecureObject):
-            field = getattr(sftype, 'field', None)  # TODO: avoid this use of 'field' attr
-            if not field:
+            if hasattr(sftype, '_output'):
                 y = await sftype._output(x, receivers, threshold)
                 if not x_is_list:
                     y = y[0]
                 return y
 
             x = await self.gather(x)
+            field = type(x[0])
         else:
             field = sftype
         x = [a.value for a in x]
-        if t:
-            share = field.to_bytes(x)
 
-        # Send share to all successors in receivers.
+        # Send share x to all successors in receivers.
+        share = None
         for peer_pid in receivers:
             if 0 < (peer_pid - self.pid) % m <= t:
+                if share is None:
+                    share = field.to_bytes(x)
                 self._send_message(peer_pid, share)
         # Receive and recombine shares if this party is a receiver.
         if self.pid in receivers:
@@ -518,9 +519,6 @@ class Runtime:
         out_shares = await self.gather(self._exchange_shares(in_shares)[:2*t+1])
         points = [(j+1, field.from_bytes(s)) for j, s in enumerate(out_shares)]
         y = thresha.recombine(field, points)
-
-        if issubclass(sftype, self.SecureObject):
-            y = [sftype(s) for s in y]
         if not x_is_list:
             y = y[0]
         return y
@@ -1285,8 +1283,8 @@ class Runtime:
             l = secint.bit_length
         delta, f, v, g, r = secint(1), a, secint(0), b, secint(1)
         for i in range(self._iterations(l)):
-            delta_gt0 = 1 - self.sgn(delta-1, l=min(i, l-1).bit_length()+1, LT=True)
-            # delta_gt0 <=> delta > 0, using that |delta-1| <= i and delta <= l (for g!=0)
+            delta_gt0 = 1 - self.sgn((delta-1-(i%2))/2, l=min(i, l).bit_length(), LT=True)
+            # delta_gt0 <=> delta > 0, using |delta-1|<=min(i,l) and delta-1=i (mod 2) (for g!=0)
             g_0 = g%2
             delta, f, v, g, r = (delta_gt0 * g_0).if_else([-delta, g, r, -f, -v],
                                                           [delta, f, v, g, r])
