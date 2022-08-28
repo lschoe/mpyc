@@ -1027,7 +1027,7 @@ def EllipticCurve(curvename='Ed25519', coordinates=None):
         - 'BN256': Barreto-Naehrig curve, https://eprint.iacr.org/2010/186
         - 'BN256_twist': sextic twist of Barreto-Naehrig curve
 
-    Both curves can be used with 'affine' (default) and 'projective' coordinates.
+    These curves can be used with 'affine' (default) and 'projective' coordinates.
     The Edwards curves can also be used with 'extended' coordinates, and the
     Weierstrass curves with 'jacobian' coordinates.
     """

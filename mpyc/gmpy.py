@@ -88,7 +88,7 @@ try:
     logging.debug(f'Load gmpy2 version {version()}')
 except ImportError:
     # load stubs, if MPYC_NOGMPY is set, or if gmpy2 import fails
-    logging.debug(f'Load pure Python stubs for gmpy2')
+    logging.debug('Load pure Python stubs for gmpy2')
     import random
 
     def mpz(x):

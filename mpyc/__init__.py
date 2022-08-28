@@ -33,6 +33,7 @@ import os
 import sys
 import argparse
 import logging
+import importlib.util
 
 
 def get_arg_parser():
@@ -95,9 +96,9 @@ def get_arg_parser():
     return parser
 
 
-# Set logging level as early as possible.
 if os.getenv('READTHEDOCS') != 'True':
     options = get_arg_parser().parse_known_args()[0]
+    # Set logging level as early as possible.
     if options.no_log:
         logging.basicConfig(level=logging.WARNING)
     else:
@@ -113,4 +114,31 @@ if os.getenv('READTHEDOCS') != 'True':
         logging.basicConfig(format='{asctime} {message}', style='{', level=level, stream=sys.stdout)
         logging.debug(f'Set logging level to {level}: {logging.getLevelName(level)}')
         del ch, level
-    del options
+
+    # Ensure numpy will not be loaded by mpyc.numpy, if demanded (saving resources).
+    env_no_numpy = os.getenv('MPYC_NONUMPY') == '1'  # check if variable MPYC_NONUMPY is set
+    if not importlib.util.find_spec('numpy'):
+        # numpy package not available
+        if not (options.no_numpy or env_no_numpy):
+            logging.info('Install package numpy for more functionality.')
+    else:
+        # numpy package available
+        if options.no_numpy or env_no_numpy:
+            logging.info('Use of package numpy inside MPyC disabled.')
+            if not env_no_numpy:
+                os.environ['MPYC_NONUMPY'] = '1'  # NB: MPYC_NONUMPY also set for subprocesses
+
+    # Ensure gmpy2 will not be loaded by mpyc.gmpy, if demanded (using stubs instead).
+    env_no_gmpy2 = os.getenv('MPYC_NOGMPY') == '1'  # check if variable MPYC_NOGMPY is set
+    if not importlib.util.find_spec('gmpy2'):
+        # gmpy2 package not available
+        if not (options.no_gmpy2 or env_no_gmpy2):
+            logging.info('Install package gmpy2 for better performance.')
+    else:
+        # gmpy2 package available
+        if options.no_gmpy2 or env_no_gmpy2:
+            logging.info('Use of package gmpy2 inside MPyC disabled.')
+            if not env_no_gmpy2:
+                os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
+
+    del options, env_no_numpy, env_no_gmpy2

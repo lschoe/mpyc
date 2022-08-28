@@ -512,6 +512,11 @@ class Runtime:
             field = sftype
 
         t = self.threshold
+        if t == 0:
+            if not x_is_list:
+                x = x[0]
+            return x
+
         m = len(self.parties)
         in_shares = thresha.random_split(x, t, m)
         in_shares = [field.to_bytes(elts) for elts in in_shares]
@@ -1244,8 +1249,8 @@ class Runtime:
         # f is odd (or f=g=0), use stripped version of _divsteps(f, g, l) below
         delta = secint(1)
         for i in range(self._iterations(l)):
-            delta_gt0 = 1 - self.sgn(delta-1, l=min(i, l-1).bit_length()+1, LT=True)
-            # delta_gt0 <=> delta > 0, using that |delta-1| <= i and delta <= l (for g!=0)
+            delta_gt0 = 1 - self.sgn((delta-1-(i%2))/2, l=min(i, l).bit_length(), LT=True)
+            # delta_gt0 <=> delta > 0, using |delta-1|<=min(i,l) and delta-1=i (mod 2) (for g!=0)
             g_0 = g%2
             delta, f, g = (delta_gt0 * g_0).if_else([-delta, g, -f], [delta, f, g])
             delta, g = delta+1, (g + g_0 * f)/2
@@ -2184,34 +2189,6 @@ def setup():
         print(f'Showing help message for {sys.argv[0]}, if available:')
         print()
     sys.argv = [sys.argv[0]] + args
-
-    env_no_numpy = os.getenv('MPYC_NONUMPY') == '1'  # check if variable MPYC_NONUMPY is set
-    if not importlib.util.find_spec('numpy'):
-        # numpy package not available
-        if not (options.no_numpy or env_no_numpy):
-            logging.info('Install package numpy for more functionality.')
-    else:
-        # numpy package available
-        if options.no_numpy or env_no_numpy:
-            logging.info('Use of package numpy disabled.')
-            if not env_no_numpy:
-                os.environ['MPYC_NONUMPY'] = '1'  # NB: MPYC_NONUMPY also set for subprocesses
-                from importlib import reload
-                reload(mpyc.numpy)  # sets mpyc.numpy.np=None etc.
-
-    env_no_gmpy2 = os.getenv('MPYC_NOGMPY') == '1'  # check if variable MPYC_NOGMPY is set
-    if not importlib.util.find_spec('gmpy2'):
-        # gmpy2 package not available
-        if not (options.no_gmpy2 or env_no_gmpy2):
-            logging.info('Install package gmpy2 for better performance.')
-    else:
-        # gmpy2 package available
-        if options.no_gmpy2 or env_no_gmpy2:
-            logging.info('Use of package gmpy2 disabled.')
-            if not env_no_gmpy2:
-                os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
-                from importlib import reload
-                reload(mpyc.gmpy)  # stubs will be loaded this time
 
     env_mix32_64bit = os.getenv('MPYC_MIX32_64BIT') == '1'  # check if MPYC_MIX32_64BIT is set
     if options.mix32_64bit or env_mix32_64bit:

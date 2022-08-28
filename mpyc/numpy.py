@@ -124,10 +124,10 @@ def _item_shape(shape, key):
         shape_item.extend(shape[i:])
         return tuple(shape_item)
 
-    except Exception as e:
+    except Exception as e:  # IndexError, ValueError, or other
         logging.debug(f'Exception "{e}" in mpyc.numpy._item_shape for {shape=} {key=}')
         # Let Numpy generate error message by calling a[key] for dummy array a of given shape:
-        np.empty(shape)[key]
+        return np.empty(shape)[key]
 
 
 try:
@@ -135,7 +135,25 @@ try:
         raise ImportError
 
     import numpy as np
+    logging.debug(f'Load NumPy version {np.__version__}')
     np._item_shape = _item_shape
+
+    if np.lib.NumpyVersion(np.__version__) < '1.23.0':
+        def _fromiter(iterable, dtype, **kwargs):
+            if dtype != object:
+                return np.fromiter(iterable, dtype, **kwargs)
+            # No dtype=object for np.fromiter(), workaournd via np.array():
+            return np.array(list(iterable), dtype=object)
+
+        np.fromiter = _fromiter
+
+    if np.lib.NumpyVersion(np.__version__) < '1.22.0':
+        # No is_integer() for np.float32, workaround via float():
+        _is_integer = lambda a: float(a).is_integer()
+    else:
+        _is_integer = lambda a: a.is_integer()
+    np.is_integral = _is_integer
+
 except ImportError:
     del _item_shape
     np = None
