@@ -66,13 +66,13 @@ class MessageExchanger(Protocol):
         """Send payload labeled with pc to the peer.
 
         Message format consists of three parts:
-         1. pc (8 bytes signed int)
-         2. payload_size (4 bytes unsigned int)
+         1. payload_size (4 bytes unsigned int)
+         2. pc (8 bytes signed int)
          3. payload (byte string of length payload_size).
         """
         payload_size = len(payload)
-        fmt = f'<qI{payload_size}s'
-        self.transport.write(struct.pack(fmt, pc, payload_size, payload))
+        fmt = f'<Iq{payload_size}s'
+        self.transport.write(struct.pack(fmt, payload_size, pc, payload))
 
     def data_received(self, data):
         """Called when data is received from the peer.
@@ -112,15 +112,15 @@ class MessageExchanger(Protocol):
             self._key_transport_done()
 
         while self.bytes:
-            if len(self.bytes) < 12:
+            if len(self.bytes) < 4:
                 return
 
-            pc, payload_size = struct.unpack_from('<qI', self.bytes)
+            payload_size = struct.unpack_from('<I', self.bytes)[0]
             len_packet = payload_size + 12
             if len(self.bytes) < len_packet:
                 return
 
-            payload = struct.unpack_from(f'<{payload_size}s', self.bytes, 12)[0]
+            pc, payload = struct.unpack_from(f'<q{payload_size}s', self.bytes, 4)
             del self.bytes[:len_packet]
             if pc in self.buffers:
                 self.buffers.pop(pc).set_result(payload)
