@@ -305,7 +305,7 @@ def find_prime_root(l, blum=True, n=1):
         a = 2
         while (w := gmpy2.powmod(a, (p-1) // n, p)) == 1:
             a += 1
-        p, w = int(p), int(w)
+        p, n, w = int(p), int(n), int(w)
     return p, n, w
 
 

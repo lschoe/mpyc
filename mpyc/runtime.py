@@ -748,7 +748,7 @@ class Runtime:
         if shb:
             c = self._reshare(c)
         if f and not (a_integral or b_integral):
-            c = self.trunc(stype(c))  # TODO: compare to approach in in_prod
+            c = self.trunc(stype(c))
         return c
 
     def div(self, a, b):
@@ -1390,15 +1390,12 @@ class Runtime:
             y = await self.gather(y)
         s = sum(a.value * b.value for a, b in zip(x, y))
         s = stype.field(s)
-        if f:
-            if x_integral or y_integral:
-                s >>= f
-            else:
-                s = stype(s)
+        if f and (x_integral or y_integral):
+            s >>= f
         if shx and shy:
             s = self._reshare(s)
-        if f and not x_integral and not y_integral:
-            s = self.trunc(s)  # TODO: compare to approach in mul
+        if f and not (x_integral or y_integral):
+            s = self.trunc(stype(s))
         return s
 
     @mpc_coro

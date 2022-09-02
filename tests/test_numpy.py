@@ -4,10 +4,8 @@ from mpyc.numpy import np
 
 class Arithmetic(unittest.TestCase):
 
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_item_shape(self):
-        if not np:
-            return
-
         for shape in ((), (1,), (2,), (1, 1), (1, 2), (2, 1), (2, 2)):
             a = np.empty(shape)
             for key in ((0,) * a.ndim,
