@@ -9,34 +9,37 @@ PRSS relies on parties having agreed upon the keys for a pseudorandom
 function (PRF).
 """
 
-__all__ = ['random_split', 'recombine', 'pseudorandom_share',
-           'pseudorandom_share_zero', 'PRF']
+__all__ = ['random_split', 'recombine', 'pseudorandom_share', 'pseudorandom_share_zero',
+           'np_pseudorandom_share', 'np_pseudorandom_share_0', 'PRF']
 
+from math import prod
 import functools
 import hashlib
 import secrets
+from mpyc.numpy import np
 
 
-def random_split(s, t, m):
+def random_split(field, s, t, m):
     """Split each secret given in s into m random Shamir shares.
 
-    The (maximum) degree for the Shamir polynomials is t, 0 <= t < n.
+    The (maximum) degree for the Shamir polynomials is t, 0 <= t < m.
     Return matrix of shares, one row per party.
     """
-    field = type(s[0])
     p = field.modulus
     order = field.order
     _0 = type(p)(0)  # _0 is int(0) or gfpx.Polynomial(0)
-    n = len(s)
-    shares = [[None] * n for _ in range(m)]
-    for h in range(n):
+    shares = [[None] * len(s) for _ in range(m)]
+    T_is_field = isinstance(s[0], field)  # all elts assumed of same type
+    for h, s_h in enumerate(s):
+        if T_is_field:
+            s_h = s_h.value
         c = [secrets.randbelow(order) for _ in range(t)]
         # polynomial f(X) = s[h] + c[t-1] X + c[t-2] X^2 + ... + c[0] X^t
         for i1 in range(1, m+1):
             y = _0
             for c_j in c:
                 y = (y + c_j) * i1
-            shares[i1-1][h] = (y + s[h].value) % p
+            shares[i1-1][h] = (y + s_h) % p
     return shares
 
 
@@ -69,11 +72,12 @@ def recombine(field, points, x_rs=0):
     xs, shares = list(zip(*points))
     if not isinstance(x_rs, list):
         x_rs = (x_rs,)
-    n = len(shares[0])
     width = len(x_rs)
-    T_is_field = isinstance(shares[0][0], field)  # all elts assumed of same type
     vector = [_recombination_vector(field, xs, x_r) for x_r in x_rs]
+
+    n = len(shares[0])
     sums = [[0] * n for _ in range(width)]
+    T_is_field = isinstance(shares[0][0], field)  # all elts assumed of same type
     for i, share_i in enumerate(shares):
         for h in range(n):
             s = share_i[h]
@@ -82,12 +86,12 @@ def recombine(field, points, x_rs=0):
             # type(s) is int or gfpx.Polynomial
             for r in range(width):
                 sums[r][h] += s * vector[r][i]
-    for r in range(width):
-        for h in range(n):
-            sums[r][h] = field(sums[r][h])
+    if T_is_field:
+        for r in range(width):
+            for h in range(n):
+                sums[r][h] = field(sums[r][h])
     if isinstance(x_rs, tuple):
-        return sums[0]
-
+        sums = sums[0]
     return sums
 
 
@@ -97,7 +101,7 @@ def _f_S_i(field, m, i, S):
 
     Polynomial f_S is 1 at 0 and 0 for all parties j outside S."""
     points = [(0, [1])] + [(x+1, [0]) for x in range(m) if x not in S]
-    return recombine(field, points, i+1)[0].value
+    return recombine(field, points, i+1)[0]
 
 
 def pseudorandom_share(field, m, i, prfs, uci, n):
@@ -117,6 +121,19 @@ def pseudorandom_share(field, m, i, prfs, uci, n):
     for h in range(n):
         sums[h] = field(sums[h])
     return sums
+
+
+def np_pseudorandom_share(field, m, i, prfs, uci, n):
+    """Return pseudorandom Shamir shares for party i for n random numbers.
+
+    The shares are based on the pseudorandom functions for party i,
+    given in prfs, which maps subsets of parties to PRF instances.
+    Input uci is used to evaluate the PRFs on a unique common input.
+    """
+    # sum over (m-1 choose t) subsets for degree t.
+    s = sum(prf_S(uci, (n,)) * _f_S_i(field, m, i, S)
+            for S, prf_S in prfs.items())
+    return field.array(s)
 
 
 def pseudorandom_share_zero(field, m, i, prfs, uci, n):
@@ -144,6 +161,25 @@ def pseudorandom_share_zero(field, m, i, prfs, uci, n):
     return sums
 
 
+def np_pseudorandom_share_0(field, m, i, prfs, uci, n):
+    """Return pseudorandom Shamir shares for party i for n sharings of 0.
+
+    The shares are based on the pseudorandom functions for party i,
+    given in prfs, which maps subsets of parties to PRF instances.
+    Input uci is used to evaluate the PRFs on a unique common input.
+    """
+    vtype = type(field.modulus)  # int or gfpx.Polynomial
+    d = m - len(next(iter(prfs.keys())))  # subsets all of same size m-t
+    i1s = np.array([vtype(i+1)**j for j in range(1, d+1)], dtype='O')
+    sums = vtype(0)
+    # iterate over (m-1 choose t) subsets for degree t.
+    for S, prf_S in prfs.items():
+        f_S_i = _f_S_i(field, m, i, S)
+        prl = prf_S(uci, (n, d))
+        sums += (prl @ i1s) * f_S_i
+    return field.array(sums)
+
+
 class PRF:
     """A pseudorandom function (PRF).
 
@@ -163,18 +199,31 @@ class PRF:
             self.byte_length += len(self.key)
 
     def __call__(self, s, n=None):
-        """Return a number or length-n list of numbers in range(self.max) for input bytes s."""
-        if n == 0:
-            return []
+        """Return pseudorandom number(s) in range(self.max) for given input bytes s.
 
+        The numbers are a deterministic function of self.key and input s.
+        If n is None, a single number is returned.
+        If n is a (nonnegative) integer, a length-n list is returned.
+        If n is a shape, a shape-n array is returned.
+        """
+        if isinstance(n, tuple):
+            shape = n
+            n = prod(shape)
+        else:
+            shape = None
         n_ = 1 if n is None else n
-        l = self.byte_length
-        if not l:
-            x = [0] * n_
+        if n_ == 0:
+            iterable = ()
+        elif not (l := self.byte_length):
+            iterable = (0 for _ in range(n_))
         else:
             dk = hashlib.pbkdf2_hmac('sha1', self.key, s, 1, n_ * l)
             byteorder = 'little'
             from_bytes = int.from_bytes  # cache
             bound = self.max
-            x = [from_bytes(dk[i:i + l], byteorder) % bound for i in range(0, n_ * l, l)]
+            iterable = (from_bytes(dk[i:i + l], byteorder) % bound for i in range(0, n_ * l, l))
+        if shape is None:
+            x = list(iterable)
+        else:
+            x = np.fromiter(iterable, object, count=n_).reshape(shape)
         return x[0] if n is None else x

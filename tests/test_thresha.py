@@ -17,7 +17,7 @@ class Arithmetic(unittest.TestCase):
             t = 0
             m = 1
             a = [field(0), field(1)]
-            shares = thresha.random_split(a, t, m)
+            shares = thresha.random_split(field, a, t, m)
             b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
             self.assertEqual(a, b)
             b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))], [0])[0]
@@ -28,14 +28,14 @@ class Arithmetic(unittest.TestCase):
                 m = 2 * t + 1
                 for i in range(t):
                     a = [field(i), field(i+1), field(i**2), field((i+1)**2)]
-                    shares = thresha.random_split(a, t, m)
+                    shares = thresha.random_split(field, a, t, m)
                     b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
                     self.assertEqual(a, b)
             m = 17
             for t in range((m + 1) // 2):
                 for i in range(t):
                     a = [field(i), field(i+1), field(i**2), field((i+1)**2)]
-                    shares = thresha.random_split(a, t, m)
+                    shares = thresha.random_split(field, a, t, m)
                     b = thresha.recombine(field, [(j + 1, shares[j]) for j in range(len(shares))])
                     self.assertEqual(a, b)
 

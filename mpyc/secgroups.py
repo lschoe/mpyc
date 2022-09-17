@@ -4,7 +4,6 @@ Secure versions of all groups supported by the module mpyc.fingroups are availab
 symmetric groups, quadratic residues, elliptic curve groups, and class groups.
 """
 
-import operator
 import itertools
 import functools
 import inspect

@@ -7,12 +7,18 @@ ensures that operators such as +,*,>= are defined by operator overloading.
 import math
 import functools
 from asyncio import Future
+from mpyc.numpy import np
 from mpyc import gmpy as gmpy2
 from mpyc import gfpx
 from mpyc import finfields
 from mpyc import fingroups
 
 runtime = None
+
+
+if np:
+    import operator
+    from numpy.core import umath as um
 
 
 class SecureObject:
@@ -62,6 +68,59 @@ class SecureObject:
         """Use of secret-shared objects in Boolean expressions makes no sense."""
         raise TypeError('cannot use secure type in Boolean expressions')
 
+    if np:
+        binary_ops = {um.less: operator.lt, um.less_equal: operator.le,
+                      um.equal: operator.eq, um.not_equal: operator.ne,
+                      um.greater: operator.gt, um.greater_equal: operator.ge,
+                      um.add: operator.add, um.subtract: operator.sub,
+                      um.multiply: operator.mul, um.divide: operator.truediv,
+                      um.floor_divide: operator.floordiv, um.remainder: operator.mod,
+                      um.divmod: divmod, um.power: operator.pow,
+                      um.left_shift: operator.lshift, um.right_shift: operator.rshift}
+        # um.bitwise_and: operator.and_, um.bitwise_xor, operator.xor, um.bitwise_or, operator.or_}
+        unary_ops = {um.negative: operator.neg, um.positive: operator.pos,
+                     um.absolute: operator.abs}
+        # um.invert, operator.invert}
+
+        def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+            """Delegate __array_ufunc__ call to corresponding operator call.
+
+            Provisional support for calls like np.less(secint(9), 10).
+            """
+            # TODO: handle method and kwargs
+            # TODO: handle np.arrays in inputs
+            inputs = list(inputs)
+            for i in range(len(inputs)):  # NB: also supports things like secint(7) + np.int32(4)
+                if isinstance(inputs[i], np.integer):
+                    inputs[i] = int(inputs[i])
+                elif isinstance(inputs[i], np.floating):
+                    inputs[i] = float(inputs[i])
+            if op := SecureObject.binary_ops.get(ufunc):
+                if isinstance(inputs[0], SecureObject):
+                    return op(inputs[0], inputs[1])
+
+                if op == operator.sub:
+                    return inputs[1].__rsub__(inputs[0])
+
+                return op(inputs[1], inputs[0])
+
+            if op := SecureObject.unary_ops.get(ufunc):
+                return op(inputs[0])
+
+            try:
+                func = eval(f'runtime.np_{ufunc.__name__}')
+            except AttributeError:
+                raise TypeError(f'np.{ufunc.__name__} not supported for {type(self).__name__}')
+
+            return func(*inputs, **kwargs)
+
+        def __array_function__(self, func, types, args, kwargs):
+            """Redirect __array_function__ call to array class, if any.
+
+            To support calls like np.block([[secint(9), -1], [1, secint(7)]]).
+            """
+            return self.array.__array_function__(self, func, types, args, kwargs)
+
 
 class SecureNumber(SecureObject):
     """Base class for secure (secret-shared) numbers."""
@@ -85,11 +144,10 @@ class SecureNumber(SecureObject):
 
         elif isinstance(other, int):
             other = type(self)(other)
-        elif isinstance(other, float):
-            if isinstance(self, SecureFixedPoint):
-                other = type(self)(other)
-            else:
-                return NotImplemented
+        elif isinstance(other, type(self).field):
+            other = type(self)(other)
+        else:
+            return NotImplemented
 
         return other
 
@@ -100,12 +158,11 @@ class SecureNumber(SecureObject):
 
         elif isinstance(other, int):
             pass
-        elif isinstance(other, float):
-            if isinstance(self, SecureFixedPoint):
-                if other.is_integer():
-                    other = round(other)
-            else:
-                return NotImplemented
+        elif isinstance(other, type(self).field):
+            # TODO: reconsider need for this case (see seclists._norm())
+            pass
+        else:
+            return NotImplemented
 
         return other
 
@@ -523,6 +580,20 @@ class SecureFixedPoint(SecureNumber):
         self.integral = integral
         super().__init__(value)
 
+    def _coerce(self, other):
+        if isinstance(other, float):
+            return type(self)(other)
+
+        return super()._coerce(other)
+
+    def _coerce2(self, other):
+        if isinstance(other, float):
+            if other.is_integer():
+                other = round(other)
+            return other
+
+        return super()._coerce2(other)
+
 
 def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, signed=False):
     """Secure finite field of order q = p**d.
@@ -613,6 +684,12 @@ def _SecFld(field):
         secfld._output_conversion = out_conv
     secfld.bit_length = l
     globals()[name] = secfld  # TODO: check name dynamic SecureFiniteField type sufficiently unique
+
+    name = f'Array{secfld.__name__}'
+    secarray = type(name, (SecureFiniteFieldArray,), {'__slots__': ()})
+    secarray.sectype = secfld
+    globals()[name] = secarray  # TODO: check name dynamic type sufficiently unique
+    secfld.array = secarray
     return secfld
 
 
@@ -643,6 +720,12 @@ def _SecInt(l, p, n):
     secint.field = _pfield(l, 0, p, n)
     secint.bit_length = l
     globals()[name] = secint  # NB: exploit (almost) unique name dynamic SecureInteger type
+
+    name = f'Array{secint.__name__}'
+    secarray = type(name, (SecureIntegerArray,), {'__slots__': ()})
+    secarray.sectype = secint
+    globals()[name] = secarray  # TODO: check name dynamic type sufficiently unique
+    secint.array = secarray
     return secint
 
 
@@ -667,6 +750,13 @@ def _SecFxp(l, f, p, n):
     secfxp.bit_length = l
     secfxp.frac_length = f
     globals()[name] = secfxp  # NB: exploit (almost) unique name dynamic SecureFixedPoint type
+
+    name = f'Array{secfxp.__name__}'
+    secarray = type(name, (SecureFixedPointArray,), {'__slots__': ()})
+    secarray.frac_length = f  # TODO: consider use of secfxp.frac_length instead
+    secarray.sectype = secfxp
+    globals()[name] = secarray  # TODO: check name dynamic type sufficiently unique
+    secfxp.array = secarray
     return secfxp
 
 
@@ -914,3 +1004,375 @@ def _SecFlt(s, e):
     secflt.exponent_type = SecInt(e)
     globals()[name] = secflt  # NB: exploit (almost) unique name dynamic SecureFloat type
     return secflt
+
+
+class SecureArray(SecureObject):
+    """Base class for secure (secret-shared) number arrays."""
+
+    __slots__ = 'shape'
+
+    sectype: type
+
+    def __init__(self, value=None, shape=None):
+        """Initialize a secure array.
+
+        The given value must be None, a Future, or a finite field array of correct type.
+        If value is None (default) or a Future, shape must not be None.
+
+        The given shape must be a (possibly empty) tuple of nonnegative integers.
+        If shape is None (default), value should be a finite field array.
+        """
+        if isinstance(value, Future):
+            pass
+        elif value is not None:
+            shape = value.value.shape
+        assert shape is not None
+        self.shape = shape
+        super().__init__(value)
+
+    def __array_function__(self, func, types, args, kwargs):
+        # minimal redirect for now
+        return eval(f'runtime.np_{func.__name__}')(*args, **kwargs)
+
+    @property
+    def ndim(self):
+        return len(self.shape)
+
+    @property
+    def size(self):
+        return math.prod(self.shape)
+
+    def _coerce(self, other):
+        if isinstance(other, SecureArray):
+            if not isinstance(other, type(self)):
+                return NotImplemented
+
+        elif isinstance(other, SecureObject):
+            if not isinstance(other, type(self).sectype):
+                return NotImplemented
+
+        elif isinstance(other, int):
+            other = type(self)(np.array(other))
+        elif isinstance(other, np.ndarray):
+            other = type(self)(other)
+        elif isinstance(other, type(self).sectype.field.array):
+            other = type(self)(other)
+        elif isinstance(other, type(self).sectype.field):
+            other = type(self).sectype(other)
+        else:
+            return NotImplemented
+
+        return other
+
+    def _coerce2(self, other):
+        if isinstance(other, SecureArray):
+            if not isinstance(other, type(self)):
+                return NotImplemented
+
+        elif isinstance(other, SecureObject):
+            if not isinstance(other, type(self).sectype):
+                return NotImplemented
+
+        elif isinstance(other, int):
+            pass
+        elif isinstance(other, np.ndarray):
+            pass
+        elif isinstance(other, type(self).sectype.field.array):
+            pass
+        elif isinstance(other, type(self).sectype.field):
+            pass
+        else:
+            return NotImplemented
+
+        return other
+
+    def __neg__(self):
+        """Matrix negation."""
+        return runtime.np_neg(self)
+
+    def __add__(self, other):
+        """Matrix addition."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return runtime.np_add(self, other)
+
+    __radd__ = __add__
+
+    def __sub__(self, other):
+        """Matrix subtraction."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return runtime.np_subtract(self, other)
+
+    def __rsub__(self, other):
+        """Matrix subtraction."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return runtime.np_subtract(other, self)
+
+    def __mul__(self, other):
+        """Multiplication."""
+        other = self._coerce2(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return runtime.np_multiply(self, other)
+
+    __rmul__ = __mul__
+
+    def __truediv__(self, other):
+        """Division."""
+        other = self._coerce2(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return runtime.np_divide(self, other)
+
+    def __rtruediv__(self, other):
+        """Division (with reflected arguments)."""
+        other = self._coerce2(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return runtime.np_divide(other, self)
+
+    def __matmul__(self, other):
+        """Matrix multiplication."""
+        return runtime.np_matmul(self, other)
+
+    def __rmatmul__(self, other):
+        """Matrix multiplication (with reflected arguments)."""
+        return runtime.np_matmul(other, self)
+
+    def __lt__(self, other):
+        """Strictly less-than comparison."""
+        # self < other
+        return runtime.np_less(self, other)
+
+    def __le__(self, other):
+        """Less-than or equal comparison."""
+        # self <= other <=> not (other < self)
+        return 1 - runtime.np_less(other, self)
+
+    def __eq__(self, other):
+        """Equality testing."""
+        # self == other
+        return runtime.np_equal(self, other)
+
+    def __ge__(self, other):
+        """Greater-than or equal comparison."""
+        # self >= other <=> not (self < other)
+        a = 1 - runtime.np_less(self, other)
+        return a
+
+    def __gt__(self, other):
+        """Strictly greater-than comparison."""
+        # self > other <=> other < self
+        return runtime.np_less(other, self)
+
+    def __ne__(self, other):
+        """Negated equality testing."""
+        # self != other <=> not (self == other)
+        return 1 - runtime.np_equal(self, other)
+
+    def __iter__(self):
+        for i in range(self.shape[0]):
+            yield self[i]
+
+    @property
+    def T(self):
+        return self.transpose()
+
+    @property
+    def flat(self):
+        # via flatten(), no MPyC coroutine for generators yet
+        for a in self.flatten():
+            yield a
+
+    def __len__(self):
+        if self.shape == ():
+            # Let NumPy generate error message by calling len(a) for dummy shape-() array a:
+            return len(np.array(0))
+
+        return self.shape[0]
+
+    def __getitem__(self, i):
+        return runtime.np_getitem(self, i)
+
+    # TODO: __setitem__(self, i, x) or runtime.np_update(a, i, x) instead
+
+    def flatten(self, order='C'):
+        return runtime.np_flatten(self, order=order)
+
+    def tolist(self):
+        return runtime.np_tolist(self)
+
+    def reshape(self, *shape, order='C'):
+        # NB: numpy.reshape only accepts a tuple (or a single int) as shape
+        return runtime.np_reshape(self, shape, order=order)
+
+    def copy(self, order='C'):
+        return runtime.np_copy(self, order=order)
+
+    def transpose(self, *axes):
+        if axes == ():
+            axes = None
+        elif len(axes) == 1 and isinstance(axes[0], (list, tuple)):
+            axes = axes[0]
+        return runtime.np_transpose(self, axes=axes)
+
+    def swapaxes(self, axis1, axis2):
+        return runtime.np_swapaxes(self, axis1, axis2)
+
+    def sum(self, *args, **kwargs):
+        return runtime.np_sum(self, *args, **kwargs)
+
+
+class SecureFiniteFieldArray(SecureArray):
+    """Base class for secure (secret-shared) arrays of finite field elements."""
+
+    __slots__ = ()
+
+    frac_length = 0
+
+    _output_conversion = None
+
+    def __init__(self, value=None, shape=None):
+        """Initialize a secure finite field array to the given value.
+
+        If value is None (default), shape must not be None.
+        The given value must be array of the appropriate type (int/polynomial/finite field array).
+        The given shape must be a (possibly empty) tuple of nonnegative integers.
+        """
+        if value is not None:
+            if isinstance(value, np.ndarray):
+                value = self.sectype.field.array(value)
+            elif isinstance(value, self.sectype.field.array):
+                pass
+            elif isinstance(value, Future):
+                pass  # NB: for internal use in runtime only
+            else:
+                # TODO: allow nested lists/tuples over int/poly/field-elt, possibly secfld
+                if isinstance(value, finfields.FiniteFieldArray):
+                    raise TypeError(f'incompatible finite field array {type(value).__name__} '
+                                    f'for {type(self).__name__}')
+
+                raise TypeError('None, int/polynomial array, or finite field array required')
+
+        super().__init__(value, shape)
+
+
+class SecureIntegerArray(SecureArray):
+    """Base class for secure (secret-shared) integer arrays."""
+
+    __slots__ = ()
+
+    frac_length = 0
+
+    @classmethod
+    def _output_conversion(cls, a):
+        return cls.sectype.field.array.intarray(a)
+        # NB: returns dtype=object array b, say
+        # Convert to NumPy int array, if desired, using calls like b.astype(np.int32).
+
+    def __init__(self, value=None, shape=None):
+        """Initialize a secure integer array to the given value.
+
+        If value is None (default), shape must not be None.
+        The given value must be array of the appropriate type (int/finite field array).
+        The given shape must be a (possibly empty) tuple of nonnegative integers.
+        """
+        if value is not None:
+            if isinstance(value, np.ndarray):
+                value = self.sectype.field.array(value)
+            elif isinstance(value, self.sectype.field.array):
+                pass
+            elif isinstance(value, Future):
+                pass  # NB: for internal use in runtime only
+            else:
+                # TODO: allow nested lists/tuples over int, possibly secint
+                if isinstance(value, finfields.FiniteFieldArray):
+                    raise TypeError(f'incompatible finite field array {type(value).__name__} '
+                                    f'for {type(self).__name__}')
+
+                raise TypeError('None, int array, or finite field array required')
+
+        super().__init__(value, shape)
+
+
+class SecureFixedPointArray(SecureArray):
+    """Base class for secure (secret-shared) arrays of fixed-point numbers."""
+
+    __slots__ = 'integral'
+
+    frac_length = 0
+
+    @classmethod
+    def _output_conversion(cls, a):
+        a = cls.sectype.field.array.intarray(a) / 2**cls.frac_length
+        if isinstance(a, np.ndarray):
+            a = a.astype(float)
+        return a
+
+    def __init__(self, value=None, shape=None, integral=None):
+        """Initialize a secure fixed-point array to the given value.
+
+        If value is None (default), shape must not be None.
+        The given value must be an array of the appropriate type (int/float/finite field array).
+        The given shape must be a (possibly empty) tuple of nonnegative integers.
+        """
+        if value is not None:
+            if isinstance(value, np.ndarray):
+                if np.issubdtype(value.dtype, np.floating):
+                    if integral is None:
+                        integral = np.vectorize(np.is_integral)(value).all()
+                        integral = bool(integral)  # NB: from np.bool_ to bool
+                    f2 = 1 << self.frac_length
+                    # Scale to Python int entries (by setting otypes='O', prevents overflow):
+                    value = np.vectorize(round, otypes='O')(value * f2)
+                    value = self.sectype.field.array(value)
+                elif np.issubdtype(value.dtype, np.integer) or np.issubdtype(value.dtype, object):
+                    if integral is None:
+                        integral = True
+                    if np.issubdtype(value.dtype, np.integer):
+                        # Convert np.integer to Python int entries, to prevent overflow:
+                        value = value.astype(object)
+                    value <<= self.frac_length  # NB: fails for np.floating entries in array value
+                    value = self.sectype.field.array(value)
+                else:
+                    raise TypeError(f'Invalid dtype {value.dtype}')
+
+            elif isinstance(value, self.sectype.field.array):
+                pass
+            elif isinstance(value, Future):
+                pass  # NB: for internal use in runtime only
+            else:
+                # TODO: allow nested lists/tuples over int/float, possibly secfxp
+                if isinstance(value, finfields.FiniteFieldArray):
+                    raise TypeError(f'incompatible finite field array {type(value).__name__} '
+                                    f'for {type(self).__name__}')
+
+                raise TypeError('None, int/float array, or finite field array required')
+
+        self.integral = integral
+        super().__init__(value, shape)
+
+    def _coerce(self, other):
+        if isinstance(other, float):
+            return type(self)(np.array(other))
+
+        return super()._coerce(other)
+
+    def _coerce2(self, other):
+        if isinstance(other, float):
+            if other.is_integer():
+                other = round(other)
+            return other  # TODO: consider returning np.array(other) here
+
+        return super()._coerce2(other)

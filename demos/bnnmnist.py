@@ -341,7 +341,7 @@ async def main():
     L = np.vectorize(lambda a: secint(int(a)))(L).tolist()
 
     logging.info('--------------- LAYER 1 -------------')
-    logging.info('- - - - - - - - fc      - - - - - - -')
+    logging.info('- - - - - - - - fc  784 x 4096  - - -')
     L = mpc.matrix_prod(L, load_W('fc1'))
     L = mpc.matrix_add(L, [load_b('fc1')] * len(L))
     logging.info('- - - - - - - - bsgn    - - - - - - -')
@@ -352,7 +352,7 @@ async def main():
     await mpc.barrier()
 
     logging.info('--------------- LAYER 2 -------------')
-    logging.info('- - - - - - - - fc      - - - - - - -')
+    logging.info('- - - - - - - - fc 4096 x 4096  - - -')
     L = mpc.matrix_prod(L, load_W('fc2'))
     L = mpc.matrix_add(L, [load_b('fc2')] * len(L))
     await mpc.barrier()
@@ -373,7 +373,7 @@ async def main():
     await mpc.barrier()
 
     logging.info('--------------- LAYER 3 -------------')
-    logging.info('- - - - - - - - fc      - - - - - - -')
+    logging.info('- - - - - - - - fc 4096 x 4096  - - -')
     L = mpc.matrix_prod(L, load_W('fc3'))
     L = mpc.matrix_add(L, [load_b('fc3')] * len(L))
     await mpc.barrier()
@@ -394,7 +394,7 @@ async def main():
     await mpc.barrier()
 
     logging.info('--------------- LAYER 4 -------------')
-    logging.info('- - - - - - - - fc      - - - - - - -')
+    logging.info('- - - - - - - - fc 4096 x 10  - - - -')
     L = mpc.matrix_prod(L, load_W('fc4'))
     L = mpc.matrix_add(L, [load_b('fc4')] * len(L))
     await mpc.barrier()

@@ -313,11 +313,24 @@ def returnType(*args, wrap=True):
     if rettype is not None:
         if isinstance(rettype, tuple):
             stype = rettype[0]
-            integral = rettype[1]
-            if stype.frac_length:
-                rt = lambda: stype(None, integral)
+            integral = None
+            shape = None
+            if isinstance(rettype[1], tuple):
+                shape = rettype[1]
+            elif isinstance(rettype[1], bool) and stype.frac_length:
+                integral = rettype[1]
+            if rettype[2:]:
+                shape = rettype[2]
+            if integral is not None:
+                if shape is not None:
+                    rt = lambda: stype(None, shape, integral)
+                else:
+                    rt = lambda: stype(None, integral=integral)
             else:
-                rt = stype
+                if shape is not None:
+                    rt = lambda: stype(None, shape)
+                else:
+                    rt = stype
         elif issubclass(rettype, Future):
             rt = lambda: rettype(loop=runtime._loop)
         else:

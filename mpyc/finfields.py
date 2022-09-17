@@ -5,27 +5,52 @@ Instantiate an object from a field and subsequently apply overloaded
 operators such as +,-,*,/ etc., to compute with field elements.
 In-place versions of the field operators are also provided.
 Taking square roots and quadratic residuosity tests supported as well.
+
+Moreover, (multidimensional) arrays over finite fields are available
+with operators like +,-,*,/ for convenient and efficient NumPy-based
+vectorized processing next to operator @ for matrix multiplication.
+Much of the NumPy API can be used to manipulate these arrays as well.
 """
 
 import functools
+from mpyc.numpy import np
 from mpyc import gmpy as gmpy2
 from mpyc import gfpx
 
 
 def GF(modulus):
-    """Create a finite (Galois) field for given modulus (prime number or irreducible polynomial)."""
-    if isinstance(modulus, gfpx.Polynomial):
-        return xGF(modulus)
+    """Create a finite (Galois) field for given modulus (prime number or irreducible polynomial).
 
-    if isinstance(modulus, tuple):
-        p, n, w = modulus
+    Also creates corresponding array type.
+    """
+    if isinstance(modulus, gfpx.Polynomial):
+        field = xGF(modulus)
     else:
-        p = modulus
-        if p == 2:
-            n, w = 1, 1
+        if isinstance(modulus, tuple):
+            p, n, w = modulus
         else:
-            n, w = 2, p-1
-    return pGF(p, n, w)
+            p = modulus
+            if p == 2:
+                n, w = 1, 1
+            else:
+                n, w = 2, p-1
+        field = pGF(p, n, w)
+
+    if not np:
+        return field
+
+    if issubclass(field, PrimeFieldElement):
+        BaseFFArray = PrimeFieldArray
+    elif issubclass(field, BinaryFieldElement):
+        BaseFFArray = BinaryFieldArray
+    else:  # issubclass(field, ExtensionFieldElement)
+        BaseFFArray = ExtensionFieldArray
+    name = f'Array{field.__name__}'
+    array = type(name, (BaseFFArray,), {'__slots__': ()})
+    array.field = field
+    field.array = array
+    globals()[name] = array  # NB: exploit (almost?) unique name dynamic array type
+    return field
 
 
 class FiniteFieldElement:
@@ -42,10 +67,15 @@ class FiniteFieldElement:
     ext_deg = None
     byte_length = None
     is_signed = None
+    array: type
     _mix_types: type  # or, a tuple of types
 
     def __init__(self, value):
         self.value = value
+
+    def __array_function__(self, func, types, args, kwargs):
+        # Redirect call to corresponding array type.
+        return self.array.__array_function__(self, func, types, args, kwargs)
 
     def __int__(self):
         """Extract field element as an integer value."""
@@ -53,7 +83,7 @@ class FiniteFieldElement:
 
     @classmethod
     def to_bytes(cls, x):
-        """Return byte string representing the given list of integers x."""
+        """Return byte string representing the given list/ndarray of integers x."""
         byte_order = 'little'
         r = cls.byte_length
         return r.to_bytes(2, byte_order) + b''.join(v.to_bytes(r, byte_order) for v in x)
@@ -189,16 +219,6 @@ class FiniteFieldElement:
         """Exponentiation."""
         raise NotImplementedError('abstract method')
 
-    @classmethod
-    def _reciprocal(cls, a):
-        """Multiplicative inverse."""
-        raise NotImplementedError('abstract method')
-
-    def reciprocal(self):
-        """Multiplicative inverse."""
-        cls = type(self)
-        return cls(cls._reciprocal(self.value))
-
     def __lshift__(self, other):
         """Left shift."""
         if not isinstance(other, int):
@@ -232,6 +252,26 @@ class FiniteFieldElement:
         raise NotImplementedError('abstract method')
 
     @classmethod
+    def _reciprocal(cls, a):
+        """Multiplicative inverse."""
+        raise NotImplementedError('abstract method')
+
+    def reciprocal(self):
+        """Multiplicative inverse."""
+        cls = type(self)
+        return cls(cls._reciprocal(self.value))
+
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        """Modular (inverse) square root."""
+        raise NotImplementedError('abstract method')
+
+    def sqrt(self, INV=False):
+        """Modular (inverse) square root."""
+        cls = type(self)
+        return cls(cls._sqrt(self.value, INV=INV))
+
+    @classmethod
     def _is_sqr(cls, a):
         """Test for quadratic residuosity (0 is also square)."""
         raise NotImplementedError('abstract method')
@@ -240,23 +280,13 @@ class FiniteFieldElement:
         """Test for quadratic residuosity (0 is also square)."""
         return self._is_sqr(self.value)
 
-    @classmethod
-    def _sqrt(cls, a, INV=False):
-        """Modular (inverse) square roots."""
-        raise NotImplementedError('abstract method')
-
-    def sqrt(self, INV=False):
-        """Modular (inverse) square roots."""
-        cls = type(self)
-        return cls(cls._sqrt(self.value, INV=INV))
-
     def __eq__(self, other):
         """Equality test."""
         if isinstance(other, type(self)):
             return self.value == other.value
 
         if isinstance(other, self._mix_types):
-            return not (self.value - other) % self.modulus
+            return self.value == other % self.modulus
 
         return NotImplemented
 
@@ -333,6 +363,7 @@ class PrimeFieldElement(FiniteFieldElement):
 
     __slots__ = ()
 
+    modulus: int
     is_signed = None
     nth = None
     root = None
@@ -402,14 +433,6 @@ class PrimeFieldElement(FiniteFieldElement):
         return self
 
     @classmethod
-    def _is_sqr(cls, a):
-        p = cls.modulus
-        if p == 2:
-            return True
-
-        return gmpy2.legendre(a, p) != -1
-
-    @classmethod
     def _sqrt(cls, a, INV=False):
         p = cls.modulus
         if a == 0:
@@ -447,6 +470,14 @@ class PrimeFieldElement(FiniteFieldElement):
             v = cls._reciprocal(v)
 
         return v
+
+    @classmethod
+    def _is_sqr(cls, a):
+        p = cls.modulus
+        if p == 2:
+            return True
+
+        return gmpy2.legendre(a, p) != -1
 
     def signed_(self):
         """Return signed integer representation, symmetric around zero."""
@@ -523,10 +554,6 @@ class ExtensionFieldElement(FiniteFieldElement):
         poly = type(self.value)
         return type(self)(poly.powmod(self.value, other, self.modulus))
 
-    @classmethod
-    def _reciprocal(cls, a):
-        return type(cls.modulus).invert(a, cls.modulus)
-
     def __rshift__(self, other):
         if not isinstance(other, int):
             return NotImplemented
@@ -542,13 +569,8 @@ class ExtensionFieldElement(FiniteFieldElement):
         return self
 
     @classmethod
-    def _is_sqr(cls, a):
-        poly = type(a)
-        q = cls.order
-        if q%2 == 0:
-            return True
-
-        return poly.powmod(a, (q-1) >> 1, cls.modulus) != [poly.p - 1]
+    def _reciprocal(cls, a):
+        return type(cls.modulus).invert(a, cls.modulus)
 
     @classmethod
     def _sqrt(cls, a, INV=False):
@@ -561,7 +583,10 @@ class ExtensionFieldElement(FiniteFieldElement):
             return a
 
         if q%2 == 0:
-            return poly.powmod(a, q>>1, cls.modulus)
+            q2 = q >> 1
+            if INV:
+                q2 -= 1
+            return poly.powmod(a, q2, cls.modulus)
 
         if q&3 == 3:
             if INV:
@@ -606,6 +631,15 @@ class ExtensionFieldElement(FiniteFieldElement):
 
         return x
 
+    @classmethod
+    def _is_sqr(cls, a):
+        poly = type(a)
+        q = cls.order
+        if q%2 == 0:
+            return True
+
+        return poly.powmod(a, (q-1) >> 1, cls.modulus) != [poly.p - 1]
+
     def __repr__(self):
         return f'{self.value}'
 
@@ -615,6 +649,7 @@ class BinaryFieldElement(ExtensionFieldElement):
 
     __slots__ = ()
 
+    modulus: gfpx.BinaryPolynomial
     characteristic = 2
     _mix_types = (int, gfpx.BinaryPolynomial)
 
@@ -632,4 +667,857 @@ class BinaryFieldElement(ExtensionFieldElement):
 
             return a
 
-        return poly.powmod(a, q>>1, cls.modulus)
+        q2 = q >> 1
+        if INV:
+            q2 -= 1
+        return poly.powmod(a, q2, cls.modulus)
+
+
+HANDLED_FUNCTIONS = {}
+
+
+class FiniteFieldArray:
+    """Common base class for finite field arrays.
+
+    An array over finite field F behaves much like a NumPy array with dtype=F.
+    Conceptually, an array a over F can be thought of as, for example
+
+       "a = np.array([[F(1), F(2)], [F(0), F(3)]], dtype=F)"
+
+    Internally, however, arrays over a finite field F are represented by NumPy
+    arrays with dtype=object storing just the values of the finite field elements:
+
+       "a = (field=F, value=np.array([[1, 2], [0, 3]], dtype=object))"
+
+    Invariant: elements of array 'value' are reduced w.r.t. modulus.
+    """
+
+    __slots__ = 'value'
+
+    field: type  # finite field of the array
+    _mix_types: type  # or tuple of types
+
+    def __init__(self, value, check=True, copy=False):
+        value = np.array(value, dtype=object, copy=copy)
+        if check:
+            # TODO: check dtype and type of entries of value (filter float)
+            value %= self.field.modulus  # NB: in-place prevents change in shape of value
+        self.value = value
+        # TODO: optimize using dtype=int8/int16/int32/int64 depending on field.order
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        # TODO: make more general
+        cls = type(self)
+        if any(isinstance(a, np.ndarray) and a.dtype != object and a.dtype not in cls._mix_types
+               for a in inputs):
+            return NotImplemented
+
+        if ufunc.__name__ == 'equal':
+            return inputs[1].__eq__(inputs[0])  # needed to avoid infinite recursion
+
+        if ufunc.__name__ == 'not_equal':
+            return inputs[1].__ne__(inputs[0])
+
+        if ufunc.__name__ == 'left_shift':
+            return inputs[0] << inputs[1]
+
+        if ufunc.__name__ == 'right_shift':
+            return inputs[0] >> inputs[1]
+
+        if ufunc.__name__ == 'power':
+            if isinstance(inputs[1], cls):
+                return NotImplemented
+
+        if ufunc.__name__ == 'reciprocal':
+            return type(self).reciprocal(inputs[0])
+
+        if ufunc.__name__ == 'sqrt':
+            return type(self).sqrt(inputs[0])
+
+        inputs = tuple(a.value if isinstance(a, (cls, cls.field)) else a for a in inputs)
+        a = getattr(ufunc, method)(*inputs, **kwargs)
+        if method == 'at':  # 'at'  is in-place so make sure to enforce invariant
+            # TODO: check other methods than '__call__' (at, reduce, reduceat, accumulate, outer)
+            self.value = self.value % cls.field.modulus
+        else:
+            a = cls(a)
+        return a
+
+    def __array_function__(self, func, types, args, kwargs):
+        # TODO: rework and make more general
+        if isinstance(self, FiniteFieldArray):
+            cls = type(self)
+        elif isinstance(self, FiniteFieldElement):
+            cls = type(self).array
+        else:
+            raise TypeError('wrong type for self in __array_function__(self, ...) call')
+
+        if func in HANDLED_FUNCTIONS:
+            return HANDLED_FUNCTIONS[func](*args, **kwargs)
+
+        args = list(args)
+        for i in range(len(args)):
+            arg = args[i]
+            if isinstance(arg, (cls, cls.field)):
+                args[i] = arg.value
+            elif isinstance(arg, tuple):
+                args[i] = tuple(a.value if isinstance(a, (cls, cls.field)) else a for a in arg)
+            elif isinstance(arg, list):
+                args[i] = [a.value if isinstance(a, (cls, cls.field)) else a for a in arg]
+
+        a = func(*args, **kwargs)
+
+        if isinstance(a, np.ndarray):
+            if func.__name__ in ('roll',  'diagonal', 'diag_flat'):
+                a = cls(a, check=False)
+            else:
+                a = cls(a)
+        elif isinstance(a, list):
+            # for func like vsplit returning list of arrays
+            a = list(map(cls, a))
+        elif isinstance(a, bool):
+            pass
+        elif not isinstance(a, tuple):  # shape
+            a = cls.field(a)
+        return a
+
+    def implements(numpy_function_name):
+        """Register an __array_function__ implementation."""
+        def decorator(func):
+            if np:
+                numpy_function = eval('np.' + numpy_function_name)
+                HANDLED_FUNCTIONS[numpy_function] = func
+            return func
+
+        return decorator
+    # TODO: use @staticmethod Python 3.10+, in 3.9- TypeError: 'staticmethod' object is not callable
+
+    @property
+    @implements('shape')
+    def shape(self):
+        return self.value.shape
+
+    @property
+    @implements('ndim')
+    def ndim(self):
+        return self.value.ndim
+
+    @property
+    @implements('size')
+    def size(self):
+        return self.value.size
+
+    @implements('block')
+    def _np_block(arrays):
+        def extract_type(s):
+            if isinstance(s, list):
+                for a in s:
+                    if cls := extract_type(a):
+                        break
+            elif isinstance(s, (FiniteFieldArray, FiniteFieldElement)):
+                cls = type(s)
+            else:
+                cls = None
+            return cls
+
+        cls = extract_type(arrays)
+        if issubclass(cls, FiniteFieldElement):
+            cls = cls.array
+
+        def peel(s):
+            if isinstance(s, list):
+                s = [peel(_) for _ in s]
+            elif isinstance(s, (cls, cls.field)):
+                s = s.value
+            return s
+
+        a = np.block(peel(arrays))  # NB: a is Numpy array
+        return cls(a)
+
+    def __iter__(self):
+        for a in self.value:
+            if isinstance(a, np.ndarray):
+                a = type(self)(a, check=False)
+            else:
+                a = self.field(a)
+            yield a
+
+    @implements('linalg.solve')
+    def gauss_solve(A, B):
+        """Linear solve by Gaussian elimination on matrix (A | B)."""
+        # TODO: extend to more dimensions, solve in last 2 dimensions
+        # TODO: remove assumption A and B are finite field arrays (e.g., B = np.eye(n))
+        cls = type(A)
+        field = cls.field
+        modulus = field.modulus  # int or gfpx.Polynomial(0)
+        n = A.shape[0]
+        if not A.shape == (n, n):
+            raise np.linalg.LinAlgError('array must be square')
+
+        A = np.concatenate((A.value, B.value), axis=1)
+
+        # Gaussian elimination
+        for k in range(n):
+            if A[k, k] == 0:
+                for x in range(k+1, n):
+                    if A[x, k] != 0:
+                        break
+                else:
+                    raise ZeroDivisionError('no inverse exists')
+
+                A[[k, x]] = A[[x, k]]
+            A[k, k] = (1 / field(A[k, k])).value  # store reciprocal of diagonal elts
+            A[k+1:, k] = A[k+1:, k] * A[k, k] % modulus
+            A[k+1:, k+1:] = (A[k+1:, k+1:] - np.outer(A[k+1:, k], A[k, k+1:])) % modulus
+
+        # back substitution
+        A[n-1, n:] = A[n-1, n:] * A[n-1, n-1] % modulus  # avoid np.dot on empty dtype='O' arrays
+        for i in range(n-2, -1, -1):
+            A[i, n:] = (A[i, n:] - np.dot(A[i, i+1:n], A[i+1:, n:])) * A[i, i] % modulus
+
+        return cls(A[:, n:], check=False)
+
+    @implements('linalg.inv')
+    def gauss_inv(A):
+        """Inverse by Gaussian elimination on augmented matrix (A | I)."""
+        # TODO: extend to more dimensions, invert last 2 dimensions
+        B = type(A)(np.eye(len(A), dtype='O'))
+        return FiniteFieldArray.gauss_solve(A, B)
+
+    @implements('linalg.det')
+    def gauss_det(a):
+        """Determinant by Gaussian elimination on (last 2 dimensions of) array a."""
+        cls = type(a)
+        field = cls.field
+        modulus = field.modulus  # int or gfpx.Polynomial(0)
+        if a.ndim < 2 or a.shape[-2] != a.shape[-1]:
+            # Let Numpy generate error message by calling det[a] for dummy array a of given shape:
+            return np.linalg.det(np.empty(a.shape))
+
+        n = a.shape[-1]
+        d = np.empty(a.size // n**2, dtype='O')
+        for i, A in enumerate(a.value.reshape((-1, n, n))):
+            A = A.copy()
+
+            # Gaussian elimination
+            for k in range(n):
+                if A[k, k] == 0:
+                    for x in range(k+1, n):
+                        if A[x, k] != 0:
+                            break
+                    else:
+                        d[i] = 0
+                        break
+
+                    A[[k, x]] = A[[x, k]]
+                inv_k = (1 / field(A[k, k])).value
+                A[k+1:, k] = A[k+1:, k] * inv_k % modulus
+                A[k+1:, k+1:] = (A[k+1:, k+1:] - np.outer(A[k+1:, k], A[k, k+1:])) % modulus
+            else:
+                d[i] = cls(np.diag(A), check=False).prod().value
+
+        d = d.reshape(a.shape[:-2])
+        if d.shape == ():
+            d = d[()]
+            d = cls.field(d)
+        else:
+            d = cls(d, check=False)
+        return d
+
+    @implements('linalg.matrix_power')
+    def matrix_pow(A, n):  # needed for handling negative n
+        cls = type(A)
+        p = cls.field.modulus
+
+        if n < 0:
+            A = np.linalg.inv(A)
+            n = -n
+
+        D = A.value
+        C = np.eye(len(A), dtype='O')
+        for i in range(n.bit_length() - 1):
+            # D = A^(2^i) holds
+            if (n >> i) & 1:
+                C = np.matmul(C, D) % p
+            D = np.matmul(D, D) % p
+        if n:
+            C = np.matmul(C, D) % p
+        return cls(C)
+
+    @implements('diag')
+    def diag(a, k=0):
+        cls = type(a)
+        return cls(np.diag(a.value, k), check=False)
+
+    @property
+    def flat(self):
+        for a in self.value.flat:
+            yield self.field(a)
+
+    def __len__(self):
+        return len(self.value)
+
+    def __contains__(self, value):
+        # TODO: check semantics of __contains__ in NumPy
+        cls = type(self)
+        if not isinstance(value, (cls, cls.field)):
+            value = cls(value)
+            if value.ndim == 0:
+                # extract single entry
+                value = value[()]
+        value = value.value
+
+        return self.value.__contains__(value)
+
+    def __getitem__(self, key):
+        a = self.value.__getitem__(key)
+        if not isinstance(a, np.ndarray):
+            return self.field(a)
+
+        return type(self)(a, check=False)  # NB: no copy
+
+    def __setitem__(self, key, value):
+        cls = type(self)
+        if not isinstance(value, (cls, cls.field)):
+            value = cls(value)
+            if value.ndim == 0:
+                # extract single entry
+                value = value[()]
+        value = value.value
+
+        # NB: NumPy does not raise exceptions for __setitem__ on dtype='O' arrays
+        try:
+            # Check if shape of target matches shape of given value.
+            shape = np._item_shape(self.value.shape, key)
+            np.broadcast_to(value, shape)  # raises if there is a mismatch
+        except Exception:
+            # Let Numpy generate error message using dummy arrays of given shapes:
+            np.empty(self.value.shape)[key] = np.empty(value.shape)
+
+        self.value.__setitem__(key, value)
+
+    def __eq__(self, other):
+        """Elementwise equality as for Numpy arrays."""
+        cls = type(self)
+        if not isinstance(other, (cls, cls.field)):
+            other = cls(other)
+        return np.equal(self.value, other.value)
+
+    def __ne__(self, other):
+        """Elementwise nonequality as for Numpy arrays."""
+        cls = type(self)
+        if not isinstance(other, (cls, cls.field)):
+            other = cls(other)
+        return np.not_equal(self.value, other.value)
+
+    @classmethod
+    def _coerce(cls, other):
+        if isinstance(other, (cls, cls.field)):
+            other = other.value
+        elif not isinstance(other, cls._mix_types):
+            if not isinstance(other, np.ndarray):
+                # TODO: check elts and dtype of other?
+                return NotImplemented
+
+        return other
+
+    def __add__(self, other):
+        """Addition."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls(self.value + other)
+
+    __radd__ = __add__
+
+    def __iadd__(self, other):
+        """In-place addition."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        self.value += other
+        self.value %= self.field.modulus
+        return self
+
+    def __sub__(self, other):
+        """Subtraction."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls(self.value - other)
+
+    def __rsub__(self, other):
+        """Subtraction (with reflected arguments)."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls(other - self.value)
+
+    def __isub__(self, other):
+        """In-place subtraction."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        self.value -= other
+        self.value %= self.field.modulus
+        return self
+
+    def __mul__(self, other):
+        """Multiplication."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls(self.value * other)
+
+    __rmul__ = __mul__
+
+    def __imul__(self, other):
+        """In-place multiplication."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        self.value *= other
+        self.value %= self.field.modulus
+        return self
+
+    def __matmul__(self, other):
+        """Matrix multiplication."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        a = self.value @ other
+        a = cls(a) if isinstance(a, np.ndarray) else cls.field(a)
+        return a
+
+    def __rmatmul__(self, other):
+        """Matrix multiplication (with reflected arguments)."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        a = other @ self.value
+        a = cls(a) if isinstance(a, np.ndarray) else cls.field(a)
+        return a
+
+    def __imatmul__(self, other):
+        """In-place matrix multiplication."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        self.value @= other  # NB: raises TypeError until NumPy aupports in-place matmul
+        self.value %= self.field.modulus
+        # TODO: case self.value is not an array, if allowed at all for in-place matmul
+        return self
+
+    def __pow__(self, other):
+        """Exponentiation."""
+        if not isinstance(other, (int, np.int8)):
+            if not isinstance(other, np.ndarray):
+                # TODO: check dtype?
+                return NotImplemented
+
+        cls = type(self)
+        return cls(cls._pow(self.value, other), check=False)
+
+    def __rpow__(self, other):
+        """Exponentiation (with reflected arguments)."""
+        # TODO: keep or omit like in FiniteFieldElement?
+        return NotImplemented
+
+    def __ipow__(self, other):
+        """In-place exponentiation."""
+        if not isinstance(other, (int, np.int8)):
+            if not isinstance(other, np.ndarray):
+                # TODO: check dtype?
+                return NotImplemented
+
+        self.value = self._pow(self.value, other)
+        return self
+
+    @classmethod
+    def _pow(cls, a, b):
+        """Exponentiation."""
+        raise NotImplementedError('abstract method')
+
+    def __neg__(self):
+        """Negation."""
+        a = self.value.__neg__()
+        return type(self)(a)
+
+    def __pos__(self):
+        """Unary +."""
+        a = self.value.__pos__()  # NB: copy
+        return type(self)(a, check=False)
+
+    def __truediv__(self, other):
+        """Division."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls(self.value * cls._reciprocal(other))
+
+    def __rtruediv__(self, other):
+        """Division (with reflected arguments)."""
+        cls = type(self)
+        other = cls._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        return cls(other * cls._reciprocal(self.value))
+
+    def __itruediv__(self, other):
+        """"In-place division."""
+        other = self._coerce(other)
+        if other is NotImplemented:
+            return NotImplemented
+
+        self.value *= self._reciprocal(other)
+        self.value %= self.field.modulus
+        return self
+
+    def __lshift__(self, other):
+        """Left shift."""
+        if not isinstance(other, (int, np.integer)):
+            if not isinstance(other, np.ndarray):
+                return NotImplemented
+        # TODO: check other.dtype (if array), also for rshift etc.
+
+        return type(self)(self.value << other)
+
+    def __rlshift__(self, other):
+        """Left shift (with reflected arguments)."""
+        return NotImplemented
+
+    def __ilshift__(self, other):
+        """In-place left shift."""
+        if not isinstance(other, (int, np.integer)):
+            if not isinstance(other, np.ndarray):
+                return NotImplemented
+
+        self.value <<= other
+        self.value %= self.field.modulus
+        return self
+
+    def __rshift__(self, other):
+        """Right shift."""
+        if not isinstance(other, (int, np.integer)):
+            if not isinstance(other, np.ndarray):
+                return NotImplemented
+
+        cls = type(self)
+        return cls(self.value * cls._reciprocal(1 << other))
+
+    def __rrshift__(self, other):
+        """Right shift (with reflected arguments)."""
+        return NotImplemented
+
+    def __irshift__(self, other):
+        """In-place right shift."""
+        if not isinstance(other, (int, np.integer)):
+            if not isinstance(other, np.ndarray):
+                return NotImplemented
+
+        self.value *= self._reciprocal(1 << other)
+        self.value %= self.field.modulus
+        return self
+
+    @classmethod
+    def _reciprocal(cls, a):
+        """Multiplicative inverse."""
+        raise NotImplementedError('abstract method')
+
+    def reciprocal(self):
+        """Multiplicative inverse."""
+        cls = type(self)
+        return cls(cls._reciprocal(self.value), check=False)
+
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        """Modular (inverse) square root."""
+        raise NotImplementedError('abstract method')
+
+    def sqrt(self, INV=False):
+        """Modular (inverse) square root."""
+        cls = type(self)
+        return cls(cls._sqrt(self.value, INV=INV), check=False)
+
+    @classmethod
+    def _is_sqr(cls, a):
+        """Test for quadratic residuosity (0 is also square)."""
+        raise NotImplementedError('abstract method')
+
+    def is_sqr(self):
+        """Test for quadratic residuosity (0 is also square)."""
+        return self._is_sqr(self.value)
+
+    def reshape(self, *args, **kwargs):
+        return type(self)(self.value.reshape(*args, **kwargs), check=False)
+
+    def copy(self, *args, **kwargs):
+        return type(self)(self.value.copy(*args, **kwargs), check=False)
+
+    def choose(self, *args, **kwargs):
+        return type(self)(self.value.choose(*args, **kwargs), check=False)
+
+    def compress(self, *args, **kwargs):
+        return type(self)(self.value.compress(*args, **kwargs), check=False)
+
+    def nonzero(self, *args, **kwargs):
+        return self.value.nonzero(*args, **kwargs)
+
+    def flatten(self, *args, **kwargs):
+        return type(self)(self.value.flatten(*args, **kwargs), check=False)
+
+    def take(self, *args, **kwargs):
+        return type(self)(self.value.take(*args, **kwargs), check=False)
+
+    def tolist(self):
+        return np.vectorize(self.field, otypes='O')(self.value).tolist()
+
+    def ravel(self, *args, **kwargs):  # view -- no copy
+        return type(self)(self.value.ravel(*args, **kwargs), check=False)
+
+    def repeat(self, *args, **kwargs):
+        return type(self)(self.value.repeat(*args, **kwargs), check=False)
+
+    def diagonal(self, *args, **kwargs):  # view -- no copy
+        return type(self)(self.value.diagonal(*args, **kwargs), check=False)
+
+    def sum(self, *args, **kwargs):
+        a = self.value.sum(*args, **kwargs)
+        if not isinstance(a, np.ndarray):
+            return self.field(a)
+
+        return type(self)(a, check=True)
+
+    def prod(self, *args, **kwargs):
+        v = kwargs.get('initial', 1)
+        if not isinstance(v, self.field):
+            v = self.field(v)  # prevent growth using field multiplication
+        kwargs['initial'] = v
+        a = self.value.prod(*args, **kwargs)
+        if not isinstance(a, np.ndarray):
+            return a
+
+        a = np.vectorize(lambda v: v.value, otypes='O')(a)
+        return type(self)(a, check=False)
+
+    def trace(self, *args, **kwargs):
+        a = self.value.trace(*args, **kwargs)
+        if not isinstance(a, np.ndarray):
+            return self.field(a)
+
+        return type(self)(a, check=True)
+
+    # TODO: add atleast1d(a), atleast2d(a), atleast3d(a)
+
+    def transpose(self, *axes):
+        a = self.value.transpose(*axes)
+        return type(self)(a, check=False)
+
+    def swapaxes(self, axis1, axis2):    # view -- no copy
+        a = self.value.swapaxes(axis1, axis2)
+        return type(self)(a, check=False)
+
+    @property
+    def T(self):
+        return self.transpose()
+
+
+class PrimeFieldArray(FiniteFieldArray):
+
+    _mix_types = int
+    if np:
+        _mix_types = (int, np.int64, np.int32, np.int16, np.int8,
+                      np.uint64, np.uint32, np.uint16, np.uint8)
+        # TODO: consider use of np.integer
+
+    @classmethod
+    def intarray(cls, a):
+        """Extract finite field array as a (signed) integer array."""
+        return a.signed_() if cls.field.is_signed else a.unsigned_()
+
+    def __int__(self):
+        """Extract (signed) integer value for size-1 arrays only."""
+        # TODO: reconsider use of this function
+        if self.field.is_signed:
+            a = self.signed_()
+        else:
+            a = self.unsigned_()
+        return a.__int__()
+
+    def __abs__(self):
+        """Absolute value of (signed) value."""
+        return abs(self.signed_())  # TODO: reconsider need for this function
+
+    def signed_(self):
+        """Return signed integer representation, symmetric around zero."""
+        p = self.field.modulus
+        f = np.vectorize(lambda a: a - p if a > p>>1 else a, otypes='O')
+        return f(self.value)
+        # TODO: check following alternative, issue with np.where result containing floats
+        # return self.value - np.where(self.value > p>>1, p, 0)
+
+    def unsigned_(self):
+        """Return unsigned integer representation."""
+        return self.value.copy()  # NB: copy for consistency with self.signed_()
+
+    @classmethod
+    def _pow(cls, a, b):  # NB: exponents assumed to be integer(s)
+        """Exponentiation."""
+        p = cls.field.modulus
+        powmod = gmpy2.powmod
+        f = np.vectorize(lambda a, b: int(powmod(a, b, p)), otypes='O')
+        return f(a, b)
+
+    @classmethod
+    def _reciprocal(cls, a):
+        """Multiplicative inverse."""
+        p = cls.field.modulus
+        invert = gmpy2.invert
+        f = np.vectorize(lambda a: int(invert(a, p)), otypes='O')
+        return f(a)  # NB: otypes='O' ensures entries of a are Python int (before f is applied)
+
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        """Modular (inverse) square roots."""
+        p = cls.field.modulus
+        if INV and (a == 0).any():
+            raise ZeroDivisionError('no inverse sqrt of 0')
+
+        if p == 2:
+            return a.copy()  # TODO: check use of copy (here: copy returned in all cases for p)
+
+        if p&3 == 3:
+            if INV:
+                p4 = (p*3 - 5) >> 2  # a**p4 == a**(-1/2) == 1/sqrt(a) mod p
+            else:
+                p4 = (p+1) >> 2
+            p = gmpy2.mpz(p)
+            p4 = gmpy2.mpz(p4)
+            powmod = gmpy2.powmod
+            return np.vectorize(lambda a: int(powmod(a, p4, p)), otypes='O')(a)
+
+        _sqrt = cls.field._sqrt
+        return np.vectorize(lambda a: _sqrt(a, INV=INV), otypes='O')(a)
+
+    @classmethod
+    def _is_sqr(cls, a):
+        p = cls.field.modulus
+        if p == 2:
+            return np.full(a.shape, True, dtype=bool)
+
+        legendre = gmpy2.legendre
+        return np.vectorize(lambda a: legendre(a, p) != -1, otypes=[bool])(a)
+
+    def __repr__(self):
+        return f'{self.intarray(self)}'
+
+
+class ExtensionFieldArray(FiniteFieldArray):
+
+    _mix_types = (int, gfpx.Polynomial)
+    if np:
+        _mix_types += (np.int64, np.int32, np.int16, np.int8,
+                       np.uint64, np.uint32, np.uint16, np.uint8)
+
+    @classmethod
+    def _pow(cls, a, b):  # NB: exponents assumed to be integer(s)
+        """Exponentiation."""
+        modulus = cls.field.modulus
+        powmod = type(modulus).powmod
+        f = np.vectorize(lambda a, n: powmod(a, n, modulus), otypes='O')
+        return f(a, b)
+
+    @classmethod
+    def _reciprocal(cls, a):
+        """Multiplicative inverse."""
+        modulus = cls.field.modulus
+        invert = type(modulus).invert
+        f = np.vectorize(lambda a: invert(a, modulus), otypes='O')
+        return f(a)
+
+    @classmethod
+    def _is_sqr(cls, a):
+        q = cls.field.order
+        if q%2 == 0:
+            return np.full(a.shape, True, dtype=bool)
+
+        modulus = cls.field.modulus
+        powmod = type(modulus).powmod
+        q2 = (q-1) >> 1
+        minus_one = [type(modulus).p - 1]
+        f = np.vectorize(lambda a: powmod(a, q2, modulus) != minus_one, otypes=[bool])
+        return f(a)
+
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        """Modular (inverse) square root."""
+        q = cls.field.order
+        modulus = cls.field.modulus
+        poly = type(modulus)
+        if INV and (a == poly(0)).any():
+            raise ZeroDivisionError('no inverse sqrt of 0')
+
+        if q%2 == 0:
+            q2 = q >> 1
+            if INV:
+                q2 -= 1
+            powmod = poly.powmod
+            return np.vectorize(lambda a: powmod(a, q2, modulus), otypes='O')(a)
+
+        if q&3 == 3:
+            if INV:
+                q4 = (q*3 - 5) >> 2  # a**q4 == a**(-1/2) == 1/sqrt(a) in GF(q)
+            else:
+                q4 = (q+1) >> 2
+            powmod = poly.powmod
+            return np.vectorize(lambda a: powmod(a, q4, modulus), otypes='O')(a)
+
+        _sqrt = cls.field._sqrt
+        return np.vectorize(lambda a: _sqrt(a, INV=INV), otypes='O')(a)
+
+    def __repr__(self):
+        return f'{self.value}'
+
+
+class BinaryFieldArray(ExtensionFieldArray):
+
+    _mix_types = (int, gfpx.BinaryPolynomial)
+    if np:
+        _mix_types += (np.int64, np.int32, np.int16, np.int8,
+                       np.uint64, np.uint32, np.uint16, np.uint8)
+
+    @classmethod
+    def _is_sqr(cls, a):
+        return np.full(a.shape, True, dtype=bool)
+
+    @classmethod
+    def _sqrt(cls, a, INV=False):
+        modulus = cls.field.modulus
+        poly = type(modulus)
+        if INV and (a == poly(0)).any():
+            raise ZeroDivisionError('no inverse sqrt of 0')
+
+        powmod = poly.powmod
+        q2 = cls.field.order >> 1
+        if INV:
+            q2 -= 1
+        return np.vectorize(lambda a: powmod(a, q2, modulus), otypes='O')(a)

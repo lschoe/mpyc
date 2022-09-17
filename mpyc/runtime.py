@@ -11,7 +11,6 @@ import os
 import sys
 import time
 import datetime
-import importlib.util
 import logging
 import math
 import secrets
@@ -22,6 +21,8 @@ from dataclasses import dataclass
 import pickle
 import asyncio
 import ssl
+from mpyc.numpy import np
+from mpyc import finfields
 from mpyc import thresha
 from mpyc import sectypes
 from mpyc import asyncoro
@@ -56,6 +57,10 @@ class Runtime:
     SecureFixedPoint = sectypes.SecureFixedPoint
     SecureFloat = sectypes.SecureFloat
     SecureFiniteGroup = mpyc.secgroups.SecureFiniteGroup
+    SecureArray = sectypes.SecureArray
+    SecureFiniteFieldArray = sectypes.SecureFiniteFieldArray
+    SecureIntegerArray = sectypes.SecureIntegerArray
+    SecureFixedPointArray = sectypes.SecureFixedPointArray
     SecFld = staticmethod(sectypes.SecFld)
     SecInt = staticmethod(sectypes.SecInt)
     SecFxp = staticmethod(sectypes.SecFxp)
@@ -395,11 +400,23 @@ class Runtime:
         if hasattr(stype, '_input'):
             return stype._input(x, senders)
 
-        field = stype.field
-        if not stype.frac_length:
-            await self.returnType(stype, len(senders), len(x))
+        if isinstance(x[0], sectypes.SecureArray):
+            field = x[0].sectype.field
+            shape = x[0].shape  # TODO: consider multiple arrays
         else:
-            await self.returnType((stype, x[0].integral), len(senders), len(x))
+            field = stype.field
+            shape = None
+        if not stype.frac_length:
+            if shape is None:
+                rettype = stype
+            else:
+                rettype = (stype, shape)
+        else:
+            if shape is None:
+                rettype = (stype, x[0].integral)
+            else:
+                rettype = (stype, x[0].integral, shape)
+        await self.returnType(rettype, len(senders), len(x))
 
         shares = [None] * len(senders)
         for i, peer_pid in enumerate(senders):
@@ -407,7 +424,9 @@ class Runtime:
                 x = await self.gather(x)
                 t = self.threshold
                 m = len(self.parties)
-                in_shares = thresha.random_split(x, t, m)
+                if shape is not None:
+                    x = x[0].value.flat  # indexable iterator
+                in_shares = thresha.random_split(field, x, t, m)
                 for other_pid, data in enumerate(in_shares):
                     data = field.to_bytes(data)
                     if other_pid == self.pid:
@@ -417,10 +436,14 @@ class Runtime:
             else:
                 shares[i] = self._receive_message(peer_pid)
         shares = await self.gather(shares)
-        return [[field(a) for a in field.from_bytes(r)] for r in shares]
+        if shape is None:
+            y = [[field(a) for a in field.from_bytes(r)] for r in shares]
+        else:
+            y = [[field.array(field.from_bytes(r), check=False).reshape(shape) for r in shares]]
+        return y
 
     @mpc_coro
-    async def output(self, x, receivers=None, threshold=None, raw=False) -> Future:
+    async def output(self, x, receivers=None, threshold=None, raw=False):
         """Output the value of x to the receivers specified.
 
         Value x is a secure object, or a list of secure objects.
@@ -442,7 +465,10 @@ class Runtime:
             x = x[:]
         else:
             x = [x]
-        if x == []:
+        await self.returnType(Future)
+
+        n = len(x)
+        if not n:
             return []
 
         t = self.threshold if threshold is None else threshold
@@ -459,10 +485,16 @@ class Runtime:
                 return y
 
             x = await self.gather(x)
+
+        if isinstance(x[0], finfields.FiniteFieldElement):
             field = type(x[0])
+            x = [a.value for a in x]
+            shape = None
         else:
-            field = sftype
-        x = [a.value for a in x]
+            field = x[0].field
+            x = x[0].value  # TODO: consider multiple arrays
+            shape = x.shape
+            x = x.flat  # indexable iterator
 
         # Send share x to all successors in receivers.
         share = None
@@ -478,12 +510,16 @@ class Runtime:
             points = [((self.pid - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
             points.append((self.pid + 1, x))
             y = thresha.recombine(field, points)
+            if shape is None:
+                y = [field(a) for a in y]
+            else:
+                y = [field.array(y).reshape(shape)]
             if issubclass(sftype, self.SecureObject):
                 f = sftype._output_conversion
                 if not raw and f is not None:
                     y = [f(a) for a in y]
         else:
-            y = [None] * len(x)
+            y = [None] * n
         if not x_is_list:
             y = y[0]
         return y
@@ -499,17 +535,22 @@ class Runtime:
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, self.SecureObject):
             if not sftype.frac_length:
-                await self.returnType(sftype, len(x))
-            else:
-                if x_is_list:
-                    await self.returnType((sftype, x[0].integral), len(x))
+                if issubclass(sftype, sectypes.SecureArray):
+                    rettype = (sftype, x[0].shape)
                 else:
-                    await self.returnType((sftype, x[0].integral))
+                    rettype = sftype
+            else:
+                if issubclass(sftype, sectypes.SecureArray):
+                    rettype = (sftype, x[0].integral, x[0].shape)
+                else:
+                    rettype = (sftype, x[0].integral)
+            if x_is_list:
+                await self.returnType(rettype, len(x))
+            else:
+                await self.returnType(rettype)
             x = await self.gather(x)
-            field = sftype.field
         else:
             await self.returnType(Future)
-            field = sftype
 
         t = self.threshold
         if t == 0:
@@ -517,13 +558,27 @@ class Runtime:
                 x = x[0]
             return x
 
+        if isinstance(x[0], finfields.FiniteFieldElement):
+            field = type(x[0])
+            x = [a.value for a in x]
+            shape = None
+        else:
+            field = x[0].field
+            x = x[0].value  # TODO: consider multiple arrays, see e.g., np_prod(), np_all()
+            shape = x.shape
+            x = x.flat  # indexable iterator
+
         m = len(self.parties)
-        in_shares = thresha.random_split(x, t, m)
+        in_shares = thresha.random_split(field, x, t, m)
         in_shares = [field.to_bytes(elts) for elts in in_shares]
         # Recombine the first 2t+1 output_shares.
         out_shares = await self.gather(self._exchange_shares(in_shares)[:2*t+1])
         points = [(j+1, field.from_bytes(s)) for j, s in enumerate(out_shares)]
         y = thresha.recombine(field, points)
+        if shape is None:
+            y = [field(a) for a in y]
+        else:
+            y = [field.array(y).reshape(shape)]
         if not x_is_list:
             y = y[0]
         return y
@@ -616,7 +671,7 @@ class Runtime:
             else:
                 await self.returnType(sftype)
             Zp = sftype.field
-            l = sftype.bit_length
+            l = l or sftype.bit_length
             if f is None:
                 f = sftype.frac_length
         else:
@@ -635,12 +690,43 @@ class Runtime:
         r_divf = self._randoms(Zp, n, 1 << k + l)
         if issubclass(sftype, self.SecureObject):
             x = await self.gather(x)
-        c = await self.output([a + ((1 << l - 1 + f) + (q.value << f) + r.value)
+        c = await self.output([a + ((1 << l-1 + f) + (q.value << f) + r.value)
                                for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
         y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
         if not x_is_list:
             y = y[0]
+        return y
+
+    @mpc_coro
+    async def np_trunc(self, a, f=None, l=None):
+        """Secure truncation of f least significant bits of (elements of) a.
+
+        Probabilistic rounding of a / 2**f (elementwise).
+        """
+        n = a.size
+        sftype = type(a)
+        if issubclass(sftype, self.SecureObject):
+            await self.returnType((sftype, a.shape))
+            Zp = sftype.sectype.field
+            l = l or sftype.sectype.bit_length
+            if f is None:
+                f = sftype.frac_length
+        else:
+            await self.returnType(Future)
+            Zp = sftype.field
+
+        k = self.options.sec_param
+        r_bits = await self.np_random_bits(Zp, f * n)
+        r_modf = np.sum(r_bits.value.reshape((n, f)) << np.arange(f), axis=1)
+        r_modf = r_modf.reshape(a.shape)
+        r_divf = self._np_randoms(Zp, n, 1 << k + l).value
+        r_divf = r_divf.reshape(a.shape)
+        if issubclass(sftype, self.SecureObject):
+            a = await self.gather(a)
+        c = await self.output(Zp.array(a.value + (1 << l-1 + f) + (r_divf << f) + r_modf))
+        c = c.value & ((1<<f) - 1)
+        y = Zp.array(a.value + r_modf - c) >> f
         return y
 
     def eq_public(self, a, b):
@@ -650,11 +736,15 @@ class Runtime:
     @mpc_coro
     async def is_zero_public(self, a) -> Future:
         """Secure public zero test of a."""
-        stype = type(a)
-        if issubclass(stype, sectypes.SecureFloat):
-            return await stype.is_zero_public(a)
+        sftype = type(a)
+        if issubclass(sftype, sectypes.SecureFloat):
+            return await sftype.is_zero_public(a)
 
-        field = stype.field
+        if issubclass(sftype, self.SecureObject):
+            field = sftype.field
+        else:
+            field = sftype
+
         m = len(self.parties)
         t = self.threshold
         if field.order.bit_length() <= 60:  # TODO: introduce MPyC parameter for failure probability
@@ -666,10 +756,48 @@ class Runtime:
                     break
         else:
             r = self._random(field)  # NB: failure r=0 with probability less than 2**-60
-        a = await self.gather(a)
+
+        if issubclass(sftype, self.SecureObject):
+            a = await self.gather(a)
         if field.order.bit_length() <= 60:
             z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
             b = a * r + z[0]
+        else:
+            b = a * r
+        c = await self.output(b, threshold=2*t)
+        return c == 0
+
+    @mpc_coro
+    async def np_is_zero_public(self, a) -> Future:
+        """Secure public zero test of a, elementwise."""
+        # TODO: remove restriction to 1D arrays a (due to r,s,z below being 1D arrays)
+        sftype = type(a)
+        if issubclass(sftype, self.SecureArray):
+            field = sftype.sectype.field
+        else:
+            field = sftype
+
+        n = a.size
+        m = len(self.parties)
+        t = self.threshold
+        if field.order.bit_length() <= 60:  # TODO: introduce MPyC parameter for failure probability
+            prfs = self.prfs(field.order)
+            while True:
+                r = self._np_randoms(field, n)
+                s = self._np_randoms(field, n)
+                z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
+                if np.all(await self.output(r * s + z, threshold=2*t)):
+                    # TODO: handle failures for cases of small sec. param k (like 8),
+                    # small bit_length l (like 2) and large n (like 200); filter the 0s.
+                    break
+        else:
+            r = self._np_randoms(field, n)  # NB: failure r=0 with probability less than 2**-60
+
+        if issubclass(sftype, self.SecureObject):
+            a = await self.gather(a)
+        if field.order.bit_length() <= 60:
+            z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
+            b = a * r + z
         else:
             b = a * r
         c = await self.output(b, threshold=2*t)
@@ -711,7 +839,7 @@ class Runtime:
     @mpc_coro_no_pc
     async def sub(self, a, b):
         """Secure subtraction of a and b."""
-        stype = type(b) if isinstance(b, self.SecureObject) else type(a)
+        stype = type(a)
         if not stype.frac_length:
             await self.returnType(stype)
         else:
@@ -719,36 +847,108 @@ class Runtime:
         a, b = await self.gather(a, b)
         return a - b
 
+    @mpc_coro_no_pc
+    async def np_add(self, a, b):
+        stype = type(a)
+        a_shape = getattr(a, 'shape', (1,))
+        b_shape = getattr(b, 'shape', (1,))
+        shape = np.broadcast_shapes(a_shape, b_shape)
+        if not stype.frac_length:
+            await self.returnType((stype, shape))
+        else:
+            await self.returnType((stype, a.integral and b.integral, shape))
+        a, b = await self.gather(a, b)
+        return a + b
+
+    @mpc_coro_no_pc
+    async def np_subtract(self, a, b):
+        stype = type(b) if isinstance(b, self.SecureArray) else type(a)
+        a_shape = getattr(a, 'shape', (1,))
+        b_shape = getattr(b, 'shape', (1,))
+        shape = np.broadcast_shapes(a_shape, b_shape)
+        if not stype.frac_length:
+            await self.returnType((stype, shape))
+        else:
+            await self.returnType((stype, a.integral and b.integral, shape))
+        a, b = await self.gather(a, b)
+        return a - b
+
     @mpc_coro
     async def mul(self, a, b):
         """Secure multiplication of a and b."""
         stype = type(a)
+        shb = isinstance(b, self.SecureObject)
         f = stype.frac_length
         if not f:
             await self.returnType(stype)
         else:
             a_integral = a.integral
-            b_integral = isinstance(b, int) or isinstance(b, self.SecureObject) and b.integral
-            if isinstance(b, float):
-                b = round(b * 2**f)
-            await self.returnType((stype, a_integral and b_integral))
+            b_integral = shb and b.integral
+            b_is_int = False
+            if not shb:
+                if isinstance(b, int):
+                    b_is_int = True
+                elif isinstance(b, float):
+                    b = round(b * 2**f)
+            await self.returnType((stype, a_integral and (b_integral or b_is_int)))
 
-        shb = isinstance(b, self.SecureObject)
         if not shb:
             a = await self.gather(a)
         elif a is b:
             a = b = await self.gather(a)
         else:
             a, b = await self.gather(a, b)
-        if f and b_integral:
-            a, b = b, a
         c = a * b
-        if f and (a_integral or b_integral) and not isinstance(a, int):
+        if f and (a_integral or b_integral) and not b_is_int:
             c >>= f  # NB: in-place rshift
         if shb:
             c = self._reshare(c)
-        if f and not (a_integral or b_integral):
+        if f and not (a_integral or b_integral) and not b_is_int:
             c = self.trunc(stype(c))
+        return c
+
+    @mpc_coro
+    async def np_multiply(self, a, b):
+        stype = type(a)
+        shb = isinstance(b, self.SecureObject)
+        a_shape = getattr(a, 'shape', (1,))
+        b_shape = getattr(b, 'shape', (1,))
+        shape = np.broadcast_shapes(a_shape, b_shape)
+        f = stype.frac_length
+        if not f:
+            await self.returnType((stype, shape))
+        else:
+            a_integral = a.integral
+            b_integral = shb and b.integral
+            b_is_int = False
+            if not shb:
+                if isinstance(b, int):
+                    b_is_int = True
+                elif isinstance(b, float):
+                    b = round(b * 2**f)
+                elif isinstance(b, np.ndarray):
+                    if np.issubdtype(b.dtype, np.integer):
+                        b_is_int = True
+                    elif np.issubdtype(b.dtype, np.floating):
+                        # NB: unlike for self.mul() no test if all entries happen to be integral
+                        # Scale to Python int entries (by setting otypes='O', prevents overflow):
+                        b = np.vectorize(round, otypes='O')(b * 2**f)
+                    # TODO: handle b.dtype=object, checking if all elts are int
+            await self.returnType((stype, a_integral and (b_integral or b_is_int), shape))
+
+        if not shb:
+            a = await self.gather(a)
+        elif a is b:
+            a = b = await self.gather(a)
+        else:
+            a, b = await self.gather(a, b)
+        c = a * b
+        if f and (a_integral or b_integral) and not b_is_int:
+            c >>= f  # NB: in-place rshift
+        if shb:
+            c = self._reshare(c)
+        if f and not (a_integral or b_integral) and not b_is_int:
+            c = self.np_trunc(stype(c, shape=shape))
         return c
 
     def div(self, a, b):
@@ -778,9 +978,35 @@ class Runtime:
             c = field(field._reciprocal(b))
         return self.mul(a, c)
 
+    def np_divide(self, a, b):
+        b_is_SecureArray = isinstance(b, self.SecureArray)
+        stype = type(b) if b_is_SecureArray else type(a)
+        field = stype.sectype.field
+        f = stype.frac_length
+        if b_is_SecureArray:
+            if f:
+                c = self._rec(b)
+            else:
+                c = self.np_reciprocal(b)
+            return self.np_multiply(c, a)
+
+        # isinstance(a, self.SecureArray) ensured
+        if f:
+            if isinstance(b, (int, float)):
+                c = 1/b
+                if c.is_integer():
+                    c = round(c)
+            else:
+                c = b.reciprocal() << f
+        else:
+            if not isinstance(b, field.array):
+                b = field.array(b)  # TODO: see if this can be used for case f != 0 as well
+            c = b.reciprocal()
+        return self.np_multiply(a, c)
+
     @mpc_coro
     async def reciprocal(self, a):
-        """Secure reciprocal (multiplicative inverse) of a, for nonzero a."""
+        """Secure reciprocal (multiplicative field inverse) of a, for nonzero a."""
         stype = type(a)
         field = stype.field
         await self.returnType(stype)
@@ -789,6 +1015,22 @@ class Runtime:
             r = self._random(field)
             ar = await self.output(a * r, threshold=2*self.threshold)
             if ar:
+                break
+        r <<= stype.frac_length
+        return r / ar
+
+    @mpc_coro
+    async def np_reciprocal(self, a):
+        """Secure reciprocal (multiplicative field inverse) of a, for nonzero a."""
+        stype = type(a)
+        shape = a.shape
+        field = stype.sectype.field
+        await self.returnType((stype, shape))
+        a = await self.gather(a)
+        while True:  # will only succeec for large fields or small arrays a
+            r = self._np_randoms(field, a.size).reshape(shape)
+            ar = await self.output(a * r, threshold=2*self.threshold)
+            if (ar != 0).all():
                 break
         r <<= stype.frac_length
         return r / ar
@@ -850,7 +1092,7 @@ class Runtime:
 
     def ge(self, a, b):
         """Secure comparison a >= b."""
-        return 1 - self.sgn(a - b, LT=True)
+        return 1 - self.lt(a, b)  # TODO: deprecate, give warning maybe
 
     def abs(self, a, l=None):
         """Secure absolute value of a."""
@@ -1391,7 +1633,7 @@ class Runtime:
         s = sum(a.value * b.value for a, b in zip(x, y))
         s = stype.field(s)
         if f and (x_integral or y_integral):
-            s >>= f
+            s >>= f  # NB: in-place rshift
         if shx and shy:
             s = self._reshare(s)
         if f and not (x_integral or y_integral):
@@ -1448,6 +1690,58 @@ class Runtime:
         return x[0]
 
     @mpc_coro
+    async def np_prod(self, x, start=1):
+        """Secure product of all elements in x, similar to Python's math.prod().
+
+        Elements of x are assumed to be arrays of the same shape.
+        Runs in log_2 len(x) rounds).
+        """
+        # TODO: cover case of SecureArray  (incl. case f > 0
+        if iter(x) is x:
+            x = list(x)
+        else:
+            x = x[:]
+        if x == []:
+            return start
+
+        x[0] = x[0] * start  # NB: also updates x[0].integral if applicable
+        sftype = type(x[0])  # all elts assumed of same type and shape
+        if issubclass(sftype, self.SecureObject):
+            assert False
+            f = sftype.frac_length
+            if not f:
+                await self.returnType((sftype, x[0].shape))
+            else:
+                integral = [a.integral for a in x]
+                await self.returnType((sftype, all(integral)))
+            x = await self.gather(x)
+        else:
+            f = 0
+            await self.returnType(Future)
+
+        n = len(x)
+        while n > 1:
+            h = [x[i] * x[i+1] for i in range(n%2, n, 2)]
+            x[n%2:] = await self.gather([self._reshare(a) for a in h])
+            if f:
+                z = []
+                for i in range(n%2, n, 2):
+                    j = (n%2 + i)//2
+                    if not integral[i] and not integral[i+1]:
+                        z.append(x[j])  # will be truncated
+                    else:
+                        x[j] >>= f  # NB: in-place rshift
+                if z:
+                    z = await self.trunc(z, f=f, l=sftype.bit_length)
+                    for i in reversed(range(n%2, n, 2)):
+                        j = (n%2 + i)//2
+                        if not integral[i] and not integral[i+1]:
+                            x[j] = z.pop()
+                integral[n%2:] = [integral[i] and integral[i+1] for i in range(n%2, n, 2)]
+            n = len(x)
+        return x[0]
+
+    @mpc_coro
     async def all(self, x):
         """Secure all of elements in x, similar to Python's built-in all().
 
@@ -1484,6 +1778,48 @@ class Runtime:
                     a >>= f  # NB: in-place rshift
             h = await self._reshare(h)
             x[n%2:] = h
+            n = len(x)
+        return x[0]
+
+    @mpc_coro
+    async def np_all(self, x):
+        """Secure all of elements in x, similar to Python's built-in all().
+
+        Elements of x are assumed to be arrays of the same shape,
+        containing 0s and 1s (Boolean).
+        Runs in log_2 len(x) rounds.
+        """
+        # TODO: cover case of SecureArray  (incl. case f > 0
+        if iter(x) is x:
+            x = list(x)
+        else:
+            x = x[:]
+        if x == []:
+            return 1
+
+        sftype = type(x[0])  # all elts assumed of same type and shape
+        if issubclass(sftype, self.SecureObject):
+            assert False  # TODO: cover this case, set shape
+            f = sftype.frac_length
+            if not f:
+                await self.returnType(sftype)
+            else:
+                if not all(a.integral for a in x):
+                    raise ValueError('nonintegral fixed-point number')
+
+                await self.returnType((sftype, True))
+            x = await self.gather(x)
+        else:
+            f = 0
+            await self.returnType(Future)
+
+        n = len(x)  # TODO: for sufficiently large n use mpc.eq(mpc.sum(x), n) instead
+        while n > 1:
+            h = [x[i] * x[i+1] for i in range(n%2, n, 2)]
+            if f:
+                for a in h:
+                    a >>= f  # NB: in-place rshift
+            x[n%2:] = await self.gather([self._reshare(a) for a in h])
             n = len(x)
         return x[0]
 
@@ -1753,6 +2089,449 @@ class Runtime:
         return C
 
     @mpc_coro
+    async def np_matmul(self, A, B):
+        shA = isinstance(A, self.SecureObject)
+        shB = isinstance(B, self.SecureObject)
+        stype = type(A) if shA else type(B)
+        shape = np._matmul_shape(A.shape, B.shape)
+        if not stype.frac_length:
+            if shape is None:
+                rettype = stype.sectype
+            else:
+                rettype = (stype, shape)
+        else:
+            if shape is None:
+                rettype = (stype.sectype, A.integral and B.integral)
+            else:
+                rettype = (stype, A.integral and B.integral, shape)
+            # TODO: handle A or B public integral value
+        await self.returnType(rettype)
+
+        if A is B:
+            A = B = await self.gather(A)
+        elif shA and shB:
+            A, B = await self.gather(A, B)
+        elif shA:
+            A = await self.gather(A)
+        else:
+            B = await self.gather(B)
+        C = A @ B
+        if shA and shB:
+            C = self._reshare(C)
+        if stype.frac_length:
+            if shape is None:
+                C = self.trunc(stype.sectype(C))
+            else:
+                C = self.np_trunc(stype(C, shape=shape))
+        return C
+
+    @mpc_coro_no_pc
+    async def np_getitem(self, a, key):
+        """SecureArray a, index/slice key."""
+        stype = type(a)
+        shape = np._item_shape(a.shape, key)
+        if not shape:
+            stype = stype.sectype
+        if issubclass(type(a), self.SecureFixedPointArray):
+            if not shape:
+                stype = (stype, a.integral)
+            else:
+                stype = (stype, a.integral, shape)
+        elif shape:
+            stype = (stype, shape)
+        await self.returnType(stype)
+        a = await self.gather(a)
+        return a.__getitem__(key)
+
+    # TODO: investigate possibility for np_setitem, for now use np_update() below, see sha3 demo
+
+    @mpc_coro_no_pc
+    async def np_update(self, a, key, value):
+        """Return secure array a modified by update a[key]=value.
+
+        Also value can be a secure array or object.
+        But key is in the clear.
+
+        Differs from __setitem__() which works in-place, returning None.
+        """
+        await self.returnType((type(a), a.shape))
+        if isinstance(value, self.SecureObject):
+            value = await self.gather(value)
+        a = await self.gather(a)
+        a.__setitem__(key, value)
+        return a
+
+    @mpc_coro_no_pc
+    async def np_flatten(self, a, order):
+        if isinstance(a, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((type(a), a.integral, (a.size,)))
+        else:
+            await self.returnType((type(a), (a.size,)))
+        a = await self.gather(a)
+        return a.flatten(order)
+
+    @mpc_coro_no_pc
+    async def np_tolist(self, a):
+        stype = type(a).sectype
+        if issubclass(stype, self.SecureFixedPoint):
+            assert a.integral is not None
+            await self.returnType((stype, a.integral), *a.shape)
+        else:
+            await self.returnType(stype, *a.shape)
+        a = await self.gather(a)
+        return a.tolist()
+
+    @mpc_coro_no_pc
+    async def np_reshape(self, a, shape, order='C'):
+        stype = type(a)
+        if isinstance(shape, int):
+            shape = (shape,)  # ensure shape is a tuple
+        if -1 in shape:
+            raise ValueError('reshape with unknown dimension not allowed for secure arrays')
+
+        if issubclass(stype, self.SecureFixedPointArray):
+            await self.returnType((stype, a.integral, shape))
+        else:
+            await self.returnType((stype, shape))
+        a = await self.gather(a)
+        return a.reshape(shape, order=order)
+
+    @mpc_coro_no_pc
+    async def np_copy(self, a, order='K'):
+        # Note that numpy.copy() puts order='K', but ndarray.copy() puts order='C'.
+        # Therefore, we put order='K' here and let SecureArray.copy() call np_copy() with order='C'.
+        # TODO: a can be a scalar, should be wrapped in 0D array
+        stype = type(a)
+        if issubclass(stype, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((stype, a.integral, a.shape))
+        else:
+            await self.returnType((stype, a.shape))
+        a = await self.gather(a)
+        return a.copy(order=order)
+
+    @mpc_coro_no_pc
+    async def np_transpose(self, a, axes=None):
+        stype = type(a)
+        if axes is None:
+            perm = range(a.ndim)[::-1]
+        else:
+            perm = axes
+        shape = tuple(a.shape[perm[i]] for i in range(a.ndim))
+        if issubclass(stype, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((stype, a.integral, shape))
+        else:
+            await self.returnType((stype, shape))
+        a = await self.gather(a)
+        return a.transpose(perm)
+
+    @mpc_coro_no_pc
+    async def np_swapaxes(self, a, axis1, axis2):
+        shape = list(a.shape)
+        shape[axis1], shape[axis2] = shape[axis2], shape[axis1]
+        await self.returnType((type(a), tuple(shape)))
+        a = await self.gather(a)
+        return a.swapaxes(axis1, axis2)
+
+    @mpc_coro_no_pc
+    async def np_concatenate(self, arrays, axis=0):
+        a = arrays[0]  # TODO: drop assumption first elt is secure array
+        shape = list(a.shape)
+        shape[axis] = sum(a.shape[axis] for a in arrays)
+        await self.returnType((type(a), tuple(shape)))
+        arrays = await self.gather(arrays)
+        return np.concatenate(arrays, axis=axis)
+
+    @mpc_coro_no_pc
+    async def np_stack(self, arrays, axis=0):
+        a = arrays[0]
+        shape = list(a.shape)
+        shape.insert(axis, len(arrays))
+        await self.returnType((type(a), tuple(shape)))
+        arrays = await self.gather(arrays)
+        return np.stack(arrays, axis=axis)
+
+    @mpc_coro_no_pc
+    async def np_block(self, arrays):
+        def extract_type(s):
+            if isinstance(s, list):
+                for a in s:
+                    if cls := extract_type(a):
+                        break
+            elif isinstance(s, sectypes.SecureObject):
+                cls = type(s)
+            else:
+                cls = None
+            return cls
+
+        sectype = extract_type(arrays)
+        if not issubclass(sectype, sectypes.SecureArray):
+            sectype = sectype.array
+
+        def block_ndim(a, depth=0):
+            if not isinstance(a, list):
+                ndm = max(getattr(a, 'ndim', 0), depth)
+            else:
+                ndm = max(block_ndim(_, depth+1) for _ in a)
+            return ndm
+
+        def _block_shape(a, ndm):
+            if not isinstance(a, list):
+                shape = getattr(a, 'shape', ())
+                shape = [1]*(ndm - len(shape)) + list(shape)  # pad all shapes with leading 1s
+                height = 1
+            else:
+                # Same shape (except for axis -h) and height for all blocks in a:
+                shape, h = _block_shape(a[0], ndm)
+                # Sum sizes for dimension -h:
+                shape[-h] = sum(_block_shape(_, ndm)[0][-h] for _ in a)
+                height = h + 1
+            return shape, height
+
+        def block_shape(a):
+            return tuple(_block_shape(a, block_ndim(a))[0])  # TODO: move this to mpyc.numpy module
+
+        await self.returnType((sectype, block_shape(arrays)))
+        arrays = await self.gather(arrays)
+        return np.block(arrays)
+
+    @mpc_coro_no_pc
+    async def np_vstack(self, tup):
+        a = tup[0]
+        shape = list(a.shape) if a.ndim >= 2 else [1, shape[0]]
+        shape[0] = sum(a.shape[0] if a.shape[1:] else 1 for a in tup)
+        await self.returnType((type(a), tuple(shape)))
+        tup = await self.gather(tup)
+        return np.vstack(tup)
+
+    @mpc_coro_no_pc
+    async def np_hstack(self, tup):
+        """Stack arrays in sequence horizontally (column wise).
+
+        This is equivalent to concatenation along the second axis,
+        except for 1-D arrays where it concatenates along the first
+        axis. Rebuilds arrays divided by hsplit.
+        """
+        a = tup[0]
+        shape = list(a.shape)
+        if a.ndim == 1:
+            shape[0] = sum(a.shape[0] for a in tup)
+        else:
+            shape[1] = sum(a.shape[1] for a in tup)
+        await self.returnType((type(a), tuple(shape)))
+        tup = await self.gather(tup)
+        return np.hstack(tup)
+
+    @mpc_coro_no_pc
+    async def np_dstack(self, tup):
+        """Stack arrays in sequence depth wise (along third axis).
+
+        This is equivalent to concatenation along the third axis
+        after 2-D arrays of shape (M,N) have been reshaped to
+        (M,N,1) and 1-D arrays of shape (N,) have been reshaped
+        to (1,N,1). Rebuilds arrays divided by dsplit.
+        """
+        a = tup[0]
+        if a.ndim == 1:
+            shape = (1, a.shape[0], len(tup))
+        if a.ndim == 2:
+            shape = (a.shape[0], a.shape[1], len(tup))
+        else:
+            shape = list(a.shape)
+            shape[2] = sum(a.shape[2] for a in tup)
+            shape = tuple(shape)
+        await self.returnType((type(a), shape))
+        tup = await self.gather(tup)
+        return np.dstack(tup)
+
+    @mpc_coro_no_pc
+    async def np_column_stack(self, tup):
+        a = tup[0]
+        shape_0 = a.shape[0]
+        shape_1 = sum(a.shape[1] if a.shape[1:] else 1 for a in tup)
+        shape = (shape_0, shape_1)
+        await self.returnType((type(a), shape))
+        tup = await self.gather(tup)
+        return np.column_stack(tup)
+
+    np_row_stack = np_vstack
+
+    @mpc_coro_no_pc
+    async def np_split(self, ary, indices_or_sections, axis=0):
+        """Split an array into multiple sub-arrays as views into ary."""
+        shape = list(ary.shape)
+        if isinstance(indices_or_sections, int):
+            N = indices_or_sections
+        else:
+            N = indices_or_sections.shape[axis]
+        shape[axis] //= N
+        shape = tuple(shape)
+        await self.returnType((type(ary), shape), N)
+        ary = await self.gather(ary)
+        return np.split(ary, indices_or_sections, axis)
+
+    # TODO: array_split() returning arrays of different shapes -- not yet supported by returnType()
+    # array_split(ary, indices_or_sections[, axis]) Split an array into multiple sub-arrays.
+
+    def np_dsplit(self, ary, indices_or_sections):
+        """Split array into multiple sub-arrays along the 3rd axis (depth)."""
+        return self.np_split(ary, indices_or_sections, axis=2)
+
+    def np_hsplit(self, ary, indices_or_sections):
+        """Split an array into multiple sub-arrays horizontally (column-wise)."""
+        return self.np_split(ary, indices_or_sections, axis=1)
+
+    def np_vsplit(self, ary, indices_or_sections):
+        """Split an array into multiple sub-arrays vertically (row-wise)."""
+        return self.np_split(ary, indices_or_sections, axis=0)
+
+    def np_minimum(self, a, b):
+        return b + (a < b) * (a - b)
+
+    def np_maximum(self, a, b):
+        return a + (a < b) * (b - a)
+
+    def np_where(self, c, a, b):
+        return c * (a - b) + b
+
+    def np_amax(self, a, axis=None):
+        assert axis is None  # TODO: handle other axis (axes) and other kwargs like keepdims
+        return self.max(a.flatten().tolist())
+
+    def np_amin(self, a, axis=None):
+        assert axis is None  # TODO: handle other axis (axes) and other kwargs like keepdims
+        return self.min(a.flatten().tolist())
+
+    @mpc_coro_no_pc
+    async def np_sum(self, a, axis=None):
+        # TODO: handle multiple axes and other kwargs like keepdims
+        if axis is None:
+            await self.returnType(type(a).sectype)
+        else:
+            shape = a.shape[:axis] + a.shape[axis+1:]
+            await self.returnType((type(a), shape))
+        a = await self.gather(a)
+        return np.sum(a, axis=axis)
+
+    @mpc_coro_no_pc
+    async def np_roll(self, a, shift, axis=None):
+        await self.returnType((type(a), a.shape))
+        a = await self.gather(a)
+        return np.roll(a, shift, axis)
+
+    @mpc_coro_no_pc
+    async def np_neg(self, a):
+        await self.returnType((type(a), a.shape))
+        a = await self.gather(a)
+        return -a
+
+    def np_less(self, a, b):
+        """Secure comparison a < b."""
+        return self.np_sgn(a - b, LT=True)
+
+    def np_equal(self, a, b):
+        """Secure comparison a < b."""
+        return self.np_sgn(a - b, EQ=True)
+        # TODO: use prob. zerotest as well like in is_zero
+        # TODO: cover finite field arrays (introduce np_pow())
+
+    @mpc_coro
+    async def np_sgn(self, a, l=None, LT=False, EQ=False):
+        """Secure sign(um) of a, return -1 if a < 0 else 0 if a == 0 else 1.
+
+        If integer flag l=L is set, it is assumed that -2^(L-1) <= a < 2^(L-1)
+        to save work (compared to the default l=type(a).bit_length).
+
+        If Boolean flag LT is set, perform a secure less than zero test instead, and
+        return 1 if a < 0 else 0, saving the work for a secure equality test.
+        If Boolean flag EQ is set, perform a secure equal to zero test instead, and
+        return 1 if a == 0 else 0, saving the work for a secure comparison.
+        """
+        assert not (LT and EQ)
+        stype = type(a)
+        await self.returnType((stype, True, a.shape))
+        Zp = stype.sectype.field
+
+        n = a.size
+        l = l or stype.sectype.bit_length
+        k = self.options.sec_param
+        r_bits = (await self.np_random_bits(Zp, (l + int(not EQ)) * n)).value
+        if not EQ:
+            s_sign = (r_bits[-n:] << 1) - 1
+        r_bits = r_bits[:l*n].reshape((n, l))
+        shifts = np.arange(l-1, -1, -1)
+        r_modl = np.sum(r_bits << shifts, axis=1)
+        r_divl = self._np_randoms(Zp, n, 1<<k).value
+        a = await self.gather(a)
+        a_r = a.value.reshape((n,)) + (1<<l) + r_modl
+        c = await self.output(Zp.array(a_r + (r_divl << l)))
+        c = c.value & ((1<<l) - 1)
+        z = c - a_r
+
+        c_bits = np.right_shift.outer(c, shifts).T & 1
+        r_bits = r_bits.T
+        Xor = c_bits + r_bits - (c_bits*r_bits << 1)  # shape (l, n)
+
+        if not EQ:  # a la Toft
+            zeros = np.zeros((1, n), dtype=object)
+            ones = np.ones((1, n), dtype=object)
+            SumXors = np.cumsum(np.vstack((zeros, Xor)), axis=0)
+            if LT:
+                del Xor
+            e = s_sign - np.vstack((c_bits - r_bits, ones)) + 3*SumXors
+            del c_bits, r_bits, SumXors
+            e = self.np_prod(map(Zp.array, e))
+            g = await self.np_is_zero_public(stype(e, shape=(n,)))
+            h = (1 - (g << 1)) * s_sign + 3
+            z = Zp.array(z + (h << l-1)) >> l
+
+        if not LT:
+            h = self.np_all(map(Zp.array, 1 - Xor))
+            del Xor
+            h = await self.gather(h)
+            if EQ:
+                z = h
+            else:
+                h = h.value
+                z = z.value
+                z = Zp.array((h - 1) * ((z << 1) - 1))
+                z = await self._reshare(z)
+
+        z <<= stype.frac_length
+        z = z.reshape(a.shape)
+        return z
+
+    @mpc_coro
+    async def np_det(self, A):
+        """Secure determinant for nonsingular matrices."""
+        # TODO: allow case det(A)=0 (obliviously)
+        secnum = type(A).sectype
+        await self.returnType(secnum)
+
+        n = A.shape[0]
+        while True:
+            U = self._np_randoms(secnum.field, n**2).reshape(n, n)
+            detU = self.prod(np.diag(U).tolist())  # detU != 0 with high probability
+            detU = secnum(detU)
+            if not await self.is_zero_public(detU):
+                break
+
+        U = U.value
+        L = np.diag(np.ones(n, dtype='O'))
+        L[np.triu_indices(n, 1)] = 0
+        L[np.tril_indices(n, -1)] = U[np.tril_indices(n, -1)]
+        U[np.tril_indices(n, -1)] = 0
+        L = secnum.array(L)
+        U = secnum.array(U)
+        LUA = L @ (U @ A)
+        LUA = await self.output(LUA, raw=True)
+        detLUA = np.linalg.det(LUA)
+        detA = detLUA / detU
+        return detA
+
+    @mpc_coro
     async def gauss(self, A, d, b, c):
         """Secure Gaussian elimination A d - b c."""
         n1, n2 = len(A), len(A[0])
@@ -1803,6 +2582,25 @@ class Runtime:
         shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
         if issubclass(sftype, self.SecureObject):
             shares = [sftype(s) for s in shares]
+        return shares
+
+    def _np_randoms(self, sftype, n, bound=None):
+        """n secure random values of the given type in the given range."""
+        if issubclass(sftype, self.SecureArray):
+            field = sftype.sectype.field
+        elif issubclass(sftype, self.SecureObject):
+            field = sftype.field
+        else:
+            field = sftype
+        if bound is None:
+            bound = field.order
+        else:
+            bound = 1 << max(0, (bound // self._bincoef).bit_length() - 1)  # NB: rounded power of 2
+        m = len(self.parties)
+        prfs = self.prfs(bound)
+        shares = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
+        if issubclass(sftype, self.SecureObject):
+            shares = sftype(shares)
         return shares
 
     def random_bit(self, stype, signed=False):
@@ -1857,6 +2655,52 @@ class Runtime:
                         s *= q
                     bits[h] = field(s << f)
         return bits
+
+    @mpc_coro
+    async def np_random_bits(self, sftype, n, signed=False):
+        """Return shape-(n,) secure array of given type with uniformly random bits."""
+        # TODO: extend to arbitrary shapes
+        prss0 = False
+        if issubclass(sftype, self.SecureObject):
+            if issubclass(sftype, self.SecureFiniteField):
+                prss0 = True
+            await self.returnType((sftype.array, True, (n,)))
+            field = sftype.field
+            f = sftype.frac_length
+        else:
+            await self.returnType(Future)
+            field = sftype
+            f = 0
+
+        m = len(self.parties)
+        if field.characteristic == 2:
+            prfs = self.prfs(2)
+            bits = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
+            return bits
+
+        if not signed:
+            p = field.characteristic
+            modulus = field.modulus
+            q = (p+1) >> 1  # q = 1/2 mod p
+        prfs = self.prfs(field.order)
+        t = self.threshold
+        h = n
+        while h > 0:
+            r = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
+            # Compute and open the squares and compute square roots.
+            r2 = r * r
+            if prss0:
+                z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), h)
+                r2 += z
+            r2 = await self.output(r2, threshold=2*t)
+            h = 0  # TODO: handle case that r2 constains 0s, e.g.. using np.any(r2.value == 0)
+            s = r.value * field.array._sqrt(r2.value, INV=True)
+            if not signed:
+                s %= modulus
+                s += 1
+                s *= q
+            bits = s << f
+        return field.array(bits)
 
     def add_bits(self, x, y):
         """Secure binary addition of bit vectors x and y."""

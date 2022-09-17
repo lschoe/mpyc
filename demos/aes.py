@@ -2,7 +2,7 @@
 
 The demo performs an AES encryption followed by an AES decryption
 for a 128-bit AES key and a 256-bit AES key, cf. the examples in
-Appendices C.1 and C.3 of the Advanced Encryption Standard (FIPS PUB 197).
+Appendices C.1 and C.3 of the Advanced Encryption Standard (FIPS 197).
 
 The plaintext p, key k, and ciphertext c are represented as lists
 of secure GF(2^8) elements. Note that computations over GF(2) are

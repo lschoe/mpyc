@@ -1,5 +1,6 @@
 import operator
 import unittest
+from mpyc.numpy import np
 from mpyc import gfpx
 from mpyc import finfields
 
@@ -137,8 +138,7 @@ class Arithmetic(unittest.TestCase):
         a = f256(177)
         self.assertTrue(a.is_sqr())
         self.assertEqual(a.sqrt()**2, a)
-        a = f256(255)
-        self.assertEqual(a.sqrt()**2, a)
+        self.assertEqual(a.sqrt(INV=True)**2, 1/a)
 
         self.assertEqual(len({f256(i) for i in range(-120, 259)}), 256)
 
@@ -312,6 +312,216 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.irshift, f256(1), f256(1))
         self.assertRaises(TypeError, operator.pow, f2(1), f19(2))
         self.assertRaises(TypeError, operator.pow, f19(1), 3.14)
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_array(self):
+        np.assertEqual = np.testing.assert_array_equal
+
+        F = self.f101
+        self.assertEqual(np.add(100, F(8)), 7)
+        self.assertEqual(np.subtract(1, F(8)), 94)
+        self.assertEqual(np.multiply(100, F(-8)), 8)
+        self.assertEqual(np.divide(1, F(2)), 51)
+        self.assertEqual(np.sqrt(F(9))**2, 9)
+
+        a = np.array([[-1, 1], [3, -3]])
+        F_a = F.array(a)
+
+        self.assertEqual(F.from_bytes(F.to_bytes(F_a.value.flat)), list(F_a.value.flat))
+        self.assertTrue(isinstance(F_a[0, 0], F))
+        self.assertTrue(isinstance(F_a[:, 0], F.array))
+        F_a[0, 0] = 2
+        F_a[0, :] = [109]
+        self.assertEqual(int(F_a[0, 1]), 8)
+        self.assertRaises(ValueError, operator.setitem, F_a, (0, 0), [2, 2])
+        self.assertRaises(ValueError, operator.setitem, F_a, (0, ...), [2, 2, 2])
+        self.assertRaises(TypeError, operator.pow, 2, F_a)
+        self.assertRaises(TypeError, int, F_a)
+
+        self.assertEqual(np.ndim(F_a), np.ndim(a))
+        self.assertEqual(np.shape(F_a), np.shape(a))
+        self.assertEqual(np.size(F_a), np.size(a))
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_array_ufunc(self):
+        np.assertEqual = np.testing.assert_array_equal
+
+        F = self.f101
+        a = F.array([[8, 8], [3, -3]])
+
+        a = np.add(a, a) + np.negative(a)
+        np.negative.at(a, (1, 1))  # NB: in-place
+        np.negative.at(a, (1, 1))  # NB: in-place
+        np.assertEqual(np.add.reduce(a, 1), [16, 0])
+        np.assertEqual(np.add.reduce(np.add.reduce(a, 1)), 16)
+        a += 2
+        a -= 2
+        a *= 3
+        np.add(np.array([1], dtype=np.int32), a)
+        np.add(a, np.array([1], dtype=np.int64))
+        self.assertRaises(TypeError, np.add, np.array([1], dtype=np.float64), a)
+        self.assertRaises(TypeError, np.add, a, np.array([1], dtype=np.float32))
+#        a = np.power(a, 2)
+#        a = divmod(a, 2)
+        a **= 2
+        a = a @ a
+
+        F = finfields.GF(2**127 - 1)
+        a, b = np.array([[-1, -1], [1, 1]]), np.array([[1, -5], [-1, -1]])
+        F_a, F_b = F.array(a), F.array(b)
+        a = a @ b
+        F_a = F_a @ b
+        b = a @ b
+        F_b = a @ F_b
+        np.assertEqual(np.multiply(F_a, F_b), np.multiply(a, b))
+        np.assertEqual(F_a @ F_b, np.matmul(a, b))
+        np.assertEqual(a @ F_b, np.matmul(a, b))
+        np.assertEqual(np.matmul(F_a, F_b), np.matmul(a, b))
+        np.assertEqual(np.add(F_a, F_b), np.add(a, b))
+
+        np.assertEqual(np.reciprocal(F_b) * F_b, np.ones(b.shape, dtype='O'))
+        np.assertEqual(np.sqrt(F_a**2)**2, F_a**2)
+
+        F81_b = self.f81.array(b)
+        np.assertEqual(np.sqrt(F81_b**2)**2, F81_b**2)
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_ndarray(self):
+        np.assertEqual = np.testing.assert_array_equal
+
+        F = self.f256
+        a = np.array([[1, 2, 3, 4], [8, 7, 6, 5]])
+        F_a = F.array(a)
+        F_a_v = np.vectorize(lambda a: a.value, otypes='O')(F_a)
+
+        self.assertEqual(F_a.ndim, a.ndim)
+        self.assertEqual(F_a.shape, a.shape)
+        self.assertEqual(F_a.size, a.size)
+        np.assertEqual(F_a.T, a.T)
+        np.assertEqual(F_a.transpose(), a.transpose())
+        np.assertEqual(F_a.swapaxes(0, 1), a.swapaxes(0, 1))
+        self.assertEqual(F_a.tolist(), a.tolist())
+        np.assertEqual(F_a.ravel(), a.ravel())
+        np.assertEqual(F_a.compress([0, 1]), a.compress([0, 1]))
+        self.assertEqual(F_a.sum(), F_a_v.sum())
+        np.assertEqual(F_a.prod(axis=1), F_a_v.prod(axis=1))
+        np.assertEqual(F_a.repeat(4, axis=1), a.repeat(4, axis=1))
+        np.assertEqual(F_a.diagonal(), a.diagonal())
+        self.assertEqual(F_a.trace(), F_a_v.trace())
+
+        self.assertTrue(F_a.is_sqr().all())
+        np.assertEqual((F_a**2).sqrt(), a)
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_array_function(self):
+        np.assertEqual = np.testing.assert_array_equal
+
+        F = finfields.GF(2**127 - 1)
+        a = np.array([[-1, -2, -3, -4], [0, 0, 0, 0], [1, 1, 1, 1], [1, 2, 3, 4]])
+        b = np.array([[10, 31, 1, -5], [76, 111, 11, 89], [67, 111, 1, -89], [-1, 10, 10, -1]])
+        F_a, F_b = F.array(a), F.array(b)
+
+        np.assertEqual(np.dot(F_a, F_b), np.dot(a, b))
+        np.assertEqual(np.dot(F_a, 3), np.dot(a, 3))
+        np.assertEqual(np.dot(F(3), F_a), np.dot(3, a))
+        np.assertEqual(np.dot(F_a, F(3)), np.dot(a, 3))
+        np.assertEqual(np.vdot(F_a, F_b), np.vdot(a, b))
+        np.assertEqual(np.tensordot(F_a, F_b), np.tensordot(a, b))
+        np.assertEqual(np.inner(F_a, F_b), np.inner(a, b))
+        np.assertEqual(np.outer(F_a, F_b), np.outer(a, b))
+        np.assertEqual(np.concatenate((F_a, F_b, F_a.T)), np.concatenate((a, b, a.T)))
+        np.assertEqual(np.stack([F_a, F_b]), np.stack([a, b]))
+        np.assertEqual(np.stack([a, F_b], axis=1), np.stack([a, b], axis=1))
+        np.assertEqual(np.block([[F(0)]]), np.block([[0]]))
+        np.assertEqual(np.block([0, F(1)]), np.block([0, 1]))
+        np.assertEqual(np.block([[F_a, F_b], [F_a.T, F_b.T]]), np.block([[a, b], [a.T, b.T]]))
+        np.assertEqual(np.vstack([F_a, F_b]), np.vstack([a, b]))
+        np.assertEqual(np.hstack([F_a, F_b]), np.hstack([a, b]))
+        np.assertEqual(np.dstack([F_a, F_b]), np.dstack([a, b]))
+        np.assertEqual(np.column_stack([F_a, F_b]), np.column_stack([a, b]))
+        np.assertEqual(np.row_stack([F_a, F_b]), np.row_stack([a, b]))
+        np.assertEqual(np.split(F_a, 2)[0], np.split(a, 2)[0])
+        np.assertEqual(np.array_split(F_a, 2)[1], np.array_split(a, 2)[1])
+        np.assertEqual(np.dsplit(F_a.reshape(1, 4, 4), 2)[1], np.dsplit(a.reshape(1, 4, 4), 2)[1])
+        np.assertEqual(np.hsplit(F_a, 2)[1], np.hsplit(a, 2)[1])
+        np.assertEqual(np.vsplit(F_a, 2)[0], np.vsplit(a, 2)[0])
+        np.assertEqual(np.tile(F_a, 3), np.tile(a, 3))
+        np.assertEqual(np.tile(F_a, (2, 2)), np.tile(a, (2, 2)))
+        np.assertEqual(np.repeat(F(3), 4), np.repeat(3, 4))
+        np.assertEqual(np.repeat(F_a, [1, 2, 2, 1], axis=0), np.repeat(a, [1, 2, 2, 1], axis=0))
+        np.assertEqual(np.delete(F_a, 1, 0), np.delete(a, 1, 0))
+        np.assertEqual(np.delete(F_a, [1, 3]), np.delete(a, [1, 3]))
+        np.assertEqual(np.insert(F_a, 1, 5), np.insert(a, 1, 5))
+        np.assertEqual(np.insert(F_a, 1, F(5), axis=1), np.insert(a, 1, 5, axis=1))
+        np.assertEqual(np.append(F_a, F_b), np.append(a, b))
+        np.assertEqual(np.append(F_a, [[0, 0, 0, 0]], axis=0), np.append(a, [[0, 0, 0, 0]], axis=0))
+        np.assertEqual(np.append(F_a, F_b, axis=1), np.append(a, b, axis=1))
+        np.assertEqual(np.resize(F_a, (3, 7)), np.resize(a, (3, 7)))
+        np.assertEqual(np.trim_zeros(F_a[0], trim='b'), np.trim_zeros(a[0], trim='b'))
+        np.assertEqual(np.flip(F_a), np.flip(a))
+        np.assertEqual(np.fliplr(F_a), np.fliplr(a))
+        np.assertEqual(np.flipud(F_a), np.flipud(a))
+        np.assertEqual(np.reshape(F_a, (F_a.size,), order='F'), np.reshape(a, (a.size,), order='F'))
+        np.assertEqual(np.roll(F_a, -1), np.roll(a, -1))
+        np.assertEqual(np.rot90(F_a), np.rot90(a))
+        np.assertEqual(np.sum(F_a), np.sum(a))
+        np.assertEqual(np.sum(F_a, axis=0), np.sum(a, axis=0))
+        np.assertEqual(np.prod(F_a), np.prod(a))
+        np.assertEqual(np.prod(F_a, axis=1), np.prod(a, axis=1))
+        np.assertEqual(np.kron(F_a, F_b), np.kron(a, b))
+
+        np.assertEqual(np.linalg.matrix_power(F_a, 3), np.linalg.matrix_power(a, 3))
+        np.assertEqual(F_b @ np.linalg.solve(F_b, F_a), F_a)
+        np.assertEqual(np.linalg.inv(F_b) @ F_b, np.eye(len(F_b), dtype='O'))
+        self.assertEqual(np.linalg.det(F_a), round(np.linalg.det(a)))
+        self.assertEqual(np.linalg.det(F_b), round(np.linalg.det(b)))
+        np.assertEqual(np.linalg.det(np.stack((F_a, F_b))),
+                       np.vectorize(round)(np.linalg.det(np.stack((a, b)))))
+        np.assertEqual(np.linalg.matrix_power(F_b, -5) @ np.linalg.matrix_power(F_b, 5),
+                       np.eye(len(F_b), dtype='O'))
+
+        F81_b = self.f81.array(b)
+        np.assertEqual(np.linalg.inv(F81_b) @ F81_b, np.eye(len(F81_b), dtype='O'))
+
+        np.assertEqual(np.tril(F_a), np.tril(a))
+        np.assertEqual(np.triu(F_a), np.triu(a))
+        np.assertEqual(np.diag(F_a), np.diag(a))
+        np.assertEqual(np.diag(F_a[0]), np.diag(a[0]))
+        np.assertEqual(np.diagflat(F_a), np.diagflat(a))
+        np.assertEqual(np.diagonal(F_a), np.diagonal(a))
+        np.assertEqual(np.vander(F_b[0]), np.vander(b[0]))
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_array_getsetitem(self):
+        np.assertEqual = np.testing.assert_array_equal
+
+        F = finfields.GF(257)
+        a = np.array([[-1, -2, -3, -4], [0, 0, 0, 0], [1, 1, 1, 1], [1, 2, 3, 4]])
+        b = np.array([[0, 31, 1, -5], [76, 111, 11, 89], [67, 111, 1, -89], [-1, 0, 0, -1]])
+        F_a, F_b = F.array(a), F.array(b)
+
+        F_a[1] = F_b[1]
+        F_a[2] = b[2]
+        F_a[[0, 3]] = F_b[[0, 3]]
+        np.assertEqual(F_a, F_b)
+        F_a = F.array(a)
+        F_a[:] = F_b[:]
+        np.assertEqual(F_a, F_b)
+        F_a = F.array(a)
+        F_a[:, 1] = F_b[:, 1]
+        F_a[:, 2] = b[:, 2]
+        F_a[:, [0, 3]] = F_b[:, [0, 3]]
+        np.assertEqual(F_a, F_b)
+        F_a = F.array(a)
+
+        self.assertRaises(ValueError, operator.setitem, F_a, 0, F_b)
+        self.assertRaises(ValueError, operator.setitem, F_a, (slice(None), 1), F_b)
+
+        self.assertTrue(F_a[0] in F_a)
+        self.assertTrue(-F_a[0] in F_a)
+        self.assertTrue(-F_a[2] in F_a)  # NB: tricky semantics for __contains__()
+        self.assertFalse(100 in F_a)
+        self.assertTrue(F_a[0, 0] in F_a)
 
 
 if __name__ == "__main__":

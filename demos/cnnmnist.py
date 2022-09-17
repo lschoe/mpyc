@@ -106,7 +106,7 @@ def inprod2D(X, W):
 
 
 def tensormatrix_prod(x, W, b):
-    logging.info('- - - - - - - - fc      - - - - - - -')
+    logging.info(f'- - - - - - - - fc {len(W)} x {len(W[0]):4}  - - -')
     W, b = W.tolist(), b.tolist()
     return [mpc.vector_add(mpc.matrix_prod([z.tolist()], W)[0], b) for z in x]
 

@@ -16,6 +16,30 @@ import os
 import logging
 
 
+def _matmul_shape(shapeA, shapeB):
+    """Return shape of A @ B for given shapes of A and B.
+
+    None is returned for the shape if A and B are both 1-D arrays,
+    as A @ B is a scalar in this case, which has no shape.
+
+    Note that A @ B does not allow A and/or B to be 0-D arrays.
+    Incidentally, A @ B will never be a 0-D array either.
+    """
+    if prepend1_A := len(shapeA) == 1:
+        shapeA = (1,) + shapeA
+    if append1_B := len(shapeB) == 1:
+        shapeB = shapeB + (1,)
+    assert shapeA[-1] == shapeB[-2]
+    shapeC = np.broadcast_shapes(shapeA[:-2], shapeB[:-2])
+    if not prepend1_A:
+        shapeC += (shapeA[-2],)
+    if not append1_B:
+        shapeC += (shapeB[-1],)
+    if shapeC == ():
+        shapeC = None
+    return shapeC
+
+
 def _item_shape(shape, key):
     """Return shape of item a[key] for any array a of given shape.
 
@@ -108,11 +132,11 @@ def _item_shape(shape, key):
                 # insert new axis
                 shape_item.append(1)
             elif separated:
-                # skip axis unless indexing array is boolean 0d-array
+                # skip axis unless indexing array is boolean 0D array
                 if not (k.dtype == bool and k.ndim == 0):
                     i += 1
             elif shape_advanced is not None:
-                # skip axes for indexing arrays (except for boolean 0d-arrays)
+                # skip axes for indexing arrays (except for boolean 0D arrays)
                 shape_item.extend(shape_advanced)
                 shape_advanced = None
                 i += len(indexing_arrays) - bool_0darray_count
@@ -136,6 +160,7 @@ try:
 
     import numpy as np
     logging.debug(f'Load NumPy version {np.__version__}')
+    np._matmul_shape = _matmul_shape
     np._item_shape = _item_shape
 
     if np.lib.NumpyVersion(np.__version__) < '1.23.0':
