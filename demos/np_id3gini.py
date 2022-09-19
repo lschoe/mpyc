@@ -1,86 +1,38 @@
-"""Demo decision tree learning using ID3.
+"""Demo decision tree learning using ID3, vectorized.
 
-This demo implements Protocol 4.1 from the paper 'Practical Secure Decision
-Tree Learning in a Teletreatment Application' by Sebastiaan de Hoogh, Berry
-Schoenmakers, Ping Chen, and Harm op den Akker, which appeared at the 18th
-International Conference on Financial Cryptography and Data Security (FC 2014),
-LNCS 8437, pp. 179-194, Springer.
-See https://doi.org/10.1007/978-3-662-45472-5_12 (or,
-see https://fc14.ifca.ai/papers/fc14_submission_103.pdf or,
-see https://www.researchgate.net/publication/295148009).
+This demo is a fully equivalent reimplementation of the id3gini.py demo.
+Performance improvement of over 6x speed-up when run with three parties
+on local host. Memory consumption is reduced accordingly.
 
-ID3 is a recursive algorithm for generating decision trees from a database
-of samples (or, transactions). The first or last attribute of each sample
-is assumed to be the class attribute, according to which the samples are
-classified. Gini impurity is used to determine the best split. See also
-https://en.wikipedia.org/wiki/ID3_algorithm.
-
-The samples are assumed to be secret, while the resulting decision tree is
-public. All calculations are performed using secure integer arithmetic only.
-
-The demo includes the following datasets (datasets 1-4 are used in the paper):
-
-  0=tennis: classic textbook example
-  1=balance-scale: balance scale weight & distance database
-  2=car: car evaluation database
-  3=SPECT: Single Proton Emission Computed Tomography train+test heart images
-  4=KRKPA7: King+Rook versus King+Pawn-on-A7 chess endgame
-  5=tic-tac-toe: Tic-Tac-Toe endgame
-  6=house-votes-84: 1984 US congressional voting records
-
-The numbers 0-6 can be used with the command line option -i of the demo.
-
-Three command line options are provided for controlling accuracy:
-
-  -l L, --bit-length: overrides the preset bit length for a dataset
-  -e E, --epsilon: minimum number of samples E required for attribute nodes,
-                   represented as a fraction of all samples, 0.0<=E<=1.0
-  -a A, --alpha: scale factor A to avoid division by zero when calculating
-                 Gini impurities, basically, by adding 1/A to denominators, A>=1
-
-Setting E=1.0 yields a trivial tree consisting of a single leaf node, while
-setting E=0.0 yields a large (overfitted) tree. Default value E=0.05 yields
-trees of reasonable complexity. Default value A=8 is sufficiently large for
-most datasets. Note that if A is increased, L should be increased accordingly.
-
-Finally, the command line option --parallel-subtrees can be used to let the
-computations of the subtrees of an attribute node be done in parallel. The
-default setting is to compute the subtrees one after another (in series).
-The increase in the level of parallelism, however, comes at the cost of
-a larger memory footprint.
-
-Interestingly, one will see that the order in which the nodes are added to
-the tree will change if the --parallel-subtrees option is used. The resulting
-tree is still the same, however. Of course, this only happens if the MPyC
-program is actually run with multiple parties (or, if the -M1 option is used).
+See id3gini.py for background information on decision tree learning and ID3.
 """
+# TODO: vectorize mpc.argmax()
 
 import os
 import logging
 import argparse
 import csv
 import asyncio
+import numpy as np
 from mpyc.runtime import mpc
 
 
 @mpc.coroutine
 async def id3(T, R) -> asyncio.Future:
-    sizes = [mpc.in_prod(T, v) for v in S[C]]
+    sizes = S[C] @ T
     i, mx = mpc.argmax(sizes)
-    sizeT = mpc.sum(sizes)
+    sizeT = sizes.sum()
     stop = (sizeT <= int(args.epsilon * len(T))) + (mx == sizeT)
     if not (R and await mpc.is_zero_public(stop)):
         i = await mpc.output(i)
         logging.info(f'Leaf node label {i}')
         tree = i
     else:
-        T_SC = [mpc.schur_prod(T, v) for v in S[C]]
-        gains = [GI(mpc.matrix_prod(S[A], T_SC, True)) for A in R]
-        k = await mpc.output(mpc.argmax(gains, key=SecureFraction)[0])
-        del gains  # release memory
-        A = list(R)[k]
-        T_SA = [mpc.schur_prod(T, v) for v in S[A]]
+        T_SC = (T * S[C]).T
+        k = mpc.argmax([GI(S[A] @ T_SC) for A in R], key=SecureFraction)[0]
+        A = list(R)[await mpc.output(k)]
         logging.info(f'Attribute node {A}')
+        T_SA = T * S[A]
         if args.parallel_subtrees:
             subtrees = await mpc.gather([id3(Tj, R.difference([A])) for Tj in T_SA])
         else:
@@ -91,9 +43,9 @@ async def id3(T, R) -> asyncio.Future:
 
 def GI(x):
     """Gini impurity for contingency table x."""
-    y = [args.alpha * s + 1 for s in map(mpc.sum, x)]  # NB: alternatively, use s + (s == 0)
-    D = mpc.prod(y)
-    G = mpc.in_prod(list(map(mpc.in_prod, x, x)), list(map(lambda x: 1/x, y)))
+    y = args.alpha * np.sum(x, axis=1) + 1  # NB: alternatively, use s + (s == 0)
+    D = mpc.prod(y.tolist())
+    G = np.sum(np.sum(x * x, axis=1) / y)
     return [D * G, D]  # numerator, denominator
 
 
@@ -158,8 +110,9 @@ async def main():
     n, d = len(transactions), len(attr_names)
     attr_ranges = [sorted(set(t[i] for t in transactions)) for i in range(d)]
     # one-hot encoding of attributes:
-    S = [[[secint(t[i] == j) for t in transactions] for j in attr_ranges[i]] for i in range(d)]
-    T = [secint(1)] * n  # bit vector representation
+    S = [secint.array(np.array([[t[i] == j for t in transactions] for j in attr_ranges[i]]))
+         for i in range(d)]
+    T = secint.array(np.ones(n, dtype='O'))
     print(f'dataset: {name} with {n} samples and {d-1} attributes')
 
     await mpc.start()
