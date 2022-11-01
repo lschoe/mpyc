@@ -996,6 +996,8 @@ class Runtime:
                 c = 1/b
                 if c.is_integer():
                     c = round(c)
+            elif isinstance(b, self.SecureFixedPoint):
+                c = self._rec(b)
             else:
                 c = b.reciprocal() << f
         else:
@@ -1055,6 +1057,37 @@ class Runtime:
 
         if b < 0:
             a = self.reciprocal(a)
+            b = -b
+        d = a
+        c = 1
+        for i in range(b.bit_length() - 1):
+            # d = a ** (1 << i) holds
+            if (b >> i) & 1:
+                c = c * d
+            d = d * d
+        c = c * d
+        return c
+
+    def np_pow(self, a, b):
+        """Secure exponentiation a raised to the power of b, for public integer b."""
+        if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
+            d = a
+            c = self.np_multiply(d, d)
+            c = self.np_multiply(c, c)
+            c = self.np_multiply(c, c)
+            c = self.np_multiply(c, d)
+            c = self.np_multiply(c, c)
+            c, d = self.np_multiply(c, self.np_stack((c, d)))
+            c, d = self.np_multiply(c, self.np_stack((c, d)))
+            c = self.np_multiply(c, d)
+            c = self.np_multiply(c, c)
+            return c
+
+        if b == 0:
+            return type(a)(np.ones(a.shape, dtype='O'))
+
+        if b < 0:
+            a = self.np_reciprocal(a)
             b = -b
         d = a
         c = 1
@@ -2094,16 +2127,19 @@ class Runtime:
         shB = isinstance(B, self.SecureObject)
         stype = type(A) if shA else type(B)
         shape = np._matmul_shape(A.shape, B.shape)
-        if not stype.frac_length:
+        f = stype.frac_length
+        if not f:
             if shape is None:
                 rettype = stype.sectype
             else:
                 rettype = (stype, shape)
         else:
+            A_integral = A.integral
+            B_integral = B.integral
             if shape is None:
-                rettype = (stype.sectype, A.integral and B.integral)
+                rettype = (stype.sectype, A_integral and B_integral)
             else:
-                rettype = (stype, A.integral and B.integral, shape)
+                rettype = (stype, A_integral and B_integral, shape)
             # TODO: handle A or B public integral value
         await self.returnType(rettype)
 
@@ -2116,9 +2152,11 @@ class Runtime:
         else:
             B = await self.gather(B)
         C = A @ B
+        if f and (A_integral or B_integral):
+            C >>= f  # NB: in-place rshift
         if shA and shB:
             C = self._reshare(C)
-        if stype.frac_length:
+        if f and not A_integral and not B_integral:
             if shape is None:
                 C = self.trunc(stype.sectype(C))
             else:
@@ -2183,6 +2221,19 @@ class Runtime:
         return a.tolist()
 
     @mpc_coro_no_pc
+    async def np_fromlist(self, x):
+        """List of secure numbers to array."""
+        stype = type(x[0])
+        shape = (len(x),)
+        if issubclass(stype, self.SecureFixedPoint):
+            integral = all(a.integral for a in x)
+            await self.returnType((stype.array, integral, shape))
+        else:
+            await self.returnType((stype.array, shape))
+        x = await self.gather(x)
+        return stype.field.array([a.value for a in x], check=False)
+
+    @mpc_coro_no_pc
     async def np_reshape(self, a, shape, order='C'):
         stype = type(a)
         if isinstance(shape, int):
@@ -2237,10 +2288,24 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_concatenate(self, arrays, axis=0):
-        a = arrays[0]  # TODO: drop assumption first elt is secure array
-        shape = list(a.shape)
-        shape[axis] = sum(a.shape[axis] for a in arrays)
-        await self.returnType((type(a), tuple(shape)))
+        """Join a sequence of arrays along an existing axis.
+
+        If axis is None, arrays are flattened before use.
+        Default axis is 0.
+        """
+        # TODO: handle array_like input arrays
+        # TODO: integral attr
+        if axis is None:
+            shape = (sum(a.size for a in arrays),)
+        else:
+            shape = list(arrays[0].shape)
+            # same shape for all arrays except for dimension axis
+            shape[axis] = sum(a.shape[axis] for a in arrays)
+            shape = tuple(shape)
+        i = 0
+        while not isinstance(a := arrays[i], sectypes.SecureArray):
+            i += 1
+        await self.returnType((type(a), shape))
         arrays = await self.gather(arrays)
         return np.concatenate(arrays, axis=axis)
 
@@ -2300,7 +2365,7 @@ class Runtime:
     @mpc_coro_no_pc
     async def np_vstack(self, tup):
         a = tup[0]
-        shape = list(a.shape) if a.ndim >= 2 else [1, shape[0]]
+        shape = list(a.shape) if a.ndim >= 2 else [1, a.shape[0]]
         shape[0] = sum(a.shape[0] if a.shape[1:] else 1 for a in tup)
         await self.returnType((type(a), tuple(shape)))
         tup = await self.gather(tup)
@@ -2387,6 +2452,14 @@ class Runtime:
         """Split an array into multiple sub-arrays vertically (row-wise)."""
         return self.np_split(ary, indices_or_sections, axis=0)
 
+    def np_append(self, arr, values, axis=None):
+        """Append values to the end of array arr.
+
+        If axis is None (default), arr and values are flattened first.
+        Otherwise, arr and values must all be of the same shape, except along the given axis.
+        """
+        return self.np_concatenate((arr, values), axis=axis)
+
     def np_minimum(self, a, b):
         return b + (a < b) * (a - b)
 
@@ -2423,7 +2496,10 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_neg(self, a):
-        await self.returnType((type(a), a.shape))
+        if not a.frac_length:
+            await self.returnType((type(a), a.shape))
+        else:
+            await self.returnType((type(a), a.integral, a.shape))
         a = await self.gather(a)
         return -a
 
@@ -2507,10 +2583,12 @@ class Runtime:
     async def np_det(self, A):
         """Secure determinant for nonsingular matrices."""
         # TODO: allow case det(A)=0 (obliviously)
+        # TODO: support higher dimensional A than A.ndim = 2
+        # TODO: support fixed-point
         secnum = type(A).sectype
         await self.returnType(secnum)
 
-        n = A.shape[0]
+        n = A.shape[-1]
         while True:
             U = self._np_randoms(secnum.field, n**2).reshape(n, n)
             detU = self.prod(np.diag(U).tolist())  # detU != 0 with high probability
@@ -2780,6 +2858,67 @@ class Runtime:
             a_bits = [field(0) for _ in range(f)] + a_bits
         return a_bits
 
+    @mpc_coro
+    async def np_to_bits(self, a, l=None):
+        """Secure extraction of l (or all) least significant bits of a."""  # a la [ST06].
+        # TODO: other cases than characteristic=2 case
+        stype = type(a).sectype
+        if l is None:
+            l = stype.bit_length
+        assert l <= stype.bit_length + stype.frac_length
+#        await self.returnType((stype, True), l)
+        shape = a.shape + (l,)
+        await self.returnType((type(a), True, shape))
+        field = stype.field
+        # f = stype.frac_length
+        # rshift_f = f and a.integral  # optimization for integral fixed-point numbers
+        # if rshift_f:
+            # # f least significant bits of a are all 0
+            # if f >= l:
+                # return [field(0) for _ in range(l)]
+
+            # l -= f
+
+        n = a.size
+        r_bits = await self.np_random_bits(field, n * l)
+        r_bits = r_bits.reshape(shape)
+        shifts = np.arange(l)
+        r_modl = np.sum(r_bits.value << shifts, axis=a.ndim)
+
+        # r_modl = 0
+        # for r_i in reversed(r_bits):
+            # r_modl <<= 1
+            # r_modl += r_i.value
+
+        if issubclass(stype, self.SecureFiniteField):
+            if field.characteristic == 2:
+                a = await self.gather(a)
+                c = await self.output(a + r_modl)
+                c = np.vectorize(int, otypes='O')(c.value)
+                c_bits = np.right_shift.outer(c, shifts) & 1
+                return c_bits + r_bits
+
+            # if field.ext_deg > 1:
+                # raise TypeError('Binary field or prime field required.')
+
+            # a = self.convert(a, self.SecInt(l=1+stype.field.order.bit_length()))
+            # a_bits = self.to_bits(a)
+            # return self.convert(a_bits, stype)
+
+        # k = self.options.sec_param
+        # r_divl = self._random(field, 1<<(stype.bit_length + k - l)).value
+        # a = await self.gather(a)
+        # if rshift_f:
+            # a = a >> f
+        # c = await self.output(a + ((1<<stype.bit_length) + (r_divl << l) - r_modl))
+        # c = c.value % (1<<l)
+        # c_bits = [(c >> i) & 1 for i in range(l)]
+        # r_bits = [stype(r.value) for r in r_bits]  # TODO: drop .value, fix secfxp(r) if r field elt
+        # a_bits = self.add_bits(r_bits, c_bits)
+        # if rshift_f:
+            # a_bits = [field(0) for _ in range(f)] + a_bits
+        # return a_bits
+
     @mpc_coro_no_pc
     async def from_bits(self, x):
         """Recover secure number from its binary representation x."""
@@ -2796,6 +2935,17 @@ class Runtime:
             s <<= 1
             s += a.value
         return stype.field(s)
+
+    @mpc_coro_no_pc
+    async def np_from_bits(self, x):
+        """Recover secure numbers from their binary representations in x."""
+        # TODO: also handle negative numbers with sign bit (NB: from_bits() in random.py)
+        *shape, l = x.shape
+        await self.returnType((type(x), True, tuple(shape)))
+        x = await self.gather(x)
+        shifts = np.arange(l)
+        s = np.sum(x.value << shifts, axis=x.ndim-1)
+        return type(x).field.array(s)
 
     def find(self, x, a, bits=True, e='len(x)', f=None, cs_f=None):
         """Return index ix of the first occurrence of a in list x.

@@ -761,9 +761,20 @@ class FiniteFieldArray:
             if isinstance(arg, (cls, cls.field)):
                 args[i] = arg.value
             elif isinstance(arg, tuple):
-                args[i] = tuple(a.value if isinstance(a, (cls, cls.field)) else a for a in arg)
+#                args[i] = tuple(a.value if isinstance(a, (cls, cls.field)) else a for a in arg)
+                arg = list(arg)
+                for j in range(len(arg)):
+                    a = arg[j]
+                    if isinstance(a, (cls, cls.field)):
+                        a = a.value
+                    elif not isinstance(a, int) and not isinstance(a, np.ndarray):
+                        return NotImplemented
+                    arg[j] = a
+                args[i] = tuple(arg)
             elif isinstance(arg, list):
                 args[i] = [a.value if isinstance(a, (cls, cls.field)) else a for a in arg]
+            elif not isinstance(arg, int) and not isinstance(arg, np.ndarray):
+                return NotImplemented
 
         a = func(*args, **kwargs)
 

@@ -39,6 +39,9 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c)), a)
         np.assertEqual(mpc.run(mpc.output(mpc._reshare(c) @ c)), a @ a)
         np.assertEqual(mpc.run(mpc.output(np.concatenate((c, c, c)))), np.concatenate((a, a, a)))
+        np.assertEqual(mpc.run(mpc.output(np.concatenate((c, a, c), axis=None))),
+                       np.concatenate((a, a, a), axis=None))
+        np.assertEqual(mpc.run(mpc.output(np.concatenate((a, c)))), np.concatenate((a, a)))
         b = np.stack((a, a, a))
         d = np.stack((c, c, c))
         np.assertEqual(mpc.run(mpc.output(c @ d)), a @ b)
@@ -103,8 +106,11 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c.swapaxes(0, 1))), a.swapaxes(0, 1))
         self.assertEqual(mpc.run(mpc.output(c.sum())), a.sum())
         np.assertEqual(mpc.run(mpc.output(c.sum(axis=0))), a.sum(axis=0))
+        np.assertEqual(mpc.run(mpc.output(c**254 * c**0 * c**-253)), a)
 
         # TODO: c //= 2 secure int __floordiv__() etc.
+
+        np.assertEqual(mpc.run(mpc.output(np.linalg.det(c[0]))), np.linalg.det(a[0]))
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfxp_array(self):

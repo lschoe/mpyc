@@ -1142,6 +1142,14 @@ class SecureArray(SecureObject):
 
         return runtime.np_divide(other, self)
 
+    def __pow__(self, other):
+        """Exponentiation for public integral exponent."""
+        # TODO: extend to secret exponent
+        if not isinstance(other, int):  # TODO: extend to np.array
+            return NotImplemented
+
+        return runtime.np_pow(self, other)
+
     def __matmul__(self, other):
         """Matrix multiplication."""
         return runtime.np_matmul(self, other)
