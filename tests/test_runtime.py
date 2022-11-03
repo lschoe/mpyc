@@ -138,6 +138,13 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(b, a * a)
         self.assertTrue(np.issubdtype(b.dtype, np.floating))
 
+        np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
+        np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
+        secnum = mpc.SecFxp(64)
+        c = secnum.array(a)
+        np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
+        np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
+
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal
@@ -149,6 +156,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(c.flatten().tolist())), [-1, 0, 0, -1])
         self.assertEqual(len(c), 1)
         self.assertEqual(len(c.T), 2)
+
+        np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
+        np.assertEqual(mpc.run(mpc.output(np.equal(c, c+1))), False)
 
     def test_async(self):
         mpc.options.no_async = False

@@ -1070,6 +1070,7 @@ class Runtime:
 
     def np_pow(self, a, b):
         """Secure exponentiation a raised to the power of b, for public integer b."""
+        # TODO: extend to non-scalar b
         if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
             d = a
             c = self.np_multiply(d, d)
@@ -1142,7 +1143,7 @@ class Runtime:
         return self.sgn(a, EQ=True)
 
     @mpc_coro
-    async def _is_zero(self, a):
+    async def _is_zero(self, a):  # a la [NO07]
         """Probabilistic zero test."""
         stype = type(a)
         await self.returnType((stype, True))
@@ -1156,9 +1157,9 @@ class Runtime:
         a = a.value
         r = self._randoms(Zp, k)
         c = [Zp(a * r[i].value + (1-(z[i].value << 1)) * u2[i].value) for i in range(k)]
-        # -1 is nonsquare for Blum p, u_i !=0 w.v.h.p.
-        # If a == 0, c_i is square mod p iff z[i] == 0.
-        # If a != 0, c_i is square mod p independent of z[i].
+        # -1 is nonsquare for Blum p, u[i] !=0 w.v.h.p.
+        # If a == 0, c[i] is square mod p iff z[i] == 0.
+        # If a != 0, c[i] is square mod p independent of z[i].
         c = await self.output(c, threshold=2*self.threshold)
         for i in range(k):
             if c[i] == 0:
@@ -2508,10 +2509,50 @@ class Runtime:
         return self.np_sgn(a - b, LT=True)
 
     def np_equal(self, a, b):
-        """Secure comparison a < b."""
-        return self.np_sgn(a - b, EQ=True)
-        # TODO: use prob. zerotest as well like in is_zero
-        # TODO: cover finite field arrays (introduce np_pow())
+        """Secure comparison a == b."""
+        d = a - b
+        stype = d.sectype
+        if issubclass(stype, self.SecureFiniteField):
+            return 1 - self.np_pow(d, stype.field.order - 1)
+
+        if stype.bit_length/2 > self.options.sec_param >= 8 and stype.field.order%4 == 3:
+            return self._np_is_zero(d)
+
+        return self.np_sgn(d, EQ=True)
+
+    @mpc_coro
+    async def _np_is_zero(self, a):
+        """Probabilistic zero test, elementwise."""
+        stype = type(a)
+        shape = a.shape
+        await self.returnType((stype, True, shape))
+        Zp = stype.sectype.field
+
+        n = a.size
+        k = self.options.sec_param
+        z = self.np_random_bits(Zp, k * n)
+        r = self._np_randoms(Zp, k * n)
+        u2 = self._reshare(r * r)
+        r = self._np_randoms(Zp, k * n)
+        a, u2, z = await self.gather(a, u2, z)
+        a = a.value.reshape((n,))
+        r = r.value.reshape((k, n))
+        z = z.value.reshape((k, n))
+        u2 = u2.value.reshape((k, n))
+
+        c = Zp.array(a * r + (1-(z << 1)) * u2)
+        del a, r, u2
+        # -1 is nonsquare for Blum p, u2[i,j] !=0 w.v.h.p.
+        # If a[j] == 0, c[i,j] is square mod p iff z[i,j] == 0.
+        # If a[j] != 0, c[i,j] is square mod p independent of z[i,j].
+        c = await self.output(c, threshold=2*self.threshold)
+        z = np.where(c.value == 0, 0, z)
+        c = np.where(c.is_sqr(), 1 - z, z)
+        del z
+        e = await self.np_all(map(Zp.array, c))
+        e <<= stype.frac_length
+        e = e.reshape(shape)
+        return e
 
     @mpc_coro
     async def np_sgn(self, a, l=None, LT=False, EQ=False):
