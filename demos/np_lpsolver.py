@@ -210,18 +210,15 @@ async def main():
     print(f'max = {mx} / {cd} / {scale} = {mx / cd / scale} in {iteration} iterations')
 
     logging.info('Solution x')
-    sum_powers = secint.array(np.zeros((N,), dtype='O'))  # TODO: compare with fromiter approach below
-    for i in range(m):
-        x_powers = pow_list(T[i+1][-1] / N, basis[i], N)
-        sum_powers += x_powers
     coefs = Zp.array([[w_powers[(j * k) % N].value for k in range(N)] for j in range(n)])   ## TODO: vandermonde ff array
+    sum_powers = np.sum(np.fromiter((pow_list(T[i+1][-1] / N, basis[i], N) for i in range(m)), 'O'))
     x = coefs @ sum_powers
     Ax_bounded_by_b = mpc.all((A @ x <= b * cd).tolist())      ## TODO: np.all
     x_nonnegative = mpc.all((x >= 0).tolist())
 
     logging.info('Dual solution y')
     coefs = Zp.array([[w_powers[((n + i) * k) % N].value for k in range(N)] for i in range(m)])
-    sum_powers = np.sum(np.fromiter((pow_list(T[0][j] / N, cobasis[j], N) for j in range(n)), 'O'))   #TODO fix for Numpy 1.22, WSL
+    sum_powers = np.sum(np.fromiter((pow_list(T[0][j] / N, cobasis[j], N) for j in range(n)), 'O'))
     y = coefs @ sum_powers
     yA_bounded_by_c = mpc.all((y @ A >= c * cd).tolist())
     y_nonnegative = mpc.all((y >= 0).tolist())

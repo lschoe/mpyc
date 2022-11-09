@@ -114,6 +114,7 @@ if os.getenv('READTHEDOCS') != 'True':
         logging.basicConfig(format='{asctime} {message}', style='{', level=level, stream=sys.stdout)
         logging.debug(f'Set logging level to {level}: {logging.getLevelName(level)}')
         del ch, level
+    logging.debug(f'On {sys.platform=}')
 
     # Ensure numpy will not be loaded by mpyc.numpy, if demanded (saving resources).
     env_no_numpy = os.getenv('MPYC_NONUMPY') == '1'  # check if variable MPYC_NONUMPY is set

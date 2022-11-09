@@ -3276,7 +3276,6 @@ def setup():
         # use default port for each local party
         m = options.M or 1
         if m > 1 and options.index is None:
-            import platform
             import subprocess
             # convert sys.flags into command line arguments
             flgmap = {'debug': 'd', 'inspect': 'i', 'interactive': 'i', 'optimize': 'O',
@@ -3292,8 +3291,14 @@ def setup():
             xopts = ['-X' + a + ('' if c is True else '=' + c) for a, c in sys._xoptions.items()]
             for i in range(m-1, 0, -1):
                 cmd_line = [sys.executable] + flags + xopts + argv + ['-I', str(i)]
-                if options.output_windows and platform.platform().startswith('Windows'):
-                    subprocess.Popen(['start'] + cmd_line, shell=True)
+                if options.output_windows and sys.platform.startswith(('win32', 'linux', 'darwin')):
+                    if sys.platform.startswith('win32'):
+                        subprocess.Popen(['start'] + cmd_line, shell=True)
+                    elif sys.platform.startswith('linux'):
+                        # TODO: check for other common Linux terminals
+                        subprocess.Popen(['gnome-terminal', '--'] + cmd_line)
+                    elif sys.platform.startswith('darwin'):
+                        subprocess.Popen(['open', '-a', 'Terminal', '--args'] + cmd_line)
                 elif options.output_file:
                     with open(f'party{options.M}_{i}.log', 'a') as f:
                         f.write('\n')

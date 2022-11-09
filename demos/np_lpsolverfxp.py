@@ -192,10 +192,7 @@ async def main():
     print(f'max = {mx} (error {rel_error:.3%}) in {iteration} iterations')
 
     logging.info('Solution x')
-    x = secfxp.array(np.zeros((n,), dtype='O'))
-    for i in range(m):
-        u = mpc.unit_vector(basis[i], m + n)[:n]
-        x += T[i+1, -1] * mpc.np_fromlist(u)
+    x = np.sum(np.fromiter((T[i+1, -1] * mpc.np_fromlist(mpc.unit_vector(basis[i], m + n)[:n]) for i in range(m)), 'O'))
     cx = c @ x
     Ax = A @ x
     Ax_bounded_by_b = mpc.all((Ax <= 1.01 * b + 0.0001).tolist())
@@ -203,7 +200,6 @@ async def main():
 
     logging.info('Dual solution y')
     y = np.sum(np.fromiter((T[0, j] * mpc.np_fromlist(mpc.unit_vector(cobasis[j], m + n)[n:]) for j in range(n)), 'O'))
-    #TODO: fix issue Numpy 1.20, see mpyc.numpy._fromiter()
     yb = y @ b
     yA = y @ A
     yA_bounded_by_c = mpc.all((yA >= np.where(c > 0, 1/1.01, 1.01) * c - 0.0001).tolist())

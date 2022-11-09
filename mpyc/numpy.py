@@ -165,10 +165,15 @@ try:
 
     if np.lib.NumpyVersion(np.__version__) < '1.23.0':
         def _fromiter(iterable, dtype, **kwargs):
-            if np.dtype(dtype) != np.object: # and dtype != 'O':
+            if np.dtype(dtype) != object:
                 return np.fromiter(iterable, dtype, **kwargs)
-            # No dtype=object for np.fromiter(), workaround via np.array():
-            return np.array(list(iterable), dtype=object)
+
+            # No dtype=object for np.fromiter(), workaround via 1D array:
+            x = list(iterable)
+            a = np.empty(len(x), dtype=object)
+            for i in range(len(x)):
+                a[i] = x[i]
+            return a
 
         np.fromiter = _fromiter
 
