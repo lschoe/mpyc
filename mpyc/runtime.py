@@ -884,13 +884,15 @@ class Runtime:
         else:
             a_integral = a.integral
             b_integral = shb and b.integral
-            b_is_int = False
+            z = 0
             if not shb:
                 if isinstance(b, int):
-                    b_is_int = True
+                    z = f
                 elif isinstance(b, float):
                     b = round(b * 2**f)
-            await self.returnType((stype, a_integral and (b_integral or b_is_int)))
+                    z = max(0, min(f, (b & -b).bit_length() - 1))
+                    b >>= z  # remove trailing zeros
+            await self.returnType((stype, a_integral and (b_integral or z == f)))
 
         if not shb:
             a = await self.gather(a)
@@ -899,12 +901,12 @@ class Runtime:
         else:
             a, b = await self.gather(a, b)
         c = a * b
-        if f and (a_integral or b_integral) and not b_is_int:
-            c >>= f  # NB: in-place rshift
+        if f and (a_integral or b_integral) and z != f:
+            c >>= f - z  # NB: in-place rshift
         if shb:
             c = self._reshare(c)
-        if f and not (a_integral or b_integral) and not b_is_int:
-            c = self.trunc(stype(c))
+        if f and not (a_integral or b_integral) and z != f:
+            c = self.trunc(stype(c), f=f - z)
         return c
 
     @mpc_coro
@@ -920,21 +922,23 @@ class Runtime:
         else:
             a_integral = a.integral
             b_integral = shb and b.integral
-            b_is_int = False
+            z = 0
             if not shb:
                 if isinstance(b, int):
-                    b_is_int = True
+                    z = f
                 elif isinstance(b, float):
                     b = round(b * 2**f)
+                    z = max(0, min(f, (b & -b).bit_length() - 1))
+                    b >>= z  # remove trailing zeros
                 elif isinstance(b, np.ndarray):
                     if np.issubdtype(b.dtype, np.integer):
-                        b_is_int = True
+                        z = f
                     elif np.issubdtype(b.dtype, np.floating):
                         # NB: unlike for self.mul() no test if all entries happen to be integral
                         # Scale to Python int entries (by setting otypes='O', prevents overflow):
                         b = np.vectorize(round, otypes='O')(b * 2**f)
                     # TODO: handle b.dtype=object, checking if all elts are int
-            await self.returnType((stype, a_integral and (b_integral or b_is_int), shape))
+            await self.returnType((stype, a_integral and (b_integral or z == f), shape))
 
         if not shb:
             a = await self.gather(a)
@@ -943,12 +947,12 @@ class Runtime:
         else:
             a, b = await self.gather(a, b)
         c = a * b
-        if f and (a_integral or b_integral) and not b_is_int:
-            c >>= f  # NB: in-place rshift
+        if f and (a_integral or b_integral) and z != f:
+            c >>= f - z  # NB: in-place rshift
         if shb:
             c = self._reshare(c)
-        if f and not (a_integral or b_integral) and not b_is_int:
-            c = self.np_trunc(stype(c, shape=shape))
+        if f and not (a_integral or b_integral) and z != f:
+            c = self.np_trunc(stype(c, shape=shape), f=f - z)
         return c
 
     def div(self, a, b):
@@ -2240,7 +2244,16 @@ class Runtime:
         if isinstance(shape, int):
             shape = (shape,)  # ensure shape is a tuple
         if -1 in shape:
-            raise ValueError('reshape with unknown dimension not allowed for secure arrays')
+            if shape.count(-1) > 1:
+                raise ValueError('can only specify one unknown dimension')
+
+            if (n := a.size) % (n1 := -math.prod(shape)) != 0:
+                raise ValueError(f'cannot reshape array of size {n} into shape {shape}')
+
+            i = shape.index(-1)
+            shape = list(shape)
+            shape[i] = n // n1
+            shape = tuple(shape)
 
         if issubclass(stype, self.SecureFixedPointArray):
             await self.returnType((stype, a.integral, shape))
@@ -2460,6 +2473,17 @@ class Runtime:
         Otherwise, arr and values must all be of the same shape, except along the given axis.
         """
         return self.np_concatenate((arr, values), axis=axis)
+
+    @mpc_coro_no_pc
+    async def np_fliplr(self, a):
+        """Reverse the order of elements along axis 1 (left/right).
+
+        For a 2D array, this flips the entries in each row in the left/right direction.
+        Columns are preserved, but appear in a different order than before.
+        """
+        await self.returnType((type(a), a.shape))
+        a = await self.gather(a)
+        return np.fliplr(a)
 
     def np_minimum(self, a, b):
         return b + (a < b) * (a - b)

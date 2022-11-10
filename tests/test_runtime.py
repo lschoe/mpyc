@@ -55,6 +55,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.row_stack((c, c, c)))), np.row_stack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.split(c, 2, 1)[0])), np.split(a, 2, 1)[0])
         np.assertEqual(mpc.run(mpc.output(np.vsplit(c, np.array([1]))[0])), np.vsplit(a, [1])[0])
+        np.assertEqual(mpc.run(mpc.output(np.reshape(c, (-1,)))), np.reshape(a, (-1,)))
+        np.assertEqual(mpc.run(mpc.output(np.fliplr(c))), np.fliplr(a))
         a1, a2 = a[:, :, 1], a[:, 0, :].reshape(2, 1)
         np.assertEqual(mpc.run(mpc.output(np.add(secnum.array(a1), secnum.array(a2)))), a1 + a2)
         np.assertEqual(mpc.run(mpc.output(a1 + secnum.array(a[:, 0, :]).reshape(2, 1))), a1 + a2)

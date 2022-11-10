@@ -1,19 +1,25 @@
-"""Demo Threshold One-Way Hash Chains.
+"""Demo Threshold One-Way Hash Chains, vectorized.
 
-This MPyC demo shows how to generate and reverse one-way hash chains in a multiparty setting.
-The seed for a hash chain, which serves as the private key, is generated jointly at random such
-that no party learns any information about it. Subsequently, the hash chain is built and
-reversed securely by the parties. No information about the upcoming elements of the hash
-chain is leaked whatsoever.
+This demo is an extended reimplementation of the onewayhashchain.py demo for
+generating and reversing one-way hash chains in a multiparty setting.
 
-Optimal binary pebbling is employed to reverse a length-2^k hash chain using k/2 hashes per
-output round, storing k hash values. See the accompanying notebook for references.
+In addition to the Matyas-Meyer-Oseas one-way function based on AES, the SHAKE128
+oneway function from the SHA3 faimlty is also provided as an option.
+
+Note that in the output stage the hashes pertaining to different pebbles are
+evaluated in parallel, without increasing the overall round complexity. Multiple
+hashes pertaining to the same pebble, however, are necessarily evaluated in series,
+increasing the overall round complxity accordingly. 
+
+See demo onewayhashchain.py for more information.
 """
 
 import argparse
 import itertools
+import numpy as np
 from mpyc.runtime import mpc
-import aes  # MPyC AES demo operating on 4x4 arrays over GF(256).
+import np_aes as aes  # vectorized AES demo operating on secure arrays over GF(256)
+import sha3  # vectorized SHA3/SHAKE demo operating on secure arrays over GF(2)
 
 f = None  # one-way function
 
@@ -105,6 +111,8 @@ async def main():
                         help='order K of hash chain, length n=2**K')
     parser.add_argument('--recursive', action='store_true',
                         help='use recursive pebbler')
+    parser.add_argument('--sha3', action='store_true',
+                        help='use SHAKE128 as one-way function')
     parser.add_argument('--no-one-way', action='store_true',
                         help='use dummy one-way function')
     parser.add_argument('--no-random-seed', action='store_true',
@@ -119,19 +127,31 @@ async def main():
     else:
         Pebbler = p
 
-    IV = [[aes.secfld(3)] * 4] * 4  # IV as 4x4 array of GF(256) elements
+    secfld = sha3.secfld if args.sha3 else aes.secfld
+
+    IV = np.array([[3] * 4] * 4)  # IV as 4x4 array of bytes
     global f
     if args.no_one_way:
-        D = aes.circulant_matrix([3, 0, 0, 0])
-        f = lambda x: mpc.matrix_prod(D, x)
+        D = aes.circulant([3, 0, 0, 0])
+        f = lambda x: D @ x
+    elif args.sha3:
+        f = lambda x: sha3.shake(x, 128)
     else:
-        K = aes.key_expansion(IV)
-        f = lambda x: mpc.matrix_add(aes.encrypt(K, x), x)
+        K = aes.key_expansion(secfld.array(IV))
+        f = lambda x: aes.encrypt(K, x) + x
 
     if args.no_random_seed:
-        x0 = IV
+        if args.sha3:
+            # convert 4x4 array of bytes to length-128 array of bits
+            IV = np.array([(b >> i) & 1 for b in IV.flat for i in range(8)])
+        x0 = secfld.array(IV)
     else:
-        x0 = [[mpc.random.getrandbits(aes.secfld, 8) for _ in range(4)] for _ in range(4)]
+        x0 = mpc.np_random_bits(secfld, 128)
+        if not args.sha3:
+            # convert length-128 array of bits to 4x4 array of bytes
+            x0 = mpc.np_from_bits(x0.reshape(4, 4, 8))
+
+    xprint = sha3.xprint if args.sha3 else aes.xprint
 
     k = args.order
     print(f'Hash chain of length {2**k}:')
@@ -139,9 +159,9 @@ async def main():
     for v in Pebbler(k, x0):
         if v is None:  # initial stage
             print(f'{r:4}', '-')
-            await mpc.throttler(0.1)  # raise barrier roughly every 10 AES calls
+            await mpc.throttler(0.0625)  # raise barrier every 16 calls to one-way f()
         else:  # output stage
-            await aes.xprint(f'{r:4} x{2**(k+1) - 1 - r:<4} =', v)
+            await xprint(f'{r:4} x{2**(k+1) - 1 - r:<4} =', v)
         r += 1
     print(f'Performed {k * 2**(k-1) = } hashes in total.')
 

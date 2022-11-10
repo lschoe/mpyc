@@ -148,6 +148,16 @@ def shake(M, d, c=256):
     return keccak(c, N, d)
 
 
+async def xprint(text, s):
+    """Print and return bit array s as hex string."""
+    s = await mpc.output(s)
+    s = np.fliplr(s.reshape(-1, 8)).reshape(-1)  # reverse bits for each byte
+    d = len(s)
+    s = f'{int("".join(str(int(b)) for b in s), 2):0{d//4}x}'  # bits to hex digits with leading 0s
+    print(f'{text} {s}')
+    return s
+
+
 async def main():
     global keccak_f1600
 
@@ -206,15 +216,11 @@ async def main():
 
     X = args.i.encode() * args.n
     print(f'Input: {X}')
-
     x = np.array([(b >> i) & 1 for b in X for i in range(8)])  # bytes to bits
     x = secfld.array(x)  # secret-shared input bits
-    y = F(x, d, c)  # secret-shared output bits
-    y = await mpc.output(y)
-    y = np.fliplr(y.reshape(-1, 8)).reshape(-1)  # reverse bits for each byte
-    Y = f'{int("".join(str(int(b)) for b in y), 2):0{d//4}x}'  # bits to hex digits with leading 0s
 
-    print(f'Output: {Y}')
+    y = F(x, d, c)  # secret-shared output bits
+    Y = await xprint(f'Output:', y)
     assert Y == f(X).hexdigest(*e)
 
     await mpc.shutdown()

@@ -588,8 +588,6 @@ class SecureFixedPoint(SecureNumber):
 
     def _coerce2(self, other):
         if isinstance(other, float):
-            if other.is_integer():
-                other = round(other)
             return other
 
         return super()._coerce2(other)
@@ -1029,6 +1027,10 @@ class SecureArray(SecureObject):
         assert shape is not None
         self.shape = shape
         super().__init__(value)
+
+    def __bool__(self):
+        """Return True if secure array is nonempty, False otherwise."""
+        return bool(self.size)
 
     def __array_function__(self, func, types, args, kwargs):
         # minimal redirect for now
