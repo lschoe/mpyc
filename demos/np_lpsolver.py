@@ -202,7 +202,7 @@ async def main():
         pp_inv = 1 / previous_pivot
         p_col = p_col * pp_inv - p_row_index
         p_row = p_row_index @ T + previous_pivot * p_col_index
-        T = T * (pivot * pp_inv) - p_col.reshape(len(p_col), 1) @ p_row.reshape(1, len(p_row))    # consider np.gauss
+        T = T * (pivot * pp_inv) - np.outer(p_col, p_row)
         previous_pivot = pivot
 
     mx = await mpc.output(T[0, -1])

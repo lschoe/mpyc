@@ -2168,6 +2168,43 @@ class Runtime:
                 C = self.np_trunc(stype(C, shape=shape))
         return C
 
+    @mpc_coro
+    async def np_outer(self, a, b):
+        """Outer product of vectors a and b.
+
+        Input arrays a and b are flattened if not already 1d.
+        """
+        sha = isinstance(a, self.SecureObject)
+        shb = isinstance(b, self.SecureObject)
+        stype = type(a) if sha else type(b)
+        shape = (a.size, b.size)
+        f = stype.frac_length
+        if not f:
+            rettype = (stype, shape)
+        else:
+            a_integral = a.integral
+            b_integral = b.integral
+            rettype = (stype, a_integral and b_integral, shape)
+            # TODO: handle a or b public integral value
+        await self.returnType(rettype)
+
+        if a is b:
+            a = b = await self.gather(a)
+        elif sha and shb:
+            a, b = await self.gather(a, b)
+        elif sha:
+            a = await self.gather(a)
+        else:
+            b = await self.gather(b)
+        c = np.outer(a, b)  # NB: flattens a and/or b
+        if f and (a_integral or b_integral):
+            c >>= f  # NB: in-place rshift
+        if sha and shb:
+            c = self._reshare(c)
+        if f and not a_integral and not b_integral:
+            c = self.np_trunc(stype(c, shape=shape))
+        return c
+
     @mpc_coro_no_pc
     async def np_getitem(self, a, key):
         """SecureArray a, index/slice key."""

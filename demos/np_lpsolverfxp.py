@@ -178,14 +178,14 @@ async def main():
         cobasis += delta * p_col_index
         basis -= delta * p_row_index
 
-        # update tableau Tij = Tij - (Til - bool(i==k))/Tkl * (Tkj + bool(j==l))
+        # update tableau Tij = Tij - (Til - bool(i==k))/Tkl *outer (Tkj + bool(j==l))
         p_col_index = np.concatenate((p_col_index, np.array([0])))
         p_row_index = np.concatenate((np.array([0]), p_row_index))
         p_col_index.integral = True
         p_row_index.integral = True
         p_col = (p_col - p_row_index) / pivot
         p_row = p_row_index @ T + p_col_index
-        T -= p_col.reshape(len(p_col), 1) @ p_row.reshape(1, len(p_row))
+        T -= np.outer(p_col, p_row)
 
     mx = await mpc.output(T[0,  -1])
     rel_error = (mx - exact_max) / exact_max
