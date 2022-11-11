@@ -2373,7 +2373,7 @@ class Runtime:
             return tuple(_block_shape(a, block_ndim(a))[0])  # TODO: move this to mpyc.numpy module
 
         await self.returnType((sectype, block_shape(arrays)))
-        arrays = await self.gather(arrays)
+        arrays = await self.gather(arrays)  # TODO: handle secfxp
         return np.block(arrays)
 
     @mpc_coro_no_pc
@@ -2520,13 +2520,17 @@ class Runtime:
         return np.roll(a, shift, axis)
 
     @mpc_coro_no_pc
-    async def np_neg(self, a):
+    async def np_negative(self, a):
         if not a.frac_length:
             await self.returnType((type(a), a.shape))
         else:
             await self.returnType((type(a), a.integral, a.shape))
         a = await self.gather(a)
         return -a
+
+    def np_absolute(self, a, l=None):
+        """Secure absolute value of a."""
+        return (-2*self.np_sgn(a, l=l, LT=True) + 1) * a
 
     def np_less(self, a, b):
         """Secure comparison a < b."""

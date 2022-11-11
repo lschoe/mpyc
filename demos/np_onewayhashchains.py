@@ -3,13 +3,13 @@
 This demo is an extended reimplementation of the onewayhashchain.py demo for
 generating and reversing one-way hash chains in a multiparty setting.
 
-In addition to the Matyas-Meyer-Oseas one-way function based on AES, the SHAKE128
-oneway function from the SHA3 faimlty is also provided as an option.
+Next to the Matyas-Meyer-Oseas one-way function based on AES, the SHAKE128
+one-way function from the SHA3 family is also provided as an option.
 
 Note that in the output stage the hashes pertaining to different pebbles are
 evaluated in parallel, without increasing the overall round complexity. Multiple
 hashes pertaining to the same pebble, however, are necessarily evaluated in series,
-increasing the overall round complxity accordingly. 
+increasing the overall round complexity accordingly.
 
 See demo onewayhashchain.py for more information.
 """

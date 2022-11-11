@@ -354,9 +354,13 @@ class Arithmetic(unittest.TestCase):
         np.negative.at(a, (1, 1))  # NB: in-place
         np.assertEqual(np.add.reduce(a, 1), [16, 0])
         np.assertEqual(np.add.reduce(np.add.reduce(a, 1)), 16)
+        a != a
         a += 2
         a -= 2
         a *= 3
+        a >>= 2
+        a <<= 1
+        a = np.right_shift(np.left_shift(a, 2), 1)
         np.add(np.array([1], dtype=np.int32), a)
         np.add(a, np.array([1], dtype=np.int64))
         self.assertRaises(TypeError, np.add, np.array([1], dtype=np.float64), a)
@@ -382,8 +386,13 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(np.reciprocal(F_b) * F_b, np.ones(b.shape, dtype='O'))
         np.assertEqual(np.sqrt(F_a**2)**2, F_a**2)
 
-        F81_b = self.f81.array(b)
-        np.assertEqual(np.sqrt(F81_b**2)**2, F81_b**2)
+        F27_b = self.f27.array(b)
+        F27_b = 1 / (1 / F27_b)
+        np.assertEqual(np.sqrt(F27_b**2)**2, F27_b**2)
+
+        F81_b2 = self.f81.array(b)**2
+        self.assertTrue((F81_b2).is_sqr().all())
+        np.assertEqual(F81_b2.sqrt(INV=True)**2, 1/F81_b2)
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_ndarray(self):

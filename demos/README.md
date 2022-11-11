@@ -7,14 +7,15 @@ Use `-H`, `--HELP` option with any demo to see the MPyC help message.
 `python secretsanta.py -H`
 
 ```
-usage: secretsanta.py [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t] [-B b]
-                      [--ssl] [-L l] [-K k] [--no-log] [--no-async]
-                      [--no-barrier] [--no-gmpy2] [--no-prss] [--mix32-64bit]
+usage: secretsanta.py [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t]
+                      [-B b] [--ssl] [-L l] [-K k] [--log-level ll]
+                      [--no-log] [--no-async] [--no-barrier] [--no-gmpy2]
+                      [--no-numpy] [--no-prss] [--mix32-64bit]
                       [--output-windows] [--output-file] [-f F]
 
-optional arguments:
+MPyC help:
   -H, --HELP            show this help message for MPyC and exit
-  -h, --help            show secretsanta.py help message (if any)
+  -h, --help            show help message for this MPyC program (if any)
 
 MPyC configuration:
   -C ini, --config ini  use ini file, defining all m parties
@@ -28,16 +29,18 @@ MPyC configuration:
 MPyC parameters:
   -L l, --bit-length l  default bit length l for secure numbers
   -K k, --sec-param k   security parameter k, leakage probability 2**-k
+  --log-level ll        logging level ll=debug/info(default)/warning/error
   --no-log              disable logging messages
   --no-async            disable asynchronous evaluation
   --no-barrier          disable barriers
   --no-gmpy2            disable use of gmpy2 package
+  --no-numpy            disable use of numpy package
   --no-prss             disable use of PRSS (pseudorandom secret sharing)
   --mix32-64bit         enable mix of 32-bit and 64-bit platforms
 
 MPyC misc:
-  --output-windows      screen output for parties i>0 (only on Windows)
-  --output-file         append output for parties i>0 to party{m}_{i}.log
+  --output-windows      screen output for parties 0<i<m (one window each)
+  --output-file         append output of parties 0<i<m to party{m}_{i}.log
   -f F                  consume IPython's -f argument F
 ```
 
@@ -89,7 +92,7 @@ optional arguments:
 
 `python cnnmnist.py 1 0`
 
-`python cnnmnist.py 3`
+`python np_cnnmnist.py 3.5`
 
 `python cnnmnist.py -M1 1.5 0`
 
@@ -121,6 +124,6 @@ optional arguments:
 
 [KaplanMeierSurvivalExplained](KaplanMeierSurvivalExplained.ipynb) presents privacy-preserving Kaplan-Meier survival analysis, featuring aggregate Kaplan-Meier curves and secure logrank tests.
 
-[4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, cnnmnist.py.
+[4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, np_cnnmnist.py.
 
 [OneWayHashChainsExplained](OneWayHashChainsExplained.ipynb) shows a more advanced MPyC program.

@@ -1090,7 +1090,11 @@ class SecureArray(SecureObject):
 
     def __neg__(self):
         """Matrix negation."""
-        return runtime.np_neg(self)
+        return runtime.np_negative(self)
+
+    def __abs__(self):
+        """Matrix absolute value."""
+        return runtime.np_absolute(self)
 
     def __add__(self, other):
         """Matrix addition."""
@@ -1381,8 +1385,6 @@ class SecureFixedPointArray(SecureArray):
 
     def _coerce2(self, other):
         if isinstance(other, float):
-            if other.is_integer():
-                other = round(other)
             return other  # TODO: consider returning np.array(other) here
 
         return super()._coerce2(other)

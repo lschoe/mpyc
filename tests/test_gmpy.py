@@ -43,7 +43,7 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(te_s_t(1234, -2*1234))
         self.assertTrue(te_s_t(-2*12364, 12364))
 
-        # self.assertEqual(gmpy.invert(3, -1), 0)  # pending gmpy2 issue if modulus is 1 or -1
+        self.assertEqual(gmpy.invert(3, -1), 0)
         self.assertEqual(gmpy.invert(3, 257), 86)
         self.assertRaises(ZeroDivisionError, gmpy.invert, 2, 0)
         self.assertRaises(ZeroDivisionError, gmpy.invert, 2, 4)

@@ -20,11 +20,11 @@ class Arithmetic(unittest.TestCase):
     def test_secint_array(self):
         np.assertEqual = np.testing.assert_array_equal
 
-        secnum = mpc.SecInt()
-        FF = secnum.field
+        secint = mpc.SecInt()
+        FF = secint.field
         a = FF.array([[[-1, 1], [1, -1]]])  # 3D array
         np.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(a, senders=0)))), a)
-        c = secnum.array(a)
+        c = secint.array(a)
         a = a.copy()  # NB: needed to pass tests with inplace operations
         self.assertTrue((a == mpc.run(mpc.output(mpc.np_sgn(c)))).all())  # via FF array __eq__
         self.assertTrue((mpc.run(mpc.output(mpc.np_sgn(c))) == a).all())  # via FF array ufunc equal
@@ -32,7 +32,7 @@ class Arithmetic(unittest.TestCase):
 
         np.assertEqual(mpc.run(mpc.output(c + np.array([1, 2]))), a + np.array([1, 2]))
         np.assertEqual(mpc.run(mpc.output(c * np.array([1, 2]))), a * np.array([1, 2]))
-        np.assertEqual(mpc.run(mpc.output(c * secnum(2))), a * 2)
+        np.assertEqual(mpc.run(mpc.output(c * secint(2))), a * 2)
         np.assertEqual(mpc.run(mpc.output(c @ c)), a @ a)
         self.assertEqual(mpc.run(mpc.output(c[0][0] @ c[0][1])), a[0][0] @ a[0][1])
 
@@ -48,6 +48,7 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(d @ d)), b @ b)
         np.assertEqual(mpc.run(mpc.output(np.stack((c, c), axis=1))), np.stack((a, a), axis=1))
         np.assertEqual(mpc.run(mpc.output(np.block([[c, c], [c, c]]))), np.block([[a, a], [a, a]]))
+        np.assertEqual(mpc.run(mpc.output(np.block([[secint(9), -1]]))), np.block([[9, -1]]))
         np.assertEqual(mpc.run(mpc.output(np.vstack((c, c, c)))), np.vstack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.hstack((c, c, c)))), np.hstack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.dstack((c, c, c)))), np.dstack((a, a, a)))
@@ -58,8 +59,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.reshape(c, (-1,)))), np.reshape(a, (-1,)))
         np.assertEqual(mpc.run(mpc.output(np.fliplr(c))), np.fliplr(a))
         a1, a2 = a[:, :, 1], a[:, 0, :].reshape(2, 1)
-        np.assertEqual(mpc.run(mpc.output(np.add(secnum.array(a1), secnum.array(a2)))), a1 + a2)
-        np.assertEqual(mpc.run(mpc.output(a1 + secnum.array(a[:, 0, :]).reshape(2, 1))), a1 + a2)
+        np.assertEqual(mpc.run(mpc.output(np.add(secint.array(a1), secint.array(a2)))), a1 + a2)
+        np.assertEqual(mpc.run(mpc.output(a1 + secint.array(a[:, 0, :]).reshape(2, 1))), a1 + a2)
         np.assertEqual(mpc.run(mpc.output(c)), a)
         np.assertEqual(mpc.run(mpc.output(c, raw=True)), a)
         np.assertEqual(mpc.run(mpc.output(mpc.input(c, senders=0))), a)
@@ -67,13 +68,13 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c + a.value)), a + a)
         np.assertEqual(mpc.run(mpc.output(np.add(c, a))), np.add(a, a))
         np.assertEqual(mpc.run(mpc.output(np.add(2, c))), 2 + a)
-        np.assertEqual(mpc.run(mpc.output(np.add(secnum(2), c))), 2 + a)
+        np.assertEqual(mpc.run(mpc.output(np.add(secint(2), c))), 2 + a)
         np.assertEqual(mpc.run(mpc.output(np.add(c, FF(2)))), 2 + a)
         np.assertEqual(mpc.run(mpc.output(np.subtract(c, FF(2)))), a - 2)
-        np.assertEqual(mpc.run(mpc.output(np.subtract(c, secnum(2)))), a - 2)
+        np.assertEqual(mpc.run(mpc.output(np.subtract(c, secint(2)))), a - 2)
         np.assertEqual(mpc.run(mpc.output(np.subtract(2, c))), 2 - a)
         np.assertEqual(mpc.run(mpc.output(np.subtract(FF(2), c))), 2 - a)
-        np.assertEqual(mpc.run(mpc.output(np.subtract(secnum(2), c))), 2 - a)
+        np.assertEqual(mpc.run(mpc.output(np.subtract(secint(2), c))), 2 - a)
         np.assertEqual(mpc.run(mpc.output(-c)), -a)
         a += 2
         c += 2
@@ -99,10 +100,14 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c > c)), False)
         np.assertEqual(mpc.run(mpc.output(c >= c)), True)
         np.assertEqual(mpc.run(mpc.output(c < -c)), a.signed_() < (-a).signed_())
+        np.assertEqual(mpc.run(mpc.output(np.negative(c))), np.negative(a))
+        np.assertEqual(mpc.run(mpc.output(np.absolute(-c))), a)
+        np.assertEqual(mpc.run(mpc.output(np.maximum(c, -c))), a)
+        np.assertEqual(mpc.run(mpc.output(np.minimum(c, -c))), -a)
 
         self.assertEqual(mpc.run(mpc.output(list(c.flat))), list(a.flat))
         self.assertEqual(len(c), len(a))
-        self.assertRaises(TypeError, len, secnum.array(np.array(42)))
+        self.assertRaises(TypeError, len, secint.array(np.array(42)))
         np.assertEqual(mpc.run(mpc.output(c.copy())), mpc.run(mpc.output(c)))
         np.assertEqual(mpc.run(mpc.output(c.transpose([1, 2, 0]))), a.transpose([1, 2, 0]))
         np.assertEqual(mpc.run(mpc.output(c.swapaxes(0, 1))), a.swapaxes(0, 1))
@@ -118,16 +123,16 @@ class Arithmetic(unittest.TestCase):
     def test_secfxp_array(self):
         np.assertEqual = np.testing.assert_array_equal
 
-        secnum = mpc.SecFxp(12)
+        secfxp = mpc.SecFxp(12)
         a = np.array([[-1.5, 2.5], [4.5, -8.5]])
-        c = secnum.array(a)
+        c = secfxp.array(a)
 
         np.assertEqual(mpc.run(mpc.output(c + np.array([1, 2]))), a + np.array([1, 2]))
         np.assertEqual(mpc.run(mpc.output(c * np.array([1, 2]))), a * np.array([1, 2]))
-        np.assertEqual(mpc.run(mpc.output(c * secnum(2))), a * 2)
+        np.assertEqual(mpc.run(mpc.output(c * secfxp(2))), a * 2)
         np.assertEqual(mpc.run(mpc.output(c + np.array([1.5, 2.5]))), a + np.array([1.5, 2.5]))
         np.assertEqual(mpc.run(mpc.output(c * np.array([1.5, 2.5]))), a * np.array([1.5, 2.5]))
-        np.assertEqual(mpc.run(mpc.output(c * secnum(2.5))), a * 2.5)
+        np.assertEqual(mpc.run(mpc.output(c * secfxp(2.5))), a * 2.5)
         np.assertEqual(mpc.run(mpc.output(c * 2.5)), a * 2.5)
 
         # NB: NumPy dispatcher converts np.int8 to int
@@ -139,11 +144,12 @@ class Arithmetic(unittest.TestCase):
         b = mpc.run(mpc.output(c * c))
         np.assertEqual(b, a * a)
         self.assertTrue(np.issubdtype(b.dtype, np.floating))
+        np.assertEqual(mpc.run(mpc.output(np.block([[secfxp(9.5)]]))), np.block([[9.5]]))
 
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
-        secnum = mpc.SecFxp(64)
-        c = secnum.array(a)
+        secfxp = mpc.SecFxp(64)
+        c = secfxp.array(a)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
 
@@ -158,9 +164,11 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(c.flatten().tolist())), [-1, 0, 0, -1])
         self.assertEqual(len(c), 1)
         self.assertEqual(len(c.T), 2)
+        self.assertTrue(bool(c))
 
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c+1))), False)
+        np.assertEqual(mpc.run(mpc.output(1/(c-1))), 1/(secfld.field.array(a)-1))
 
     def test_async(self):
         mpc.options.no_async = False
