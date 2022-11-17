@@ -87,12 +87,9 @@ async def main():
     basis = [secfxp(n + i) for i in range(m)]
 
     iteration = 0
-    while True:
+    while await mpc.output((arg_min := argmin_int(T[0][:-1]))[1] < 0):
         # find index of pivot column
-        p_col_index, minimum = argmin_int(T[0][:-1])
-
-        if await mpc.output(minimum >= 0):
-            break  # maximum reached
+        p_col_index = arg_min[0]
 
         # find index of pivot row
         p_col = mpc.matrix_prod([p_col_index], T, True)[0]

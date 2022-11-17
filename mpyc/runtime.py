@@ -1301,6 +1301,8 @@ class Runtime:
         """Secure argmin of all given elements in x.
 
         See runtime.sorted() for details on key etc.
+        In case of multiple occurrences of the minimum values,
+        the index of the first occurrence is returned.
         """
         if len(x) == 1:
             x = x[0]
@@ -1324,15 +1326,17 @@ class Runtime:
         i0, min0 = self._argmin(x[:n//2], key)
         i1, min1 = self._argmin(x[n//2:], key)
         i1 += n//2
-        c = key(min0) < key(min1)
-        a = self.if_else(c, i0, i1)
-        m = self.if_else(c, min0, min1)  # TODO: merge if_else's once integral attr per list element
+        c = key(min1) < key(min0)
+        a = self.if_else(c, i1, i0)
+        m = self.if_else(c, min1, min0)  # TODO: merge if_else's once integral attr per list element
         return a, m
 
     def argmax(self, *x, key=None):
         """Secure argmax of all given elements in x.
 
         See runtime.sorted() for details on key etc.
+        In case of multiple occurrences of the maximum values,
+        the index of the first occurrence is returned.
         """
         if len(x) == 1:
             x = x[0]
@@ -1827,7 +1831,7 @@ class Runtime:
         containing 0s and 1s (Boolean).
         Runs in log_2 len(x) rounds.
         """
-        # TODO: cover case of SecureArray  (incl. case f > 0
+        # TODO: cover case of SecureArray  (incl. case f > 0)
         if iter(x) is x:
             x = list(x)
         else:
@@ -2315,6 +2319,9 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_transpose(self, a, axes=None):
+        if a.ndim == 1:
+            return a
+
         stype = type(a)
         if axes is None:
             perm = range(a.ndim)[::-1]
@@ -2345,7 +2352,6 @@ class Runtime:
         Default axis is 0.
         """
         # TODO: handle array_like input arrays
-        # TODO: integral attr
         if axis is None:
             shape = (sum(a.size for a in arrays),)
         else:
@@ -2356,16 +2362,29 @@ class Runtime:
         i = 0
         while not isinstance(a := arrays[i], sectypes.SecureArray):
             i += 1
-        await self.returnType((type(a), shape))
+        stype = type(a)
+        if issubclass(stype, self.SecureFixedPointArray):
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in arrays)
+            await self.returnType((stype, integral, shape))
+        else:
+            await self.returnType((stype, shape))
         arrays = await self.gather(arrays)
         return np.concatenate(arrays, axis=axis)
 
     @mpc_coro_no_pc
     async def np_stack(self, arrays, axis=0):
-        a = arrays[0]
+        i = 0
+        while not isinstance(a := arrays[i], sectypes.SecureArray):
+            i += 1
         shape = list(a.shape)
         shape.insert(axis, len(arrays))
-        await self.returnType((type(a), tuple(shape)))
+        shape = tuple(shape)
+        stype = type(a)
+        if issubclass(stype, self.SecureFixedPointArray):
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in arrays)
+            await self.returnType((stype, integral, shape))
+        else:
+            await self.returnType((stype, shape))
         arrays = await self.gather(arrays)
         return np.stack(arrays, axis=axis)
 
@@ -2430,13 +2449,21 @@ class Runtime:
         except for 1-D arrays where it concatenates along the first
         axis. Rebuilds arrays divided by hsplit.
         """
-        a = tup[0]
+        i = 0
+        while not isinstance(a := tup[i], sectypes.SecureArray):
+            i += 1
+        stype = type(a)
         shape = list(a.shape)
         if a.ndim == 1:
             shape[0] = sum(a.shape[0] for a in tup)
         else:
             shape[1] = sum(a.shape[1] for a in tup)
-        await self.returnType((type(a), tuple(shape)))
+        shape = tuple(shape)
+        if issubclass(stype, self.SecureFixedPointArray):
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in tup)
+            await self.returnType((stype, integral, shape))
+        else:
+            await self.returnType((stype, shape))
         tup = await self.gather(tup)
         return np.hstack(tup)
 
@@ -2464,11 +2491,18 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_column_stack(self, tup):
-        a = tup[0]
+        i = 0
+        while not isinstance(a := tup[i], sectypes.SecureArray):
+            i += 1
+        stype = type(a)
         shape_0 = a.shape[0]
         shape_1 = sum(a.shape[1] if a.shape[1:] else 1 for a in tup)
         shape = (shape_0, shape_1)
-        await self.returnType((type(a), shape))
+        if issubclass(stype, self.SecureFixedPointArray):
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in tup)
+            await self.returnType((stype, integral, shape))
+        else:
+            await self.returnType((stype, shape))
         tup = await self.gather(tup)
         return np.column_stack(tup)
 
@@ -2684,6 +2718,104 @@ class Runtime:
         z <<= stype.frac_length
         z = z.reshape(a.shape)
         return z
+
+    def np_argmin(self, a, key=None, raw=False, raw2=False):
+        # TODO: rename raw, raw2
+        # TODO: generalize beyond 1D arrays
+        if key is None:
+            key = lambda a: a
+
+        u, m = self._np_argmin(a, key)
+        if not raw:
+            iv = np.arange(len(u))
+            if isinstance(a, self.SecureFixedPointArray):
+                iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
+            u = u @ iv
+        if not raw2:
+            return u
+
+        return u, m
+
+    def _np_argmin(self, a, key):
+        # return first occurence if multiple hits
+        n = len(a)
+        if n == 1:
+            u = type(a)(np.array([1]))
+            m = a[0]
+        elif n == 2:
+            # Redundant case, except for some small savings.
+            a1, a2 = a[:1], a[1:]
+            c = key(a2) < key(a1)
+            u = self.np_concatenate((1 - c, c))  # save *
+            m = (c * (a2 - a1) + a1)[0]          # save .T (3x)
+        else:
+            n0 = n%2
+            a1, a2 = a[n0::2], a[n0 + 1::2]
+            c = key(a2) < key(a1)
+            a1, a2 = a1.T, a2.T
+            m = c * (a2 - a1) + a1
+            m = m.T
+            del a1, a2
+            if n0:
+                m = self.np_concatenate((a[:1], m))
+            u, m = self._np_argmin(m, key)
+            if n0:
+                u0, u = u[:1], u[1:]
+            u2 = u * c
+            u1 = u - u2
+            u = self.np_column_stack((u1, u2)).flatten()
+            if n0:
+                u = self.np_concatenate((u0, u))
+        return u, m
+
+    def np_argmax(self, a, key=None, raw=False, raw2=False):
+        # TODO: rename raw, raw2
+        # TODO: generalize beyond 1D arrays
+        if key is None:
+            key = lambda a: a
+
+        u, m = self._np_argmax(a, key)
+        if not raw:
+            iv = np.arange(len(u))
+            if isinstance(a, self.SecureFixedPointArray):
+                iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
+            u = u @ iv
+        if not raw2:
+            return u
+
+        return u, m
+
+    def _np_argmax(self, a, key):
+        # return first occurence if multiple hits
+        n = len(a)
+        if n == 1:
+            u = type(a)(np.array([1]))
+            m = a[0]
+        elif n == 2:
+            # Redundant case, except for some small savings.
+            a1, a2 = a[:1], a[1:]
+            c = key(a1) < key(a2)
+            u = self.np_concatenate((1 - c, c))  # save *
+            m = (c * (a2 - a1) + a1)[0]          # save .T (3x)
+        else:
+            n0 = n%2
+            a1, a2 = a[n0::2], a[n0 + 1::2]
+            c = key(a1) < key(a2)
+            a1, a2 = a1.T, a2.T
+            m = c * (a2 - a1) + a1
+            m = m.T
+            del a1, a2
+            if n0:
+                m = self.np_concatenate((a[:1], m))
+            u, m = self._np_argmax(m, key)
+            if n0:
+                u0, u = u[:1], u[1:]
+            u2 = u * c
+            u1 = u - u2
+            u = self.np_column_stack((u1, u2)).flatten()
+            if n0:
+                u = self.np_concatenate((u0, u))
+        return u, m
 
     @mpc_coro
     async def np_det(self, A):

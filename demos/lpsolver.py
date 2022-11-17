@@ -153,13 +153,13 @@ async def main():
     args = parser.parse_args()
 
     settings = [('uvlp', 8, 1, 2),
-                ('wiki', 6, 1, 2),
+                ('wiki', 6, 1, 1),
                 ('tb2x2', 6, 1, 2),
                 ('woody', 8, 1, 3),
-                ('LPExample_R20', 70, 1, 5),
+                ('LPExample_R20', 70, 1, 9),
                 ('sc50b', 104, 10, 55),
-                ('kb2', 536, 100000, 106),
-                ('LPExample', 110, 1, 178)]
+                ('kb2', 560, 100000, 154),
+                ('LPExample', 110, 1, 175)]
     name, bit_length, scale, n_iter = settings[args.dataset]
     if args.bit_length:
         bit_length = args.bit_length
@@ -200,11 +200,9 @@ async def main():
     previous_pivot = secint(1)
 
     iteration = 0
-    while True:
+    while await mpc.output((arg_min := argmin_int(T[0][:-1]))[1] < 0):
         # find index of pivot column
-        p_col_index, minimum = argmin_int(T[0][:-1])
-        if await mpc.output(minimum >= 0):
-            break  # maximum reached
+        p_col_index = arg_min[0]
 
         # find index of pivot row
         p_col = mpc.matrix_prod([p_col_index], T, True)[0]

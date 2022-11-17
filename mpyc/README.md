@@ -2,8 +2,8 @@
 
 [MPyC](https://lschoe.github.io/mpyc) currently consists of 14 modules (all in pure Python):
 
-1. [gmpy](https://lschoe.github.io/mpyc/mpyc.gmpy.html): some basic number theoretic algorithms (using GMP via Python package gmpy2, if installed)
-2. [numpy](https://lschoe.github.io/mpyc/mpyc.numpy.html): stub to avoid dependency on NumPy package (also handling version issues, etc.)
+1. [numpy](https://lschoe.github.io/mpyc/mpyc.numpy.html): stub to avoid dependency on NumPy package (also handling version issues, etc.)
+2. [gmpy](https://lschoe.github.io/mpyc/mpyc.gmpy.html): some basic number theoretic algorithms (using GMP via Python package gmpy2, if installed)
 3. [gfpx](https://lschoe.github.io/mpyc/mpyc.gfpx.html): polynomial arithmetic over arbitrary prime fields
 4. [finfields](https://lschoe.github.io/mpyc/mpyc.finfields.html): arbitrary finite fields, including binary fields and prime fields
 5. [fingroups](https://lschoe.github.io/mpyc/mpyc.fingroups.html): finite groups, in particular for use in cryptography (elliptic curves, Schnorr groups, etc.)

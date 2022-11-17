@@ -16,69 +16,12 @@ import numpy as np
 from mpyc.runtime import mpc
 
 
-# TODO: unify approaches for argmin etc. with secure NumPy arrays (also see lpsolverfxp.py)
+class SecureFraction:
+    def __init__(self, a):
+        self.a = a  # numerator, denominator
 
-
-def argmin_int(x):
-    secintarr = type(x)
-    n = len(x)
-    if n == 1:
-        return (secintarr(np.array([1])), x[0])
-
-    if n == 2:
-        b = x[0] < x[1]
-        arg = mpc.np_fromlist([b, 1 - b])
-        min = b * (x[0] - x[1]) + x[1]
-        return arg, min
-
-    a = x[:n//2]   ## split even odd?  start at n%2 as in reduce in mpctools
-    b = x[(n+1)//2:]
-    c = a < b
-    m = c * (a - b) + b
-    if n%2 == 1:
-        m = np.concatenate((m, x[n//2:(n+1)//2]))
-    ag, mn = argmin_int(m)
-    if n%2 == 1:
-        ag_1 = ag[-1:]
-        ag = ag[:-1]
-    arg1 = ag * c
-    arg2 = ag - arg1
-    if n%2 == 1:
-        arg = np.concatenate((arg1, ag_1, arg2))
-    else:
-        arg = np.concatenate((arg1, arg2))
-    return arg, mn
-
-
-def argmin_rat(nd):
-    secintarr = type(nd)
-    N = nd.shape[1]
-    if N == 1:
-        return (secintarr(np.array([1])), (nd[0, 0], nd[1, 0]))
-
-    if N == 2:
-        b = mpc.in_prod([nd[0, 0], -nd[1, 0]], [nd[1, 1], nd[0, 1]]) < 0
-        arg = mpc.np_fromlist([b, 1 - b])
-        min = b * (nd[:, 0] - nd[:, 1]) + nd[:, 1]
-        return arg, (min[0], min[1])
-
-    a = nd[:, :N//2]
-    b = nd[:, (N+1)//2:]
-    c = a[0] * b[1] < b[0] * a[1]
-    m = c * (a - b) + b
-    if N%2 == 1:
-        m = np.concatenate((m, nd[:, N//2:(N+1)//2]), axis=1)
-    ag, mn = argmin_rat(m)
-    if N%2 == 1:
-        ag_1 = ag[-1:]
-        ag = ag[:-1]
-    arg1 = ag * c
-    arg2 = ag - arg1
-    if N%2 == 1:
-        arg = np.concatenate((arg1, ag_1, arg2))
-    else:
-        arg = np.concatenate((arg1, arg2))
-    return arg, mn
+    def __lt__(self, other):  # NB: __lt__() is basic comparison as in Python's list.sort()
+        return self.a[:, 0] * other.a[:, 1] < self.a[:, 1] * other.a[:, 0]
 
 
 def pow_list(a, x, n):
@@ -135,13 +78,13 @@ async def main():
     args = parser.parse_args()
 
     settings = [('uvlp', 8, 1, 2),
-                ('wiki', 6, 1, 2),
+                ('wiki', 6, 1, 1),
                 ('tb2x2', 6, 1, 2),
                 ('woody', 8, 1, 3),
-                ('LPExample_R20', 70, 1, 5),
+                ('LPExample_R20', 70, 1, 9),
                 ('sc50b', 104, 10, 55),
-                ('kb2', 536, 100000, 106),
-                ('LPExample', 110, 1, 178)]
+                ('kb2', 560, 100000, 154),
+                ('LPExample', 110, 1, 175)]
     name, bit_length, scale, n_iter = settings[args.dataset]
     if args.bit_length:
         bit_length = args.bit_length
@@ -173,17 +116,15 @@ async def main():
     previous_pivot = secint(1)
 
     iteration = 0
-    while True:
+    while await mpc.output((arg_min := T[0, :-1].argmin())[1] < 0):
         # find index of pivot column
-        p_col_index, minimum = argmin_int(T[0, :-1])
-        if await mpc.output(minimum >= 0):
-            break  # maximum reached
+        p_col_index = arg_min[0]
 
         # find index of pivot row
         p_col = T[:, :-1] @ p_col_index
-        den = p_col[1:]
-        num = T[1:, -1] + (den <= 0)
-        p_row_index, (_, pivot) = argmin_rat(np.stack((num, den)))
+        denominator = p_col[1:]
+        constraints = np.column_stack((T[1:, -1] + (denominator <= 0), denominator))
+        p_row_index, (_, pivot) = constraints.argmin(key=SecureFraction)
 
         # reveal progress a bit
         iteration += 1
@@ -198,7 +139,6 @@ async def main():
         # update tableau Tij = Tij*Tkl/Tkl' - (Til/Tkl' - bool(i==k)) * (Tkj + bool(j==l)*Tkl')
         p_col_index = np.concatenate((p_col_index, np.array([0])))
         p_row_index = np.concatenate((np.array([0]), p_row_index))
-
         pp_inv = 1 / previous_pivot
         p_col = p_col * pp_inv - p_row_index
         p_row = p_row_index @ T + previous_pivot * p_col_index

@@ -177,7 +177,7 @@ async def main():
         secnum.bit_length = 37
 
     for i in range(batch_size):
-        prediction = int(await mpc.output(mpc.argmax(x[i].tolist())[0]))
+        prediction = int(await mpc.output(np.argmax(x[i])))
         error = '******* ERROR *******' if prediction != labels[i] else ''
         print(f'Image #{offset+i} with label {labels[i]}: {prediction} predicted. {error}')
         print(await mpc.output(x[i]))

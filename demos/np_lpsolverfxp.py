@@ -15,106 +15,19 @@ import numpy as np
 from mpyc.runtime import mpc
 
 
-# TODO: unify approaches for argmin etc. with secure NumPy arrays (also see lpsolver.py)
+class SecureFraction:
+    def __init__(self, a):
+        self.a = a  # numerator, denominator, pos
 
-# def argmin_int(xs):
-    # a, m = mpc.argmin(xs)
-    # u = mpc.unit_vector(a, len(xs))
-    # u = mpc.np_fromlist(u)
-    # u.integral = True
-    # return u, m
-
-
-def argmin_int(x):
-    secarr = type(x)
-    n = len(x)
-    if n == 1:
-        return (secarr(np.array([1])), x[0])
-
-    if n == 2:
-        b = x[0] < x[1]
-        arg = mpc.np_fromlist([b, 1 - b])
-        min = b * (x[0] - x[1]) + x[1]
-        arg.integral = True
-        return arg, min
-
-    a = x[:n//2]   ## split even odd?  start at n%2 as in reduce in mpctools
-    b = x[(n+1)//2:]
-    c = a < b
-    m = c * (a - b) + b
-    if n%2 == 1:
-        m = np.concatenate((m, x[n//2:(n+1)//2]))
-    ag, mn = argmin_int(m)
-    if n%2 == 1:
-        ag_1 = ag[-1:]
-        ag = ag[:-1]
-    arg1 = ag * c
-    arg2 = ag - arg1
-    if n%2 == 1:
-        arg = np.concatenate((arg1, ag_1, arg2))
-    else:
-        arg = np.concatenate((arg1, arg2))
-    arg.integral = True
-    return arg, mn
-
-
-def argmin_rat(nd, p):
-    secarr = type(nd)
-    n = nd.shape[1]
-    if n == 1:
-        return secarr(np.array([1])), (nd[0, 0], nd[1, 0])
-
-    if n == 2:
-        b = mpc.in_prod([nd[0, 0], -nd[1, 0]], [nd[1, 1], nd[0, 1]]) < 0
-        c0 = p[0]
-#        c0.integral = True
-        b = mpc.if_else(c0, b, 0)
-        c1 = p[1]
-#        c1.integral = True
-        b = mpc.if_else(c1, b, 1)
-#        b.integral = True
-        assert b.integral
-        arg = mpc.np_fromlist([b, 1 - b])
-        min = b * (nd[:, 0] - nd[:, 1]) + nd[:, 1]
-        return arg, min
-
-    a = nd[:, :n//2]
-    b = nd[:, (n+1)//2:]
-    aa = np.stack((-a[1], a[0]))
-    aa.integral = False
-    b.integral = False
-    aa = aa.T.reshape(n//2, 1, 2)
-    c = aa @ b.T.reshape(n//2, 2, 1) < 0  # c = a[0] * b[1] < b[0] * a[1]
-    c = c.reshape(len(c))
-    assert c.integral
-    assert p.integral
-#    c = a[2] * c
-    a2 = p[:n//2]
-    c *= a2
-    assert c.integral
-#    c = b[2] * (c - 1) + 1
-    b2 = p[(n+1)//2:]
-    c = b2 * (c - 1) + 1
-    assert c.integral
-    m = c * (a - b) + b
-    mp = c * (a2 - b2) + b2
-    assert mp.integral
-    if n%2 == 1:
-        m = np.concatenate((m, nd[:, n//2:(n+1)//2]), axis=1)
-        mp = np.concatenate((mp, p[n//2:(n+1)//2]))
-        mp.integral = True
-    ag, mn = argmin_rat(m, mp)
-    if n%2 == 1:
-        ag_1 = ag[-1:]
-        ag = ag[:-1]
-    arg1 = ag * c
-    arg2 = ag - arg1
-    if n%2 == 1:
-        arg = np.concatenate((arg1, ag_1, arg2))
-    else:
-        arg = np.concatenate((arg1, arg2))
-    arg.integral = True
-    return arg, mn
+    def __lt__(self, other):  # NB: __lt__() is basic comparison as in Python's list.sort()
+        b = self.a[:, 0] * other.a[:, 1] < other.a[:, 0] * self.a[:, 1]
+        c0 = self.a[:, 2]
+        c0.integral = True
+        b *= c0               # b = b if c0 else 0
+        c1 = other.a[:, 2]
+        c1.integral = True
+        b = c1 * (b - 1) + 1  # b = b if c1 else 1
+        return b
 
 
 async def main():
@@ -154,18 +67,15 @@ async def main():
     basis = secfxp.array(n + np.arange(m))
 
     iteration = 0
-    while True:
+    while await mpc.output((arg_min := T[0, :-1].argmin())[1] < 0):
         # find index of pivot column
-        p_col_index, minimum = argmin_int(T[0, :-1])
-        if await mpc.output(minimum >= 0):
-            break  # maximum reached
+        p_col_index = arg_min[0]
 
         # find index of pivot row
-        assert p_col_index.integral
-        p_col =  T[:, :-1] @ p_col_index
-        p_col1 = p_col[1:]
-        pos = p_col1 > 0.0001
-        p_row_index, (_, pivot) = argmin_rat(np.stack((T[1:, -1], p_col1)), pos)
+        p_col = T[:, :-1] @ p_col_index
+        denominator = p_col[1:]
+        constraints = np.column_stack((T[1:, -1], denominator, denominator > 0.0001))
+        p_row_index, (_, pivot, _) = constraints.argmin(key=SecureFraction)
 
         # reveal progress a bit
         iteration += 1
@@ -181,8 +91,6 @@ async def main():
         # update tableau Tij = Tij - (Til - bool(i==k))/Tkl *outer (Tkj + bool(j==l))
         p_col_index = np.concatenate((p_col_index, np.array([0])))
         p_row_index = np.concatenate((np.array([0]), p_row_index))
-        p_col_index.integral = True
-        p_row_index.integral = True
         p_col = (p_col - p_row_index) / pivot
         p_row = p_row_index @ T + p_col_index
         T -= np.outer(p_col, p_row)
@@ -193,19 +101,15 @@ async def main():
 
     logging.info('Solution x')
     x = np.sum(np.fromiter((T[i+1, -1] * mpc.np_fromlist(mpc.unit_vector(basis[i], m + n)[:n]) for i in range(m)), 'O'))
-    cx = c @ x
-    Ax = A @ x
-    Ax_bounded_by_b = mpc.all((Ax <= 1.01 * b + 0.0001).tolist())
+    Ax_bounded_by_b = mpc.all((A @ x <= 1.01 * b + 0.0001).tolist())
     x_nonnegative = mpc.all((x >= 0).tolist())
 
     logging.info('Dual solution y')
     y = np.sum(np.fromiter((T[0, j] * mpc.np_fromlist(mpc.unit_vector(cobasis[j], m + n)[n:]) for j in range(n)), 'O'))
-    yb = y @ b
-    yA = y @ A
-    yA_bounded_by_c = mpc.all((yA >= np.where(c > 0, 1/1.01, 1.01) * c - 0.0001).tolist())
+    yA_bounded_by_c = mpc.all((y @ A >= np.where(c > 0, 1/1.01, 1.01) * c - 0.0001).tolist())
     y_nonnegative = mpc.all((y >= 0).tolist())
 
-    cx_eq_yb = abs(cx - yb) <= 0.01 * abs(cx)
+    cx_eq_yb = abs((cx := c @ x) - y @ b) <= 0.01 * abs(cx)
     check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonnegative])
     check = bool(await mpc.output(check))
     print(f'verification c.x == y.b, A.x <= b, x >= 0, y.A >= c, y >= 0: {check}')

@@ -1182,8 +1182,7 @@ class SecureArray(SecureObject):
     def __ge__(self, other):
         """Greater-than or equal comparison."""
         # self >= other <=> not (self < other)
-        a = 1 - runtime.np_less(self, other)
-        return a
+        return 1 - runtime.np_less(self, other)
 
     def __gt__(self, other):
         """Strictly greater-than comparison."""
@@ -1246,6 +1245,20 @@ class SecureArray(SecureObject):
 
     def sum(self, *args, **kwargs):
         return runtime.np_sum(self, *args, **kwargs)
+
+    def argmin(self, *args, **kwargs):
+        if 'raw' not in kwargs:
+            kwargs['raw'] = True
+        if 'raw2' not in kwargs:
+            kwargs['raw2'] = True
+        return runtime.np_argmin(self, *args, **kwargs)
+
+    def argmax(self, *args, **kwargs):
+        if 'raw' not in kwargs:
+            kwargs['raw'] = True
+        if 'raw2' not in kwargs:
+            kwargs['raw2'] = True
+        return runtime.np_argmax(self, *args, **kwargs)
 
 
 class SecureFiniteFieldArray(SecureArray):
