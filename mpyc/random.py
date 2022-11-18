@@ -192,17 +192,35 @@ def shuffle(sectype, x):
     """Shuffle list x secretly in-place, and return None.
 
     Given list x may contain public or secret elements.
+    Elements of x are all numbers or all lists (of the same length) of numbers.
     """
     n = len(x)
-    if not isinstance(x[0], sectype):  # assume same type for all elts of x
-        for i in range(len(x)):
-            x[i] = sectype(x[i])
+    # assume same type for all elts of x
+    x_i_is_list = isinstance(x[0], list)
+    if not x_i_is_list:
+        # elements of x are numbers
+        if not isinstance(x[0], sectype):
+            for i in range(n):
+                x[i] = sectype(x[i])
+        for i in range(n-1):
+            u = random_unit_vector(sectype, n - i)
+            x_u = runtime.in_prod(x[i:], u)
+            d = runtime.scalar_mul(x[i] - x_u, u)
+            x[i] = x_u
+            x[i:] = runtime.vector_add(x[i:], d)
+        return
+
+    # elements of x are lists of numbers
+    for j in range(len(x[0])):
+        if not isinstance(x[0][j], sectype):
+            for i in range(n):
+                x[i][j] = sectype(x[i][j])
     for i in range(n-1):
         u = random_unit_vector(sectype, n - i)
-        x_u = runtime.in_prod(x[i:], u)
-        d = runtime.scalar_mul(x[i] - x_u, u)
+        x_u = runtime.matrix_prod([u], x[i:])[0]
+        d = runtime.matrix_prod([[a] for a in u], [runtime.vector_sub(x[i], x_u)])
         x[i] = x_u
-        x[i:] = runtime.vector_add(x[i:], d)
+        x[i:] = runtime.matrix_add(x[i:], d)
 
 
 def random_permutation(sectype, x):

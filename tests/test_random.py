@@ -38,9 +38,12 @@ class Arithmetic(unittest.TestCase):
 
         x = list(range(8))
         shuffle(secint, x)
-        shuffle(secint, x)
         x = mpc.run(mpc.output(x))
         self.assertSetEqual(set(x), set(range(8)))
+        x = list(map(list, zip(range(8), range(0, -8, -1))))
+        shuffle(secint, x)
+        a = mpc.run(mpc.output(x[0]))
+        self.assertEqual(a[1], -a[0])
         x = mpc.run(mpc.output(random_permutation(secint, 8)))
         self.assertSetEqual(set(x), set(range(8)))
         x = mpc.run(mpc.output(random_derangement(secint, 2)))
