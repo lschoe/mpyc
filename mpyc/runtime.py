@@ -3413,6 +3413,10 @@ def setup():
         parser.print_help()
         sys.exit()
 
+    if options.VERSION:
+        print(f'MPyC {mpyc.__version__}')
+        sys.exit()
+
     if options.help:
         args += ['-h']
         print(f'Showing help message for {sys.argv[0]}, if available:')

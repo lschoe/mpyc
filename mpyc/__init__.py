@@ -41,10 +41,12 @@ def get_arg_parser():
     parser = argparse.ArgumentParser(add_help=False)
 
     group = parser.add_argument_group('MPyC help')
+    group.add_argument('-V', '--VERSION', action='store_true',
+                       help='print MPyC version number and exit')
     group.add_argument('-H', '--HELP', action='store_true',
-                       help='show this help message for MPyC and exit')
+                       help='print this help message for MPyC and exit')
     group.add_argument('-h', '--help', action='store_true',
-                       help='show help message for this MPyC program (if any)')
+                       help='print help message for this MPyC program (if any)')
 
     group = parser.add_argument_group('MPyC configuration')
     group.add_argument('-C', '--config', metavar='ini',
