@@ -105,6 +105,15 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.absolute(-c))), a)
         np.assertEqual(mpc.run(mpc.output(np.maximum(c, -c))), a)
         np.assertEqual(mpc.run(mpc.output(np.minimum(c, -c))), -a)
+        c_, a_ = c.flatten()[:3], a.signed_().flatten()[:3]
+        np.assertEqual(mpc.run(mpc.output(np.argmin(c_[:1]))), np.argmin(a_[:1]))
+        np.assertEqual(mpc.run(mpc.output(c_.argmin(key=operator.neg, raw=False)[0])), a_.argmax())
+        np.assertEqual(mpc.run(mpc.output(list(c_.argmin(raw=False)))), [a_.argmin(), np.amin(a_)])
+        np.assertEqual(mpc.run(mpc.output(c_.argmin(raw2=False))), [1, 0, 0])
+        np.assertEqual(mpc.run(mpc.output(np.argmax(c_[:1]))), np.argmax(a_[:1]))
+        np.assertEqual(mpc.run(mpc.output(c_.argmax(key=operator.neg, raw=False)[0])), a_.argmin())
+        np.assertEqual(mpc.run(mpc.output(list(c_.argmax(raw=False)))), [a_.argmax(), np.amax(a_)])
+        np.assertEqual(mpc.run(mpc.output(c_.argmax(raw2=False))), [0, 1, 0])
 
         self.assertEqual(mpc.run(mpc.output(list(c.flat))), list(a.flat))
         self.assertEqual(len(c), len(a))
@@ -154,6 +163,10 @@ class Arithmetic(unittest.TestCase):
         c = secfxp.array(a)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
+        a = a.flatten()[:3]
+        c = c.flatten()[:3]
+        np.assertEqual(mpc.run(mpc.output(np.argmin(c))), np.argmin(a))
+        np.assertEqual(mpc.run(mpc.output(np.argmax(c))), np.argmax(a))
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):

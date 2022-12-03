@@ -100,6 +100,9 @@ def get_arg_parser():
 
 if os.getenv('READTHEDOCS') != 'True':
     options = get_arg_parser().parse_known_args()[0]
+    if options.VERSION or options.HELP:
+        options.no_log = True
+
     # Set logging level as early as possible.
     if options.no_log:
         logging.basicConfig(level=logging.WARNING)

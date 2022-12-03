@@ -515,10 +515,7 @@ def SchnorrGroup(p=None, q=None, g=None, l=None, n=None):
     if g is None:
         w = (p-1) // q
         i = 2
-        while True:
-            g = powmod(i, w, p)
-            if g != 1 and powmod(g, q, p) == 1:
-                break
+        while (g := powmod(i, w, p)) == 1:
             i += 1
         g = int(g)
     return _SchnorrGroup(p, q, g)
