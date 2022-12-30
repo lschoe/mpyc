@@ -20,7 +20,6 @@ import configparser
 from dataclasses import dataclass
 import pickle
 import asyncio
-import ssl
 from mpyc.numpy import np
 from mpyc import finfields
 from mpyc import thresha
@@ -210,6 +209,7 @@ class Runtime:
         for peer in self.parties:
             peer.protocol = Future(loop=loop) if peer.pid == self.pid else None
         if self.options.ssl:
+            import ssl  # NB: avoid "dependency" for PyScript (ssl unvendored in Pyodide)
             crtfile = os.path.join('.config', f'party_{self.pid}.crt')
             keyfile = os.path.join('.config', f'party_{self.pid}.key')
             cafile = os.path.join('.config', 'mpyc_ca.crt')

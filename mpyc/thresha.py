@@ -14,7 +14,7 @@ __all__ = ['random_split', 'recombine', 'pseudorandom_share', 'pseudorandom_shar
 
 from math import prod
 import functools
-import hashlib
+import hashlib  # TODO: Python 3.12+ requires OpenSSL's pbkdf2_hmac, unavailable in, e.g., PyScrypt
 import secrets
 from mpyc.numpy import np
 
