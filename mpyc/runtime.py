@@ -2334,10 +2334,13 @@ class Runtime:
         else:
             await self.returnType((stype, shape))
         a = await self.gather(a)
-        return a.transpose(perm)
+        return a.transpose(axes)
 
     @mpc_coro_no_pc
     async def np_swapaxes(self, a, axis1, axis2):
+        if axis1 == axis2:
+            return a
+
         shape = list(a.shape)
         shape[axis1], shape[axis2] = shape[axis2], shape[axis1]
         await self.returnType((type(a), tuple(shape)))
@@ -2557,29 +2560,104 @@ class Runtime:
         return np.fliplr(a)
 
     def np_minimum(self, a, b):
+        """Elementwise minimum of a and b.
+
+        If a and b are of different shapes, they must be broadcastable to a common shape
+        (which is scalar if both a and b are scalars).
+        """
         return b + (a < b) * (a - b)
 
     def np_maximum(self, a, b):
+        """Elementwise maximum of a and b.
+
+        If a and b are of different shapes, they must be broadcastable to a common shape
+        (which is scalar if both a and b are scalars).
+        """
         return a + (a < b) * (b - a)
 
     def np_where(self, c, a, b):
+        """Return elements chosen from a or b depending on condition c.
+
+        The shapes of a, b, and c are broadcast together.
+        """
         return c * (a - b) + b
 
-    def np_amax(self, a, axis=None):
-        assert axis is None  # TODO: handle other axis (axes) and other kwargs like keepdims
-        return self.max(a.flatten().tolist())
-
     def np_amin(self, a, axis=None):
-        assert axis is None  # TODO: handle other axis (axes) and other kwargs like keepdims
-        return self.min(a.flatten().tolist())
+        """Return the minimum of an array or minimum along one or more axes.
+
+        If axis is None (default) the minimum of the array is returned (as a scalar).
+        If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
+        The shape of the result is the shape of a with all specified axes removed
+        (converted to a scalar if no dimensions remain).
+        """
+        # TODO: other kwargs like keepdims and initial
+        if axis is None:
+            # Flatten a to 1D array:
+            a = self.np_reshape(a, (-1,))
+        elif isinstance(axis, tuple):
+            axis = tuple(i % a.ndim for i in axis)
+            # Move specified axes to front:
+            axes = axis + tuple(i for i in range(a.ndim) if i not in axis)
+            a = self.np_transpose(a, axes=axes)
+            # Flatten specified axes to one dimension:
+            a = self.np_reshape(a, (-1,) + a.shape[len(axis):])
+        elif axis := axis % a.ndim:
+            # Move nonzero axis to front:
+            axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
+            a = self.np_transpose(a, axes=axes)
+        n = a.shape[0]
+        if n == 1:
+            return a[0]
+
+        m0 = self.np_amin(a[:n//2], axis=0)
+        m1 = self.np_amin(a[n//2:], axis=0)
+        return self.np_minimum(m0, m1)
+
+    def np_amax(self, a, axis=None):
+        """Return the maximum of an array or maximum along one or more axes.
+
+        If axis is None (default) the maximum of the array is returned (as a scalar).
+        If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
+        The shape of the result is the shape of a with all specified axes removed
+        (converted to a scalar if no dimensions remain).
+        """
+        # TODO: other kwargs like keepdims and initial
+        if axis is None:
+            # Flatten a to 1D array:
+            a = self.np_reshape(a, (-1,))
+        elif isinstance(axis, tuple):
+            axis = tuple(i % a.ndim for i in axis)
+            # Move specified axes to front:
+            axes = axis + tuple(i for i in range(a.ndim) if i not in axis)
+            a = self.np_transpose(a, axes=axes)
+            # Flatten specified axes to one dimension:
+            a = self.np_reshape(a, (-1,) + a.shape[len(axis):])
+        elif axis := axis % a.ndim:
+            # Move nonzero axis to front:
+            axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
+            a = self.np_transpose(a, axes=axes)
+        n = a.shape[0]
+        if n == 1:
+            return a[0]
+
+        m0 = self.np_amax(a[:n//2], axis=0)
+        m1 = self.np_amax(a[n//2:], axis=0)
+        return self.np_maximum(m0, m1)
 
     @mpc_coro_no_pc
     async def np_sum(self, a, axis=None):
-        # TODO: handle multiple axes and other kwargs like keepdims
+        """Sum of array elements over a given axis (or axes)."""
+        # TODO: kwargs like keepdims and initial
         if axis is None:
+            shape = ()
+        else:
+            if not isinstance(axis, tuple):
+                axis = (axis,)
+            axes = [i % a.ndim for i in axis]
+            shape = tuple(s for i, s in enumerate(a.shape) if i not in axes)
+        if shape == ():
             await self.returnType(type(a).sectype)
         else:
-            shape = a.shape[:axis] + a.shape[axis+1:]
             await self.returnType((type(a), shape))
         a = await self.gather(a)
         return np.sum(a, axis=axis)

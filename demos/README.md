@@ -7,15 +7,16 @@ Use `-H`, `--HELP` option with any demo to see the MPyC help message.
 `python secretsanta.py -H`
 
 ```
-usage: secretsanta.py [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t]
+usage: secretsanta.py [-V] [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t]
                       [-B b] [--ssl] [-L l] [-K k] [--log-level ll]
                       [--no-log] [--no-async] [--no-barrier] [--no-gmpy2]
                       [--no-numpy] [--no-prss] [--mix32-64bit]
                       [--output-windows] [--output-file] [-f F]
 
 MPyC help:
-  -H, --HELP            show this help message for MPyC and exit
-  -h, --help            show help message for this MPyC program (if any)
+  -V, --VERSION         print MPyC version number and exit
+  -H, --HELP            print this help message for MPyC and exit
+  -h, --help            print help message for this MPyC program (if any)
 
 MPyC configuration:
   -C ini, --config ini  use ini file, defining all m parties
@@ -46,18 +47,19 @@ MPyC misc:
 
 Use `-h`, `--help` option to see help message for demo (if available).
 
-`python onewayhashchains.py -h`
+`python np_onewayhashchains.py -h`
 
 ```
-Showing help message for onewayhashchains.py, if available:
+Showing help message for np_onewayhashchains.py, if available:
 
-usage: onewayhashchains.py [-h] [-k K] [--recursive] [--no-one-way]
-                           [--no-random-seed]
+usage: np_onewayhashchains.py [-h] [-k K] [--recursive] [--sha3]
+                              [--no-one-way] [--no-random-seed]
 
 optional arguments:
   -h, --help        show this help message and exit
   -k K, --order K   order K of hash chain, length n=2**K
   --recursive       use recursive pebbler
+  --sha3            use SHAKE128 as one-way function
   --no-one-way      use dummy one-way function
   --no-random-seed  use fixed seed
 ```
@@ -78,9 +80,9 @@ optional arguments:
 
 `run-all.bat --no-async`
 
-`run-all.sh -M2 --ssl`
+`np-run-all.sh -M2 --ssl`
 
-`run-all.bat -M3 --output-file > party3_0.log`
+`np-run-all.bat -M3 --output-file > party3_0.log`
 
 `run-all.sh -M4 --threshold 0 --ssl`
 

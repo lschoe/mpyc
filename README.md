@@ -57,4 +57,4 @@ a notebook cell, even outside a coroutine.
 6. For Python, you also get top-level `await` by running `python -m asyncio` to launch a natively async REPL.
 By running `python -m mpyc` instead you even get this REPL with the MPyC runtime preloaded!
 
-Copyright &copy; 2018-2022 Berry Schoenmakers
+Copyright &copy; 2018-2023 Berry Schoenmakers
