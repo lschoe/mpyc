@@ -12,6 +12,7 @@ vectorized processing next to operator @ for matrix multiplication.
 Much of the NumPy API can be used to manipulate these arrays as well.
 """
 
+import os
 import functools
 from mpyc.numpy import np
 from mpyc import gmpy as gmpy2
@@ -1423,8 +1424,27 @@ class PrimeFieldArray(FiniteFieldArray):
                 p4 = (p+1) >> 2
             p = gmpy2.mpz(p)
             p4 = gmpy2.mpz(p4)
-            powmod = gmpy2.powmod
-            return np.vectorize(lambda a: int(powmod(a, p4, p)), otypes='O')(a)
+
+            W = int(os.getenv('MPYC_MAXWORKERS'))
+            if W == 0:
+                powmod = gmpy2.powmod
+                return np.vectorize(lambda a: int(powmod(a, p4, p)), otypes='O')(a)
+
+            # Experimental use of W worker threads.
+            # Using gmpy2's new function powmod_base_list(), which releases the GIL.
+            # Example: "python np_lpsolver.py -i6 -M3 -W2" about 1.4x faster than for W=0.
+            from gmpy2 import powmod_base_list  # NB: requires gmpy2 >= 2.1.3
+            import concurrent.futures
+            n = a.size
+            s = a.flat
+            with concurrent.futures.ThreadPoolExecutor(max_workers=W) as executor:
+                tasks = {executor.submit(powmod_base_list, s[i*n//W:(i+1)*n//W], p4, p): i
+                         for i in range(W)}
+            s = np.empty(n, dtype='O')
+            for task in concurrent.futures.as_completed(tasks):
+                i = tasks[task]
+                s[i*n//W:(i+1)*n//W] = task.result()
+            return np.vectorize(int, otypes='O')(s).reshape(a.shape)
 
         _sqrt = cls.field._sqrt
         return np.vectorize(lambda a: _sqrt(a, INV=INV), otypes='O')(a)

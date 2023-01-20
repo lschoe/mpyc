@@ -26,7 +26,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.8.11'
+__version__ = '0.8.12'
 __license__ = 'MIT License'
 
 import os
@@ -63,6 +63,8 @@ def get_arg_parser():
                        help='use port number b+i for party i')
     group.add_argument('--ssl', action='store_true',
                        help='enable SSL connections')
+    group.add_argument('-W', '--workers', type=int, metavar='w',
+                       help='maximum number of worker threads per party')
 
     group = parser.add_argument_group('MPyC parameters')
     group.add_argument('-L', '--bit-length', type=int, metavar='l',
@@ -120,6 +122,15 @@ if os.getenv('READTHEDOCS') != 'True':
         logging.debug(f'Set logging level to {level}: {logging.getLevelName(level)}')
         del ch, level
     logging.debug(f'On {sys.platform=}')
+
+    # Experimental speedup for mpyc.finfields.PrimeFieldArray._sqrt() using multithreading.
+    env_max_workers = os.getenv('MPYC_MAXWORKERS')  # check if variable MPYC_MAXWORKERS is set
+    if not env_max_workers:
+        if options.workers is None:
+            options.workers = 0
+        os.environ['MPYC_MAXWORKERS'] = str(options.workers)
+        # NB: MPYC_MAXWORKERS also set for subprocesses
+    logging.debug(f'Number of worker threads maximum set to {os.getenv("MPYC_MAXWORKERS")}')
 
     # Ensure numpy will not be loaded by mpyc.numpy, if demanded (saving resources).
     env_no_numpy = os.getenv('MPYC_NONUMPY') == '1'  # check if variable MPYC_NONUMPY is set
