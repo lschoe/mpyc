@@ -92,6 +92,7 @@ except ImportError:
     import random
 
     def mpz(x):
+        """Return Python int(x) as stub for gmpy2's mpz(x)."""
         return int(x)
 
     def is_prime(x, n=25):

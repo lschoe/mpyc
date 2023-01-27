@@ -347,8 +347,13 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual = np.testing.assert_array_equal
 
         F = self.f101
-        a = F.array([[8, 8], [3, -3]])
+        np_a = np.array([[8, 8], [3, -3]])
+        a = F.array(np_a)
 
+        np.assertEqual(a == a, True)
+        np.assertEqual(np.equal(a, +a), True)
+        np.assertEqual(a != a, False)
+        np.assertEqual(np.not_equal(a, -a), True)
         a = np.add(a, a) + np.negative(a)
         np.negative.at(a, (1, 1))  # NB: in-place
         np.negative.at(a, (1, 1))  # NB: in-place
@@ -358,6 +363,7 @@ class Arithmetic(unittest.TestCase):
         a += 2
         a -= 2
         a *= 3
+        a /= 3
         a >>= 2
         a <<= 1
         a = np.right_shift(np.left_shift(a, 2), 1)
@@ -365,10 +371,20 @@ class Arithmetic(unittest.TestCase):
         np.add(a, np.array([1], dtype=np.int64))
         self.assertRaises(TypeError, np.add, np.array([1], dtype=np.float64), a)
         self.assertRaises(TypeError, np.add, a, np.array([1], dtype=np.float32))
-#        a = np.power(a, 2)
-#        a = divmod(a, 2)
+        self.assertRaises(TypeError, operator.sub, a, 7j)
+        self.assertRaises(TypeError, operator.sub, 7j, a)
+        self.assertRaises(TypeError, operator.mul, a, 7j)
+        self.assertRaises(TypeError, operator.truediv, a, 7j)
+        self.assertRaises(TypeError, operator.truediv, 7j, a)
+        self.assertRaises(TypeError, operator.iadd, a, 7j)
+        self.assertRaises(TypeError, operator.isub, a, 7j)
+        self.assertRaises(TypeError, operator.imul, a, 7j)
+        self.assertRaises(TypeError, operator.itruediv, a, 7j)
+        a = np.power(a, 2)
         a **= 2
-        a = a @ a
+        np.assertEqual(a, np_a**4 % F.modulus)
+        np.assertEqual(np.sqrt(a)**2, np_a**4)
+        self.assertRaises(ZeroDivisionError, F.array._sqrt, a - a, INV=True)
 
         F = finfields.GF(2**127 - 1)
         a, b = np.array([[-1, -1], [1, 1]]), np.array([[1, -5], [-1, -1]])
@@ -389,6 +405,7 @@ class Arithmetic(unittest.TestCase):
         F27_b = self.f27.array(b)
         F27_b = 1 / (1 / F27_b)
         np.assertEqual(np.sqrt(F27_b**2)**2, F27_b**2)
+        self.assertRaises(ZeroDivisionError, (F27_b - F27_b).sqrt, INV=True)
 
         F81_b2 = self.f81.array(b)**2
         self.assertTrue((F81_b2).is_sqr().all())
@@ -412,14 +429,18 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(F_a.tolist(), a.tolist())
         np.assertEqual(F_a.ravel(), a.ravel())
         np.assertEqual(F_a.compress([0, 1]), a.compress([0, 1]))
+        np.assertEqual(F_a.nonzero(), a.nonzero())
+        np.assertEqual(F_a[0].take([2, 1]), np.array([a[0, 2], a[0, 1]]))
         self.assertEqual(F_a.sum(), F_a_v.sum())
         np.assertEqual(F_a.prod(axis=1), F_a_v.prod(axis=1))
         np.assertEqual(F_a.repeat(4, axis=1), a.repeat(4, axis=1))
         np.assertEqual(F_a.diagonal(), a.diagonal())
         self.assertEqual(F_a.trace(), F_a_v.trace())
+        np.assertEqual(F_a.reshape(2, 2, 2).trace(), F_a_v.reshape(2, 2, 2).trace())
 
         self.assertTrue(F_a.is_sqr().all())
         np.assertEqual((F_a**2).sqrt(), a)
+        self.assertRaises(ZeroDivisionError, (F_a - F_a).sqrt, INV=True)
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_array_function(self):
@@ -429,6 +450,13 @@ class Arithmetic(unittest.TestCase):
         a = np.array([[-1, -2, -3, -4], [0, 0, 0, 0], [1, 1, 1, 1], [1, 2, 3, 4]])
         b = np.array([[10, 31, 1, -5], [76, 111, 11, 89], [67, 111, 1, -89], [-1, 10, 10, -1]])
         F_a, F_b = F.array(a), F.array(b)
+
+        np.assertEqual(np.array_equal(F_a, F_a), True)
+        np.assertEqual(np.array_equal(F_a, F_b), False)
+        np.assertEqual(np.nonzero(F_a), np.nonzero(a))
+        np.assertEqual(np.take(F_a[0], [2, 1]), np.array([a[0, 2], a[0, 1]]))
+        np.assertEqual(np.choose([[1, 0], [1, 1]], [F(7), F(11)]), [[F(11), F(7)], [F(11), F(11)]])
+        np.assertEqual(np.array([[1, 0]]).choose([F(7), F(11)]), [[F(11), F(7)]])
 
         np.assertEqual(np.dot(F_a, F_b), np.dot(a, b))
         np.assertEqual(np.dot(F_a, 3), np.dot(a, 3))
@@ -484,6 +512,7 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(np.linalg.inv(F_b) @ F_b, np.eye(len(F_b), dtype='O'))
         self.assertEqual(np.linalg.det(F_a), round(np.linalg.det(a)))
         self.assertEqual(np.linalg.det(F_b), round(np.linalg.det(b)))
+        self.assertRaises(np.linalg.LinAlgError, np.linalg.det, F_b[0])
         np.assertEqual(np.linalg.det(np.stack((F_a, F_b))),
                        np.vectorize(round)(np.linalg.det(np.stack((a, b)))))
         np.assertEqual(np.linalg.matrix_power(F_b, -5) @ np.linalg.matrix_power(F_b, 5),

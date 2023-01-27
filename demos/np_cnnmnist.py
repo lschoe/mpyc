@@ -122,8 +122,8 @@ async def main():
     print('Labels:', labels)
     df = gzip.open(os.path.join('data', 'cnn', 't10k-images-idx3-ubyte.gz'))
     d = df.read()[16 + offset * 28**2: 16 + (offset + batch_size) * 28**2]
-    x = list(map(lambda a: a/255, d))
-    x = np.array(x).reshape(batch_size, 1, 28, 28)
+    x = np.frombuffer(d, dtype=np.ubyte) / 255
+    x = np.reshape(x, (batch_size, 1, 28, 28))
     if batch_size == 1:
         print(np.array2string(np.vectorize(lambda a: int(bool(a)))(x[0, 0]), separator=''))
     if issubclass(secnum, mpc.SecureInteger):

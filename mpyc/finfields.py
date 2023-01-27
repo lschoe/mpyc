@@ -677,6 +677,17 @@ class BinaryFieldElement(ExtensionFieldElement):
 HANDLED_FUNCTIONS = {}
 
 
+def implements(numpy_function_name):
+    """Register an __array_function__ implementation."""
+    def decorator(func):
+        if np:
+            numpy_function = eval('np.' + numpy_function_name)
+            HANDLED_FUNCTIONS[numpy_function] = func
+        return func
+
+    return decorator
+
+
 class FiniteFieldArray:
     """Common base class for finite field arrays.
 
@@ -793,17 +804,6 @@ class FiniteFieldArray:
             a = cls.field(a)
         return a
 
-    def implements(numpy_function_name):
-        """Register an __array_function__ implementation."""
-        def decorator(func):
-            if np:
-                numpy_function = eval('np.' + numpy_function_name)
-                HANDLED_FUNCTIONS[numpy_function] = func
-            return func
-
-        return decorator
-    # TODO: use @staticmethod Python 3.10+, in 3.9- TypeError: 'staticmethod' object is not callable
-
     @property
     @implements('shape')
     def shape(self):
@@ -819,6 +819,7 @@ class FiniteFieldArray:
     def size(self):
         return self.value.size
 
+    @staticmethod
     @implements('block')
     def _np_block(arrays):
         def extract_type(s):
@@ -854,6 +855,7 @@ class FiniteFieldArray:
                 a = self.field(a)
             yield a
 
+    @staticmethod
     @implements('linalg.solve')
     def gauss_solve(A, B):
         """Linear solve by Gaussian elimination on matrix (A | B)."""
@@ -889,6 +891,7 @@ class FiniteFieldArray:
 
         return cls(A[:, n:], check=False)
 
+    @staticmethod
     @implements('linalg.inv')
     def gauss_inv(A):
         """Inverse by Gaussian elimination on augmented matrix (A | I)."""
@@ -896,6 +899,7 @@ class FiniteFieldArray:
         B = type(A)(np.eye(len(A), dtype='O'))
         return FiniteFieldArray.gauss_solve(A, B)
 
+    @staticmethod
     @implements('linalg.det')
     def gauss_det(a):
         """Determinant by Gaussian elimination on (last 2 dimensions of) array a."""
@@ -936,6 +940,7 @@ class FiniteFieldArray:
             d = cls(d, check=False)
         return d
 
+    @staticmethod
     @implements('linalg.matrix_power')
     def matrix_pow(A, n):  # needed for handling negative n
         cls = type(A)
@@ -956,6 +961,7 @@ class FiniteFieldArray:
             C = np.matmul(C, D) % p
         return cls(C)
 
+    @staticmethod
     @implements('diag')
     def diag(a, k=0):
         cls = type(a)
@@ -1284,9 +1290,6 @@ class FiniteFieldArray:
 
     def copy(self, *args, **kwargs):
         return type(self)(self.value.copy(*args, **kwargs), check=False)
-
-    def choose(self, *args, **kwargs):
-        return type(self)(self.value.choose(*args, **kwargs), check=False)
 
     def compress(self, *args, **kwargs):
         return type(self)(self.value.compress(*args, **kwargs), check=False)

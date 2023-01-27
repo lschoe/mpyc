@@ -183,7 +183,7 @@ all binary encodings is equal to 1. Presence of any "no" vote will make the prod
 
 The case of two parties Alice and Bob finding out if they're romantically interested in each other is a special case
 of unanimous agreement. When doing this in a privacy-preserving manner, we also refer to this as |MPyClogo|
-`matching without embarrassments <https://youtu.be/JnmESTrsQbg>`_.
+`matching without embarrassments <https://youtu.be/WRU_nUeqVu8>`_.
 To have an honest majority we add a trusted helper as a third party.
 The helper party will not provide any input.
 
@@ -218,7 +218,7 @@ is what they can deduce from the output that is demanded from the computation, c
 the inputs that they provide to the computation.
 
 The unanimous agreement demo generalizes matchmaking between any number of parties. For parameter :math:`t\geq0` the demo
-runs between :math:`m=2t+1` in total, of which :math:`t+1` parties cast a vote, and the remaining :math:`t` parties
+runs between :math:`m=2t+1` parties in total, of which :math:`t+1` parties cast a vote, and the remaining :math:`t` parties
 act as trusted helpers. The main privacy-preserving property is that even a collusion of :math:`t` voters cannot
 find out what the remaining vote is, of course, unless all colluding voters input a 1.
 

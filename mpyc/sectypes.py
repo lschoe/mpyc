@@ -1247,17 +1247,35 @@ class SecureArray(SecureObject):
         return runtime.np_sum(self, *args, **kwargs)
 
     def argmin(self, *args, **kwargs):
-        if 'raw' not in kwargs:
-            kwargs['raw'] = True
-        if 'raw2' not in kwargs:
-            kwargs['raw2'] = True
+        """Returns the indices of the minimum values along an axis.
+
+        If no axis is given (default), array is flattened.
+
+        By default, the indices are returned as unit vectors ...
+        Also, by default, the minimum values are returned (next to the indices).
+
+        NB: Different defaults for np.argmin(). Latter behaves like for NumPy arrays.
+        """
+        if 'arg_unary' not in kwargs:
+            kwargs['arg_unary'] = True
+        if 'arg_only' not in kwargs:
+            kwargs['arg_only'] = False
         return runtime.np_argmin(self, *args, **kwargs)
 
     def argmax(self, *args, **kwargs):
-        if 'raw' not in kwargs:
-            kwargs['raw'] = True
-        if 'raw2' not in kwargs:
-            kwargs['raw2'] = True
+        """Returns the indices of the maximum values along an axis.
+
+        If no axis is given (default), array is flattened.
+
+        By default, the indices are returned as unit vectors ...
+        Also, by default, the maximum values are returned (next to the indices).
+
+        NB: Different defaults for np.argmax(). Latter behaves like for NumPy arrays.
+        """
+        if 'arg_unary' not in kwargs:
+            kwargs['arg_unary'] = True
+        if 'arg_only' not in kwargs:
+            kwargs['arg_only'] = False
         return runtime.np_argmax(self, *args, **kwargs)
 
 

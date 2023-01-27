@@ -10,21 +10,23 @@ See demo lpsolverfxp.py for background information.
 import os
 import logging
 import argparse
-import csv
 import numpy as np
 from mpyc.runtime import mpc
 
 
 class SecureFraction:
+
+    size = 3  # __lt__() assumes last dimension of size 3
+
     def __init__(self, a):
         self.a = a  # numerator, denominator, pos
 
     def __lt__(self, other):  # NB: __lt__() is basic comparison as in Python's list.sort()
-        b = self.a[:, 0] * other.a[:, 1] < other.a[:, 0] * self.a[:, 1]
-        c0 = self.a[:, 2]
+        b = self.a[..., 0] * other.a[..., 1] < other.a[..., 0] * self.a[..., 1]
+        c0 = self.a[..., 2]
         c0.integral = True
         b *= c0               # b = b if c0 else 0
-        c1 = other.a[:, 2]
+        c1 = other.a[..., 2]
         c1.integral = True
         b = c1 * (b - 1) + 1  # b = b if c1 else 1
         return b
@@ -101,13 +103,13 @@ async def main():
 
     logging.info('Solution x')
     x = np.sum(np.fromiter((T[i+1, -1] * mpc.np_fromlist(mpc.unit_vector(basis[i], m + n)[:n]) for i in range(m)), 'O'))
-    Ax_bounded_by_b = mpc.all((A @ x <= 1.01 * b + 0.0001).tolist())
-    x_nonnegative = mpc.all((x >= 0).tolist())
+    Ax_bounded_by_b = np.all(A @ x <= 1.01 * b + 0.0001)
+    x_nonnegative = np.all(x >= 0)
 
     logging.info('Dual solution y')
     y = np.sum(np.fromiter((T[0, j] * mpc.np_fromlist(mpc.unit_vector(cobasis[j], m + n)[n:]) for j in range(n)), 'O'))
-    yA_bounded_by_c = mpc.all((y @ A >= np.where(c > 0, 1/1.01, 1.01) * c - 0.0001).tolist())
-    y_nonnegative = mpc.all((y >= 0).tolist())
+    yA_bounded_by_c = np.all(y @ A >= np.where(c > 0, 1/1.01, 1.01) * c - 0.0001)
+    y_nonnegative = np.all(y >= 0)
 
     cx_eq_yb = abs((cx := c @ x) - y @ b) <= 0.01 * abs(cx)
     check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonnegative])

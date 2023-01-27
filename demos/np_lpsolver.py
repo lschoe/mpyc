@@ -10,18 +10,19 @@ See demo lpsolver.py for background information.
 import os
 import logging
 import argparse
-import csv
-import math
 import numpy as np
 from mpyc.runtime import mpc
 
 
 class SecureFraction:
+
+    size = 2  # __lt__() assumes last dimension of size 2
+
     def __init__(self, a):
         self.a = a  # numerator, denominator
 
     def __lt__(self, other):  # NB: __lt__() is basic comparison as in Python's list.sort()
-        return self.a[:, 0] * other.a[:, 1] < self.a[:, 1] * other.a[:, 0]
+        return self.a[..., 0] * other.a[..., 1] < self.a[..., 1] * other.a[..., 0]
 
 
 def pow_list(a, x, n):
@@ -81,10 +82,10 @@ async def main():
                 ('wiki', 6, 1, 1),
                 ('tb2x2', 6, 1, 2),
                 ('woody', 8, 1, 3),
-                ('LPExample_R20', 70, 1, 9),
-                ('sc50b', 104, 10, 55),
-                ('kb2', 560, 100000, 154),
-                ('LPExample', 110, 1, 175)]
+                ('LPExample_R20', 70, 1, 8),
+                ('sc50b', 104, 10, 54),
+                ('kb2', 560, 100000, 145),
+                ('LPExample', 110, 1, 176)]
     name, bit_length, scale, n_iter = settings[args.dataset]
     if args.bit_length:
         bit_length = args.bit_length
@@ -149,19 +150,19 @@ async def main():
     cd = await mpc.output(previous_pivot)  # common denominator for all entries of T
     print(f'max = {mx} / {cd} / {scale} = {mx / cd / scale} in {iteration} iterations')
 
-    logging.info('Solution x')
-    coefs = Zp.array([[w_powers[(j * k) % N].value for k in range(N)] for j in range(n)])   ## TODO: vandermonde ff array
+    logging.info('Solution x')  # TODO: support np.vander() for finite field Vandermonde arrays
+    coefs = Zp.array([[w_powers[(j * k) % N].value for k in range(N)] for j in range(n)])
     sum_powers = np.sum(np.fromiter((pow_list(T[i+1][-1] / N, basis[i], N) for i in range(m)), 'O'))
     x = coefs @ sum_powers
-    Ax_bounded_by_b = mpc.all((A @ x <= b * cd).tolist())      ## TODO: np.all
-    x_nonnegative = mpc.all((x >= 0).tolist())
+    Ax_bounded_by_b = np.all(A @ x <= b * cd)
+    x_nonnegative = np.all(x >= 0)
 
     logging.info('Dual solution y')
     coefs = Zp.array([[w_powers[((n + i) * k) % N].value for k in range(N)] for i in range(m)])
     sum_powers = np.sum(np.fromiter((pow_list(T[0][j] / N, cobasis[j], N) for j in range(n)), 'O'))
     y = coefs @ sum_powers
-    yA_bounded_by_c = mpc.all((y @ A >= c * cd).tolist())
-    y_nonnegative = mpc.all((y >= 0).tolist())
+    yA_bounded_by_c = np.all(y @ A >= c * cd)
+    y_nonnegative = np.all(y >= 0)
 
     cx_eq_yb = c @ x == y @ b
     check = mpc.all([cx_eq_yb, Ax_bounded_by_b, x_nonnegative, yA_bounded_by_c, y_nonnegative])

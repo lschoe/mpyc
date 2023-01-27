@@ -19,7 +19,7 @@ from mpyc.runtime import mpc
 @mpc.coroutine
 async def id3(T, R) -> asyncio.Future:
     sizes = S[C] @ T
-    i, mx = sizes.argmax(raw=False)
+    i, mx = sizes.argmax(arg_unary=False)
     sizeT = sizes.sum()
     stop = (sizeT <= int(args.epsilon * len(T))) + (mx == sizeT)
     if not (R and await mpc.is_zero_public(stop)):
@@ -29,7 +29,7 @@ async def id3(T, R) -> asyncio.Future:
     else:
         T_SC = (T * S[C]).T
         CT = np.stack(tuple(GI(S[A] @ T_SC) for A in R))
-        k = CT.argmax(key=SecureFraction, raw=False, raw2=False)
+        k = CT.argmax(key=SecureFraction, arg_unary=False, arg_only=True)
         A = list(R)[await mpc.output(k)]
         logging.info(f'Attribute node {A}')
         T_SA = T * S[A]
@@ -50,11 +50,14 @@ def GI(x):
 
 
 class SecureFraction:
+
+    size = 2  # __lt__() assumes last dimension of size 2
+
     def __init__(self, a):
         self.a = a  # numerator, denominator
 
     def __lt__(self, other):  # NB: __lt__() is basic comparison as in Python's list.sort()
-        return self.a[:, 0] * other.a[:, 1] < self.a[:, 1] * other.a[:, 0]
+        return self.a[..., 0] * other.a[..., 1] < self.a[..., 1] * other.a[..., 0]
 
 
 depth = lambda tree: 0 if isinstance(tree, int) else max(map(depth, tree[1])) + 1

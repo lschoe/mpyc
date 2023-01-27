@@ -770,7 +770,6 @@ class Runtime:
     @mpc_coro
     async def np_is_zero_public(self, a) -> Future:
         """Secure public zero test of a, elementwise."""
-        # TODO: remove restriction to 1D arrays a (due to r,s,z below being 1D arrays)
         sftype = type(a)
         if issubclass(sftype, self.SecureArray):
             field = sftype.sectype.field
@@ -795,12 +794,17 @@ class Runtime:
 
         if issubclass(sftype, self.SecureObject):
             a = await self.gather(a)
+        shape = a.shape
+        if len(shape) > 1:
+            a = a.reshape(-1)
         if field.order.bit_length() <= 60:
             z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
             b = a * r + z
         else:
             b = a * r
         c = await self.output(b, threshold=2*t)
+        if len(shape) > 1:
+            c = c.reshape(shape)
         return c == 0
 
     @mpc_coro_no_pc
@@ -849,6 +853,7 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_add(self, a, b):
+        """Secure addition of a and b, elementwise with broadcast."""
         stype = type(a)
         a_shape = getattr(a, 'shape', (1,))
         b_shape = getattr(b, 'shape', (1,))
@@ -862,6 +867,7 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_subtract(self, a, b):
+        """Secure subtraction of a and b, elementwise with broadcast."""
         stype = type(b) if isinstance(b, self.SecureArray) else type(a)
         a_shape = getattr(a, 'shape', (1,))
         b_shape = getattr(b, 'shape', (1,))
@@ -911,6 +917,7 @@ class Runtime:
 
     @mpc_coro
     async def np_multiply(self, a, b):
+        """Secure multiplication of a and b, elementwise with broadcast."""
         stype = type(a)
         shb = isinstance(b, self.SecureObject)
         a_shape = getattr(a, 'shape', (1,))
@@ -983,6 +990,7 @@ class Runtime:
         return self.mul(a, c)
 
     def np_divide(self, a, b):
+        """Secure division of a and b, for nonzero b, elementwise with broadcast."""
         b_is_SecureArray = isinstance(b, self.SecureArray)
         stype = type(b) if b_is_SecureArray else type(a)
         field = stype.sectype.field
@@ -1027,7 +1035,7 @@ class Runtime:
 
     @mpc_coro
     async def np_reciprocal(self, a):
-        """Secure reciprocal (multiplicative field inverse) of a, for nonzero a."""
+        """Secure elementwise reciprocal (multiplicative field inverse) of a, for nonzero a."""
         stype = type(a)
         shape = a.shape
         field = stype.sectype.field
@@ -1073,7 +1081,7 @@ class Runtime:
         return c
 
     def np_pow(self, a, b):
-        """Secure exponentiation a raised to the power of b, for public integer b."""
+        """Secure elementwise exponentiation a raised to the power of b, for public integer b."""
         # TODO: extend to non-scalar b
         if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
             d = a
@@ -1738,7 +1746,7 @@ class Runtime:
         Elements of x are assumed to be arrays of the same shape.
         Runs in log_2 len(x) rounds).
         """
-        # TODO: cover case of SecureArray  (incl. case f > 0
+        # TODO: cover case of SecureArray (incl. case f > 0)
         if iter(x) is x:
             x = list(x)
         else:
@@ -1823,48 +1831,6 @@ class Runtime:
             n = len(x)
         return x[0]
 
-    @mpc_coro
-    async def np_all(self, x):
-        """Secure all of elements in x, similar to Python's built-in all().
-
-        Elements of x are assumed to be arrays of the same shape,
-        containing 0s and 1s (Boolean).
-        Runs in log_2 len(x) rounds.
-        """
-        # TODO: cover case of SecureArray  (incl. case f > 0)
-        if iter(x) is x:
-            x = list(x)
-        else:
-            x = x[:]
-        if x == []:
-            return 1
-
-        sftype = type(x[0])  # all elts assumed of same type and shape
-        if issubclass(sftype, self.SecureObject):
-            assert False  # TODO: cover this case, set shape
-            f = sftype.frac_length
-            if not f:
-                await self.returnType(sftype)
-            else:
-                if not all(a.integral for a in x):
-                    raise ValueError('nonintegral fixed-point number')
-
-                await self.returnType((sftype, True))
-            x = await self.gather(x)
-        else:
-            f = 0
-            await self.returnType(Future)
-
-        n = len(x)  # TODO: for sufficiently large n use mpc.eq(mpc.sum(x), n) instead
-        while n > 1:
-            h = [x[i] * x[i+1] for i in range(n%2, n, 2)]
-            if f:
-                for a in h:
-                    a >>= f  # NB: in-place rshift
-            x[n%2:] = await self.gather([self._reshare(a) for a in h])
-            n = len(x)
-        return x[0]
-
     def any(self, x):
         """Secure any of elements in x, similar to Python's built-in any().
 
@@ -1872,6 +1838,47 @@ class Runtime:
         Runs in log_2 len(x) rounds.
         """
         return 1 - self.all(1-a for a in x)
+
+    def np_all(self, a, axis=None):
+        """Secure all-predicate for array a, entirely or along the given axis (or axes).
+
+        If axis is None (default) all is evaluated over the entire array (returning a scalar).
+        If axis is an int or a tuple of ints, all is evaluated along all specified axes.
+        The shape of the result is the shape of a with all specified axes removed
+        (converted to a scalar if no dimensions remain).
+        """
+        if axis is None:
+            # Flatten a to 1D array:
+            a = self.np_reshape(a, (-1,))
+        elif isinstance(axis, tuple):
+            axis = tuple(i % a.ndim for i in axis)
+            # Move specified axes to front:
+            axes = axis + tuple(i for i in range(a.ndim) if i not in axis)
+            a = self.np_transpose(a, axes=axes)
+            # Flatten specified axes to one dimension:
+            a = self.np_reshape(a, (-1,) + a.shape[len(axis):])
+        elif axis := axis % a.ndim:
+            # Move nonzero axis to front:
+            axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
+            a = self.np_transpose(a, axes=axes)
+
+        while (n := a.shape[0]) > 1:
+            n0 = n%2
+            m = a[n0:(n+1)//2] * a[(n+1)//2:]
+            if n0:
+                m = self.np_concatenate((a[:1], m), axis=0)
+            a = m
+        return a[0]
+
+    def np_any(self, a, axis=None):
+        """Secure any-predicate for array a, entirely or along the given axis (or axes).
+
+        If axis is None (default) any is evaluated over the entire array (returning a scalar).
+        If axis is an int or a tuple of ints, any is evaluated along all specified axes.
+        The shape of the result is the shape of a with all specified axes removed
+        (converted to a scalar if no dimensions remain).
+        """
+        return 1 - self.np_all(1 - a, axis=axis)
 
     @mpc_coro_no_pc
     async def vector_add(self, x, y):
@@ -2132,6 +2139,7 @@ class Runtime:
 
     @mpc_coro
     async def np_matmul(self, A, B):
+        """Secure matrix product of arrays A and B, with broadcast."""
         shA = isinstance(A, self.SecureObject)
         shB = isinstance(B, self.SecureObject)
         stype = type(A) if shA else type(B)
@@ -2174,9 +2182,9 @@ class Runtime:
 
     @mpc_coro
     async def np_outer(self, a, b):
-        """Outer product of vectors a and b.
+        """Secure outer product of vectors a and b.
 
-        Input arrays a and b are flattened if not already 1d.
+        Input arrays a and b are flattened if not already 1D.
         """
         sha = isinstance(a, self.SecureObject)
         shb = isinstance(b, self.SecureObject)
@@ -2211,7 +2219,7 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_getitem(self, a, key):
-        """SecureArray a, index/slice key."""
+        """Secure array a, index/slice key."""
         stype = type(a)
         shape = np._item_shape(a.shape, key)
         if not shape:
@@ -2246,7 +2254,12 @@ class Runtime:
         return a
 
     @mpc_coro_no_pc
-    async def np_flatten(self, a, order):
+    async def np_flatten(self, a, order='C'):
+        """Return 1D copy of a.
+
+        Default 'C' for row-major order (C style).
+        Alternative 'F' for column-major order (Fortran style).
+        """
         if isinstance(a, self.SecureFixedPointArray):
             assert a.integral is not None
             await self.returnType((type(a), a.integral, (a.size,)))
@@ -2257,6 +2270,10 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_tolist(self, a):
+        """Return array a as an nested list of Python scalars.
+
+        The nested list is a.ndim levels deep (scalar if a.ndim is zero).
+        """
         stype = type(a).sectype
         if issubclass(stype, self.SecureFixedPoint):
             assert a.integral is not None
@@ -2268,7 +2285,7 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_fromlist(self, x):
-        """List of secure numbers to array."""
+        """List of secure numbers to 1D array."""
         stype = type(x[0])
         shape = (len(x),)
         if issubclass(stype, self.SecureFixedPoint):
@@ -2546,7 +2563,7 @@ class Runtime:
         If axis is None (default), arr and values are flattened first.
         Otherwise, arr and values must all be of the same shape, except along the given axis.
         """
-        return self.np_concatenate((arr, values), axis=axis)
+        return self.np_concatenate((arr, values), axis=axis) ###check this?
 
     @mpc_coro_no_pc
     async def np_fliplr(self, a):
@@ -2560,7 +2577,7 @@ class Runtime:
         return np.fliplr(a)
 
     def np_minimum(self, a, b):
-        """Elementwise minimum of a and b.
+        """Secure elementwise minimum of a and b.
 
         If a and b are of different shapes, they must be broadcastable to a common shape
         (which is scalar if both a and b are scalars).
@@ -2568,7 +2585,7 @@ class Runtime:
         return b + (a < b) * (a - b)
 
     def np_maximum(self, a, b):
-        """Elementwise maximum of a and b.
+        """Secure elementwise maximum of a and b.
 
         If a and b are of different shapes, they must be broadcastable to a common shape
         (which is scalar if both a and b are scalars).
@@ -2583,7 +2600,7 @@ class Runtime:
         return c * (a - b) + b
 
     def np_amin(self, a, axis=None):
-        """Return the minimum of an array or minimum along one or more axes.
+        """Secure minimum of array a, entirely or along the given axis (or axes).
 
         If axis is None (default) the minimum of the array is returned (as a scalar).
         If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
@@ -2605,16 +2622,18 @@ class Runtime:
             # Move nonzero axis to front:
             axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
             a = self.np_transpose(a, axes=axes)
-        n = a.shape[0]
-        if n == 1:
-            return a[0]
 
-        m0 = self.np_amin(a[:n//2], axis=0)
-        m1 = self.np_amin(a[n//2:], axis=0)
-        return self.np_minimum(m0, m1)
+        while (n := a.shape[0]) > 1:
+            n0 = n%2
+            a1, a2 = a[n0:(n+1)//2], a[(n+1)//2:]
+            m = a1 + (a2 < a1) * (a2 - a1)
+            if n0:
+                m = self.np_concatenate((a[:1], m), axis=0)
+            a = m
+        return a[0]
 
     def np_amax(self, a, axis=None):
-        """Return the maximum of an array or maximum along one or more axes.
+        """Secure maximum of array a, entirely or along the given axis (or axes).
 
         If axis is None (default) the maximum of the array is returned (as a scalar).
         If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
@@ -2636,31 +2655,42 @@ class Runtime:
             # Move nonzero axis to front:
             axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
             a = self.np_transpose(a, axes=axes)
-        n = a.shape[0]
-        if n == 1:
-            return a[0]
 
-        m0 = self.np_amax(a[:n//2], axis=0)
-        m1 = self.np_amax(a[n//2:], axis=0)
-        return self.np_maximum(m0, m1)
+        while (n := a.shape[0]) > 1:
+            n0 = n%2
+            a1, a2 = a[n0:(n+1)//2], a[(n+1)//2:]
+            m = a1 + (a1 < a2) * (a2 - a1)
+            if n0:
+                m = self.np_concatenate((a[:1], m), axis=0)
+            a = m
+        return a[0]
 
     @mpc_coro_no_pc
-    async def np_sum(self, a, axis=None):
+    async def np_sum(self, a, axis=None, keepdims=False, initial=0):
         """Sum of array elements over a given axis (or axes)."""
-        # TODO: kwargs like keepdims and initial
+        sectype = type(a).sectype
+        if not isinstance(initial, sectype):
+            initial = sectype(initial)
         if axis is None:
-            shape = ()
+            if keepdims:
+                shape = (1,) * a.ndim
+            else:
+                shape = ()
         else:
             if not isinstance(axis, tuple):
                 axis = (axis,)
             axes = [i % a.ndim for i in axis]
-            shape = tuple(s for i, s in enumerate(a.shape) if i not in axes)
+            if keepdims:
+                shape = tuple(s if i not in axes else 1 for i, s in enumerate(a.shape))
+            else:
+                shape = tuple(s for i, s in enumerate(a.shape) if i not in axes)
         if shape == ():
-            await self.returnType(type(a).sectype)
+            await self.returnType(sectype)
         else:
             await self.returnType((type(a), shape))
-        a = await self.gather(a)
-        return np.sum(a, axis=axis)
+        a, initial = await self.gather(a, initial)
+        return np.sum(a, axis=axis, keepdims=keepdims, initial=initial.value)
+        # TODO: handle switch from initial (field elt) to initial.value inside finfields.py
 
     @mpc_coro_no_pc
     async def np_roll(self, a, shift, axis=None):
@@ -2670,6 +2700,7 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_negative(self, a):
+        """Secure elementwise negation -a (additive inverse) of a."""
         if not a.frac_length:
             await self.returnType((type(a), a.shape))
         else:
@@ -2678,15 +2709,15 @@ class Runtime:
         return -a
 
     def np_absolute(self, a, l=None):
-        """Secure absolute value of a."""
+        """Secure elementwise absolute value of a."""
         return (-2*self.np_sgn(a, l=l, LT=True) + 1) * a
 
     def np_less(self, a, b):
-        """Secure comparison a < b."""
+        """Secure comparison a < b, elementwise with broadcast."""
         return self.np_sgn(a - b, LT=True)
 
     def np_equal(self, a, b):
-        """Secure comparison a == b."""
+        """Secure comparison a == b, elementwise with broadcast."""
         d = a - b
         stype = d.sectype
         if issubclass(stype, self.SecureFiniteField):
@@ -2699,7 +2730,10 @@ class Runtime:
 
     @mpc_coro
     async def _np_is_zero(self, a):
-        """Probabilistic zero test, elementwise."""
+        """Probabilistic elementwise zero test of array a.
+
+        Return 1 if a == 0 else 0.
+        """
         stype = type(a)
         shape = a.shape
         await self.returnType((stype, True, shape))
@@ -2726,14 +2760,16 @@ class Runtime:
         z = np.where(c.value == 0, 0, z)
         c = np.where(c.is_sqr(), 1 - z, z)
         del z
-        e = await self.np_all(map(Zp.array, c))
-        e <<= stype.frac_length
+        e = self.np_all(stype(c), axis=0)
+        e = await self.gather(e)
         e = e.reshape(shape)
         return e
 
     @mpc_coro
     async def np_sgn(self, a, l=None, LT=False, EQ=False):
-        """Secure sign(um) of a, return -1 if a < 0 else 0 if a == 0 else 1.
+        """Secure elementwise sign(um) of array a.
+
+        Return -1 if a < 0 else 0 if a == 0 else 1.
 
         If integer flag l=L is set, it is assumed that -2^(L-1) <= a < 2^(L-1)
         to save work (compared to the default l=type(a).bit_length).
@@ -2782,9 +2818,10 @@ class Runtime:
             z = Zp.array(z + (h << l-1)) >> l
 
         if not LT:
-            h = self.np_all(map(Zp.array, 1 - Xor))
+            h = self.np_all(stype(1 - Xor), axis=0)
             del Xor
             h = await self.gather(h)
+            h >>= stype.frac_length
             if EQ:
                 z = h
             else:
@@ -2797,102 +2834,169 @@ class Runtime:
         z = z.reshape(a.shape)
         return z
 
-    def np_argmin(self, a, key=None, raw=False, raw2=False):
-        # TODO: rename raw, raw2
-        # TODO: generalize beyond 1D arrays
+    def np_argmin(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+        # TODO: add keepdims= (was added in NumPy 1.22, gives TypeError for np.argmin in 1.21)
         if key is None:
             key = lambda a: a
 
+        key_size = getattr(key, 'size', 1)
+        assert key_size in (1, a.shape[-1])
+
+        shape = a.shape
+        if axis is None:
+            if key_size == 1:
+                a = self.np_reshape(a, (1, a.size))
+            else:
+                a = self.np_reshape(a, (1, a.size // key_size, key_size))
+        else:
+            if key_size == 1:
+                # Move axis to last position:
+                a = self.np_swapaxes(a, axis, -1)
+                # Collapse all dimensions except the last one:
+                a = self.np_reshape(a, (-1, a.shape[-1]))
+            else:
+                # Last axis is of dimension equal to key size, and not allowed as value for axis:
+                assert (axis + 1) % a.ndim != 0
+                # Move axis to last but one position:
+                a = self.np_swapaxes(a, axis, -2)
+                # Collapse all dimensions except the last two:
+                a = self.np_reshape(a, (-1, a.shape[-2], key_size))
         u, m = self._np_argmin(a, key)
-        if not raw:
-            iv = np.arange(len(u))
+        # u is a 2D array
+        if not arg_unary:
+            iv = np.arange(u.shape[1])
             if isinstance(a, self.SecureFixedPointArray):
                 iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
             u = u @ iv
-        if not raw2:
+        if axis is None:
+            u = u[0]
+            m = m[0][0]
+        else:
+            shape = list(shape)
+            if key_size > 1:
+                del shape[-1]
+            if arg_unary:
+                shape[axis], shape[-1] = shape[-1], shape[axis]
+            else:
+                del shape[axis]
+            u = self.np_reshape(u, tuple(shape))
+            if arg_unary:
+                u = self.np_swapaxes(u, axis, -1)
+        if arg_only:
             return u
 
         return u, m
 
     def _np_argmin(self, a, key):
-        # return first occurence if multiple hits
-        n = len(a)
+        # Return first occurrence (smallest arg) of minimum.
+        n = a.shape[1]
         if n == 1:
-            u = type(a)(np.array([1]))
-            m = a[0]
-        elif n == 2:
+            u = type(a)(np.array([[1]]))
+            m = a
+        elif n == -2:
             # Redundant case, except for some small savings.
-            a1, a2 = a[:1], a[1:]
+            a1, a2 = a[:, :1], a[:, 1:]
             c = key(a2) < key(a1)
-            u = self.np_concatenate((1 - c, c))  # save *
-            m = (c * (a2 - a1) + a1)[0]          # save .T (3x)
+            u = self.np_concatenate((1 - c, c), axis=1)
+            m = c * (a2 - a1) + a1
         else:
             n0 = n%2
-            a1, a2 = a[n0::2], a[n0 + 1::2]
+            a1, a2 = a[:, n0::2], a[:, n0 + 1::2]  # NB: odd-even split to return first occurrence
             c = key(a2) < key(a1)
-            a1, a2 = a1.T, a2.T
-            m = c * (a2 - a1) + a1
-            m = m.T
-            del a1, a2
+            cc = c if c.ndim == a.ndim else c.reshape(*c.shape, 1)  # TODO: use c[..., np.newaxis]?
+            m = cc * (a2 - a1) + a1
             if n0:
-                m = self.np_concatenate((a[:1], m))
+                m = self.np_concatenate((a[:, :1], m), axis=1)
             u, m = self._np_argmin(m, key)
             if n0:
-                u0, u = u[:1], u[1:]
+                u0, u = u[:, :1], u[:, 1:]
             u2 = u * c
-            u1 = u - u2
-            u = self.np_column_stack((u1, u2)).flatten()
+            u = self.np_concatenate((u - u2, u2), axis=0)
+            u = self.np_reshape(u, (len(c), 2*c.shape[1]), order='F')
             if n0:
-                u = self.np_concatenate((u0, u))
+                u = self.np_concatenate((u0, u), axis=1)
         return u, m
 
-    def np_argmax(self, a, key=None, raw=False, raw2=False):
-        # TODO: rename raw, raw2
-        # TODO: generalize beyond 1D arrays
+    def np_argmax(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+        # TODO: add keepdims= (was added in NumPy 1.22, gives TypeError for np.argmax in 1.21)
         if key is None:
             key = lambda a: a
 
+        key_size = getattr(key, 'size', 1)
+        assert key_size in (1, a.shape[-1])
+
+        shape = a.shape
+        if axis is None:
+            if key_size == 1:
+                a = self.np_reshape(a, (1, a.size))
+            else:
+                a = self.np_reshape(a, (1, a.size // key_size, key_size))
+        else:
+            if key_size == 1:
+                # Move axis to last position:
+                a = self.np_swapaxes(a, axis, -1)
+                # Collapse all dimensions except the last one:
+                a = self.np_reshape(a, (-1, a.shape[-1]))
+            else:
+                # Last axis is of dimension equal to key size, and not allowed as value for axis:
+                assert (axis + 1) % a.ndim != 0
+                # Move axis to last but one position:
+                a = self.np_swapaxes(a, axis, -2)
+                # Collapse all dimensions except the last two:
+                a = self.np_reshape(a, (-1, a.shape[-2], key_size))
         u, m = self._np_argmax(a, key)
-        if not raw:
-            iv = np.arange(len(u))
+        if not arg_unary:
+            iv = np.arange(u.shape[1])
             if isinstance(a, self.SecureFixedPointArray):
                 iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
             u = u @ iv
-        if not raw2:
+        if axis is None:
+            u = u[0]
+            m = m[0][0]
+        else:
+            shape = list(shape)
+            if key_size > 1:
+                del shape[-1]
+            if arg_unary:
+                shape[axis], shape[-1] = shape[-1], shape[axis]
+            else:
+                del shape[axis]
+            u = self.np_reshape(u, tuple(shape))
+            if arg_unary:
+                u = self.np_swapaxes(u, axis, -1)
+        if arg_only:
             return u
 
         return u, m
 
     def _np_argmax(self, a, key):
-        # return first occurence if multiple hits
-        n = len(a)
+        # Return first occurrence (smallest arg) of maximum.
+        n = a.shape[1]
         if n == 1:
-            u = type(a)(np.array([1]))
-            m = a[0]
-        elif n == 2:
+            u = type(a)(np.array([[1]]))
+            m = a
+        elif n == -2:
             # Redundant case, except for some small savings.
-            a1, a2 = a[:1], a[1:]
+            a1, a2 = a[:, :1], a[:, 1:]
             c = key(a1) < key(a2)
-            u = self.np_concatenate((1 - c, c))  # save *
-            m = (c * (a2 - a1) + a1)[0]          # save .T (3x)
+            u = self.np_concatenate((1 - c, c), axis=1)
+            m = c * (a2 - a1) + a1
         else:
             n0 = n%2
-            a1, a2 = a[n0::2], a[n0 + 1::2]
+            a1, a2 = a[:, n0::2], a[:, n0 + 1::2]  # NB: odd-even split to return first occurrence
             c = key(a1) < key(a2)
-            a1, a2 = a1.T, a2.T
-            m = c * (a2 - a1) + a1
-            m = m.T
-            del a1, a2
+            cc = c if c.ndim == a.ndim else c.reshape(*c.shape, 1)  # TODO: use c[..., np.newaxis]?
+            m = cc * (a2 - a1) + a1
             if n0:
-                m = self.np_concatenate((a[:1], m))
+                m = self.np_concatenate((a[:, :1], m), axis=1)
             u, m = self._np_argmax(m, key)
             if n0:
-                u0, u = u[:1], u[1:]
+                u0, u = u[:, :1], u[:, 1:]
             u2 = u * c
-            u1 = u - u2
-            u = self.np_column_stack((u1, u2)).flatten()
+            u = self.np_concatenate((u - u2, u2), axis=0)
+            u = self.np_reshape(u, (len(c), 2*c.shape[1]), order='F')
             if n0:
-                u = self.np_concatenate((u0, u))
+                u = self.np_concatenate((u0, u), axis=1)
         return u, m
 
     @mpc_coro

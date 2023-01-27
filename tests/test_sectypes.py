@@ -1,5 +1,6 @@
 import operator
 import unittest
+from mpyc.numpy import np
 from mpyc import gfpx
 from mpyc import sectypes
 import mpyc.runtime  # NB: to set attribute runtime in sectypes
@@ -152,6 +153,30 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, operator.lshift, 3.14, b)
         self.assertRaises(TypeError, operator.rshift, b, 3.14)
         self.assertRaises(TypeError, operator.rshift, 3.14, b)
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_array(self):
+        secfld = sectypes.SecFld()
+        secint = sectypes.SecInt()
+        secfxp = sectypes.SecFxp()
+        self.assertRaises(TypeError, np.tan, secint.array(np.array([0])))
+        self.assertRaises(TypeError, secfld.array, secint.field.array([0]))
+        self.assertRaises(TypeError, secint.array, secfld.field.array([0]))
+        self.assertRaises(TypeError, secfxp.array, secfld.field.array([0]))
+        self.assertRaises(TypeError, secfxp.array, np.array(complex(0)))
+        self.assertRaises(TypeError, secfxp.array, np.array(complex(0)))
+        a = secint.array(np.array([0]))
+        b = secfxp.array(np.array([0]))
+        self.assertRaises(TypeError, operator.add, a, complex(7))
+        self.assertRaises(TypeError, operator.add, a, b)
+        self.assertRaises(TypeError, operator.add, a, secfxp(3.14))
+        self.assertRaises(TypeError, operator.mul, a, secfxp(3.14))
+        self.assertRaises(TypeError, operator.sub, a, complex(7))
+        self.assertRaises(TypeError, operator.sub, complex(7), a)
+        self.assertRaises(TypeError, operator.truediv, a, complex(7))
+        self.assertRaises(TypeError, operator.truediv, complex(7), a)
+        self.assertRaises(TypeError, operator.truediv, a, b)
+        self.assertRaises(TypeError, operator.pow, a, complex(7))
 
 
 if __name__ == "__main__":
