@@ -57,11 +57,13 @@ async def _randbelow(sectype, n, bits=False):
     """
     if issubclass(sectype, sectypes.SecureFiniteField) and n == sectype.field.order:
         assert not bits, 'bits not available'
-        await runtime.returnType((sectype, True))
         return runtime._random(sectype)
 
     b = n-1
     k = b.bit_length()
+    if not n & b:  # fast path for integral powers of 2
+        return getrandbits(sectype, k, bits=bits)
+
     if bits:
         await runtime.returnType((sectype, True), k)
     else:

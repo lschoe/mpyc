@@ -52,7 +52,7 @@ def _item_shape(shape, key):
     Alternatively, the item's shape could be obtained as a[key].shape for dummy array
     a=np.empty(shape), but this potentially consumes a large amount of memory.
     """
-    # TODO: handle field acces  a['field-name']
+    # TODO: handle field access  a['field-name']
     if not isinstance(key, tuple):
         key = (key,)
     if len(key) == 1 and isinstance(key[0], np.ndarray) and \
@@ -60,7 +60,7 @@ def _item_shape(shape, key):
         return (key[0].sum(),)
 
     try:
-        # Replace ellipsis ... in key by 0 or more : slices, depending on occurences of np.newaxis.
+        # Replace ellipsis ... in key by 0 or more : slices, depending on occurrences of np.newaxis.
         # NB: tests like "Ellipsis in key" trigger elementwise ==-testing for arrays; to avoid
         # this use key0 as a pruned version of key with everything but .../newaxis collapsed to 0.
         key0 = tuple(a if a is Ellipsis or a is np.newaxis else 0 for a in key)

@@ -564,7 +564,7 @@ class Runtime:
             shape = None
         else:
             field = x[0].field
-            x = x[0].value  # TODO: consider multiple arrays, see e.g., np_prod(), np_all()
+            x = x[0].value  # TODO: consider multiple arrays, see e.g., np_prod()
             shape = x.shape
             x = x.flat  # indexable iterator
 
@@ -1447,8 +1447,6 @@ class Runtime:
         assert isinstance(b, int)
         if b == 2:
             r = self.lsb(a)
-        elif not b & (b-1):
-            r = self.from_bits(self.to_bits(a, b.bit_length() - 1))
         else:
             r = self._mod(a, b)
         f = stype.frac_length
@@ -1475,6 +1473,8 @@ class Runtime:
         a = await self.gather(a)
         c = await self.output(a + ((1<<l) - ((1<<l) % b) + b * r_divb - r_modb))
         c = c.value % b
+        if c == 0:
+            c = b  # NB: needed if b is an integral power of 2
 
         # Secure comparison z <=> c + r_modb >= b <=> r_modb >= b - c:
         l = len(r_bits)
@@ -3191,7 +3191,7 @@ class Runtime:
                 z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), h)
                 r2 += z
             r2 = await self.output(r2, threshold=2*t)
-            h = 0  # TODO: handle case that r2 constains 0s, e.g.. using np.any(r2.value == 0)
+            h = 0  # TODO: handle case that r2 contains 0s, e.g.. using np.any(r2.value == 0)
             s = r.value * field.array._sqrt(r2.value, INV=True)
             if not signed:
                 s %= modulus
