@@ -220,7 +220,7 @@ async def main():
     x = secfld.array(x)  # secret-shared input bits
 
     y = F(x, d, c)  # secret-shared output bits
-    Y = await xprint('Output: ', y)
+    Y = await xprint('Output:', y)
     assert Y == f(X).hexdigest(*e)
 
     await mpc.shutdown()

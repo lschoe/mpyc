@@ -1,10 +1,12 @@
 """Demo decision tree learning using ID3, vectorized.
 
-This demo is a fully equivalent reimplementation of the id3gini.py demo.
+This demo is a fully equivalent reimplementation of the id3gini.py demo,
+using secure integer arrays for NumPy-based vectorized computation.
+
 Performance improvement of over 6x speed-up when run with three parties
 on local host. Memory consumption is reduced accordingly.
 
-See id3gini.py for background information on decision tree learning and ID3.
+See demo id3gini.py for more information on decision tree learning and ID3.
 """
 
 import os

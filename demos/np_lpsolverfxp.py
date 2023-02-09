@@ -1,10 +1,12 @@
-"""Demo Linear Programming (LP) solver, using secure fixed-point arithmetic.
+"""Demo LP solver, using secure fixed-point arithmetic, vectorized.
 
-Vectorized.
+This demo is a fully equivalent reimplementation of the lpsolverfxp.py demo,
+using secure fixed-point arrays for NumPy-based vectorized computation.
 
-See demo lpsolverfxp.py for background information.
+Performance improvement of 2x speed-up when run with three parties
+on local host. Memory consumption is also reduced.
 
-... work in progress for MPyC version 0.9
+See demo lpsolverfxp.py for more information.
 """
 
 import os
@@ -66,7 +68,7 @@ async def main():
     await mpc.start()
 
     cobasis = secfxp.array(np.arange(n))
-    basis = secfxp.array(n + np.arange(m))
+    basis = secfxp.array(np.arange(n, n + m))
 
     iteration = 0
     while await mpc.output((arg_min := T[0, :-1].argmin())[1] < 0):
@@ -97,17 +99,19 @@ async def main():
         p_row = p_row_index @ T + p_col_index
         T -= np.outer(p_col, p_row)
 
-    mx = await mpc.output(T[0,  -1])
+    mx = await mpc.output(T[0, -1])
     rel_error = (mx - exact_max) / exact_max
     print(f'max = {mx} (error {rel_error:.3%}) in {iteration} iterations')
 
     logging.info('Solution x')
-    x = np.sum(np.fromiter((T[i+1, -1] * mpc.np_fromlist(mpc.unit_vector(basis[i], m + n)[:n]) for i in range(m)), 'O'))
+    x = np.sum(np.fromiter((T[i+1, -1] * mpc.np_unit_vector(basis[i], n + m)[:n] for i in range(m)),
+                           'O'))
     Ax_bounded_by_b = np.all(A @ x <= 1.01 * b + 0.0001)
     x_nonnegative = np.all(x >= 0)
 
     logging.info('Dual solution y')
-    y = np.sum(np.fromiter((T[0, j] * mpc.np_fromlist(mpc.unit_vector(cobasis[j], m + n)[n:]) for j in range(n)), 'O'))
+    y = np.sum(np.fromiter((T[0, j] * mpc.np_unit_vector(cobasis[j], n + m)[n:] for j in range(n)),
+                           'O'))
     yA_bounded_by_c = np.all(y @ A >= np.where(c > 0, 1/1.01, 1.01) * c - 0.0001)
     y_nonnegative = np.all(y >= 0)
 

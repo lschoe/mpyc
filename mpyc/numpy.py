@@ -8,8 +8,6 @@ types---along with vectorized implementations---for secure numbers and the under
 finite field types. The array types are accessible through the 'array' attribute,
 e.g., for secint48=mpc.SecInt(48), the array type is secint48.array and the array type
 for the underlying prime field is secint48.field.array.
-
-... work in progress for MPyC version 0.9
 """
 
 import os
@@ -163,6 +161,9 @@ try:
     np._matmul_shape = _matmul_shape
     np._item_shape = _item_shape
 
+    if np.lib.NumpyVersion(np.__version__) < '1.21.0':
+        logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.21+.')
+
     if np.lib.NumpyVersion(np.__version__) < '1.23.0':
         def _fromiter(iterable, dtype, **kwargs):
             if np.dtype(dtype) != object:
@@ -185,5 +186,6 @@ try:
     np.is_integral = _is_integer
 
 except ImportError:
+    del _matmul_shape
     del _item_shape
     np = None

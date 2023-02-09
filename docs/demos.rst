@@ -73,7 +73,7 @@ The ``-P`` switches are used to set the IPv4 addresses for the two parties, wher
 To run the demo with more parties just keep adding ``-P`` switches. The port numbers will be set automatically, but can
 also be specified in several ways.
 The ``-I`` switch is used to assign a unique index :math:`i\in\{0,1,\ldots,m-1\}` to each of the :math:`m` parties.
-The party's index :math:`i` is much like the `rank` assigned to a process(or) in a parallel computing context,
+The party's index :math:`i` is much like the *rank* assigned to a process(or) in a parallel computing context,
 and it can be obtained as ``mpc.pid`` within a running MPyC program.
 
 The actual code of the 'Hello world!' demo is very simple:
@@ -508,6 +508,9 @@ respective parties input their parts of the dataset.
 
 See `id3gini.py <https://github.com/lschoe/mpyc/blob/master/demos/id3gini.py>`_ for more information.
 
+Also see the vectorized version `np_id3gini.py <https://github.com/lschoe/mpyc/blob/master/demos/np_id3gini.py>`_,
+using secure NumPy arrays for more compact and more efficient MPyC code.
+
 lpsolver.py
 -----------
 
@@ -546,6 +549,9 @@ under the constraints :math:`A \boldsymbol{x} \leq \boldsymbol{b}` and :math:`\b
 
 See `lpsolver.py <https://github.com/lschoe/mpyc/blob/master/demos/lpsolver.py>`_ for more information.
 
+Also see the vectorized version `np_lpsolver.py <https://github.com/lschoe/mpyc/blob/master/demos/np_lpsolver.py>`_,
+using secure NumPy arrays for more compact and more efficient MPyC code.
+
 lpsolverfxp.py
 --------------
 
@@ -574,6 +580,9 @@ of the numbers, compared to using secure integer arithmetic.
 
 See `lpsolverfxp.py <https://github.com/lschoe/mpyc/blob/master/demos/lpsolverfxp.py>`_ for more information.
 
+Also see the vectorized version `np_lpsolverfxp.py <https://github.com/lschoe/mpyc/blob/master/demos/np_lpsolverfxp.py>`_,
+using secure NumPy arrays for more compact and more efficient MPyC code.
+
 aes.py
 ------
 
@@ -600,6 +609,9 @@ An encryption with a 128-bit AES key runs as follows::
 This way multiple parties are able to perform encryptions and decryptions, without ever exposing any plaintexts or AES keys.
 
 See `aes.py <https://github.com/lschoe/mpyc/blob/master/demos/aes.py>`_ for more information.
+
+Also see the vectorized version `np_aes.py <https://github.com/lschoe/mpyc/blob/master/demos/np_aes.py>`_,
+using secure NumPy arrays for more compact and more efficient MPyC code.
 
 onewayhashchains.py
 -------------------
@@ -638,6 +650,9 @@ To do so efficiently for long chains, we use so-called pebbling algorithms, whic
 Python generators.
 
 See `onewayhashchains.py <https://github.com/lschoe/mpyc/blob/master/demos/onewayhashchains.py>`_ for more information.
+
+Also see the vectorized version `np_onewayhashchains.py <https://github.com/lschoe/mpyc/blob/master/demos/np_onewayhashchains.py>`_,
+using secure NumPy arrays for more compact and more efficient MPyC code.
 
 elgamal.py
 ----------
@@ -784,6 +799,57 @@ than threshold DSA signatures. The demo can also be run with Schnorr groups, in 
 Schnorr signatures over DSA gets even larger.
 
 See `dsa.py <https://github.com/lschoe/mpyc/blob/master/demos/dsa.py>`_ for more information.
+
+sha3.py
+-------
+
+This demo implements threshold cryptographic hash functions.
+Hash functions from the `SHA-3 <https://en.wikipedia.org/wiki/SHA-3>`_ family are quite MPC-friendly as
+the nonlinear part of each internal round consists of 1600 secure bit multiplications in parallel.
+Using MPyC's secure NumPy arrays over GF(2), the algorithms can be programmed compactly *and* efficiently
+in a vectorized manner.
+
+Here is an example run with :math:`m=4` parties::
+
+   $ python sha3.py -i abc -M4
+   function sha3 with capacity 512 and output length 256
+   2023-02-08 18:35:48,040 Start MPyC runtime v0.8.13
+   2023-02-08 18:35:48,248 All 4 parties connected.
+   Input: b'abc'
+   Output: 3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532
+   2023-02-08 18:35:49,411 Stop MPyC runtime -- elapsed time: 0:00:01.370658
+
+The demo covers the SHA-3 hash functions with output lengths 224, 256, 384,
+and 512 as well as the SHAKE extendable-output functions (XOFs) at security
+levels 128 and 256.
+
+See `sha3.py <https://github.com/lschoe/mpyc/blob/master/demos/sha3.py>`_ for more information.
+
+pseudoinverse.py
+----------------
+
+The `Moore-Penrose pseudoinverse <https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse>`_
+is a well-known generalization of the matrix inverse. This demo computes the pseudoinverse
+for a random secret-shared matrix ``A`` of a given dimension :math:`m\times n` and rank :math:`r`.
+
+The Penrose equations are checked for the computed pseudoinverse ``X``.
+The value of ``X`` is also checked numerically against the value of ``np.linalg.pinv(A)``,
+as can be seen from this example run::
+
+   $ python pseudoinverse.py -n3 -r2 -M3  --no-log
+   Matrix A, 3x3 of rank 2, entries up to bit length 4:
+    [[-1  2  0]
+    [-1  2  0]
+    [-2  4  4]]
+   Using secure integers: SecInt11
+   Common denominator vol^2(A): 160
+   Penrose equations AXA=A, XAX=X, (AX)^T=AX, (XA)^T=XA: True
+   Pseudoinverse X of A:
+    [[-0.1 -0.1 0.0]
+    [0.2 0.2 0.0]
+    [-0.25 -0.25 0.25]]
+
+See `pseudoinverse.py <https://github.com/lschoe/mpyc/blob/master/demos/pseudoinverse.py>`_ for more information.
 
 ridgeregression.py
 ------------------
@@ -987,6 +1053,9 @@ parts, such that the parties have sufficiently many "gates" to work on in parall
 
 See `cnnmnist.py <https://github.com/lschoe/mpyc/blob/master/demos/cnnmnist.py>`_ for more information.
 
+Also see the vectorized version `np_cnnmnist.py <https://github.com/lschoe/mpyc/blob/master/demos/np_cnnmnist.py>`_,
+using secure NumPy arrays for more compact and more efficient MPyC code.
+
 bnnmnist.py
 -----------
 
@@ -1044,8 +1113,11 @@ exploiting properties of the Legendre symbol of integers modulo :math:`p`.
 
 See `bnnmnist.py <https://github.com/lschoe/mpyc/blob/master/demos/bnnmnist.py>`_ for more information.
 
-run-all.{bat,sh}
-----------------
+Also see the vectorized version `np_bnnmnist.py <https://github.com/lschoe/mpyc/blob/master/demos/np_bnnmnist.py>`_,
+using secure NumPy arrays for more compact and more efficient MPyC code.
+
+[np-]run-all.{bat,sh}
+---------------------
 
 All the demos from ``helloworld.py`` up to ``dsa.py`` can be run in one go using
 `run-all.bat <https://github.com/lschoe/mpyc/blob/master/demos/run-all.bat>`_ or
@@ -1053,5 +1125,8 @@ All the demos from ``helloworld.py`` up to ``dsa.py`` can be run in one go using
 These demos have no dependencies other than MPyC itself.
 You can also provide parameters like ``-M 3`` to run all demos with three parties.
 
-The more advanced demos from ``ridgeregression.py`` up to ``bnnmnist.py`` are not included here
-because these have some dependencies such as NumPy.
+Similarly, the demos ``sha3.py`` and ``pseudoinverse.py`` as well as all available "vectorized" versions
+of the demos (``np_id3gini.py``, ``np_cnnmnist.py``, and so on) can be run using
+`np-run-all.bat <https://github.com/lschoe/mpyc/blob/master/demos/np-run-all.bat>`_ or
+`np-run-all.sh <https://github.com/lschoe/mpyc/blob/master/demos/np-run-all.sh>`_.
+These demos all require NumPy.

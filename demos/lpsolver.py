@@ -107,7 +107,7 @@ from mpyc.runtime import mpc
 def pow_list(a, x, n):
     """Return [a,ax, ax^2, ..., ax^(n-1)].
 
-    Runs in O(log n) rounds using minimal number of n-1 secure multiplications.
+    Runs roughly in 2log_2(n)-1 rounds using n-1 + log_2(n) secure multiplications.
     """
     if n == 1:
         powers = [a]

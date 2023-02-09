@@ -564,7 +564,7 @@ class Runtime:
             shape = None
         else:
             field = x[0].field
-            x = x[0].value  # TODO: consider multiple arrays, see e.g., np_prod()
+            x = x[0].value
             shape = x.shape
             x = x.flat  # indexable iterator
 
@@ -1740,58 +1740,6 @@ class Runtime:
         return x[0]
 
     @mpc_coro
-    async def np_prod(self, x, start=1):
-        """Secure product of all elements in x, similar to Python's math.prod().
-
-        Elements of x are assumed to be arrays of the same shape.
-        Runs in log_2 len(x) rounds).
-        """
-        # TODO: cover case of SecureArray (incl. case f > 0)
-        if iter(x) is x:
-            x = list(x)
-        else:
-            x = x[:]
-        if x == []:
-            return start
-
-        x[0] = x[0] * start  # NB: also updates x[0].integral if applicable
-        sftype = type(x[0])  # all elts assumed of same type and shape
-        if issubclass(sftype, self.SecureObject):
-            assert False
-            f = sftype.frac_length
-            if not f:
-                await self.returnType((sftype, x[0].shape))
-            else:
-                integral = [a.integral for a in x]
-                await self.returnType((sftype, all(integral)))
-            x = await self.gather(x)
-        else:
-            f = 0
-            await self.returnType(Future)
-
-        n = len(x)
-        while n > 1:
-            h = [x[i] * x[i+1] for i in range(n%2, n, 2)]
-            x[n%2:] = await self.gather([self._reshare(a) for a in h])
-            if f:
-                z = []
-                for i in range(n%2, n, 2):
-                    j = (n%2 + i)//2
-                    if not integral[i] and not integral[i+1]:
-                        z.append(x[j])  # will be truncated
-                    else:
-                        x[j] >>= f  # NB: in-place rshift
-                if z:
-                    z = await self.trunc(z, f=f, l=sftype.bit_length)
-                    for i in reversed(range(n%2, n, 2)):
-                        j = (n%2 + i)//2
-                        if not integral[i] and not integral[i+1]:
-                            x[j] = z.pop()
-                integral[n%2:] = [integral[i] and integral[i+1] for i in range(n%2, n, 2)]
-            n = len(x)
-        return x[0]
-
-    @mpc_coro
     async def all(self, x):
         """Secure all of elements in x, similar to Python's built-in all().
 
@@ -1839,14 +1787,8 @@ class Runtime:
         """
         return 1 - self.all(1-a for a in x)
 
-    def np_all(self, a, axis=None):
-        """Secure all-predicate for array a, entirely or along the given axis (or axes).
-
-        If axis is None (default) all is evaluated over the entire array (returning a scalar).
-        If axis is an int or a tuple of ints, all is evaluated along all specified axes.
-        The shape of the result is the shape of a with all specified axes removed
-        (converted to a scalar if no dimensions remain).
-        """
+    def np_prod(self, a, axis=None):
+        """Secure product of array elements over a given axis (or axes)."""
         if axis is None:
             # Flatten a to 1D array:
             a = self.np_reshape(a, (-1,))
@@ -1870,6 +1812,16 @@ class Runtime:
             a = m
         return a[0]
 
+    def np_all(self, a, axis=None):
+        """Secure all-predicate for array a, entirely or along the given axis (or axes).
+
+        If axis is None (default) all is evaluated over the entire array (returning a scalar).
+        If axis is an int or a tuple of ints, all is evaluated along all specified axes.
+        The shape of the result is the shape of a with all specified axes removed
+        (converted to a scalar if no dimensions remain).
+        """
+        return self.np_prod(a, axis=axis)
+
     def np_any(self, a, axis=None):
         """Secure any-predicate for array a, entirely or along the given axis (or axes).
 
@@ -1878,7 +1830,7 @@ class Runtime:
         The shape of the result is the shape of a with all specified axes removed
         (converted to a scalar if no dimensions remain).
         """
-        return 1 - self.np_all(1 - a, axis=axis)
+        return 1 - self.np_prod(1 - a, axis=axis)
 
     @mpc_coro_no_pc
     async def vector_add(self, x, y):
@@ -2336,6 +2288,11 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_transpose(self, a, axes=None):
+        """Reverse (default) or permute the axes of array a.
+
+        For 2D arrays, default result is the usual matrix transpose.
+        Parameter axes can be any permutation of 0,...,n-1 for nD array a.
+        """
         if a.ndim == 1:
             return a
 
@@ -2355,6 +2312,10 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_swapaxes(self, a, axis1, axis2):
+        """Interchange two given axes of array a.
+
+        For 2D arrays, same as the usual matrix transpose.
+        """
         if axis1 == axis2:
             return a
 
@@ -2384,7 +2345,8 @@ class Runtime:
             i += 1
         stype = type(a)
         if issubclass(stype, self.SecureFixedPointArray):
-            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in arrays)
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral
+                           for a in arrays)
             await self.returnType((stype, integral, shape))
         else:
             await self.returnType((stype, shape))
@@ -2393,6 +2355,12 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_stack(self, arrays, axis=0):
+        """Join a sequence of arrays along a new axis.
+
+        The axis parameter specifies the index of the new axis in the shape of the result.
+        For example, if axis=0 it will be the first dimension and if axis=-1 it will be
+        the last dimension.
+        """
         i = 0
         while not isinstance(a := arrays[i], sectypes.SecureArray):
             i += 1
@@ -2401,7 +2369,8 @@ class Runtime:
         shape = tuple(shape)
         stype = type(a)
         if issubclass(stype, self.SecureFixedPointArray):
-            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in arrays)
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral
+                           for a in arrays)
             await self.returnType((stype, integral, shape))
         else:
             await self.returnType((stype, shape))
@@ -2410,6 +2379,12 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_block(self, arrays):
+        """Assemble an array from nested lists of blocks given by arrays.
+
+        Blocks in the innermost lists are concatenated along the last axis,
+        then these are concatenated along the second to last axis,
+        and so on until the outermost list is reached.
+        """
         def extract_type(s):
             if isinstance(s, list):
                 for a in s:
@@ -2563,7 +2538,7 @@ class Runtime:
         If axis is None (default), arr and values are flattened first.
         Otherwise, arr and values must all be of the same shape, except along the given axis.
         """
-        return self.np_concatenate((arr, values), axis=axis) ###check this?
+        return self.np_concatenate((arr, values), axis=axis)
 
     @mpc_coro_no_pc
     async def np_fliplr(self, a):
@@ -2667,7 +2642,7 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_sum(self, a, axis=None, keepdims=False, initial=0):
-        """Sum of array elements over a given axis (or axes)."""
+        """Secure sum of array elements over a given axis (or axes)."""
         sectype = type(a).sectype
         if not isinstance(initial, sectype):
             initial = sectype(initial)
@@ -2694,6 +2669,11 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_roll(self, a, shift, axis=None):
+        """Roll array elements (cyclically) along a given axis.
+
+        If axis is None (default), array is flattened before cyclic shift,
+        and original shape is restored afterwards.
+        """
         await self.returnType((type(a), a.shape))
         a = await self.gather(a)
         return np.roll(a, shift, axis)
@@ -2812,8 +2792,8 @@ class Runtime:
                 del Xor
             e = s_sign - np.vstack((c_bits - r_bits, ones)) + 3*SumXors
             del c_bits, r_bits, SumXors
-            e = self.np_prod(map(Zp.array, e))
-            g = await self.np_is_zero_public(stype(e, shape=(n,)))
+            e = self.np_prod(stype(e), axis=0)
+            g = await self.np_is_zero_public(e)
             h = (1 - (g << 1)) * s_sign + 3
             z = Zp.array(z + (h << l-1)) >> l
 
@@ -2835,6 +2815,12 @@ class Runtime:
         return z
 
     def np_argmin(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+        """Returns the indices of the minimum values along an axis.
+
+        If no axis is given (default), array is flattened.
+
+        NB: Different defaults than for method call a.argmin().
+        """
         # TODO: add keepdims= (was added in NumPy 1.22, gives TypeError for np.argmin in 1.21)
         if key is None:
             key = lambda a: a
@@ -2888,7 +2874,7 @@ class Runtime:
         return u, m
 
     def _np_argmin(self, a, key):
-        # Return first occurrence (smallest arg) of minimum.
+        """Return first occurrence of minimum (as unit vector) and minimum itself."""
         n = a.shape[1]
         if n == 1:
             u = type(a)(np.array([[1]]))
@@ -2918,6 +2904,12 @@ class Runtime:
         return u, m
 
     def np_argmax(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+        """Returns the indices of the maximum values along an axis.
+
+        If no axis is given (default), array is flattened.
+
+        NB: Different defaults than for method call a.argmax().
+        """
         # TODO: add keepdims= (was added in NumPy 1.22, gives TypeError for np.argmax in 1.21)
         if key is None:
             key = lambda a: a
@@ -2970,7 +2962,7 @@ class Runtime:
         return u, m
 
     def _np_argmax(self, a, key):
-        # Return first occurrence (smallest arg) of maximum.
+        """Return first occurrence of maximum (as unit vector) and maximum itself."""
         n = a.shape[1]
         if n == 1:
             u = type(a)(np.array([[1]]))
@@ -3543,6 +3535,32 @@ class Runtime:
                 u.pop()
         # u is (a-1)st unit vector of length n-1 (if 1<=a<n) or all-0 vector of length n-1 (if a=0).
         return [type(a)(1) - self.sum(u)] + u
+
+    @mpc_coro
+    async def np_unit_vector(self, a, n):
+        """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n.
+
+        Unit vector returned as secure NumPy array.
+
+        NB: Value of a is reduced modulo n (almost for free).
+        """
+        # TODO: allow large range for a
+        # TODO: extend to arrays for a
+        await self.returnType((type(a).array, True, (n,)))
+        # TODO: conversion GF(p) to secint, 0<=a<n, n < p/2 needed? Like for self.unit_vector(a, n).
+        u = self.np_fromlist(self.random.random_unit_vector(type(a), n))
+        u = await self.gather(u)
+        r = u @ np.arange(n)
+        f = type(a).frac_length
+        r >>= f
+        a = await self.gather(a)
+        a >>= f
+        R = 1 + self._random(type(a), 1<<self.options.sec_param)
+        c = await self.output(a - r + R * n)
+        c = c.value % n
+        # rotate u over c positions to the right
+        u = np.roll(u, c)
+        return u
 
 
 @dataclass
