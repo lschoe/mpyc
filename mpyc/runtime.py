@@ -3699,8 +3699,9 @@ def setup():
                         # TODO: check for other common Linux terminals
                         subprocess.Popen(['gnome-terminal', '--'] + cmd_line)
                     elif sys.platform.startswith('darwin'):
-#                        subprocess.Popen(['open', '-a', 'Terminal', '--args'] + cmd_line)
-                        subprocess.Popen(['osascript', '-e', f'tell application "Terminal" to do script "{cmd_line}"'])
+                        cmd_line = ' '.join(cmd_line)
+                        cmd_line = f'tell application "Terminal" to do script "{cmd_line}"'
+                        subprocess.Popen(['osascript', '-e', cmd_line])
                 elif options.output_file:
                     with open(f'party{options.M}_{i}.log', 'a') as f:
                         f.write('\n')
