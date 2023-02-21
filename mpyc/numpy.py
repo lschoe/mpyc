@@ -165,9 +165,11 @@ try:
         logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.21+.')
 
     if np.lib.NumpyVersion(np.__version__) < '1.23.0':
+        __fromiter = np.fromiter
+
         def _fromiter(iterable, dtype, **kwargs):
             if np.dtype(dtype) != object:
-                return np.fromiter(iterable, dtype, **kwargs)
+                return __fromiter(iterable, dtype, **kwargs)
 
             # No dtype=object for np.fromiter(), workaround via 1D array:
             x = list(iterable)

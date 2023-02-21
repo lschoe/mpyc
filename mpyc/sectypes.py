@@ -1246,6 +1246,14 @@ class SecureArray(SecureObject):
     def sum(self, *args, **kwargs):
         return runtime.np_sum(self, *args, **kwargs)
 
+    def sort(self, *args, **kwargs):
+        """Returns new array sorted along an axis.
+
+        By default, axis=-1.
+        If axis is None, the array is flattened.
+        """
+        return runtime.np_sort(self, *args, **kwargs)
+
     def argmin(self, *args, **kwargs):
         """Returns the indices of the minimum values along an axis.
 

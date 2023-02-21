@@ -401,10 +401,12 @@ class Arithmetic(unittest.TestCase):
 
         np.assertEqual(np.reciprocal(F_b) * F_b, np.ones(b.shape, dtype='O'))
         np.assertEqual(np.sqrt(F_a**2)**2, F_a**2)
+        np.assertEqual((F_b**2).sqrt(INV=True)**2, 1/F_b**2)
 
         F27_b = self.f27.array(b)
         F27_b = 1 / (1 / F27_b)
         np.assertEqual(np.sqrt(F27_b**2)**2, F27_b**2)
+        np.assertEqual((F27_b**2).sqrt(INV=True)**2, 1/F27_b**2)
         self.assertRaises(ZeroDivisionError, (F27_b - F27_b).sqrt, INV=True)
 
         F81_b2 = self.f81.array(b)**2
@@ -439,7 +441,7 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(F_a.reshape(2, 2, 2).trace(), F_a_v.reshape(2, 2, 2).trace())
 
         self.assertTrue(F_a.is_sqr().all())
-        np.assertEqual((F_a**2).sqrt(), a)
+        np.assertEqual(1/(F_a**2).sqrt(INV=True), a)
         self.assertRaises(ZeroDivisionError, (F_a - F_a).sqrt, INV=True)
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')

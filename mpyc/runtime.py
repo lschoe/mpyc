@@ -1410,10 +1410,48 @@ class Runtime:
                 for i in range(n - d):  # NB: all n-d comparisons can be done in parallel
                     if i & p == r:
                         a, b = x[i], x[i + d]
-                        x[i], x[i + d] = self.if_swap(key(a) >= key(b), a, b)
+                        x[i], x[i + d] = self.if_swap(key(a) < key(b), b, a)
                 d, q, r = q - p, q >> 1, p
             p >>= 1
         return x
+
+    def np_sort(self, a, axis=-1, key=None):
+        """"Returns new array sorted along given axis.
+
+        By default, axis=-1.
+        If axis is None, the array is flattened.
+
+        Same sorting network as in self._sort().
+        """
+        if axis is None:
+            a = self.np_flatten(a)
+            axis = 0
+        else:
+            a = self.np_copy(a)
+        if key is None:
+            key = lambda a: a
+        n = a.shape[axis]
+        if a.size == 0 or n <= 1:
+            return a
+
+        # n >= 2
+        a = self.np_swapaxes(a, axis, -1)  # switch to last axis
+        t = (n-1).bit_length()
+        p = 1 << t-1
+        while p:
+            d, q, r = p, 1 << t-1, 0
+            while d:
+                I = np.fromiter((i for i in range(n - d) if i & p == r), dtype=int)
+                b0 = a[..., I]
+                b1 = a[..., I + d]
+                h = (key(b1) < key(b0)) * (b1 - b0)
+                b0, b1 = b0 + h, b1 - h
+                a = self.np_update(a, (..., I), b0)
+                a = self.np_update(a, (..., I + d), b1)
+                d, q, r = q - p, q >> 1, p
+            p >>= 1
+        a = self.np_swapaxes(a, axis, -1)  # restore original axis
+        return a
 
     @mpc_coro
     async def lsb(self, a):
@@ -2199,9 +2237,9 @@ class Runtime:
         Differs from __setitem__() which works in-place, returning None.
         """
         await self.returnType((type(a), a.shape))
+        a = await self.gather(a)
         if isinstance(value, self.SecureObject):
             value = await self.gather(value)
-        a = await self.gather(a)
         a.__setitem__(key, value)
         return a
 
@@ -2316,7 +2354,7 @@ class Runtime:
 
         For 2D arrays, same as the usual matrix transpose.
         """
-        if axis1 == axis2:
+        if a.ndim and axis1 - axis2 in (0, a.ndim, -a.ndim):
             return a
 
         shape = list(a.shape)
@@ -2515,7 +2553,7 @@ class Runtime:
         shape = tuple(shape)
         await self.returnType((type(ary), shape), N)
         ary = await self.gather(ary)
-        return np.split(ary, indices_or_sections, axis)
+        return np.split(ary, indices_or_sections, axis=axis)
 
     # TODO: array_split() returning arrays of different shapes -- not yet supported by returnType()
     # array_split(ary, indices_or_sections[, axis]) Split an array into multiple sub-arrays.
@@ -2676,7 +2714,7 @@ class Runtime:
         """
         await self.returnType((type(a), a.shape))
         a = await self.gather(a)
-        return np.roll(a, shift, axis)
+        return np.roll(a, shift, axis=axis)
 
     @mpc_coro_no_pc
     async def np_negative(self, a):
@@ -2879,7 +2917,7 @@ class Runtime:
         if n == 1:
             u = type(a)(np.array([[1]]))
             m = a
-        elif n == -2:
+        elif n == 2:
             # Redundant case, except for some small savings.
             a1, a2 = a[:, :1], a[:, 1:]
             c = key(a2) < key(a1)
@@ -2967,7 +3005,7 @@ class Runtime:
         if n == 1:
             u = type(a)(np.array([[1]]))
             m = a
-        elif n == -2:
+        elif n == 2:
             # Redundant case, except for some small savings.
             a1, a2 = a[:, :1], a[:, 1:]
             c = key(a1) < key(a2)
