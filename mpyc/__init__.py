@@ -26,7 +26,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.8.14'
+__version__ = '0.8.15'
 __license__ = 'MIT License'
 
 import os
@@ -158,4 +158,4 @@ if os.getenv('READTHEDOCS') != 'True':
             if not env_no_gmpy2:
                 os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
 
-    del options, env_no_numpy, env_no_gmpy2
+    del options, env_max_workers, env_no_numpy, env_no_gmpy2

@@ -15,9 +15,10 @@ processing all array elements in one go. In contrast, for (nested) lists
 the elements are processed one by one in an uncoordinated manner, each time
 doing a small bit of work and communication.
 
-For this demo, we see a 15-fold speed-up when run with three parties on
-local host. Also, the memory consumption is reduced accordingly, e.g., by
-a factor of around 10 when run with all barriers disabled.
+For this demo, we see an 18-fold speedup when run with three parties on
+local host (uaing secure fixed-point arithmetic). Also, the memory consumption
+is reduced accordingly, e.g., by a factor of around 10 when run with all
+barriers disabled.
 
 See cnnmnist.py for background information on the CNN MNIST classifier.
 """

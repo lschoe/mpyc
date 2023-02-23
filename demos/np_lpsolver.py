@@ -3,7 +3,7 @@
 This demo is a fully equivalent reimplementation of the lpsolver.py demo,
 using secure integer arrays for NumPy-based vectorized computation.
 
-Performance improvement of 2x speed-up when run with three parties
+Performance improvement of over 2x speedup when run with three parties
 on local host. Memory consumption is also reduced.
 
 See demo lpsolver.py for more information.
@@ -84,7 +84,7 @@ async def main():
     Zp = secint.field
     N = Zp.nth
     w = Zp.root  # w is an Nth root of unity in Zp, where N >= m + n
-    w_powers = Zp.array(np.empty(N))
+    w_powers = Zp.array(np.empty(N), check=False)
     w_powers[0] = 1
     for i in range(1, N):
         w_powers[i] = w_powers[i - 1] * w

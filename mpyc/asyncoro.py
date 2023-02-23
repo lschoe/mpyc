@@ -20,7 +20,7 @@ class MessageExchanger(Protocol):
     Bidirectional connection with one of the other parties (peers).
     """
 
-    __slots__ = 'runtime', 'peer_pid', 'bytes', 'buffers', 'transport'
+    __slots__ = 'runtime', 'peer_pid', 'bytes', 'buffers', 'transport', 'nbytes_sent'
 
     def __init__(self, rt, peer_pid=None):
         """Initialize protocol for runtime rt between this party and a peer.
@@ -36,6 +36,7 @@ class MessageExchanger(Protocol):
         self.bytes = bytearray()
         self.buffers = {}
         self.transport = None
+        self.nbytes_sent = 0
 
     def _key_transport_done(self):
         rt = self.runtime
@@ -73,6 +74,7 @@ class MessageExchanger(Protocol):
         payload_size = len(payload)
         fmt = f'<Iq{payload_size}s'
         self.transport.write(struct.pack(fmt, payload_size, pc, payload))
+        self.nbytes_sent += 12 + payload_size
 
     def data_received(self, data):
         """Called when data is received from the peer.

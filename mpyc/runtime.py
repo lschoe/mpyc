@@ -46,8 +46,6 @@ class Runtime:
     to enable distributed computation (without secret sharing).
     """
 
-#    __slots__ = ('pid', 'parties', 'options', '_threshold', '_logging_enabled', '_program_counter',
-#                 '_pc_level', '_loop', 'start_time', 'aggregate_load', '_prss_keys', '_bincoef')
     version = mpyc.__version__
     SecureObject = sectypes.SecureObject
     SecureNumber = sectypes.SecureNumber
@@ -199,9 +197,9 @@ class Runtime:
         Open connections with other parties, if any.
         """
         logging.info(f'Start MPyC runtime v{self.version}')
-        self.start_time = time.time()
         m = len(self.parties)
         if m == 1:
+            self.start_time = time.time()
             return
 
         # m > 1
@@ -259,6 +257,7 @@ class Runtime:
             logging.info(f'All {m} parties connected.')
         if self.pid:
             server.close()
+        self.start_time = time.time()
 
     async def shutdown(self):
         """Shutdown the MPyC runtime.
@@ -269,7 +268,10 @@ class Runtime:
         while self._pc_level > self._program_counter[1]:
             await asyncio.sleep(0)
         elapsed = time.time() - self.start_time
-        logging.info(f'Stop MPyC runtime -- elapsed time: {datetime.timedelta(seconds=elapsed)}')
+        nbytes = [peer.protocol.nbytes_sent if peer.pid != self.pid else 0 for peer in self.parties]
+        elapsed = datetime.timedelta(seconds=round(elapsed*1000)/1000)  # round to milliseconds
+        logging.info(f'Stop MPyC -- elapsed time: {str(elapsed)[:-3]}|bytes sent: {sum(nbytes)}')
+        logging.debug(f'Bytes sent per party: {" ".join(map(str, nbytes))}')
         m = len(self.parties)
         if m == 1:
             return
@@ -418,6 +420,14 @@ class Runtime:
                 rettype = (stype, x[0].integral, shape)
         await self.returnType(rettype, len(senders), len(x))
 
+        if shape is None or self.options.mix32_64bit:
+            random_split = thresha.random_split
+            marshal = field.to_bytes
+            unmarshal = field.from_bytes
+        else:
+            random_split = thresha.np_random_split
+            marshal = pickle.dumps
+            unmarshal = pickle.loads
         shares = [None] * len(senders)
         for i, peer_pid in enumerate(senders):
             if peer_pid == self.pid:
@@ -425,10 +435,10 @@ class Runtime:
                 t = self.threshold
                 m = len(self.parties)
                 if shape is not None:
-                    x = x[0].value.flat  # indexable iterator
-                in_shares = thresha.random_split(field, x, t, m)
+                    x = x[0].reshape(-1)  # in-place flatten
+                in_shares = random_split(field, x, t, m)
                 for other_pid, data in enumerate(in_shares):
-                    data = field.to_bytes(data)
+                    data = marshal(data)
                     if other_pid == self.pid:
                         shares[i] = data
                     else:
@@ -436,10 +446,10 @@ class Runtime:
             else:
                 shares[i] = self._receive_message(peer_pid)
         shares = await self.gather(shares)
-        if shape is None:
-            y = [[field(a) for a in field.from_bytes(r)] for r in shares]
+        if shape is None or self.options.mix32_64bit:
+            y = [[field(a) for a in unmarshal(r)] for r in shares]
         else:
-            y = [[field.array(field.from_bytes(r), check=False).reshape(shape) for r in shares]]
+            y = [[field.array(unmarshal(r), check=False).reshape(shape) for r in shares]]
         return y
 
     @mpc_coro
@@ -494,26 +504,36 @@ class Runtime:
             field = x[0].field
             x = x[0].value  # TODO: consider multiple arrays
             shape = x.shape
-            x = x.flat  # indexable iterator
+            x = x.reshape(-1)  # in-place flatten
 
+        if shape is None or self.options.mix32_64bit:
+            recombine = thresha.recombine
+            marshal = field.to_bytes
+            unmarshal = field.from_bytes
+        else:
+            recombine = thresha.np_recombine
+            marshal = pickle.dumps
+            unmarshal = pickle.loads
         # Send share x to all successors in receivers.
         share = None
         for peer_pid in receivers:
             if 0 < (peer_pid - self.pid) % m <= t:
                 if share is None:
-                    share = field.to_bytes(x)
+                    share = marshal(x)
                 self._send_message(peer_pid, share)
         # Receive and recombine shares if this party is a receiver.
         if self.pid in receivers:
             shares = [self._receive_message((self.pid - t + j) % m) for j in range(t)]
             shares = await self.gather(shares)
-            points = [((self.pid - t + j) % m + 1, field.from_bytes(shares[j])) for j in range(t)]
+            points = [((self.pid - t + j) % m + 1, unmarshal(shares[j])) for j in range(t)]
             points.append((self.pid + 1, x))
-            y = thresha.recombine(field, points)
+            y = recombine(field, points)
             if shape is None:
                 y = [field(a) for a in y]
-            else:
+            elif self.options.mix32_64bit:
                 y = [field.array(y).reshape(shape)]
+            else:
+                y = [y.reshape(shape)]
             if issubclass(sftype, self.SecureObject):
                 f = sftype._output_conversion
                 if not raw and f is not None:
@@ -566,19 +586,30 @@ class Runtime:
             field = x[0].field
             x = x[0].value
             shape = x.shape
-            x = x.flat  # indexable iterator
+            x = x.reshape(-1)  # in-place flatten
 
         m = len(self.parties)
-        in_shares = thresha.random_split(field, x, t, m)
-        in_shares = [field.to_bytes(elts) for elts in in_shares]
+        if shape is None or self.options.mix32_64bit:
+            shares = thresha.random_split(field, x, t, m)
+            shares = [field.to_bytes(elts) for elts in shares]
+        else:
+            shares = thresha.np_random_split(field, x, t, m)
+            shares = [pickle.dumps(elts) for elts in shares]
         # Recombine the first 2t+1 output_shares.
-        out_shares = await self.gather(self._exchange_shares(in_shares)[:2*t+1])
-        points = [(j+1, field.from_bytes(s)) for j, s in enumerate(out_shares)]
-        y = thresha.recombine(field, points)
+        shares = self._exchange_shares(shares)
+        shares = await self.gather(shares[:2*t+1])
+        if shape is None or self.options.mix32_64bit:
+            points = [(j+1, field.from_bytes(s)) for j, s in enumerate(shares)]
+            y = thresha.recombine(field, points)
+        else:
+            points = [(j+1, pickle.loads(s)) for j, s in enumerate(shares)]
+            y = thresha.np_recombine(field, points)
         if shape is None:
             y = [field(a) for a in y]
-        else:
+        elif self.options.mix32_64bit:
             y = [field.array(y).reshape(shape)]
+        else:
+            y = [y.reshape(shape)]
         if not x_is_list:
             y = y[0]
         return y

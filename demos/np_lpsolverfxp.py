@@ -3,7 +3,7 @@
 This demo is a fully equivalent reimplementation of the lpsolverfxp.py demo,
 using secure fixed-point arrays for NumPy-based vectorized computation.
 
-Performance improvement of 2x speed-up when run with three parties
+Performance improvement of over 2x speedup when run with three parties
 on local host. Memory consumption is also reduced.
 
 See demo lpsolverfxp.py for more information.

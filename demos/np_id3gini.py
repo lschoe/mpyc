@@ -3,7 +3,7 @@
 This demo is a fully equivalent reimplementation of the id3gini.py demo,
 using secure integer arrays for NumPy-based vectorized computation.
 
-Performance improvement of over 6x speed-up when run with three parties
+Performance improvement of over 9x speedup when run with three parties
 on local host. Memory consumption is reduced accordingly.
 
 See demo id3gini.py for more information on decision tree learning and ID3.
