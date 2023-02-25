@@ -8,17 +8,20 @@ and withstand passive adversaries controlling less than half of the parties.
 Secure integer and fixed-point arithmetic is supported for parameterized
 number ranges, also including support for comparison and bitwise operations.
 Secure finite field arithmetic is supported for fields of arbitrary order.
-Basic support for secure floating-point arithmetic is provided as well.
-Moreover, support for secure finite group operations is built-in for a range
-of groups, particularly for use in threshold cryptography (e.g., Schnorr groups
-and elliptic curves). These operations are all available via Python's operator
-overloading.
+Secure NumPy arrays over these basic types are available as well.
+
+Basic support for secure floating-point arithmetic is provided. Moreover,
+support for secure finite group operations is built-in for a range of groups,
+particularly for use in threshold cryptography (e.g., Schnorr groups and
+elliptic curves).
+
+The above operations are all available via Python's operator overloading.
 
 Secure drop-in replacements for lots of Python built-in functions, such as
 all(), any(), sum(), min(), max(), sorted() are provided, mimicking the Python
 APIs as much as possible. Further operations for container datatypes holding
 secret-shared data items are provided as well (e.g., matrix-vector operations
-like secure dot products).
+like secure dot products), next to the support for NumPy arrays.
 
 And much more functionality still in a couple of extension modules: seclists
 (secure lists with oblivious access and updates), mpctools (reduce and accumulate

@@ -251,6 +251,11 @@ class Arithmetic(unittest.TestCase):
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal
 
+        secfld = mpc.SecFld(2**2)
+        c = secfld.array(np.array([[-3, 0], [1, 2]]))
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c))), [[[1, 1],[0, 0]], [[1, 0], [0, 1]]])
+        self.assertRaises(TypeError, mpc.np_to_bits, mpc.SecFld(3**2).array(np.array(2)))
+
         secfld = mpc.SecFld(min_order=2**16)
         a = np.array([[[-1, 0], [0, -1]]])
         c = secfld.array(a)

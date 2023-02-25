@@ -831,6 +831,7 @@ pseudoinverse.py
 The `Moore-Penrose pseudoinverse <https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse>`_
 is a well-known generalization of the matrix inverse. This demo computes the pseudoinverse
 for a random secret-shared matrix ``A`` of a given dimension :math:`m\times n` and rank :math:`r`.
+Secure NumPy integer arrays are used for a compact and efficient vectorized implementation.
 
 The Penrose equations are checked for the computed pseudoinverse ``X``.
 The value of ``X`` is also checked numerically against the value of ``np.linalg.pinv(A)``,
@@ -1129,4 +1130,4 @@ Similarly, the demos ``sha3.py`` and ``pseudoinverse.py`` as well as all availab
 of the demos (``np_id3gini.py``, ``np_cnnmnist.py``, and so on) can be run using
 `np-run-all.bat <https://github.com/lschoe/mpyc/blob/master/demos/np-run-all.bat>`_ or
 `np-run-all.sh <https://github.com/lschoe/mpyc/blob/master/demos/np-run-all.sh>`_.
-These demos all require NumPy.
+These demos use MPyC's secure arrays and all require NumPy.

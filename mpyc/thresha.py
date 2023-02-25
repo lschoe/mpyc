@@ -10,12 +10,12 @@ function (PRF).
 """
 
 __all__ = ['random_split', 'recombine', 'pseudorandom_share', 'pseudorandom_share_zero',
-           'np_random_split', 'np_recombine','np_pseudorandom_share', 'np_pseudorandom_share_0',
+           'np_random_split', 'np_recombine', 'np_pseudorandom_share', 'np_pseudorandom_share_0',
            'PRF']
 
 from math import prod
 import functools
-import hashlib  # TODO: Python 3.12+ requires OpenSSL's pbkdf2_hmac, unavailable in, e.g., PyScrypt
+from hashlib import shake_128
 import secrets
 from mpyc.numpy import np
 
@@ -254,7 +254,7 @@ class PRF:
         elif not (l := self.byte_length):
             iterable = (0 for _ in range(n_))
         else:
-            dk = hashlib.pbkdf2_hmac('sha1', self.key, s, 1, n_ * l)
+            dk = shake_128(self.key + s).digest(n_ * l)
             byteorder = 'little'
             from_bytes = int.from_bytes  # cache
             bound = self.max

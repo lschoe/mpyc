@@ -3342,63 +3342,30 @@ class Runtime:
     @mpc_coro
     async def np_to_bits(self, a, l=None):
         """Secure extraction of l (or all) least significant bits of a."""  # a la [ST06].
-        # TODO: other cases than characteristic=2 case
+        # TODO: other cases than characteristic=2 case, see self.to_bits()
         stype = type(a).sectype
         if l is None:
             l = stype.bit_length
         assert l <= stype.bit_length + stype.frac_length
-#        await self.returnType((stype, True), l)
         shape = a.shape + (l,)
         await self.returnType((type(a), True, shape))
         field = stype.field
-        # f = stype.frac_length
-        # rshift_f = f and a.integral  # optimization for integral fixed-point numbers
-        # if rshift_f:
-            # # f least significant bits of a are all 0
-            # if f >= l:
-                # return [field(0) for _ in range(l)]
-
-            # l -= f
-
-        n = a.size
-        r_bits = await self.np_random_bits(field, n * l)
-        r_bits = r_bits.reshape(shape)
-        shifts = np.arange(l)
-        r_modl = np.sum(r_bits.value << shifts, axis=a.ndim)
-
-        # r_modl = 0
-        # for r_i in reversed(r_bits):
-            # r_modl <<= 1
-            # r_modl += r_i.value
 
         if issubclass(stype, self.SecureFiniteField):
             if field.characteristic == 2:
+                n = a.size
+                r_bits = await self.np_random_bits(field, n * l)
+                r_bits = r_bits.reshape(shape)
+                shifts = np.arange(l)
+                r_modl = np.sum(r_bits.value << shifts, axis=a.ndim)
                 a = await self.gather(a)
                 c = await self.output(a + r_modl)
                 c = np.vectorize(int, otypes='O')(c.value)
                 c_bits = np.right_shift.outer(c, shifts) & 1
                 return c_bits + r_bits
 
-            # if field.ext_deg > 1:
-                # raise TypeError('Binary field or prime field required.')
-
-            # a = self.convert(a, self.SecInt(l=1+stype.field.order.bit_length()))
-            # a_bits = self.to_bits(a)
-            # return self.convert(a_bits, stype)
-
-        # k = self.options.sec_param
-        # r_divl = self._random(field, 1<<(stype.bit_length + k - l)).value
-        # a = await self.gather(a)
-        # if rshift_f:
-            # a = a >> f
-        # c = await self.output(a + ((1<<stype.bit_length) + (r_divl << l) - r_modl))
-        # c = c.value % (1<<l)
-        # c_bits = [(c >> i) & 1 for i in range(l)]
-        # r_bits = [stype(r.value) for r in r_bits]  # TODO: drop .value, fix secfxp(r) if r field elt
-        # a_bits = self.add_bits(r_bits, c_bits)
-        # if rshift_f:
-            # a_bits = [field(0) for _ in range(f)] + a_bits
-        # return a_bits
+            if field.ext_deg > 1:
+                raise TypeError('Binary field or prime field required.')
 
     @mpc_coro_no_pc
     async def from_bits(self, x):

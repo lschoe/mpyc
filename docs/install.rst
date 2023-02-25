@@ -2,7 +2,7 @@ MPyC installation
 =================
 
 MPyC runs on Windows/Mac/Linux platforms supporting Python 3.8+.
-There are no dependencies on other Python packages.
+There are no hard dependencies on other Python packages.
 
 If you first want to try MPyC online, click
 `launch binder <https://mybinder.org/v2/gh/lschoe/mpyc/master>`_ to run MPyC and the demos
@@ -68,8 +68,13 @@ The parties engaging in a secure multiparty computation are allowed to be on
 different 32-bit/64-bit platforms, mixing different implementations of Python.
 The parties also need not always run exactly the same version of MPyC.
 
-To enhance the performance of MPyC, it may help to install the
-`gmpy2 <https://gmpy2.readthedocs.io>`_ package, e.g., using ``pip install gmpy2``.
+To enhance the functionality of MPyC with secure array types, along with vectorized
+implementations, install the `NumPy <https://numpy.org>`_ package, e.g.,
+using ``pip install numpy``.
+
+To enhance the performance of MPyC with faster integer arithmetic, install the
+`gmpy2 <https://gmpy2.readthedocs.io>`_ package, e.g.,
+using ``pip install gmpy2``.
 
 PyPy / Nuitka
 -------------

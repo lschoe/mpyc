@@ -27,7 +27,7 @@ class SecureFraction:
         return self.a[..., 0] * other.a[..., 1] < self.a[..., 1] * other.a[..., 0]
 
 
-def np_pow(a, x, n):
+def np_pwlst(a, x, n):
     """Return array with a,ax,ax^2,...,ax^(n-1).
 
     Runs roughly in 2log_2(n)-1 rounds using n-1 + log_2(n) secure multiplications.
@@ -37,7 +37,7 @@ def np_pow(a, x, n):
     elif n == 2:
         powers = mpc.np_fromlist([a, a * x])
     else:
-        even_powers = np_pow(a, x * x, (n+1)//2)
+        even_powers = np_pwlst(a, x * x, (n+1)//2)
         if n%2:
             even_powers, d = even_powers[:-1], even_powers[-1:]
         powers = np.stack((even_powers, x * even_powers))  # add odd powers
@@ -135,7 +135,7 @@ async def main():
         coefs = w_powers[[[(-j * k) % N for k in range(N)] for j in range(n)]]
     else:
         coefs = Zp.array([[w_powers[-j*k % N].value for k in range(N)] for j in range(n)])
-    sum_powers = np.sum(np.fromiter((np_pow(T[i+1][-1] / N, basis[i], N) for i in range(m)), 'O'))
+    sum_powers = np.sum(np.fromiter((np_pwlst(T[i+1][-1] / N, basis[i], N) for i in range(m)), 'O'))
     x = coefs @ sum_powers
     Ax_bounded_by_b = np.all(A @ x <= b * cd)
     x_nonnegative = np.all(x >= 0)
@@ -145,7 +145,7 @@ async def main():
         coefs = w_powers[[[(-i * k) % N for k in range(N)] for i in range(N - m, N)]]
     else:
         coefs = Zp.array([[w_powers[-i*k % N].value for k in range(N)] for i in range(N - m, N)])
-    sum_powers = np.sum(np.fromiter((np_pow(T[0][j] / N, cobasis[j], N) for j in range(n)), 'O'))
+    sum_powers = np.sum(np.fromiter((np_pwlst(T[0][j] / N, cobasis[j], N) for j in range(n)), 'O'))
     y = coefs @ sum_powers
     yA_bounded_by_c = np.all(y @ A >= c * cd)
     y_nonnegative = np.all(y >= 0)
