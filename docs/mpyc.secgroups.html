@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.secgroups</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/secgroups.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/secgroups.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/secgroups.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/secgroups.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;(secret-shared)&nbsp;types&nbsp;of&nbsp;finite&nbsp;groups&nbsp;in&nbsp;MPyC.<br>
 &nbsp;<br>
 Secure&nbsp;versions&nbsp;of&nbsp;all&nbsp;groups&nbsp;supported&nbsp;by&nbsp;the&nbsp;module&nbsp;mpyc.fingroups&nbsp;are&nbsp;available:<br>
@@ -27,7 +27,6 @@ symmetric&nbsp;groups,&nbsp;quadratic&nbsp;residues,&nbsp;elliptic&nbsp;curve&nb
 </td><td width="25%" valign=top><a href="https://docs.python.org/3/library/inspect.html">inspect</a><br>
 <a href="https://docs.python.org/3/library/itertools.html">itertools</a><br>
 </td><td width="25%" valign=top><a href="mpyc.html">mpyc</a><br>
-<a href="https://docs.python.org/3/library/operator.html">operator</a><br>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -86,13 +85,13 @@ using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbs
 Class methods defined here:<br>
 <dl><dt><a name="SecureClassGroupForm-decode"><strong>decode</strong></a>(M, Z)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt></dl>
 
-<dl><dt><a name="SecureClassGroupForm-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureClassGroupForm-equality"><strong>equality</strong></a>(f1, f2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureClassGroupForm-inversion"><strong>inversion</strong></a>(f)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SecureClassGroupForm-inversion"><strong>inversion</strong></a>(f, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SecureClassGroupForm-operation"><strong>operation</strong></a>(f1, f2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureClassGroupForm-operation"><strong>operation</strong></a>(f1, f2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureClassGroupForm-operation2"><strong>operation2</strong></a>(f)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SecureClassGroupForm-operation2"><strong>operation2</strong></a>(f, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -158,6 +157,14 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 
 <hr>
 Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureClassGroupForm-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
+&nbsp;<br>
+To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
+
+<dl><dt><a name="SecureClassGroupForm-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt><dd><tt>Delegate&nbsp;__array_ufunc__&nbsp;call&nbsp;to&nbsp;corresponding&nbsp;operator&nbsp;call.<br>
+&nbsp;<br>
+Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&nbsp;10).</tt></dd></dl>
+
 <dl><dt><a name="SecureClassGroupForm-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
 
 <dl><dt><a name="SecureClassGroupForm-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
@@ -168,6 +175,12 @@ Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
+
+<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
+
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -204,11 +217,11 @@ using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbs
 Class methods defined here:<br>
 <dl><dt><a name="SecureEllipticCurvePoint-decode"><strong>decode</strong></a>(M, Z, gap=256)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt></dl>
 
-<dl><dt><a name="SecureEllipticCurvePoint-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureEllipticCurvePoint-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureEllipticCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SecureEllipticCurvePoint-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SecureEllipticCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureEllipticCurvePoint-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -258,7 +271,7 @@ Condition&nbsp;c&nbsp;must&nbsp;be&nbsp;of&nbsp;a&nbsp;secure&nbsp;number&nbsp;t
 and&nbsp;its&nbsp;value&nbsp;should&nbsp;be&nbsp;0&nbsp;or&nbsp;1.&nbsp;Input&nbsp;a&nbsp;must&nbsp;be&nbsp;compatible&nbsp;with&nbsp;the&nbsp;group&nbsp;as<br>
 well,&nbsp;either&nbsp;of&nbsp;the&nbsp;secure&nbsp;type&nbsp;cls&nbsp;or&nbsp;of&nbsp;type&nbsp;cls.group.&nbsp;Same&nbsp;for&nbsp;input&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureEllipticCurvePoint-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SecureEllipticCurvePoint-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="SecureEllipticCurvePoint-repeat"><strong>repeat</strong></a>(a, x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^x),&nbsp;for&nbsp;any&nbsp;integral&nbsp;number&nbsp;x.<br>
 &nbsp;<br>
@@ -276,6 +289,14 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 
 <hr>
 Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureEllipticCurvePoint-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
+&nbsp;<br>
+To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
+
+<dl><dt><a name="SecureEllipticCurvePoint-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt><dd><tt>Delegate&nbsp;__array_ufunc__&nbsp;call&nbsp;to&nbsp;corresponding&nbsp;operator&nbsp;call.<br>
+&nbsp;<br>
+Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&nbsp;10).</tt></dd></dl>
+
 <dl><dt><a name="SecureEllipticCurvePoint-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
 
 <dl><dt><a name="SecureEllipticCurvePoint-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
@@ -286,6 +307,12 @@ Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
+
+<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
+
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -340,7 +367,7 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="SecureFiniteGroup-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureFiniteGroup-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="SecureFiniteGroup-if_else"><strong>if_else</strong></a>(c, a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Secure&nbsp;selection&nbsp;based&nbsp;on&nbsp;binary&nbsp;condition&nbsp;c&nbsp;between&nbsp;group&nbsp;elements&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
@@ -348,11 +375,11 @@ Condition&nbsp;c&nbsp;must&nbsp;be&nbsp;of&nbsp;a&nbsp;secure&nbsp;number&nbsp;t
 and&nbsp;its&nbsp;value&nbsp;should&nbsp;be&nbsp;0&nbsp;or&nbsp;1.&nbsp;Input&nbsp;a&nbsp;must&nbsp;be&nbsp;compatible&nbsp;with&nbsp;the&nbsp;group&nbsp;as<br>
 well,&nbsp;either&nbsp;of&nbsp;the&nbsp;secure&nbsp;type&nbsp;cls&nbsp;or&nbsp;of&nbsp;type&nbsp;cls.group.&nbsp;Same&nbsp;for&nbsp;input&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureFiniteGroup-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SecureFiniteGroup-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SecureFiniteGroup-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureFiniteGroup-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureFiniteGroup-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SecureFiniteGroup-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="SecureFiniteGroup-repeat"><strong>repeat</strong></a>(a, x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^x),&nbsp;for&nbsp;any&nbsp;integral&nbsp;number&nbsp;x.<br>
 &nbsp;<br>
@@ -372,6 +399,14 @@ Data and other attributes defined here:<br>
 
 <hr>
 Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureFiniteGroup-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
+&nbsp;<br>
+To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
+
+<dl><dt><a name="SecureFiniteGroup-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt><dd><tt>Delegate&nbsp;__array_ufunc__&nbsp;call&nbsp;to&nbsp;corresponding&nbsp;operator&nbsp;call.<br>
+&nbsp;<br>
+Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&nbsp;10).</tt></dd></dl>
+
 <dl><dt><a name="SecureFiniteGroup-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
 
 <dl><dt><a name="SecureFiniteGroup-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
@@ -392,6 +427,12 @@ using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbs
 Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
+
+<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
+
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -422,11 +463,11 @@ using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbs
 Class methods defined here:<br>
 <dl><dt><a name="SecureQuadraticResidue-decode"><strong>decode</strong></a>(M, Z, gap=128)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt></dl>
 
-<dl><dt><a name="SecureQuadraticResidue-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureQuadraticResidue-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureQuadraticResidue-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SecureQuadraticResidue-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SecureQuadraticResidue-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureQuadraticResidue-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -476,7 +517,7 @@ Condition&nbsp;c&nbsp;must&nbsp;be&nbsp;of&nbsp;a&nbsp;secure&nbsp;number&nbsp;t
 and&nbsp;its&nbsp;value&nbsp;should&nbsp;be&nbsp;0&nbsp;or&nbsp;1.&nbsp;Input&nbsp;a&nbsp;must&nbsp;be&nbsp;compatible&nbsp;with&nbsp;the&nbsp;group&nbsp;as<br>
 well,&nbsp;either&nbsp;of&nbsp;the&nbsp;secure&nbsp;type&nbsp;cls&nbsp;or&nbsp;of&nbsp;type&nbsp;cls.group.&nbsp;Same&nbsp;for&nbsp;input&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureQuadraticResidue-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SecureQuadraticResidue-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="SecureQuadraticResidue-repeat"><strong>repeat</strong></a>(a, x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^x),&nbsp;for&nbsp;any&nbsp;integral&nbsp;number&nbsp;x.<br>
 &nbsp;<br>
@@ -494,6 +535,14 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 
 <hr>
 Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureQuadraticResidue-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
+&nbsp;<br>
+To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
+
+<dl><dt><a name="SecureQuadraticResidue-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt><dd><tt>Delegate&nbsp;__array_ufunc__&nbsp;call&nbsp;to&nbsp;corresponding&nbsp;operator&nbsp;call.<br>
+&nbsp;<br>
+Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&nbsp;10).</tt></dd></dl>
+
 <dl><dt><a name="SecureQuadraticResidue-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
 
 <dl><dt><a name="SecureQuadraticResidue-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
@@ -504,6 +553,12 @@ Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
+
+<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
+
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -534,11 +589,11 @@ using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbs
 Class methods defined here:<br>
 <dl><dt><a name="SecureSchnorrGroupElement-decode"><strong>decode</strong></a>(M, Z)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt></dl>
 
-<dl><dt><a name="SecureSchnorrGroupElement-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureSchnorrGroupElement-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureSchnorrGroupElement-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SecureSchnorrGroupElement-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SecureSchnorrGroupElement-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureSchnorrGroupElement-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -588,7 +643,7 @@ Condition&nbsp;c&nbsp;must&nbsp;be&nbsp;of&nbsp;a&nbsp;secure&nbsp;number&nbsp;t
 and&nbsp;its&nbsp;value&nbsp;should&nbsp;be&nbsp;0&nbsp;or&nbsp;1.&nbsp;Input&nbsp;a&nbsp;must&nbsp;be&nbsp;compatible&nbsp;with&nbsp;the&nbsp;group&nbsp;as<br>
 well,&nbsp;either&nbsp;of&nbsp;the&nbsp;secure&nbsp;type&nbsp;cls&nbsp;or&nbsp;of&nbsp;type&nbsp;cls.group.&nbsp;Same&nbsp;for&nbsp;input&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureSchnorrGroupElement-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SecureSchnorrGroupElement-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="SecureSchnorrGroupElement-repeat"><strong>repeat</strong></a>(a, x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^x),&nbsp;for&nbsp;any&nbsp;integral&nbsp;number&nbsp;x.<br>
 &nbsp;<br>
@@ -606,6 +661,14 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 
 <hr>
 Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureSchnorrGroupElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
+&nbsp;<br>
+To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
+
+<dl><dt><a name="SecureSchnorrGroupElement-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt><dd><tt>Delegate&nbsp;__array_ufunc__&nbsp;call&nbsp;to&nbsp;corresponding&nbsp;operator&nbsp;call.<br>
+&nbsp;<br>
+Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&nbsp;10).</tt></dd></dl>
+
 <dl><dt><a name="SecureSchnorrGroupElement-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
 
 <dl><dt><a name="SecureSchnorrGroupElement-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
@@ -616,6 +679,12 @@ Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
+
+<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
+
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -646,11 +715,11 @@ using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbs
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="SecureSymmetricGroupElement-equality"><strong>equality</strong></a>(p, q)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SecureSymmetricGroupElement-equality"><strong>equality</strong></a>(p, q, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureSymmetricGroupElement-inversion"><strong>inversion</strong></a>(p)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SecureSymmetricGroupElement-inversion"><strong>inversion</strong></a>(p, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SecureSymmetricGroupElement-operation"><strong>operation</strong></a>(p, q)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>First&nbsp;p&nbsp;then&nbsp;q.</tt></dd></dl>
+<dl><dt><a name="SecureSymmetricGroupElement-operation"><strong>operation</strong></a>(p, q, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>First&nbsp;p&nbsp;then&nbsp;q.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -700,7 +769,7 @@ Condition&nbsp;c&nbsp;must&nbsp;be&nbsp;of&nbsp;a&nbsp;secure&nbsp;number&nbsp;t
 and&nbsp;its&nbsp;value&nbsp;should&nbsp;be&nbsp;0&nbsp;or&nbsp;1.&nbsp;Input&nbsp;a&nbsp;must&nbsp;be&nbsp;compatible&nbsp;with&nbsp;the&nbsp;group&nbsp;as<br>
 well,&nbsp;either&nbsp;of&nbsp;the&nbsp;secure&nbsp;type&nbsp;cls&nbsp;or&nbsp;of&nbsp;type&nbsp;cls.group.&nbsp;Same&nbsp;for&nbsp;input&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SecureSymmetricGroupElement-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SecureSymmetricGroupElement-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="SecureSymmetricGroupElement-repeat"><strong>repeat</strong></a>(a, x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;xth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^x),&nbsp;for&nbsp;any&nbsp;integral&nbsp;number&nbsp;x.<br>
 &nbsp;<br>
@@ -718,6 +787,14 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 
 <hr>
 Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><a name="SecureSymmetricGroupElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
+&nbsp;<br>
+To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
+
+<dl><dt><a name="SecureSymmetricGroupElement-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt><dd><tt>Delegate&nbsp;__array_ufunc__&nbsp;call&nbsp;to&nbsp;corresponding&nbsp;operator&nbsp;call.<br>
+&nbsp;<br>
+Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&nbsp;10).</tt></dd></dl>
+
 <dl><dt><a name="SecureSymmetricGroupElement-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Use&nbsp;of&nbsp;secret-shared&nbsp;objects&nbsp;in&nbsp;Boolean&nbsp;expressions&nbsp;makes&nbsp;no&nbsp;sense.</tt></dd></dl>
 
 <dl><dt><a name="SecureSymmetricGroupElement-__deepcopy__"><strong>__deepcopy__</strong></a>(self, memo)</dt><dd><tt>Let&nbsp;SecureObjects&nbsp;behave&nbsp;as&nbsp;immutable&nbsp;objects.<br>
@@ -728,6 +805,12 @@ Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
+
+<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
+
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
@@ -761,10 +844,11 @@ The&nbsp;following&nbsp;Edwards&nbsp;curves&nbsp;and&nbsp;Weierstrass&nbsp;curve
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'Ed25519':&nbsp;see&nbsp;<a href="https://en.wikipedia.org/wiki/EdDSA#Ed25519">https://en.wikipedia.org/wiki/EdDSA#Ed25519</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'Ed448':&nbsp;aka&nbsp;"Goldilocks",&nbsp;see&nbsp;<a href="https://en.wikipedia.org/wiki/Curve448">https://en.wikipedia.org/wiki/Curve448</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'secp256k1':&nbsp;Bitcoin's&nbsp;Koblitz&nbsp;curve&nbsp;from&nbsp;<a href="https://www.secg.org/sec2-v2.pdf">https://www.secg.org/sec2-v2.pdf</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256':&nbsp;Barreto-Naehrig&nbsp;curve,&nbsp;<a href="https://eprint.iacr.org/2010/186">https://eprint.iacr.org/2010/186</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256_twist':&nbsp;sextic&nbsp;twist&nbsp;of&nbsp;Barreto-Naehrig&nbsp;curve<br>
 &nbsp;<br>
-Both&nbsp;curves&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;'affine'&nbsp;(default)&nbsp;and&nbsp;'projective'&nbsp;coordinates.<br>
+These&nbsp;curves&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;'affine'&nbsp;(default)&nbsp;and&nbsp;'projective'&nbsp;coordinates.<br>
 The&nbsp;Edwards&nbsp;curves&nbsp;can&nbsp;also&nbsp;be&nbsp;used&nbsp;with&nbsp;'extended'&nbsp;coordinates,&nbsp;and&nbsp;the<br>
 Weierstrass&nbsp;curves&nbsp;with&nbsp;'jacobian'&nbsp;coordinates.</tt></dd></dl>
  <dl><dt><a name="-SecGrp"><strong>SecGrp</strong></a>(group)</dt><dd><tt>Secure&nbsp;version&nbsp;of&nbsp;given&nbsp;finite&nbsp;group.</tt></dd></dl>

@@ -1,4 +1,4 @@
-"""This module acts as a stub to avoid a dependency for the numpy package.
+"""This module acts as a stub to avoid a (hard) dependency for the numpy package.
 
 If the numpy package is not available, MPyC still runs but with less functionality.
 Use of NumPy can be disabled to avoid loading the numpy package.

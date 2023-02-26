@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>mpyc</strong></big></big> (version 0.8)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>mpyc</strong></big></big> (version 0.9)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/__init__.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/__init__.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/__init__.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/__init__.py</a></font></td></tr></table>
     <p><tt>MPyC&nbsp;is&nbsp;a&nbsp;Python&nbsp;package&nbsp;for&nbsp;secure&nbsp;multiparty&nbsp;computation&nbsp;(MPC).<br>
 &nbsp;<br>
 MPyC&nbsp;provides&nbsp;a&nbsp;runtime&nbsp;for&nbsp;performing&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values,<br>
@@ -18,18 +18,21 @@ and&nbsp;withstand&nbsp;passive&nbsp;adversaries&nbsp;controlling&nbsp;less&nbsp
 &nbsp;<br>
 Secure&nbsp;integer&nbsp;and&nbsp;fixed-point&nbsp;arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;parameterized<br>
 number&nbsp;ranges,&nbsp;also&nbsp;including&nbsp;support&nbsp;for&nbsp;comparison&nbsp;and&nbsp;bitwise&nbsp;operations.<br>
-Secure&nbsp;finite&nbsp;field&nbsp;arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;fields&nbsp;of&nbsp;arbitrary&nbsp;order,&nbsp;as<br>
-long&nbsp;as&nbsp;the&nbsp;order&nbsp;exceeds&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;Basic&nbsp;support&nbsp;for&nbsp;secure<br>
-floating-point&nbsp;arithmetic&nbsp;is&nbsp;provided&nbsp;as&nbsp;well.&nbsp;Moreover,&nbsp;support&nbsp;for&nbsp;secure<br>
-finite&nbsp;group&nbsp;operations&nbsp;is&nbsp;built-in&nbsp;for&nbsp;a&nbsp;range&nbsp;of&nbsp;groups,&nbsp;particularly&nbsp;for<br>
-use&nbsp;in&nbsp;threshold&nbsp;cryptography&nbsp;(e.g.,&nbsp;Schnorr&nbsp;groups&nbsp;and&nbsp;elliptic&nbsp;curves).<br>
-These&nbsp;operations&nbsp;are&nbsp;all&nbsp;available&nbsp;via&nbsp;Python's&nbsp;operator&nbsp;overloading.<br>
+Secure&nbsp;finite&nbsp;field&nbsp;arithmetic&nbsp;is&nbsp;supported&nbsp;for&nbsp;fields&nbsp;of&nbsp;arbitrary&nbsp;order.<br>
+Secure&nbsp;NumPy&nbsp;arrays&nbsp;over&nbsp;these&nbsp;basic&nbsp;types&nbsp;are&nbsp;available&nbsp;as&nbsp;well.<br>
+&nbsp;<br>
+Basic&nbsp;support&nbsp;for&nbsp;secure&nbsp;floating-point&nbsp;arithmetic&nbsp;is&nbsp;provided.&nbsp;Moreover,<br>
+support&nbsp;for&nbsp;secure&nbsp;finite&nbsp;group&nbsp;operations&nbsp;is&nbsp;built-in&nbsp;for&nbsp;a&nbsp;range&nbsp;of&nbsp;groups,<br>
+particularly&nbsp;for&nbsp;use&nbsp;in&nbsp;threshold&nbsp;cryptography&nbsp;(e.g.,&nbsp;Schnorr&nbsp;groups&nbsp;and<br>
+elliptic&nbsp;curves).<br>
+&nbsp;<br>
+The&nbsp;above&nbsp;operations&nbsp;are&nbsp;all&nbsp;available&nbsp;via&nbsp;Python's&nbsp;operator&nbsp;overloading.<br>
 &nbsp;<br>
 Secure&nbsp;drop-in&nbsp;replacements&nbsp;for&nbsp;lots&nbsp;of&nbsp;Python&nbsp;built-in&nbsp;functions,&nbsp;such&nbsp;as<br>
 all(),&nbsp;any(),&nbsp;sum(),&nbsp;min(),&nbsp;max(),&nbsp;sorted()&nbsp;are&nbsp;provided,&nbsp;mimicking&nbsp;the&nbsp;Python<br>
 APIs&nbsp;as&nbsp;much&nbsp;as&nbsp;possible.&nbsp;Further&nbsp;operations&nbsp;for&nbsp;container&nbsp;datatypes&nbsp;holding<br>
 secret-shared&nbsp;data&nbsp;items&nbsp;are&nbsp;provided&nbsp;as&nbsp;well&nbsp;(e.g.,&nbsp;matrix-vector&nbsp;operations<br>
-like&nbsp;secure&nbsp;dot&nbsp;products).<br>
+like&nbsp;secure&nbsp;dot&nbsp;products),&nbsp;next&nbsp;to&nbsp;the&nbsp;support&nbsp;for&nbsp;NumPy&nbsp;arrays.<br>
 &nbsp;<br>
 And&nbsp;much&nbsp;more&nbsp;functionality&nbsp;still&nbsp;in&nbsp;a&nbsp;couple&nbsp;of&nbsp;extension&nbsp;modules:&nbsp;seclists<br>
 (secure&nbsp;lists&nbsp;with&nbsp;oblivious&nbsp;access&nbsp;and&nbsp;updates),&nbsp;mpctools&nbsp;(reduce&nbsp;and&nbsp;accumulate<br>
@@ -49,14 +52,23 @@ and&nbsp;statistics&nbsp;(securely&nbsp;mimicking&nbsp;Python’s&nbsp;statistic
 </td><td width="25%" valign=top><a href="mpyc.gfpx.html">gfpx</a><br>
 <a href="mpyc.gmpy.html">gmpy</a><br>
 <a href="mpyc.mpctools.html">mpctools</a><br>
-<a href="mpyc.random.html">random</a><br>
-</td><td width="25%" valign=top><a href="mpyc.runtime.html">runtime</a><br>
+<a href="mpyc.numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="mpyc.random.html">random</a><br>
+<a href="mpyc.runtime.html">runtime</a><br>
 <a href="mpyc.secgroups.html">secgroups</a><br>
 <a href="mpyc.seclists.html">seclists</a><br>
-<a href="mpyc.sectypes.html">sectypes</a><br>
-</td><td width="25%" valign=top><a href="mpyc.statistics.html">statistics</a><br>
+</td><td width="25%" valign=top><a href="mpyc.sectypes.html">sectypes</a><br>
+<a href="mpyc.statistics.html">statistics</a><br>
 <a href="mpyc.thresha.html">thresha</a><br>
 </td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-get_arg_parser"><strong>get_arg_parser</strong></a>()</dt><dd><tt>Return&nbsp;parser&nbsp;for&nbsp;command&nbsp;line&nbsp;arguments&nbsp;passed&nbsp;to&nbsp;the&nbsp;MPyC&nbsp;runtime.</tt></dd></dl>
+</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
 <td colspan=3 valign=bottom>&nbsp;<br>

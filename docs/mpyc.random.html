@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.random</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/random.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/random.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/random.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/random.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;several&nbsp;functions&nbsp;for<br>
 generating&nbsp;pseudorandom&nbsp;numbers,&nbsp;cf.&nbsp;the&nbsp;random&nbsp;module&nbsp;of&nbsp;Python's<br>
 standard&nbsp;library.&nbsp;Each&nbsp;function&nbsp;behaves&nbsp;like&nbsp;its&nbsp;Python&nbsp;counterpart,<br>
@@ -89,7 +89,8 @@ This&nbsp;is&nbsp;especially&nbsp;fast&nbsp;and&nbsp;space&nbsp;efficient&nbsp;f
 large&nbsp;population,&nbsp;e.g.:&nbsp;<a href="#-sample">sample</a>(sectype,&nbsp;range(10000000),&nbsp;60).</tt></dd></dl>
  <dl><dt><a name="-shuffle"><strong>shuffle</strong></a>(sectype, x)</dt><dd><tt>Shuffle&nbsp;list&nbsp;x&nbsp;secretly&nbsp;in-place,&nbsp;and&nbsp;return&nbsp;None.<br>
 &nbsp;<br>
-Given&nbsp;list&nbsp;x&nbsp;may&nbsp;contain&nbsp;public&nbsp;or&nbsp;secret&nbsp;elements.</tt></dd></dl>
+Given&nbsp;list&nbsp;x&nbsp;may&nbsp;contain&nbsp;public&nbsp;or&nbsp;secret&nbsp;elements.<br>
+Elements&nbsp;of&nbsp;x&nbsp;are&nbsp;all&nbsp;numbers&nbsp;or&nbsp;all&nbsp;lists&nbsp;(of&nbsp;the&nbsp;same&nbsp;length)&nbsp;of&nbsp;numbers.</tt></dd></dl>
  <dl><dt><a name="-uniform"><strong>uniform</strong></a>(sectype, a, b)</dt><dd><tt>Uniformly&nbsp;random&nbsp;secret&nbsp;fixed-point&nbsp;number&nbsp;N&nbsp;such&nbsp;that<br>
 a&nbsp;&lt;=&nbsp;N&nbsp;&lt;=&nbsp;b&nbsp;for&nbsp;a&nbsp;&lt;=&nbsp;b&nbsp;and&nbsp;b&nbsp;&lt;=&nbsp;N&nbsp;&lt;=&nbsp;a&nbsp;for&nbsp;b&nbsp;&lt;&nbsp;a.</tt></dd></dl>
 </td></tr></table><p>

@@ -674,15 +674,15 @@ class BinaryFieldElement(ExtensionFieldElement):
         return poly.powmod(a, q2, cls.modulus)
 
 
-HANDLED_FUNCTIONS = {}
+_HANDLED_FUNCTIONS = {}
 
 
-def implements(numpy_function_name):
+def _implements(numpy_function_name):
     """Register an __array_function__ implementation."""
     def decorator(func):
         if np:
             numpy_function = eval('np.' + numpy_function_name)
-            HANDLED_FUNCTIONS[numpy_function] = func
+            _HANDLED_FUNCTIONS[numpy_function] = func
         return func
 
     return decorator
@@ -764,8 +764,8 @@ class FiniteFieldArray:
         else:
             raise TypeError('wrong type for self in __array_function__(self, ...) call')
 
-        if func in HANDLED_FUNCTIONS:
-            return HANDLED_FUNCTIONS[func](*args, **kwargs)
+        if func in _HANDLED_FUNCTIONS:
+            return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
         args = list(args)
         for i in range(len(args)):
@@ -805,22 +805,22 @@ class FiniteFieldArray:
         return a
 
     @property
-    @implements('shape')
+    @_implements('shape')
     def shape(self):
         return self.value.shape
 
     @property
-    @implements('ndim')
+    @_implements('ndim')
     def ndim(self):
         return self.value.ndim
 
     @property
-    @implements('size')
+    @_implements('size')
     def size(self):
         return self.value.size
 
     @staticmethod
-    @implements('block')
+    @_implements('block')
     def _np_block(arrays):
         def extract_type(s):
             if isinstance(s, list):
@@ -856,7 +856,7 @@ class FiniteFieldArray:
             yield a
 
     @staticmethod
-    @implements('linalg.solve')
+    @_implements('linalg.solve')
     def gauss_solve(A, B):
         """Linear solve by Gaussian elimination on matrix (A | B)."""
         # TODO: extend to more dimensions, solve in last 2 dimensions
@@ -892,7 +892,7 @@ class FiniteFieldArray:
         return cls(A[:, n:], check=False)
 
     @staticmethod
-    @implements('linalg.inv')
+    @_implements('linalg.inv')
     def gauss_inv(A):
         """Inverse by Gaussian elimination on augmented matrix (A | I)."""
         # TODO: extend to more dimensions, invert last 2 dimensions
@@ -900,7 +900,7 @@ class FiniteFieldArray:
         return FiniteFieldArray.gauss_solve(A, B)
 
     @staticmethod
-    @implements('linalg.det')
+    @_implements('linalg.det')
     def gauss_det(a):
         """Determinant by Gaussian elimination on (last 2 dimensions of) array a."""
         cls = type(a)
@@ -941,7 +941,7 @@ class FiniteFieldArray:
         return d
 
     @staticmethod
-    @implements('linalg.matrix_power')
+    @_implements('linalg.matrix_power')
     def matrix_pow(A, n):  # needed for handling negative n
         cls = type(A)
         p = cls.field.modulus
@@ -962,7 +962,7 @@ class FiniteFieldArray:
         return cls(C)
 
     @staticmethod
-    @implements('diag')
+    @_implements('diag')
     def diag(a, k=0):
         cls = type(a)
         return cls(np.diag(a.value, k), check=False)

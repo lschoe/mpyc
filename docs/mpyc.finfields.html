@@ -8,14 +8,19 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.finfields</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/finfields.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/finfields.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/finfields.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/finfields.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;supports&nbsp;finite&nbsp;(Galois)&nbsp;fields.<br>
 &nbsp;<br>
 Function&nbsp;GF&nbsp;creates&nbsp;types&nbsp;implementing&nbsp;finite&nbsp;fields.<br>
 Instantiate&nbsp;an&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;from&nbsp;a&nbsp;field&nbsp;and&nbsp;subsequently&nbsp;apply&nbsp;overloaded<br>
 operators&nbsp;such&nbsp;as&nbsp;+,-,*,/&nbsp;etc.,&nbsp;to&nbsp;compute&nbsp;with&nbsp;field&nbsp;elements.<br>
 In-place&nbsp;versions&nbsp;of&nbsp;the&nbsp;field&nbsp;operators&nbsp;are&nbsp;also&nbsp;provided.<br>
-Taking&nbsp;square&nbsp;roots&nbsp;and&nbsp;quadratic&nbsp;residuosity&nbsp;tests&nbsp;supported&nbsp;as&nbsp;well.</tt></p>
+Taking&nbsp;square&nbsp;roots&nbsp;and&nbsp;quadratic&nbsp;residuosity&nbsp;tests&nbsp;supported&nbsp;as&nbsp;well.<br>
+&nbsp;<br>
+Moreover,&nbsp;(multidimensional)&nbsp;arrays&nbsp;over&nbsp;finite&nbsp;fields&nbsp;are&nbsp;available<br>
+with&nbsp;operators&nbsp;like&nbsp;+,-,*,/&nbsp;for&nbsp;convenient&nbsp;and&nbsp;efficient&nbsp;NumPy-based<br>
+vectorized&nbsp;processing&nbsp;next&nbsp;to&nbsp;operator&nbsp;@&nbsp;for&nbsp;matrix&nbsp;multiplication.<br>
+Much&nbsp;of&nbsp;the&nbsp;NumPy&nbsp;API&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;manipulate&nbsp;these&nbsp;arrays&nbsp;as&nbsp;well.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -24,8 +29,10 @@ Taking&nbsp;square&nbsp;roots&nbsp;and&nbsp;quadratic&nbsp;residuosity&nbsp;test
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/functools.html">functools</a><br>
-</td><td width="25%" valign=top><a href="mpyc.gfpx.html">mpyc.gfpx</a><br>
+<a href="mpyc.gfpx.html">mpyc.gfpx</a><br>
 </td><td width="25%" valign=top><a href="mpyc.gmpy.html">mpyc.gmpy</a><br>
+<a href="mpyc.numpy.html">mpyc.numpy</a><br>
+</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/os.html">os</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -37,6 +44,18 @@ Taking&nbsp;square&nbsp;roots&nbsp;and&nbsp;quadratic&nbsp;residuosity&nbsp;test
 <dt><font face="helvetica, arial"><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>
 </font></dt><dd>
 <dl>
+<dt><font face="helvetica, arial"><a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.finfields.html#ExtensionFieldArray">ExtensionFieldArray</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="mpyc.finfields.html#BinaryFieldArray">BinaryFieldArray</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="mpyc.finfields.html#PrimeFieldArray">PrimeFieldArray</a>
+</font></dt></dl>
+</dd>
 <dt><font face="helvetica, arial"><a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>
 </font></dt><dd>
 <dl>
@@ -56,6 +75,181 @@ Taking&nbsp;square&nbsp;roots&nbsp;and&nbsp;quadratic&nbsp;residuosity&nbsp;test
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="BinaryFieldArray">class <strong>BinaryFieldArray</strong></a>(<a href="mpyc.finfields.html#ExtensionFieldArray">ExtensionFieldArray</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#BinaryFieldArray">BinaryFieldArray</a>(value,&nbsp;check=True,&nbsp;copy=False)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.finfields.html#BinaryFieldArray">BinaryFieldArray</a></dd>
+<dd><a href="mpyc.finfields.html#ExtensionFieldArray">ExtensionFieldArray</a></dd>
+<dd><a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a></dd>
+<dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {}</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.finfields.html#ExtensionFieldArray">ExtensionFieldArray</a>:<br>
+<dl><dt><a name="BinaryFieldArray-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="mpyc.finfields.html#ExtensionFieldArray">ExtensionFieldArray</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><a name="BinaryFieldArray-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__contains__"><strong>__contains__</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;equality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__iadd__"><strong>__iadd__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;addition.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__ilshift__"><strong>__ilshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__imatmul__"><strong>__imatmul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__imul__"><strong>__imul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__init__"><strong>__init__</strong></a>(self, value, check=True, copy=False)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__ipow__"><strong>__ipow__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__irshift__"><strong>__irshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__isub__"><strong>__isub__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;subtraction.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__itruediv__"><strong>__itruediv__</strong></a>(self, other)</dt><dd><tt>"In-place&nbsp;division.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__lshift__"><strong>__lshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__mul__"><strong>__mul__</strong></a>(self, other)</dt><dd><tt>Multiplication.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;nonequality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__neg__"><strong>__neg__</strong></a>(self)</dt><dd><tt>Negation.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__pos__"><strong>__pos__</strong></a>(self)</dt><dd><tt>Unary&nbsp;+.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__pow__"><strong>__pow__</strong></a>(self, other)</dt><dd><tt>Exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__radd__"><strong>__radd__</strong></a> = <a href="#BinaryFieldArray-__add__">__add__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rlshift__"><strong>__rlshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rmul__"><strong>__rmul__</strong></a> = <a href="#BinaryFieldArray-__mul__">__mul__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rpow__"><strong>__rpow__</strong></a>(self, other)</dt><dd><tt>Exponentiation&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rrshift__"><strong>__rrshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rshift__"><strong>__rshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt><dd><tt>Subtraction&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt><dd><tt>Division&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__setitem__"><strong>__setitem__</strong></a>(self, key, value)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-__sub__"><strong>__sub__</strong></a>(self, other)</dt><dd><tt>Subtraction.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt><dd><tt>Division.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-compress"><strong>compress</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-copy"><strong>copy</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-diagonal"><strong>diagonal</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-flatten"><strong>flatten</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-nonzero"><strong>nonzero</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-prod"><strong>prod</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-ravel"><strong>ravel</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-repeat"><strong>repeat</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-reshape"><strong>reshape</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-sum"><strong>sum</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-swapaxes"><strong>swapaxes</strong></a>(self, axis1, axis2)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-take"><strong>take</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-tolist"><strong>tolist</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-trace"><strong>trace</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-transpose"><strong>transpose</strong></a>(self, *axes)</dt></dl>
+
+<hr>
+Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><a name="BinaryFieldArray-diag"><strong>diag</strong></a>(a, k=0)</dt></dl>
+
+<dl><dt><a name="BinaryFieldArray-gauss_det"><strong>gauss_det</strong></a>(a)</dt><dd><tt>Determinant&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;(last&nbsp;2&nbsp;dimensions&nbsp;of)&nbsp;array&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-gauss_inv"><strong>gauss_inv</strong></a>(A)</dt><dd><tt>Inverse&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;augmented&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;I).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-gauss_solve"><strong>gauss_solve</strong></a>(A, B)</dt><dd><tt>Linear&nbsp;solve&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;B).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldArray-matrix_pow"><strong>matrix_pow</strong></a>(A, n)</dt></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>T</strong></dt>
+</dl>
+<dl><dt><strong>flat</strong></dt>
+</dl>
+<dl><dt><strong>ndim</strong></dt>
+</dl>
+<dl><dt><strong>shape</strong></dt>
+</dl>
+<dl><dt><strong>size</strong></dt>
+</dl>
+<hr>
+Data descriptors inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="BinaryFieldElement">class <strong>BinaryFieldElement</strong></a>(<a href="mpyc.finfields.html#ExtensionFieldElement">ExtensionFieldElement</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
@@ -70,14 +264,8 @@ Common&nbsp;base&nbsp;class&nbsp;for&nbsp;binary&nbsp;field&nbsp;elements.<br>&n
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
-Methods defined here:<br>
-<dl><dt><a name="BinaryFieldElement-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
-
-<dl><dt><a name="BinaryFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;roots.</tt></dd></dl>
-
-<hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__annotations__</strong> = {}</dl>
+<dl><dt><strong>__annotations__</strong> = {'modulus': &lt;class 'mpyc.gfpx.BinaryPolynomial'&gt;}</dl>
 
 <dl><dt><strong>characteristic</strong> = 2</dl>
 
@@ -97,8 +285,6 @@ Methods inherited from <a href="mpyc.finfields.html#ExtensionFieldElement">Exten
 
 <dl><dt><a name="BinaryFieldElement-__rshift__"><strong>__rshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift.</tt></dd></dl>
 
-<dl><dt><a name="BinaryFieldElement-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
-
 <hr>
 Static methods inherited from <a href="mpyc.finfields.html#ExtensionFieldElement">ExtensionFieldElement</a>:<br>
 <dl><dt><a name="BinaryFieldElement-createGF"><strong>createGF</strong></a>(modulus)</dt><dd><tt>Create&nbsp;new&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;for&nbsp;use&nbsp;by&nbsp;pickle&nbsp;module.</tt></dd></dl>
@@ -106,6 +292,8 @@ Static methods inherited from <a href="mpyc.finfields.html#ExtensionFieldElement
 <hr>
 Methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
 <dl><dt><a name="BinaryFieldElement-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
 
 <dl><dt><a name="BinaryFieldElement-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Truth&nbsp;value&nbsp;testing.<br>
 &nbsp;<br>
@@ -150,9 +338,15 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <dl><dt><a name="BinaryFieldElement-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt><dd><tt>Division.</tt></dd></dl>
 
+<dl><dt><a name="BinaryFieldElement-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldElement-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
+
+<dl><dt><a name="BinaryFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
+
 <hr>
 Class methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="BinaryFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="BinaryFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
@@ -173,6 +367,180 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 <dl><dt><strong>modulus</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ExtensionFieldArray">class <strong>ExtensionFieldArray</strong></a>(<a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#ExtensionFieldArray">ExtensionFieldArray</a>(value,&nbsp;check=True,&nbsp;copy=False)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.finfields.html#ExtensionFieldArray">ExtensionFieldArray</a></dd>
+<dd><a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a></dd>
+<dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ExtensionFieldArray-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {}</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><a name="ExtensionFieldArray-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__contains__"><strong>__contains__</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;equality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__iadd__"><strong>__iadd__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;addition.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__ilshift__"><strong>__ilshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__imatmul__"><strong>__imatmul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__imul__"><strong>__imul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__init__"><strong>__init__</strong></a>(self, value, check=True, copy=False)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__ipow__"><strong>__ipow__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__irshift__"><strong>__irshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__isub__"><strong>__isub__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;subtraction.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__itruediv__"><strong>__itruediv__</strong></a>(self, other)</dt><dd><tt>"In-place&nbsp;division.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__lshift__"><strong>__lshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__mul__"><strong>__mul__</strong></a>(self, other)</dt><dd><tt>Multiplication.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;nonequality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__neg__"><strong>__neg__</strong></a>(self)</dt><dd><tt>Negation.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__pos__"><strong>__pos__</strong></a>(self)</dt><dd><tt>Unary&nbsp;+.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__pow__"><strong>__pow__</strong></a>(self, other)</dt><dd><tt>Exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__radd__"><strong>__radd__</strong></a> = <a href="#ExtensionFieldArray-__add__">__add__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rlshift__"><strong>__rlshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rmul__"><strong>__rmul__</strong></a> = <a href="#ExtensionFieldArray-__mul__">__mul__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rpow__"><strong>__rpow__</strong></a>(self, other)</dt><dd><tt>Exponentiation&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rrshift__"><strong>__rrshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rshift__"><strong>__rshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt><dd><tt>Subtraction&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt><dd><tt>Division&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__setitem__"><strong>__setitem__</strong></a>(self, key, value)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__sub__"><strong>__sub__</strong></a>(self, other)</dt><dd><tt>Subtraction.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt><dd><tt>Division.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-compress"><strong>compress</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-copy"><strong>copy</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-diagonal"><strong>diagonal</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-flatten"><strong>flatten</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-nonzero"><strong>nonzero</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-prod"><strong>prod</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-ravel"><strong>ravel</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-repeat"><strong>repeat</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-reshape"><strong>reshape</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-sum"><strong>sum</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-swapaxes"><strong>swapaxes</strong></a>(self, axis1, axis2)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-take"><strong>take</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-tolist"><strong>tolist</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-trace"><strong>trace</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-transpose"><strong>transpose</strong></a>(self, *axes)</dt></dl>
+
+<hr>
+Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><a name="ExtensionFieldArray-diag"><strong>diag</strong></a>(a, k=0)</dt></dl>
+
+<dl><dt><a name="ExtensionFieldArray-gauss_det"><strong>gauss_det</strong></a>(a)</dt><dd><tt>Determinant&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;(last&nbsp;2&nbsp;dimensions&nbsp;of)&nbsp;array&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-gauss_inv"><strong>gauss_inv</strong></a>(A)</dt><dd><tt>Inverse&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;augmented&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;I).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-gauss_solve"><strong>gauss_solve</strong></a>(A, B)</dt><dd><tt>Linear&nbsp;solve&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;B).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldArray-matrix_pow"><strong>matrix_pow</strong></a>(A, n)</dt></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>T</strong></dt>
+</dl>
+<dl><dt><strong>flat</strong></dt>
+</dl>
+<dl><dt><strong>ndim</strong></dt>
+</dl>
+<dl><dt><strong>shape</strong></dt>
+</dl>
+<dl><dt><strong>size</strong></dt>
+</dl>
+<hr>
+Data descriptors inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -206,23 +574,19 @@ Methods defined here:<br>
 
 <dl><dt><a name="ExtensionFieldElement-__rshift__"><strong>__rshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift.</tt></dd></dl>
 
-<dl><dt><a name="ExtensionFieldElement-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
-
-<dl><dt><a name="ExtensionFieldElement-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
-
-<dl><dt><a name="ExtensionFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;roots.</tt></dd></dl>
-
 <hr>
 Static methods defined here:<br>
 <dl><dt><a name="ExtensionFieldElement-createGF"><strong>createGF</strong></a>(modulus)</dt><dd><tt>Create&nbsp;new&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;for&nbsp;use&nbsp;by&nbsp;pickle&nbsp;module.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__annotations__</strong> = {}</dl>
+<dl><dt><strong>__annotations__</strong> = {'modulus': &lt;class 'mpyc.gfpx.Polynomial'&gt;}</dl>
 
 <hr>
 Methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
 <dl><dt><a name="ExtensionFieldElement-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
 
 <dl><dt><a name="ExtensionFieldElement-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Truth&nbsp;value&nbsp;testing.<br>
 &nbsp;<br>
@@ -267,9 +631,15 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <dl><dt><a name="ExtensionFieldElement-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt><dd><tt>Division.</tt></dd></dl>
 
+<dl><dt><a name="ExtensionFieldElement-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldElement-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
+
+<dl><dt><a name="ExtensionFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
+
 <hr>
 Class methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="ExtensionFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="ExtensionFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
@@ -297,6 +667,172 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="FiniteFieldArray">class <strong>FiniteFieldArray</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#FiniteFieldArray">FiniteFieldArray</a>(value,&nbsp;check=True,&nbsp;copy=False)<br>
+&nbsp;<br>
+Common&nbsp;base&nbsp;class&nbsp;for&nbsp;finite&nbsp;field&nbsp;arrays.<br>
+&nbsp;<br>
+An&nbsp;array&nbsp;over&nbsp;finite&nbsp;field&nbsp;F&nbsp;behaves&nbsp;much&nbsp;like&nbsp;a&nbsp;NumPy&nbsp;array&nbsp;with&nbsp;dtype=F.<br>
+Conceptually,&nbsp;an&nbsp;array&nbsp;a&nbsp;over&nbsp;F&nbsp;can&nbsp;be&nbsp;thought&nbsp;of&nbsp;as,&nbsp;for&nbsp;example<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;"a&nbsp;=&nbsp;np.array([[F(1),&nbsp;F(2)],&nbsp;[F(0),&nbsp;F(3)]],&nbsp;dtype=F)"<br>
+&nbsp;<br>
+Internally,&nbsp;however,&nbsp;arrays&nbsp;over&nbsp;a&nbsp;finite&nbsp;field&nbsp;F&nbsp;are&nbsp;represented&nbsp;by&nbsp;NumPy<br>
+arrays&nbsp;with&nbsp;dtype=<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;storing&nbsp;just&nbsp;the&nbsp;values&nbsp;of&nbsp;the&nbsp;finite&nbsp;field&nbsp;elements:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;"a&nbsp;=&nbsp;(field=F,&nbsp;value=np.array([[1,&nbsp;2],&nbsp;[0,&nbsp;3]],&nbsp;dtype=<a href="https://docs.python.org/3/library/functions.html#object">object</a>))"<br>
+&nbsp;<br>
+Invariant:&nbsp;elements&nbsp;of&nbsp;array&nbsp;'value'&nbsp;are&nbsp;reduced&nbsp;w.r.t.&nbsp;modulus.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="FiniteFieldArray-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__contains__"><strong>__contains__</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;equality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__iadd__"><strong>__iadd__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;addition.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__ilshift__"><strong>__ilshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__imatmul__"><strong>__imatmul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__imul__"><strong>__imul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__init__"><strong>__init__</strong></a>(self, value, check=True, copy=False)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__ipow__"><strong>__ipow__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__irshift__"><strong>__irshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__isub__"><strong>__isub__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;subtraction.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__itruediv__"><strong>__itruediv__</strong></a>(self, other)</dt><dd><tt>"In-place&nbsp;division.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__lshift__"><strong>__lshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__mul__"><strong>__mul__</strong></a>(self, other)</dt><dd><tt>Multiplication.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;nonequality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__neg__"><strong>__neg__</strong></a>(self)</dt><dd><tt>Negation.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__pos__"><strong>__pos__</strong></a>(self)</dt><dd><tt>Unary&nbsp;+.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__pow__"><strong>__pow__</strong></a>(self, other)</dt><dd><tt>Exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__radd__"><strong>__radd__</strong></a> = <a href="#FiniteFieldArray-__add__">__add__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rlshift__"><strong>__rlshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rmul__"><strong>__rmul__</strong></a> = <a href="#FiniteFieldArray-__mul__">__mul__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rpow__"><strong>__rpow__</strong></a>(self, other)</dt><dd><tt>Exponentiation&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rrshift__"><strong>__rrshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rshift__"><strong>__rshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt><dd><tt>Subtraction&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt><dd><tt>Division&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__setitem__"><strong>__setitem__</strong></a>(self, key, value)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-__sub__"><strong>__sub__</strong></a>(self, other)</dt><dd><tt>Subtraction.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt><dd><tt>Division.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-compress"><strong>compress</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-copy"><strong>copy</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-diagonal"><strong>diagonal</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-flatten"><strong>flatten</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-nonzero"><strong>nonzero</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-prod"><strong>prod</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-ravel"><strong>ravel</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-repeat"><strong>repeat</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-reshape"><strong>reshape</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-sum"><strong>sum</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-swapaxes"><strong>swapaxes</strong></a>(self, axis1, axis2)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-take"><strong>take</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-tolist"><strong>tolist</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-trace"><strong>trace</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-transpose"><strong>transpose</strong></a>(self, *axes)</dt></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="FiniteFieldArray-diag"><strong>diag</strong></a>(a, k=0)</dt></dl>
+
+<dl><dt><a name="FiniteFieldArray-gauss_det"><strong>gauss_det</strong></a>(a)</dt><dd><tt>Determinant&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;(last&nbsp;2&nbsp;dimensions&nbsp;of)&nbsp;array&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-gauss_inv"><strong>gauss_inv</strong></a>(A)</dt><dd><tt>Inverse&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;augmented&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;I).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-gauss_solve"><strong>gauss_solve</strong></a>(A, B)</dt><dd><tt>Linear&nbsp;solve&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;B).</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldArray-matrix_pow"><strong>matrix_pow</strong></a>(A, n)</dt></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>T</strong></dt>
+</dl>
+<dl><dt><strong>flat</strong></dt>
+</dl>
+<dl><dt><strong>ndim</strong></dt>
+</dl>
+<dl><dt><strong>shape</strong></dt>
+</dl>
+<dl><dt><strong>size</strong></dt>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {'_mix_types': &lt;class 'type'&gt;, 'field': &lt;class 'type'&gt;}</dl>
+
+<dl><dt><strong>__hash__</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="FiniteFieldElement">class <strong>FiniteFieldElement</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
@@ -304,10 +840,12 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 &nbsp;<br>
 Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;finite&nbsp;field&nbsp;elements.<br>
 &nbsp;<br>
-Invariant:&nbsp;attribute&nbsp;'value'&nbsp;nonnegative&nbsp;and&nbsp;below&nbsp;modulus.<br>&nbsp;</tt></td></tr>
+Invariant:&nbsp;'value'&nbsp;is&nbsp;reduced&nbsp;w.r.t.&nbsp;modulus.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="FiniteFieldElement-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="FiniteFieldElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
 
 <dl><dt><a name="FiniteFieldElement-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Truth&nbsp;value&nbsp;testing.<br>
 &nbsp;<br>
@@ -366,11 +904,11 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <dl><dt><a name="FiniteFieldElement-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
 
-<dl><dt><a name="FiniteFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;roots.</tt></dd></dl>
+<dl><dt><a name="FiniteFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="FiniteFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="FiniteFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
@@ -382,7 +920,7 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__annotations__</strong> = {'_mix_types': &lt;class 'type'&gt;}</dl>
+<dl><dt><strong>__annotations__</strong> = {'_mix_types': &lt;class 'type'&gt;, 'array': &lt;class 'type'&gt;}</dl>
 
 <dl><dt><strong>byte_length</strong> = None</dl>
 
@@ -395,6 +933,192 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>modulus</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PrimeFieldArray">class <strong>PrimeFieldArray</strong></a>(<a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#PrimeFieldArray">PrimeFieldArray</a>(value,&nbsp;check=True,&nbsp;copy=False)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="mpyc.finfields.html#PrimeFieldArray">PrimeFieldArray</a></dd>
+<dd><a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a></dd>
+<dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PrimeFieldArray-__abs__"><strong>__abs__</strong></a>(self)</dt><dd><tt>Absolute&nbsp;value&nbsp;of&nbsp;(signed)&nbsp;value.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__int__"><strong>__int__</strong></a>(self)</dt><dd><tt>Extract&nbsp;(signed)&nbsp;integer&nbsp;value&nbsp;for&nbsp;size-1&nbsp;arrays&nbsp;only.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-signed_"><strong>signed_</strong></a>(self)</dt><dd><tt>Return&nbsp;signed&nbsp;integer&nbsp;representation,&nbsp;symmetric&nbsp;around&nbsp;zero.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-unsigned_"><strong>unsigned_</strong></a>(self)</dt><dd><tt>Return&nbsp;unsigned&nbsp;integer&nbsp;representation.</tt></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="PrimeFieldArray-intarray"><strong>intarray</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Extract&nbsp;finite&nbsp;field&nbsp;array&nbsp;as&nbsp;a&nbsp;(signed)&nbsp;integer&nbsp;array.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__annotations__</strong> = {}</dl>
+
+<hr>
+Methods inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><a name="PrimeFieldArray-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__array_ufunc__"><strong>__array_ufunc__</strong></a>(self, ufunc, method, *inputs, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__contains__"><strong>__contains__</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;equality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__iadd__"><strong>__iadd__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;addition.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__ilshift__"><strong>__ilshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__imatmul__"><strong>__imatmul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__imul__"><strong>__imul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__init__"><strong>__init__</strong></a>(self, value, check=True, copy=False)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__ipow__"><strong>__ipow__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__irshift__"><strong>__irshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__isub__"><strong>__isub__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;subtraction.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__itruediv__"><strong>__itruediv__</strong></a>(self, other)</dt><dd><tt>"In-place&nbsp;division.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__lshift__"><strong>__lshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__matmul__"><strong>__matmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__mul__"><strong>__mul__</strong></a>(self, other)</dt><dd><tt>Multiplication.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><tt>Elementwise&nbsp;nonequality&nbsp;as&nbsp;for&nbsp;Numpy&nbsp;arrays.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__neg__"><strong>__neg__</strong></a>(self)</dt><dd><tt>Negation.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__pos__"><strong>__pos__</strong></a>(self)</dt><dd><tt>Unary&nbsp;+.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__pow__"><strong>__pow__</strong></a>(self, other)</dt><dd><tt>Exponentiation.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__radd__"><strong>__radd__</strong></a> = <a href="#PrimeFieldArray-__add__">__add__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rlshift__"><strong>__rlshift__</strong></a>(self, other)</dt><dd><tt>Left&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rmatmul__"><strong>__rmatmul__</strong></a>(self, other)</dt><dd><tt>Matrix&nbsp;multiplication&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rmul__"><strong>__rmul__</strong></a> = <a href="#PrimeFieldArray-__mul__">__mul__</a>(self, other)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rpow__"><strong>__rpow__</strong></a>(self, other)</dt><dd><tt>Exponentiation&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rrshift__"><strong>__rrshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rshift__"><strong>__rshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rsub__"><strong>__rsub__</strong></a>(self, other)</dt><dd><tt>Subtraction&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__rtruediv__"><strong>__rtruediv__</strong></a>(self, other)</dt><dd><tt>Division&nbsp;(with&nbsp;reflected&nbsp;arguments).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__setitem__"><strong>__setitem__</strong></a>(self, key, value)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-__sub__"><strong>__sub__</strong></a>(self, other)</dt><dd><tt>Subtraction.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt><dd><tt>Division.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-compress"><strong>compress</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-copy"><strong>copy</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-diagonal"><strong>diagonal</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-flatten"><strong>flatten</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-nonzero"><strong>nonzero</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-prod"><strong>prod</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-ravel"><strong>ravel</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-repeat"><strong>repeat</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-reshape"><strong>reshape</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-sum"><strong>sum</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-swapaxes"><strong>swapaxes</strong></a>(self, axis1, axis2)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-take"><strong>take</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-tolist"><strong>tolist</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-trace"><strong>trace</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-transpose"><strong>transpose</strong></a>(self, *axes)</dt></dl>
+
+<hr>
+Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><a name="PrimeFieldArray-diag"><strong>diag</strong></a>(a, k=0)</dt></dl>
+
+<dl><dt><a name="PrimeFieldArray-gauss_det"><strong>gauss_det</strong></a>(a)</dt><dd><tt>Determinant&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;(last&nbsp;2&nbsp;dimensions&nbsp;of)&nbsp;array&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-gauss_inv"><strong>gauss_inv</strong></a>(A)</dt><dd><tt>Inverse&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;augmented&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;I).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-gauss_solve"><strong>gauss_solve</strong></a>(A, B)</dt><dd><tt>Linear&nbsp;solve&nbsp;by&nbsp;Gaussian&nbsp;elimination&nbsp;on&nbsp;matrix&nbsp;(A&nbsp;|&nbsp;B).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldArray-matrix_pow"><strong>matrix_pow</strong></a>(A, n)</dt></dl>
+
+<hr>
+Readonly properties inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>T</strong></dt>
+</dl>
+<dl><dt><strong>flat</strong></dt>
+</dl>
+<dl><dt><strong>ndim</strong></dt>
+</dl>
+<dl><dt><strong>shape</strong></dt>
+</dl>
+<dl><dt><strong>size</strong></dt>
+</dl>
+<hr>
+Data descriptors inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFieldArray">FiniteFieldArray</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -416,6 +1140,8 @@ Common&nbsp;base&nbsp;class&nbsp;for&nbsp;prime&nbsp;field&nbsp;elements.<br>&nb
 Methods defined here:<br>
 <dl><dt><a name="PrimeFieldElement-__abs__"><strong>__abs__</strong></a>(self)</dt><dd><tt>Absolute&nbsp;value&nbsp;of&nbsp;(signed)&nbsp;value.</tt></dd></dl>
 
+<dl><dt><a name="PrimeFieldElement-__init__"><strong>__init__</strong></a>(self, value)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
 <dl><dt><a name="PrimeFieldElement-__int__"><strong>__int__</strong></a>(self)</dt><dd><tt>Extract&nbsp;field&nbsp;element&nbsp;as&nbsp;a&nbsp;(signed)&nbsp;integer&nbsp;value.</tt></dd></dl>
 
 <dl><dt><a name="PrimeFieldElement-__irshift__"><strong>__irshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;right&nbsp;shift.</tt></dd></dl>
@@ -428,23 +1154,17 @@ Methods defined here:<br>
 
 <dl><dt><a name="PrimeFieldElement-__rshift__"><strong>__rshift__</strong></a>(self, other)</dt><dd><tt>Right&nbsp;shift.</tt></dd></dl>
 
-<dl><dt><a name="PrimeFieldElement-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
-
-<dl><dt><a name="PrimeFieldElement-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
-
 <dl><dt><a name="PrimeFieldElement-signed_"><strong>signed_</strong></a>(self)</dt><dd><tt>Return&nbsp;signed&nbsp;integer&nbsp;representation,&nbsp;symmetric&nbsp;around&nbsp;zero.</tt></dd></dl>
-
-<dl><dt><a name="PrimeFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;roots.</tt></dd></dl>
 
 <dl><dt><a name="PrimeFieldElement-unsigned_"><strong>unsigned_</strong></a>(self)</dt><dd><tt>Return&nbsp;unsigned&nbsp;integer&nbsp;representation.</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="PrimeFieldElement-createGF"><strong>createGF</strong></a>(p, f, n, w)</dt><dd><tt>Create&nbsp;new&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;for&nbsp;use&nbsp;by&nbsp;pickle&nbsp;module.</tt></dd></dl>
+<dl><dt><a name="PrimeFieldElement-createGF"><strong>createGF</strong></a>(p, n, w)</dt><dd><tt>Create&nbsp;new&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;for&nbsp;use&nbsp;by&nbsp;pickle&nbsp;module.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__annotations__</strong> = {}</dl>
+<dl><dt><strong>__annotations__</strong> = {'modulus': &lt;class 'int'&gt;}</dl>
 
 <dl><dt><strong>is_signed</strong> = None</dl>
 
@@ -455,6 +1175,8 @@ Data and other attributes defined here:<br>
 <hr>
 Methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
 <dl><dt><a name="PrimeFieldElement-__add__"><strong>__add__</strong></a>(self, other)</dt><dd><tt>Addition.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt></dl>
 
 <dl><dt><a name="PrimeFieldElement-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Truth&nbsp;value&nbsp;testing.<br>
 &nbsp;<br>
@@ -470,8 +1192,6 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 <dl><dt><a name="PrimeFieldElement-__ilshift__"><strong>__ilshift__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;left&nbsp;shift.</tt></dd></dl>
 
 <dl><dt><a name="PrimeFieldElement-__imul__"><strong>__imul__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;multiplication.</tt></dd></dl>
-
-<dl><dt><a name="PrimeFieldElement-__init__"><strong>__init__</strong></a>(self, value)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <dl><dt><a name="PrimeFieldElement-__isub__"><strong>__isub__</strong></a>(self, other)</dt><dd><tt>In-place&nbsp;subtraction.</tt></dd></dl>
 
@@ -501,9 +1221,15 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <dl><dt><a name="PrimeFieldElement-__truediv__"><strong>__truediv__</strong></a>(self, other)</dt><dd><tt>Division.</tt></dd></dl>
 
+<dl><dt><a name="PrimeFieldElement-is_sqr"><strong>is_sqr</strong></a>(self)</dt><dd><tt>Test&nbsp;for&nbsp;quadratic&nbsp;residuosity&nbsp;(0&nbsp;is&nbsp;also&nbsp;square).</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldElement-reciprocal"><strong>reciprocal</strong></a>(self)</dt><dd><tt>Multiplicative&nbsp;inverse.</tt></dd></dl>
+
+<dl><dt><a name="PrimeFieldElement-sqrt"><strong>sqrt</strong></a>(self, INV=False)</dt><dd><tt>Modular&nbsp;(inverse)&nbsp;square&nbsp;root.</tt></dd></dl>
+
 <hr>
 Class methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="PrimeFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="PrimeFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
@@ -532,13 +1258,15 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-GF"><strong>GF</strong></a>(modulus, f=0)</dt><dd><tt>Create&nbsp;a&nbsp;finite&nbsp;(Galois)&nbsp;field&nbsp;for&nbsp;given&nbsp;modulus&nbsp;(prime&nbsp;number&nbsp;or&nbsp;irreducible&nbsp;polynomial).</tt></dd></dl>
+<td width="100%"><dl><dt><a name="-GF"><strong>GF</strong></a>(modulus)</dt><dd><tt>Create&nbsp;a&nbsp;finite&nbsp;(Galois)&nbsp;field&nbsp;for&nbsp;given&nbsp;modulus&nbsp;(prime&nbsp;number&nbsp;or&nbsp;irreducible&nbsp;polynomial).<br>
+&nbsp;<br>
+Also&nbsp;creates&nbsp;corresponding&nbsp;array&nbsp;type.</tt></dd></dl>
  <dl><dt><a name="-find_irreducible"><strong>find_irreducible</strong></a>(p, d)</dt><dd><tt>Find&nbsp;smallest&nbsp;irreducible&nbsp;polynomial&nbsp;of&nbsp;degree&nbsp;d&nbsp;over&nbsp;<a href="#-GF">GF</a>(p).</tt></dd></dl>
  <dl><dt><a name="-find_prime_root"><strong>find_prime_root</strong></a>(l, blum=True, n=1)</dt><dd><tt>Find&nbsp;smallest&nbsp;prime&nbsp;of&nbsp;bit&nbsp;length&nbsp;at&nbsp;least&nbsp;l&nbsp;satisfying&nbsp;given&nbsp;constraints.<br>
 &nbsp;<br>
 Default&nbsp;is&nbsp;to&nbsp;return&nbsp;Blum&nbsp;primes&nbsp;(primes&nbsp;p&nbsp;with&nbsp;p&nbsp;%&nbsp;4&nbsp;==&nbsp;3).<br>
 Also,&nbsp;a&nbsp;primitive&nbsp;root&nbsp;w&nbsp;is&nbsp;returned&nbsp;of&nbsp;prime&nbsp;order&nbsp;at&nbsp;least&nbsp;n&nbsp;(0&nbsp;&lt;&nbsp;w&nbsp;&lt;&nbsp;p).</tt></dd></dl>
- <dl><dt><a name="-pGF"><strong>pGF</strong></a>(p, f, n, w)</dt><dd><tt>Create&nbsp;a&nbsp;finite&nbsp;field&nbsp;for&nbsp;given&nbsp;prime&nbsp;modulus&nbsp;p.</tt></dd></dl>
+ <dl><dt><a name="-pGF"><strong>pGF</strong></a>(p, n, w)</dt><dd><tt>Create&nbsp;a&nbsp;finite&nbsp;field&nbsp;for&nbsp;given&nbsp;prime&nbsp;modulus&nbsp;p.</tt></dd></dl>
  <dl><dt><a name="-xGF"><strong>xGF</strong></a>(modulus)</dt><dd><tt>Create&nbsp;a&nbsp;finite&nbsp;field&nbsp;for&nbsp;given&nbsp;irreducible&nbsp;polynomial.</tt></dd></dl>
 </td></tr></table>
 </body></html>

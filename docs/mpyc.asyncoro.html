@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.asyncoro</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/asyncoro.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/asyncoro.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/asyncoro.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/asyncoro.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;basic&nbsp;support&nbsp;for&nbsp;asynchronous&nbsp;communication<br>
 and&nbsp;computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
 <p>
@@ -46,7 +46,7 @@ and&nbsp;computation&nbsp;of&nbsp;secret-shared&nbsp;values.</tt></p>
 <font color="#000000" face="helvetica, arial"><a name="MessageExchanger">class <strong>MessageExchanger</strong></a>(<a href="https://docs.python.org/3/library/asyncio-protocol.html#asyncio.Protocol">asyncio.protocols.Protocol</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#MessageExchanger">MessageExchanger</a>(runtime,&nbsp;peer_pid=None)<br>
+<td colspan=2><tt><a href="#MessageExchanger">MessageExchanger</a>(rt,&nbsp;peer_pid=None)<br>
 &nbsp;<br>
 Send&nbsp;and&nbsp;receive&nbsp;messages.<br>
 &nbsp;<br>
@@ -60,19 +60,24 @@ Bidirectional&nbsp;connection&nbsp;with&nbsp;one&nbsp;of&nbsp;the&nbsp;other&nbs
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="MessageExchanger-__init__"><strong>__init__</strong></a>(self, runtime, peer_pid=None)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+<dl><dt><a name="MessageExchanger-__init__"><strong>__init__</strong></a>(self, rt, peer_pid=None)</dt><dd><tt>Initialize&nbsp;protocol&nbsp;for&nbsp;runtime&nbsp;rt&nbsp;between&nbsp;this&nbsp;party&nbsp;and&nbsp;a&nbsp;peer.<br>
+&nbsp;<br>
+The&nbsp;connection&nbsp;between&nbsp;the&nbsp;two&nbsp;parties&nbsp;will&nbsp;be&nbsp;set&nbsp;up&nbsp;with&nbsp;one&nbsp;party<br>
+listening&nbsp;(as&nbsp;server)&nbsp;for&nbsp;the&nbsp;other&nbsp;party&nbsp;to&nbsp;connect&nbsp;(as&nbsp;client).<br>
+If&nbsp;peer_pid=None,&nbsp;party&nbsp;rt.pid&nbsp;starts&nbsp;as&nbsp;server&nbsp;and&nbsp;the&nbsp;peer&nbsp;start&nbsp;as<br>
+client,&nbsp;and&nbsp;the&nbsp;other&nbsp;way&nbsp;around&nbsp;otherwise.&nbsp;Once&nbsp;the&nbsp;connection&nbsp;is&nbsp;made,<br>
+the&nbsp;client&nbsp;will&nbsp;immediately&nbsp;send&nbsp;its&nbsp;pid&nbsp;to&nbsp;the&nbsp;server.</tt></dd></dl>
 
 <dl><dt><a name="MessageExchanger-close_connection"><strong>close_connection</strong></a>(self)</dt><dd><tt>Close&nbsp;connection&nbsp;with&nbsp;the&nbsp;peer.</tt></dd></dl>
 
 <dl><dt><a name="MessageExchanger-connection_lost"><strong>connection_lost</strong></a>(self, exc)</dt><dd><tt>Called&nbsp;when&nbsp;the&nbsp;connection&nbsp;with&nbsp;the&nbsp;peer&nbsp;is&nbsp;lost&nbsp;or&nbsp;closed.<br>
 &nbsp;<br>
 If&nbsp;the&nbsp;connection&nbsp;is&nbsp;closed&nbsp;normally&nbsp;(during&nbsp;shutdown)&nbsp;then&nbsp;exc&nbsp;is&nbsp;None.<br>
-Otherwise,&nbsp;if&nbsp;the&nbsp;connection&nbsp;is&nbsp;lost&nbsp;unexpectedly,&nbsp;exc&nbsp;may&nbsp;indicate&nbsp;the<br>
-cause&nbsp;(but&nbsp;exc&nbsp;is&nbsp;None&nbsp;is&nbsp;still&nbsp;possible).</tt></dd></dl>
+Otherwise,&nbsp;if&nbsp;the&nbsp;connection&nbsp;is&nbsp;lost&nbsp;unexpectedly,&nbsp;exc&nbsp;may&nbsp;indicate&nbsp;the&nbsp;cause.</tt></dd></dl>
 
 <dl><dt><a name="MessageExchanger-connection_made"><strong>connection_made</strong></a>(self, transport)</dt><dd><tt>Called&nbsp;when&nbsp;a&nbsp;connection&nbsp;is&nbsp;made.<br>
 &nbsp;<br>
-If&nbsp;the&nbsp;party&nbsp;is&nbsp;a&nbsp;client&nbsp;for&nbsp;this&nbsp;connection,&nbsp;it&nbsp;sends&nbsp;its&nbsp;identity<br>
+If&nbsp;this&nbsp;party&nbsp;is&nbsp;a&nbsp;client&nbsp;for&nbsp;this&nbsp;connection,&nbsp;it&nbsp;sends&nbsp;its&nbsp;identity<br>
 to&nbsp;the&nbsp;peer&nbsp;as&nbsp;well&nbsp;as&nbsp;any&nbsp;PRSS&nbsp;keys.</tt></dd></dl>
 
 <dl><dt><a name="MessageExchanger-data_received"><strong>data_received</strong></a>(self, data)</dt><dd><tt>Called&nbsp;when&nbsp;data&nbsp;is&nbsp;received&nbsp;from&nbsp;the&nbsp;peer.<br>
@@ -87,8 +92,8 @@ First&nbsp;message&nbsp;from&nbsp;peer&nbsp;is&nbsp;processed&nbsp;differently&n
 <dl><dt><a name="MessageExchanger-send"><strong>send</strong></a>(self, pc, payload)</dt><dd><tt>Send&nbsp;payload&nbsp;labeled&nbsp;with&nbsp;pc&nbsp;to&nbsp;the&nbsp;peer.<br>
 &nbsp;<br>
 Message&nbsp;format&nbsp;consists&nbsp;of&nbsp;three&nbsp;parts:<br>
-&nbsp;1.&nbsp;pc&nbsp;(8&nbsp;bytes&nbsp;signed&nbsp;int)<br>
-&nbsp;2.&nbsp;payload_size&nbsp;(4&nbsp;bytes&nbsp;unsigned&nbsp;int)<br>
+&nbsp;1.&nbsp;payload_size&nbsp;(4&nbsp;bytes&nbsp;unsigned&nbsp;int)<br>
+&nbsp;2.&nbsp;pc&nbsp;(8&nbsp;bytes&nbsp;signed&nbsp;int)<br>
 &nbsp;3.&nbsp;payload&nbsp;(byte&nbsp;string&nbsp;of&nbsp;length&nbsp;payload_size).</tt></dd></dl>
 
 <hr>
@@ -96,6 +101,8 @@ Data descriptors defined here:<br>
 <dl><dt><strong>buffers</strong></dt>
 </dl>
 <dl><dt><strong>bytes</strong></dt>
+</dl>
+<dl><dt><strong>nbytes_sent</strong></dt>
 </dl>
 <dl><dt><strong>peer_pid</strong></dt>
 </dl>

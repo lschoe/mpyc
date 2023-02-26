@@ -152,6 +152,25 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.argmax(d3, axis=1))), np.argmax(b3, axis=1))
         np.assertEqual(mpc.run(mpc.output(np.argmin(d3, axis=0))), np.argmin(b3, axis=0))
         np.assertEqual(mpc.run(mpc.output(np.argmax(d3))), np.argmax(b3))
+
+        class key:
+            size = 2  # __lt__() assumes last dimension of size 2
+
+            def __init__(self, a):
+                self.a = a
+
+            def __lt__(self, other):
+                return self.a[..., 0] < other.a[..., 0]
+
+        np.assertEqual(mpc.run(mpc.output(d3.argmin(axis=2, key=key, arg_unary=False)[0])),
+                       np.argmin((np.delete(b3, 1, 3).reshape(b3.shape[:-1])), axis=-1))
+        np.assertEqual(mpc.run(mpc.output(d3.argmin(key=key, arg_unary=False, arg_only=True))),
+                       np.argmin((np.delete(b3, 1, 3).reshape(b3.shape[:-1]))))
+        np.assertEqual(mpc.run(mpc.output(d3.argmax(axis=2, key=key, arg_unary=False)[0])),
+                       np.argmin((np.delete(b3, 0, 3).reshape(b3.shape[:-1])), axis=-1))
+        np.assertEqual(mpc.run(mpc.output(d3.argmax(key=key, arg_unary=False, arg_only=True))),
+                       np.argmax((np.delete(b3, 1, 3).reshape(b3.shape[:-1]))))
+
         c_, a_ = c.flatten()[:3], a.signed_().flatten()[:3]
         np.assertEqual(mpc.run(mpc.output(np.argmin(c_[:1]))), np.argmin(a_[:1]))
         np.assertEqual(mpc.run(mpc.output(c_.argmin(key=operator.neg, arg_unary=False)[0])),
@@ -253,8 +272,15 @@ class Arithmetic(unittest.TestCase):
 
         secfld = mpc.SecFld(2**2)
         c = secfld.array(np.array([[-3, 0], [1, 2]]))
-        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c))), [[[1, 1],[0, 0]], [[1, 0], [0, 1]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c))), [[[1, 1], [0, 0]], [[1, 0], [0, 1]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_from_bits(mpc.np_to_bits(c[1])))), [1, 2])
+        c = mpc.np_random_bits(secfld, 25)
+        np.assertEqual(mpc.run(mpc.output(np.equal(c**2, c))), True)
+
+        secfld = mpc.SecFld(3**2)
         self.assertRaises(TypeError, mpc.np_to_bits, mpc.SecFld(3**2).array(np.array(2)))
+        c = mpc.np_random_bits(secfld, 25)
+        np.assertEqual(mpc.run(mpc.output(np.equal(c**2, c))), True)
 
         secfld = mpc.SecFld(min_order=2**16)
         a = np.array([[[-1, 0], [0, -1]]])
@@ -266,7 +292,6 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(len(c), 1)
         self.assertEqual(len(c.T), 2)
         self.assertTrue(bool(c))
-
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c+1))), False)
         np.assertEqual(mpc.run(mpc.output(1/(c-1))), 1/(secfld.field.array(a)-1))
@@ -403,6 +428,7 @@ class Arithmetic(unittest.TestCase):
         self.assertNotEqual(id(a), id(+a))  # NB: +a creates a copy
         self.assertEqual(mpc.run(mpc.output(a + b)), 1)
         self.assertEqual(mpc.run(mpc.output(a * b)), 0)
+        self.assertRaises(TypeError, mpc.to_bits, a)
 
     def test_bsecfld(self):
         secfld = mpc.SecFld(char=2, min_order=2**8)

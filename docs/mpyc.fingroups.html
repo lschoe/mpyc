@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.fingroups</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/fingroups.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/fingroups.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/fingroups.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/fingroups.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;supports&nbsp;several&nbsp;types&nbsp;of&nbsp;finite&nbsp;groups.<br>
 &nbsp;<br>
 A&nbsp;finite&nbsp;group&nbsp;is&nbsp;a&nbsp;set&nbsp;of&nbsp;group&nbsp;elements&nbsp;together&nbsp;with&nbsp;a&nbsp;group&nbsp;operation.<br>
@@ -33,7 +33,7 @@ in&nbsp;cryptography:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;symmetric&nbsp;groups&nbsp;of&nbsp;any&nbsp;degree&nbsp;n&nbsp;(n&gt;=0)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;quadratic&nbsp;residue&nbsp;groups&nbsp;modulo&nbsp;a&nbsp;safe&nbsp;prime<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Schnorr&nbsp;groups&nbsp;(prime-order&nbsp;subgroups&nbsp;of&nbsp;the&nbsp;multiplicative&nbsp;group&nbsp;of&nbsp;a&nbsp;finite&nbsp;field)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;elliptic&nbsp;curve&nbsp;groups&nbsp;(Edwards&nbsp;curves&nbsp;and&nbsp;Barreto-Naehrig&nbsp;curves)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;elliptic&nbsp;curve&nbsp;groups&nbsp;(Edwards&nbsp;curves,&nbsp;a&nbsp;Koblitz&nbsp;curve,&nbsp;and&nbsp;Barreto-Naehrig&nbsp;curves)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;class&nbsp;groups&nbsp;of&nbsp;imaginary&nbsp;quadratic&nbsp;fields<br>
 &nbsp;<br>
 The&nbsp;structure&nbsp;of&nbsp;most&nbsp;of&nbsp;these&nbsp;groups&nbsp;will&nbsp;be&nbsp;trivial,&nbsp;preferably&nbsp;cyclic&nbsp;or&nbsp;even<br>
@@ -127,13 +127,13 @@ Class methods defined here:<br>
 
 <dl><dt><a name="ClassGroupForm-encode"><strong>encode</strong></a>(m)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;the&nbsp;first&nbsp;coefficient&nbsp;of&nbsp;a&nbsp;form.</tt></dd></dl>
 
-<dl><dt><a name="ClassGroupForm-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="ClassGroupForm-equality"><strong>equality</strong></a>(f1, f2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="ClassGroupForm-inversion"><strong>inversion</strong></a>(f)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="ClassGroupForm-inversion"><strong>inversion</strong></a>(f, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="ClassGroupForm-operation"><strong>operation</strong></a>(f1, f2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="ClassGroupForm-operation"><strong>operation</strong></a>(f1, f2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="ClassGroupForm-operation2"><strong>operation2</strong></a>(f)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="ClassGroupForm-operation2"><strong>operation2</strong></a>(f, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -223,11 +223,11 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="EdwardsAffine-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-equality"><strong>equality</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="EdwardsAffine-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-inversion"><strong>inversion</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="EdwardsAffine-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;using&nbsp;affine&nbsp;coordinates&nbsp;(projective&nbsp;with&nbsp;z=1).</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-operation"><strong>operation</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;using&nbsp;affine&nbsp;coordinates&nbsp;(projective&nbsp;with&nbsp;z=1).</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -311,7 +311,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="EdwardsAffine-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EdwardsAffine-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -430,13 +430,13 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="EdwardsCurvePoint-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="EdwardsCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="EdwardsCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="EdwardsCurvePoint-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EdwardsCurvePoint-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -480,11 +480,11 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="EdwardsExtended-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-equality"><strong>equality</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="EdwardsExtended-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-inversion"><strong>inversion</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="EdwardsExtended-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;(twisted&nbsp;a=-1)&nbsp;Edwards&nbsp;points&nbsp;in&nbsp;extended&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-operation"><strong>operation</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;(twisted&nbsp;a=-1)&nbsp;Edwards&nbsp;points&nbsp;in&nbsp;extended&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -568,7 +568,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="EdwardsExtended-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EdwardsExtended-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -612,11 +612,11 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="EdwardsProjective-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="EdwardsProjective-equality"><strong>equality</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="EdwardsProjective-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EdwardsProjective-inversion"><strong>inversion</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="EdwardsProjective-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;with&nbsp;(homogeneous)&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="EdwardsProjective-operation"><strong>operation</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Edwards&nbsp;points&nbsp;with&nbsp;(homogeneous)&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -700,7 +700,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="EdwardsProjective-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EdwardsProjective-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -804,13 +804,13 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="EllipticCurvePoint-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="EllipticCurvePoint-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="EllipticCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="EllipticCurvePoint-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="EllipticCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="EllipticCurvePoint-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="EllipticCurvePoint-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="EllipticCurvePoint-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -878,13 +878,13 @@ Overview&nbsp;Python&nbsp;operators&nbsp;for&nbsp;group&nbsp;operation,&nbsp;inv
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="FiniteGroupElement-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="FiniteGroupElement-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="FiniteGroupElement-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="FiniteGroupElement-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="FiniteGroupElement-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="FiniteGroupElement-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="FiniteGroupElement-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="FiniteGroupElement-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
@@ -942,11 +942,11 @@ Class methods defined here:<br>
 
 <dl><dt><a name="QuadraticResidue-encode"><strong>encode</strong></a>(m)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;a&nbsp;quadratic&nbsp;residue.</tt></dd></dl>
 
-<dl><dt><a name="QuadraticResidue-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="QuadraticResidue-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="QuadraticResidue-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="QuadraticResidue-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="QuadraticResidue-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="QuadraticResidue-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="QuadraticResidue-repeat"><strong>repeat</strong></a>(a, n)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
 
@@ -996,7 +996,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="QuadraticResidue-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="QuadraticResidue-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -1040,11 +1040,11 @@ Class methods defined here:<br>
 
 <dl><dt><a name="SchnorrGroupElement-encode"><strong>encode</strong></a>(m)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Encode&nbsp;message&nbsp;m&nbsp;in&nbsp;group&nbsp;element&nbsp;g^m.</tt></dd></dl>
 
-<dl><dt><a name="SchnorrGroupElement-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SchnorrGroupElement-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SchnorrGroupElement-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SchnorrGroupElement-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SchnorrGroupElement-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SchnorrGroupElement-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="SchnorrGroupElement-repeat"><strong>repeat</strong></a>(a, n)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;nth&nbsp;@-power&nbsp;of&nbsp;a&nbsp;(written&nbsp;a^n),&nbsp;for&nbsp;any&nbsp;integer&nbsp;n.</tt></dd></dl>
 
@@ -1092,7 +1092,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="SchnorrGroupElement-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SchnorrGroupElement-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -1134,11 +1134,11 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="SymmetricGroupElement-equality"><strong>equality</strong></a>(p, q)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="SymmetricGroupElement-equality"><strong>equality</strong></a>(p, q, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="SymmetricGroupElement-inversion"><strong>inversion</strong></a>(p)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="SymmetricGroupElement-inversion"><strong>inversion</strong></a>(p, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="SymmetricGroupElement-operation"><strong>operation</strong></a>(p, q)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>First&nbsp;p&nbsp;then&nbsp;q.</tt></dd></dl>
+<dl><dt><a name="SymmetricGroupElement-operation"><strong>operation</strong></a>(p, q, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>First&nbsp;p&nbsp;then&nbsp;q.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -1180,7 +1180,7 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="SymmetricGroupElement-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="SymmetricGroupElement-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -1230,13 +1230,13 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="WeierstrassAffine-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-equality"><strong>equality</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassAffine-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-inversion"><strong>inversion</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassAffine-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;affine&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-operation"><strong>operation</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;affine&nbsp;coordinates.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassAffine-operation2"><strong>operation2</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;affine&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="WeierstrassAffine-operation2"><strong>operation2</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;affine&nbsp;coordinates.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -1435,13 +1435,13 @@ Methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGr
 
 <hr>
 Class methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
-<dl><dt><a name="WeierstrassCurvePoint-equality"><strong>equality</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="WeierstrassCurvePoint-equality"><strong>equality</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassCurvePoint-inversion"><strong>inversion</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="WeierstrassCurvePoint-inversion"><strong>inversion</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassCurvePoint-operation"><strong>operation</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="WeierstrassCurvePoint-operation"><strong>operation</strong></a>(a, b, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassCurvePoint-operation2"><strong>operation2</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="WeierstrassCurvePoint-operation2"><strong>operation2</strong></a>(a, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;@&nbsp;a.</tt></dd></dl>
 
 <hr>
 Static methods inherited from <a href="mpyc.fingroups.html#FiniteGroupElement">FiniteGroupElement</a>:<br>
@@ -1485,13 +1485,13 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="WeierstrassJacobian-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="WeierstrassJacobian-equality"><strong>equality</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassJacobian-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="WeierstrassJacobian-inversion"><strong>inversion</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassJacobian-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="WeierstrassJacobian-operation"><strong>operation</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassJacobian-operation2"><strong>operation2</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="WeierstrassJacobian-operation2"><strong>operation2</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;Jacobian&nbsp;coordinates.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -1615,13 +1615,13 @@ Methods defined here:<br>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="WeierstrassProjective-equality"><strong>equality</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-equality"><strong>equality</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassProjective-inversion"><strong>inversion</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-inversion"><strong>inversion</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;@-inverse&nbsp;of&nbsp;a&nbsp;(written&nbsp;~a).</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassProjective-operation"><strong>operation</strong></a>(pt1, pt2)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-operation"><strong>operation</strong></a>(pt1, pt2, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;Weierstrass&nbsp;points&nbsp;with&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
 
-<dl><dt><a name="WeierstrassProjective-operation2"><strong>operation2</strong></a>(pt)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
+<dl><dt><a name="WeierstrassProjective-operation2"><strong>operation2</strong></a>(pt, /)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Double&nbsp;Weierstrass&nbsp;point&nbsp;with&nbsp;projective&nbsp;coordinates.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -1744,10 +1744,11 @@ The&nbsp;following&nbsp;Edwards&nbsp;curves&nbsp;and&nbsp;Weierstrass&nbsp;curve
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'Ed25519':&nbsp;see&nbsp;<a href="https://en.wikipedia.org/wiki/EdDSA#Ed25519">https://en.wikipedia.org/wiki/EdDSA#Ed25519</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'Ed448':&nbsp;aka&nbsp;"Goldilocks",&nbsp;see&nbsp;<a href="https://en.wikipedia.org/wiki/Curve448">https://en.wikipedia.org/wiki/Curve448</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'secp256k1':&nbsp;Bitcoin's&nbsp;Koblitz&nbsp;curve&nbsp;from&nbsp;<a href="https://www.secg.org/sec2-v2.pdf">https://www.secg.org/sec2-v2.pdf</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256':&nbsp;Barreto-Naehrig&nbsp;curve,&nbsp;<a href="https://eprint.iacr.org/2010/186">https://eprint.iacr.org/2010/186</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;'BN256_twist':&nbsp;sextic&nbsp;twist&nbsp;of&nbsp;Barreto-Naehrig&nbsp;curve<br>
 &nbsp;<br>
-Both&nbsp;curves&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;'affine'&nbsp;(default)&nbsp;and&nbsp;'projective'&nbsp;coordinates.<br>
+These&nbsp;curves&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;'affine'&nbsp;(default)&nbsp;and&nbsp;'projective'&nbsp;coordinates.<br>
 The&nbsp;Edwards&nbsp;curves&nbsp;can&nbsp;also&nbsp;be&nbsp;used&nbsp;with&nbsp;'extended'&nbsp;coordinates,&nbsp;and&nbsp;the<br>
 Weierstrass&nbsp;curves&nbsp;with&nbsp;'jacobian'&nbsp;coordinates.</tt></dd></dl>
  <dl><dt><a name="-QuadraticResidues"><strong>QuadraticResidues</strong></a>(p=None, l=None)</dt><dd><tt>Create&nbsp;type&nbsp;for&nbsp;quadratic&nbsp;residues&nbsp;group&nbsp;given&nbsp;(bit&nbsp;length&nbsp;l&nbsp;of)&nbsp;odd&nbsp;prime&nbsp;modulus&nbsp;p.<br>

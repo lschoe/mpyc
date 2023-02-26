@@ -1072,7 +1072,7 @@ class Runtime:
         field = stype.sectype.field
         await self.returnType((stype, shape))
         a = await self.gather(a)
-        while True:  # will only succeec for large fields or small arrays a
+        while True:  # TODO: will only succeed for large fields or small arrays a, cf np_random_bits
             r = self._np_randoms(field, a.size).reshape(shape)
             ar = await self.output(a * r, threshold=2*self.threshold)
             if (ar != 0).all():
@@ -2256,7 +2256,7 @@ class Runtime:
         a = await self.gather(a)
         return a.__getitem__(key)
 
-    # TODO: investigate possibility for np_setitem, for now use np_update() below, see sha3 demo
+    # TODO: investigate options for np_setitem, for now use np_update(), see sha3 demo and np_sort()
 
     @mpc_coro_no_pc
     async def np_update(self, a, key, value):
@@ -3243,22 +3243,35 @@ class Runtime:
             q = (p+1) >> 1  # q = 1/2 mod p
         prfs = self.prfs(field.order)
         t = self.threshold
+        r = np.array([], dtype='O')
+        r2 = np.array([], dtype='O')
         h = n
-        while h > 0:
-            r = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
-            # Compute and open the squares and compute square roots.
-            r2 = r * r
+        while h:
+            _r = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
+            # Compute and open the squares and later compute square roots.
+            _r2 = _r * _r
             if prss0:
                 z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), h)
-                r2 += z
-            r2 = await self.output(r2, threshold=2*t)
-            h = 0  # TODO: handle case that r2 contains 0s, e.g.. using np.any(r2.value == 0)
-            s = r.value * field.array._sqrt(r2.value, INV=True)
-            if not signed:
-                s %= modulus
-                s += 1
-                s *= q
-            bits = s << f
+                _r2 += z
+            _r2 = await self.output(_r2, threshold=2*t)
+            mask = _r2.value != 0
+            h -= np.count_nonzero(mask)
+            if h:
+                r = np.append(r, _r.value[mask])
+                r2 = np.append(r2, _r2.value[mask])
+            # else: fast path for h == 0
+        if len(r):
+            r = np.append(r, _r.value)
+            r2 = np.append(r2, _r2.value)
+        else:  # fast path
+            r = _r.value
+            r2 = _r2.value
+        bits = r * field.array._sqrt(r2, INV=True)
+        if not signed:
+            bits %= modulus
+            bits += 1
+            bits *= q
+        bits <<= f
         return field.array(bits)
 
     def add_bits(self, x, y):

@@ -1,6 +1,6 @@
 """This module collects basic secure (secret-shared) types for MPyC.
 
-Secure (secret-shared) number types all use common base classes, which
+Secure number (array) types all use common base classes, which
 ensures that operators such as +,*,>= are defined by operator overloading.
 """
 

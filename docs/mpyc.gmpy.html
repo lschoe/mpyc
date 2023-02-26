@@ -8,11 +8,11 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.gmpy</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.8/mpyc/gmpy.py">github.com/lschoe/mpyc/blob/v0.8/mpyc/gmpy.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/gmpy.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/gmpy.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;collects&nbsp;all&nbsp;gmpy2&nbsp;functions&nbsp;used&nbsp;by&nbsp;MPyC.<br>
 &nbsp;<br>
 Stubs&nbsp;only&nbsp;using&nbsp;Python&nbsp;built-ins&nbsp;are&nbsp;provided&nbsp;in&nbsp;case&nbsp;the&nbsp;gmpy2&nbsp;package&nbsp;is&nbsp;not&nbsp;available.<br>
-A&nbsp;function&nbsp;for&nbsp;factoring&nbsp;prime&nbsp;powers&nbsp;and&nbsp;a&nbsp;function&nbsp;for&nbsp;rational&nbsp;reconstruction&nbsp;are&nbsp;also&nbsp;provided.</tt></p>
+Efficient&nbsp;functions&nbsp;for&nbsp;factoring&nbsp;prime&nbsp;powers&nbsp;and&nbsp;rational&nbsp;reconstruction&nbsp;are&nbsp;also&nbsp;provided.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -20,9 +20,10 @@ A&nbsp;function&nbsp;for&nbsp;factoring&nbsp;prime&nbsp;powers&nbsp;and&nbsp;a&n
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/math.html">math</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/logging.html">logging</a><br>
+</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/math.html">math</a><br>
 </td><td width="25%" valign=top><a href="https://docs.python.org/3/library/os.html">os</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -74,5 +75,8 @@ That&nbsp;is,&nbsp;&nbsp;n/d&nbsp;=&nbsp;x&nbsp;(mod&nbsp;y)&nbsp;with&nbsp;-N&n
 provided&nbsp;2*N*D&nbsp;&lt;&nbsp;y.<br>
 &nbsp;<br>
 Default&nbsp;N=D=None&nbsp;will&nbsp;set&nbsp;both&nbsp;N&nbsp;and&nbsp;D&nbsp;to&nbsp;sqrt(y/2)&nbsp;approximately.</tt></dd></dl>
+ <dl><dt><a name="-version"><strong>version</strong></a>(...)</dt><dd><tt><a href="#-version">version</a>()&nbsp;-&gt;&nbsp;string<br>
+&nbsp;<br>
+Return&nbsp;string&nbsp;giving&nbsp;current&nbsp;GMPY2&nbsp;version.</tt></dd></dl>
 </td></tr></table>
 </body></html>
