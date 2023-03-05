@@ -8,6 +8,9 @@ jobs:
   - python: pypy3.9-7.3.9
     install: pip install numpy==1.23.*
   - python: 3.10
+    env:
+      - MPYC_NONUMPY=1
+      - MPYC_NOGMPY=1
   - python: 3.11
     install: pip install numpy gmpy2
 before_install:
