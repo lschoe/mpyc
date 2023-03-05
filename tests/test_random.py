@@ -72,9 +72,9 @@ class Arithmetic(unittest.TestCase):
         self.assertGreaterEqual(min(x), 0)
         self.assertLessEqual(max(x), 10**8 - 1)
 
-        x = mpc.run(mpc.output(sample(secint, range(1000000, 3000000, 1000), 10)))
+        x = mpc.run(mpc.output(sample(secint, range(1000000, 1009000, 1000), 8)))
         self.assertGreaterEqual(min(x) // 1000, 1000)
-        self.assertLessEqual(max(x) // 1000, 3000)
+        self.assertLessEqual(max(x) // 1000, 1009)
         self.assertEqual(sum(x) % 1000, 0)
 
     def test_secfxp(self):

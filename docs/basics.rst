@@ -19,7 +19,7 @@ To load MPyC we use the following ``import`` statement:
 
 This sets up the MPyC runtime ``mpc``, which means that the identities and addresses of
 the MPC parties have been loaded. The details of these parties can be inspected via
-``mpc.parties``. If available, the package ``gmpy2`` will have been loaded as well.
+``mpc.parties``.
 
 Secure types
 ------------

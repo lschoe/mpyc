@@ -1,13 +1,17 @@
 dist: jammy
 language: python
-python:
-    - 3.8
-    - 3.9
-    - 3.10
-    - 3.11
-    - pypy3.8-7.3.9
-install:
-    - pip install --upgrade pip
-    - pip install codecov numpy
+jobs:
+  - python: 3.8
+    install: pip install numpy==1.21.*
+  - python: 3.9
+    install: pip install numpy==1.22.* gmpy2
+  - python: pypy3.9-7.3.9
+    install: pip install numpy==1.23.*
+  - python: 3.10
+  - python: 3.11
+    install: pip install numpy gmpy2
+before_install:
+  - pip install --upgrade pip
+  - pip install codecov
 script: coverage run --source mpyc -m unittest discover tests
 after_success: codecov

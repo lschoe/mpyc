@@ -16,7 +16,7 @@ the elements are processed one by one in an uncoordinated manner, each time
 doing a small bit of work and communication.
 
 For this demo, we see an 18-fold speedup when run with three parties on
-local host (uaing secure fixed-point arithmetic). Also, the memory consumption
+local host (using secure fixed-point arithmetic). Also, the memory consumption
 is reduced accordingly, e.g., by a factor of around 10 when run with all
 barriers disabled.
 
