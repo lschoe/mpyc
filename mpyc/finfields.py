@@ -305,7 +305,7 @@ class FiniteFieldElement:
 
 
 def find_prime_root(l, blum=True, n=1):
-    """Find smallest prime of bit length at least l satisfying given constraints.
+    """Find prime of bit length at least l satisfying given constraints.
 
     Default is to return Blum primes (primes p with p % 4 == 3).
     Also, a primitive root w is returned of prime order at least n (0 < w < p).
@@ -319,10 +319,10 @@ def find_prime_root(l, blum=True, n=1):
             p = 3
             n, w = 2, p-1
     elif n <= 2:
-        p = gmpy2.next_prime(1 << l-1)
+        p = gmpy2.prev_prime(1 << l)
         if blum:
             while p%4 != 3:
-                p = gmpy2.next_prime(p)
+                p = gmpy2.prev_prime(p)
         p = int(p)
         w = p-1 if n == 2 else 1
     else:

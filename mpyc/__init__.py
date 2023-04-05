@@ -29,7 +29,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.9'
+__version__ = '0.9.1'
 __license__ = 'MIT License'
 
 import os

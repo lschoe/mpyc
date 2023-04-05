@@ -15,6 +15,10 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(gmpy.next_prime(1), 2)
         self.assertEqual(gmpy.next_prime(2), 3)
         self.assertEqual(gmpy.next_prime(256), 257)
+        self.assertEqual(gmpy.prev_prime(3), 2)
+        self.assertEqual(gmpy.prev_prime(10), 7)
+        self.assertEqual(gmpy.prev_prime(259), 257)
+        self.assertRaises(ValueError, gmpy.prev_prime, 2)
 
         self.assertEqual(gmpy.powmod(3, 256, 257), 1)
 
