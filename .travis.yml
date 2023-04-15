@@ -13,5 +13,6 @@ jobs:
     install: pip install numpy gmpy2
 before_install:
   - pip install --upgrade pip
+  - pip install coverage
 script: coverage run --source mpyc -m unittest discover tests
 after_success: codecov
