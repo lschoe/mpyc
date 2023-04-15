@@ -340,7 +340,7 @@ def find_prime_root(l, blum=True, n=1):
     return p, n, w
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def pGF(p, n, w):
     """Create a finite field for given prime modulus p."""
     if not gmpy2.is_prime(p):
@@ -501,7 +501,7 @@ def find_irreducible(p, d):
     return gfpx.GFpX(p).next_irreducible(p**d - 1)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def xGF(modulus):
     """Create a finite field for given irreducible polynomial."""
     p = modulus.p

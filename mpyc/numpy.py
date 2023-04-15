@@ -161,8 +161,8 @@ try:
     np._matmul_shape = _matmul_shape
     np._item_shape = _item_shape
 
-    if np.lib.NumpyVersion(np.__version__) < '1.21.0':
-        logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.21+.')
+    if np.lib.NumpyVersion(np.__version__) < '1.22.0':
+        logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.22+.')
 
     if np.lib.NumpyVersion(np.__version__) < '1.23.0':
         __fromiter = np.fromiter
@@ -179,14 +179,6 @@ try:
             return a
 
         np.fromiter = _fromiter
-
-    if np.lib.NumpyVersion(np.__version__) < '1.22.0':
-        # No is_integer() for np.float32, workaround via float():
-        _is_integer = lambda a: float(a).is_integer()
-    else:
-        _is_integer = lambda a: a.is_integer()
-    np.is_integral = _is_integer
-
 except ImportError:
     del _matmul_shape
     del _item_shape

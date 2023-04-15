@@ -21,7 +21,6 @@ when n is equal to the order of sectype's finite field.
 """
 
 import math
-import functools
 import itertools
 from mpyc import sectypes
 from mpyc import asyncoro
@@ -176,7 +175,7 @@ def choices(sectype, population, weights=None, *, cum_weights=None, k=1):
         raise ValueError('number of weights does not match the population')
 
     # assume weights are integers
-    g = functools.reduce(math.gcd, cum_weights)
+    g = math.gcd(*cum_weights)
     cum_weights = [a // g for a in cum_weights]
     z = []
     for _ in range(k):

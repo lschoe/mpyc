@@ -655,7 +655,7 @@ def SecFld(order=None, modulus=None, char=None, ext_deg=None, min_order=None, si
     return _SecFld(field)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _SecFld(field):
     l = (field.order - 1).bit_length()
     name = f'SecFld{l}({field.__name__})'
@@ -710,7 +710,7 @@ def SecInt(l=None, p=None, n=2):
     return _SecInt(l, p, n)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _SecInt(l, p, n):
     name = f'SecInt{l}' if p is None else f'SecInt{l}({p})'
     secint = type(name, (SecureInteger,), {'__slots__': ()})
@@ -739,7 +739,7 @@ def SecFxp(l=None, f=None, p=None, n=2):
     return _SecFxp(l, f, p, n)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _SecFxp(l, f, p, n):
     name = f'SecFxp{l}:{f}' if p is None else f'SecFxp{l}:{f}({p})'
     secfxp = type(name, (SecureFixedPoint,), {'__slots__': ()})
@@ -992,7 +992,7 @@ def SecFlt(l=None, s=None, e=None):
     return _SecFlt(s, e)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _SecFlt(s, e):
     name = f'SecFlt{s + e}:{s}:{e}'
     secflt = type(name, (SecureFloat,), {'__slots__': ()})
@@ -1205,8 +1205,7 @@ class SecureArray(SecureObject):
     @property
     def flat(self):
         # via flatten(), no MPyC coroutine for generators yet
-        for a in self.flatten():
-            yield a
+        yield from self.flatten()
 
     def __len__(self):
         if self.shape == ():
@@ -1384,7 +1383,7 @@ class SecureFixedPointArray(SecureArray):
             if isinstance(value, np.ndarray):
                 if np.issubdtype(value.dtype, np.floating):
                     if integral is None:
-                        integral = np.vectorize(np.is_integral)(value).all()
+                        integral = np.vectorize(lambda a: a.is_integer())(value).all()
                         integral = bool(integral)  # NB: from np.bool_ to bool
                     f2 = 1 << self.frac_length
                     # Scale to Python int entries (by setting otypes='O', prevents overflow):

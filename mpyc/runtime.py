@@ -110,7 +110,7 @@ class Runtime:
                 keys[subset] = secrets.token_bytes(16)  # 128-bit key
         self._prss_keys = keys
 
-    @functools.lru_cache(maxsize=None)
+    @functools.cache
     def prfs(self, bound):
         """PRFs with codomain range(bound) for pseudorandom secret sharing.
 
@@ -2890,7 +2890,7 @@ class Runtime:
 
         NB: Different defaults than for method call a.argmin().
         """
-        # TODO: add keepdims= (was added in NumPy 1.22, gives TypeError for np.argmin in 1.21)
+        # TODO: add keepdims=
         if key is None:
             key = lambda a: a
 
@@ -2979,7 +2979,7 @@ class Runtime:
 
         NB: Different defaults than for method call a.argmax().
         """
-        # TODO: add keepdims= (was added in NumPy 1.22, gives TypeError for np.argmax in 1.21)
+        # TODO: add keepdims=
         if key is None:
             key = lambda a: a
 

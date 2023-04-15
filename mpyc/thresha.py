@@ -64,7 +64,7 @@ def np_random_split(field, s, t, m):
     return shares
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _recombination_vector(field, xs, x_r):
     """Compute and store a recombination vector.
 
@@ -132,7 +132,7 @@ def np_recombine(field, points, x_rs=0):
     return sums
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _f_S_i(field, m, i, S):
     """Compute and store polynomial f_S evaluated for party i.
 

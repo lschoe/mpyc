@@ -674,7 +674,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
         return (M.share[0] - Z.share[0]) / gap
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def SecGrp(group):
     """Secure version of given finite group."""
     if issubclass(group, fg.SymmetricGroupElement):

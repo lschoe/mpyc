@@ -173,11 +173,9 @@ async def main():
     print(f'dataset: {name} with {m} constraints and {n} variables (scale factor {scale})')
     T[0][-1] = '0'  # initialize optimal value
     for i in range(m+1):
-        g = 0
         for j in range(n+1):
             T[i][j] = int(scale * float(T[i][j]))  # scale to integer
-            g = math.gcd(g, T[i][j])
-        g = max(g, 1) if i else 1  # skip cost row
+        g = max(math.gcd(*T[i]), 1) if i else 1  # skip cost row
         for j in range(n+1):
             T[i][j] = secint(T[i][j] // g)
 

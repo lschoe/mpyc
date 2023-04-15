@@ -1,8 +1,6 @@
 dist: jammy
 language: python
 jobs:
-  - python: 3.8
-    install: pip install numpy==1.21.*
   - python: 3.9
     install: pip install numpy==1.22.* gmpy2
   - python: pypy3.9-7.3.9

@@ -42,5 +42,5 @@ setup(
     license=mpyc.__license__,
     packages=['mpyc'],
     platforms=['any'],
-    python_requires='>=3.8'
+    python_requires='>=3.9'
 )

@@ -247,7 +247,7 @@ class SymmetricGroupElement(FiniteGroupElement):
         return p.value == q.value
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def SymmetricGroup(n):
     """Create type for symmetric group of degree n, n>=0."""
     name = f'Sym({n})'
@@ -388,7 +388,7 @@ def QuadraticResidues(p=None, l=None):
     return _QuadraticResidues(p)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _QuadraticResidues(p):
     field = GF(p)  # raises if p is not prime
     g = 2
@@ -521,7 +521,7 @@ def SchnorrGroup(p=None, q=None, g=None, l=None, n=None):
     return _SchnorrGroup(p, q, g)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _SchnorrGroup(p, q, g):
     field = GF(p)  # raises if modulus is not prime
     l = p.bit_length()
@@ -1033,7 +1033,7 @@ def EllipticCurve(curvename='Ed25519', coordinates=None):
     return _EllipticCurve(curvename, coordinates)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _EllipticCurve(curvename, coordinates):
     if curvename.startswith('Ed'):
         if curvename == 'Ed25519':
@@ -1414,7 +1414,7 @@ def ClassGroup(Delta=None, l=None):
     return _ClassGroup(Delta)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _ClassGroup(Delta):
     l = Delta.bit_length()
     name = f'Cl{l}({Delta})'

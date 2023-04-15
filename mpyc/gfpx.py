@@ -25,7 +25,7 @@ from mpyc import gmpy as gmpy2
 X = 'x'  # symbol for indeterminate in polynomials
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def GFpX(p):
     """Create type for polynomials over GF(p)."""
     if not gmpy2.is_prime(p):
@@ -807,7 +807,7 @@ class BinaryPolynomial(Polynomial):
     _sub = _add
 
     @staticmethod
-#    @functools.lru_cache(maxsize=None)
+#    @functools.cache
     def _mul(a, b):
         if a < b:
             a, b = b, a
@@ -829,7 +829,7 @@ class BinaryPolynomial(Polynomial):
         return a >> n
 
     @staticmethod
-#    @functools.lru_cache(maxsize=None)
+#    @functools.cache
     def _mod(a, b):
         if b is None:  # see _powmod()
             return a
