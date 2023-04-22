@@ -373,7 +373,7 @@ def np_shuffle(a, axis=None):
     if axis is None:
         axis = 0
 
-    if axis >= len(a.shape):
+    if axis >= len(a.shape) or axis <0:
         raise ValueError("Invalid axis")
 
     x = runtime.np_copy(a)
