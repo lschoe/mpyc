@@ -259,6 +259,25 @@ class Runtime:
             server.close()
         self.start_time = time.time()
 
+    def elapsed_time(self):
+        """Return the elapsed time since the MPyC runtime started."""
+        return time.time() - self.start_time
+    
+    def communication_cost(self, per_user=False):
+        """Return the number of bytes exchanged since the MPyC runtime started.
+        
+        If the per_user parameter is True, the function returns a list with the cost per user.
+        Otherwise, all costs are aggregated.
+        """
+        per_user_cost = [peer.protocol.nbytes_sent if peer.pid != self.pid else 0 for peer in self.parties]
+        
+        if per_user:
+            return per_user_cost
+        else:
+            return sum(per_user_cost)
+            
+
+
     async def shutdown(self):
         """Shutdown the MPyC runtime.
 
@@ -267,8 +286,8 @@ class Runtime:
         # Wait for all parties behind a barrier.
         while self._pc_level > self._program_counter[1]:
             await asyncio.sleep(0)
-        elapsed = time.time() - self.start_time
-        nbytes = [peer.protocol.nbytes_sent if peer.pid != self.pid else 0 for peer in self.parties]
+        elapsed = self.elapsed_time()
+        nbytes = self.communication_cost(per_user=True)
         elapsed = datetime.timedelta(seconds=round(elapsed*1000)/1000)  # round to milliseconds
         logging.info(f'Stop MPyC -- elapsed time: {str(elapsed)[:-3]}|bytes sent: {sum(nbytes)}')
         logging.debug(f'Bytes sent per party: {" ".join(map(str, nbytes))}')
