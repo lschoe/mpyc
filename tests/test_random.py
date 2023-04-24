@@ -82,23 +82,24 @@ class Arithmetic(unittest.TestCase):
     def test_np_shuffle(self):
         secint = mpc.SecInt()
         x = secint.array(np.arange(8))
-        np_shuffle(x)
+        mpc.run(np_shuffle(x))
         x = mpc.run(mpc.output(x))
         self.assertSetEqual(set(x), set(np.arange(8)))
 
         x_init = np.arange(8).reshape(2,4)
         x = secint.array(x_init)
-        np_shuffle(x)
+        mpc.run(np_shuffle(x))
         x = mpc.run(mpc.output(x))
         self.assertIn(set(x[0,:]), [set(x_init[i,:]) for i in range(x_init.shape[0])])
 
         x = secint.array(x_init)
-        np_shuffle(x, axis=1)
+        mpc.run(np_shuffle(x, axis=1))
         x = mpc.run(mpc.output(x))
         self.assertIn(set(x[:,0]), [set(x_init[:,j]) for j in range(x_init.shape[1])])
 
         x = secint.array(x_init)
-        self.assertRaises(ValueError, np_shuffle, x, 3)
+        with self.assertRaises(ValueError):
+            mpc.run(np_shuffle(x, 3))
 
 
     def test_secfxp(self):

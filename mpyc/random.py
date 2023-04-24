@@ -364,7 +364,7 @@ async def np_random_unit_vector(sectype, n):
     return u
 
 
-def np_shuffle(a, axis=None):
+async def np_shuffle(a, axis=None):
     """Shuffle numpy-like array x secretly in-place, and return None.
 
     Given array x may contain public or secret elements.
@@ -401,4 +401,5 @@ def np_shuffle(a, axis=None):
     if axis != 0:
         x = runtime.np_transpose(x)
 
+    x = await runtime.gather(x)
     runtime.np_update(a, range(a.shape[0]), x)
