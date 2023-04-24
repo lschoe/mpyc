@@ -354,7 +354,7 @@ async def np_random_unit_vector(sectype, n):
             u = v
         elif await runtime.output(u[0] * x[i]):  # TODO: mul_public
             # restart, keeping unused secret random bits x[:i]
-            x = runtime.np_hstack((x[:i], np_random_unit_vector(sectype, k - i)))
+            x = runtime.np_hstack((x[:i], runtime.np_random_bits(sectype, k - i)))
             i = k - 1
             u = runtime.np_fromlist([x[i], 1 - x[i]])
         else:
@@ -370,16 +370,20 @@ def np_shuffle(a, axis=None):
     Given array x may contain public or secret elements.
     """
     sectype = type(a).sectype
+
+    if len(a.shape) > 2:
+        raise ValueError("Can only shuffle 1D and 2D arrays")
+
     if axis is None:
         axis = 0
 
-    if axis >= len(a.shape) or axis <0:
+    if axis not in (0,1,-1):
         raise ValueError("Invalid axis")
 
     x = runtime.np_copy(a)
 
     if axis != 0:
-        x = runtime.np_swapaxes(x, 0, axis)
+        x = runtime.np_transpose(x)
 
     n = x.shape[0]
 
@@ -392,9 +396,9 @@ def np_shuffle(a, axis=None):
         else:
             d = u * (x[i] - x_u)
             x = runtime.np_hstack((x[:i, ...], runtime.np_add(x[i:, ...], d)))
-        runtime.np_update(x, i, x_u)
+        x = runtime.np_update(x, i, x_u)
 
     if axis != 0:
-        x = runtime.np_swapaxes(x, 0, axis)
+        x = runtime.np_transpose(x)
 
     runtime.np_update(a, range(a.shape[0]), x)
