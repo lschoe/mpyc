@@ -1,6 +1,6 @@
 import unittest
 from mpyc.runtime import mpc
-from mpyc.random import (getrandbits, randrange, random_unit_vector, randint,
+from mpyc.random import (getrandbits, randrange, random_unit_vector, np_random_unit_vector, randint,
                          shuffle, np_shuffle, random_permutation, random_derangement,
                          choice, choices, sample, random, uniform)
 from mpyc.numpy import np
@@ -19,6 +19,8 @@ class Arithmetic(unittest.TestCase):
         self.assertLessEqual(a, 2**10 - 1)
 
         x = mpc.run(mpc.output(random_unit_vector(secint, 4)))
+        self.assertEqual(sum(x), 1)
+        x = mpc.run(mpc.output(np_random_unit_vector(secint, 4)))
         self.assertEqual(sum(x), 1)
 
         a = mpc.run(mpc.output(randrange(secint, 37)))  # French roulette
@@ -86,6 +88,11 @@ class Arithmetic(unittest.TestCase):
         x = mpc.run(mpc.output(x))
         self.assertSetEqual(set(x), set(np.arange(8)))
 
+        x = secint.array(np.array([np.arange(8)]))
+        mpc.run(np_shuffle(x))
+        x = mpc.run(mpc.output(x))
+        self.assertTrue((x == np.array([np.arange(8)])).all())
+
         x_init = np.arange(8).reshape(2,4)
         x = secint.array(x_init)
         mpc.run(np_shuffle(x))
@@ -101,6 +108,10 @@ class Arithmetic(unittest.TestCase):
         with self.assertRaises(ValueError):
             mpc.run(np_shuffle(x, 3))
 
+        x = secint.array(np.ones((8,8,8)))
+        with self.assertRaises(ValueError):
+            mpc.run(np_shuffle(x))
+
 
     def test_secfxp(self):
         secfxp = mpc.SecFxp()
@@ -111,6 +122,8 @@ class Arithmetic(unittest.TestCase):
         self.assertLessEqual(int(a), 2**10 - 1)
 
         x = mpc.run(mpc.output(random_unit_vector(secfxp, 3)))
+        self.assertEqual(int(sum(x)), 1)
+        x = mpc.run(mpc.output(np_random_unit_vector(secfxp, 3)))
         self.assertEqual(int(sum(x)), 1)
 
         x = mpc.run(mpc.output(random_permutation(secfxp, range(1, 9))))
@@ -159,6 +172,8 @@ class Arithmetic(unittest.TestCase):
         self.assertIn(a, [0, 1, 2])
         x = mpc.run(mpc.output(random_unit_vector(secfld, 2)))
         self.assertEqual(int(sum(x)), 1)
+        x = mpc.run(mpc.output(np_random_unit_vector(secfld, 2)))
+        self.assertEqual(int(sum(x)), 1)
         x = mpc.run(mpc.output(random_permutation(secfld, range(1, 9))))
         self.assertSetEqual(set(map(int, x)), set(range(1, 9)))
         x = mpc.run(mpc.output(random_derangement(secfld, range(2))))
@@ -175,6 +190,8 @@ class Arithmetic(unittest.TestCase):
         a = mpc.run(mpc.output(randint(secfld, -1, 1)))
         self.assertIn(a, [-1, 0, 1])
         x = mpc.run(mpc.output(random_unit_vector(secfld, 1)))
+        self.assertEqual(int(sum(x)), 1)
+        x = mpc.run(mpc.output(np_random_unit_vector(secfld, 1)))
         self.assertEqual(int(sum(x)), 1)
         x = mpc.run(mpc.output(random_permutation(secfld, range(1, 9))))
         self.assertSetEqual(set(map(int, x)), set(range(1, 9)))

@@ -332,10 +332,7 @@ async def np_random_unit_vector(sectype, n):
     with c a small constant, c < 3.
     """
 
-    if issubclass(sectype, runtime.SecureObject):
-        await runtime.returnType((sectype.array, True, (n,)))
-    else:
-        await runtime.returnType(asyncoro.Future)
+    await runtime.returnType((sectype.array, True, (n,)))
 
     if n == 1:
         return runtime.np_fromlist([sectype(1)])
