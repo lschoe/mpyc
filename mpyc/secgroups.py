@@ -456,7 +456,7 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
         for a, b in zip(self.share, value):
             a.set_share(b.share)
 
-    def __getitem__(self, key):  # NB:  no set_item to prevent mutability
+    def __getitem__(self, key):  # NB: no set_item to prevent mutability
         return self.share[key]
 
     @classmethod
@@ -591,7 +591,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
         for a, b in zip(self.share, value):
             a.set_share(b.share)
 
-    def __getitem__(self, key):  # NB:  no set_item to prevent mutability
+    def __getitem__(self, key):  # NB: no set_item to prevent mutability
         return self.share[key]
 
     @classmethod
