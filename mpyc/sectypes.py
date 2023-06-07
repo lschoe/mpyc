@@ -1256,12 +1256,13 @@ class SecureArray(SecureObject):
     def argmin(self, *args, **kwargs):
         """Returns the indices of the minimum values along an axis.
 
-        If no axis is given (default), array is flattened.
+        If no axis is given (default), array is flattened first.
 
-        By default, the indices are returned as unit vectors ...
+        By default, the indices are returned as unit vectors.
         Also, by default, the minimum values are returned (next to the indices).
 
-        NB: Different defaults for np.argmin(). Latter behaves like for NumPy arrays.
+        NB: Different defaults than for np_argmin(). Latter behaves like np.argmin()
+        for NumPy arrays, returning the indices as numbers and omitting the minimum values.
         """
         if 'arg_unary' not in kwargs:
             kwargs['arg_unary'] = True
@@ -1272,12 +1273,13 @@ class SecureArray(SecureObject):
     def argmax(self, *args, **kwargs):
         """Returns the indices of the maximum values along an axis.
 
-        If no axis is given (default), array is flattened.
+        If no axis is given (default), array is flattened first.
 
-        By default, the indices are returned as unit vectors ...
+        By default, the indices are returned as unit vectors.
         Also, by default, the maximum values are returned (next to the indices).
 
-        NB: Different defaults for np.argmax(). Latter behaves like for NumPy arrays.
+        NB: Different defaults than for np_argmax(). Latter behaves like np.argmax()
+        for NumPy arrays, returning the indices as numbers and omitting the maximum values.
         """
         if 'arg_unary' not in kwargs:
             kwargs['arg_unary'] = True

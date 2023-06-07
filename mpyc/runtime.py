@@ -2643,26 +2643,38 @@ class Runtime:
         """
         return c * (a - b) + b
 
-    def np_amin(self, a, axis=None):
+    def np_amin(self, a, axis=None, keepdims=False):
         """Secure minimum of array a, entirely or along the given axis (or axes).
 
-        If axis is None (default) the minimum of the array is returned (as a scalar).
+        If axis is None (default) the minimum of the array is returned.
         If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
-        The shape of the result is the shape of a with all specified axes removed
-        (converted to a scalar if no dimensions remain).
+
+        If keepdims is not set (default), the shape of the result is the shape of a with all
+        specified axes removed (converted to a scalar if no dimensions remain).
+        Otherwise, if keepdims is set, the axes along which the minimum is taken
+        are left in the result as dimensions of size 1.
         """
-        # TODO: other kwargs like keepdims and initial
+        # TODO: other kwargs like initial
         if axis is None:
+            if keepdims:
+                shape = [1] * a.ndim
             # Flatten a to 1D array:
             a = self.np_reshape(a, (-1,))
         elif isinstance(axis, tuple):
             axis = tuple(i % a.ndim for i in axis)
+            if keepdims:
+                shape = list(a.shape)
+                for i in axis:
+                    shape[i] = 1
             # Move specified axes to front:
             axes = axis + tuple(i for i in range(a.ndim) if i not in axis)
             a = self.np_transpose(a, axes=axes)
             # Flatten specified axes to one dimension:
             a = self.np_reshape(a, (-1,) + a.shape[len(axis):])
         elif axis := axis % a.ndim:
+            if keepdims:
+                shape = list(a.shape)
+                shape[axis] = 1
             # Move nonzero axis to front:
             axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
             a = self.np_transpose(a, axes=axes)
@@ -2674,28 +2686,44 @@ class Runtime:
             if n0:
                 m = self.np_concatenate((a[:1], m), axis=0)
             a = m
+
+        if keepdims:
+            return self.np_reshape(a, tuple(shape))
+
         return a[0]
 
-    def np_amax(self, a, axis=None):
+    def np_amax(self, a, axis=None, keepdims=False):
         """Secure maximum of array a, entirely or along the given axis (or axes).
 
-        If axis is None (default) the maximum of the array is returned (as a scalar).
+        If axis is None (default) the maximum of the array is returned.
         If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
-        The shape of the result is the shape of a with all specified axes removed
-        (converted to a scalar if no dimensions remain).
+
+        If keepdims is not set (default), the shape of the result is the shape of a with all
+        specified axes removed (converted to a scalar if no dimensions remain).
+        Otherwise, if keepdims is set, the axes along which the maximum is taken
+        are left in the result as dimensions of size 1.
         """
-        # TODO: other kwargs like keepdims and initial
+        # TODO: other kwargs like initial
         if axis is None:
+            if keepdims:
+                shape = [1] * a.ndim
             # Flatten a to 1D array:
             a = self.np_reshape(a, (-1,))
         elif isinstance(axis, tuple):
             axis = tuple(i % a.ndim for i in axis)
+            if keepdims:
+                shape = list(a.shape)
+                for i in axis:
+                    shape[i] = 1
             # Move specified axes to front:
             axes = axis + tuple(i for i in range(a.ndim) if i not in axis)
             a = self.np_transpose(a, axes=axes)
             # Flatten specified axes to one dimension:
             a = self.np_reshape(a, (-1,) + a.shape[len(axis):])
         elif axis := axis % a.ndim:
+            if keepdims:
+                shape = list(a.shape)
+                shape[axis] = 1
             # Move nonzero axis to front:
             axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
             a = self.np_transpose(a, axes=axes)
@@ -2707,6 +2735,10 @@ class Runtime:
             if n0:
                 m = self.np_concatenate((a[:1], m), axis=0)
             a = m
+
+        if keepdims:
+            return self.np_reshape(a, tuple(shape))
+
         return a[0]
 
     @mpc_coro_no_pc
@@ -2883,14 +2915,36 @@ class Runtime:
         z = z.reshape(a.shape)
         return z
 
-    def np_argmin(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+    def np_argmin(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True):
         """Returns the indices of the minimum values along an axis.
 
-        If no axis is given (default), array is flattened.
+        Default behavior similar to np.argmin() for NumPy arrays:
+
+         - the indices are returned as numbers (not as unit vectors),
+         - only the indices are returned (minimum values omitted).
 
         NB: Different defaults than for method call a.argmin().
+
+        If no axis is given (default), array a is flattened first.
+
+        If the indices are returned as unit vectors in an array u say,
+        then u is always of the same shape as the (possibly flattened) input array a.
+
+        If the indices are returned as numbers, the shape of the array of indices
+        is controlled by parameter keepdims. If keepdims is not set (default),
+        the shape of the indices is the shape of a with the specified axis removed
+        (converted to a scalar if no dimensions remain). Otherwise, if keepdims is
+        set, the axis along which the minimum is taken is left in the result as
+        dimension of size 1.
+
+        If the minimum values are returned as well, the shape of this part of the output is
+        also controlled by parameter keepdims. If keepdims is not set (default), a 1D array
+        of minimum values is returned with one entry per element of the given array a with
+        the given axis removed; if axis is None, the minimum is returned as a scalar.
+        Otherwise, if keepdims is set, the array of minimum values is of the same shape
+        as the given array a except that the dimension of the given axis is reduced to 1;
+        if axis is None, all axes are present as dimensions of size 1.
         """
-        # TODO: add keepdims=
         if key is None:
             key = lambda a: a
 
@@ -2898,6 +2952,7 @@ class Runtime:
         assert key_size in (1, a.shape[-1])
 
         shape = a.shape
+        ndim = a.ndim - key_size + 1  # number of dimensions corrected for key size
         if axis is None:
             if key_size == 1:
                 a = self.np_reshape(a, (1, a.size))
@@ -2924,8 +2979,11 @@ class Runtime:
                 iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
             u = u @ iv
         if axis is None:
-            u = u[0]
-            m = m[0][0]
+            if not arg_unary and keepdims:
+                # convert shape u from (1,) to (1,...,1)
+                u = self.np_reshape(u, (1,) * ndim)
+            else:
+                u = u[0]
         else:
             shape = list(shape)
             if key_size > 1:
@@ -2933,13 +2991,26 @@ class Runtime:
             if arg_unary:
                 shape[axis], shape[-1] = shape[-1], shape[axis]
             else:
-                del shape[axis]
+                if keepdims:
+                    shape[axis] = 1
+                else:
+                    del shape[axis]
             u = self.np_reshape(u, tuple(shape))
             if arg_unary:
                 u = self.np_swapaxes(u, axis, -1)
         if arg_only:
             return u
 
+        if axis is None:
+            if keepdims:
+                m = self.np_reshape(m, (1,) * ndim)
+            else:
+                m = m[0][0]
+        elif keepdims:
+            if arg_unary:
+                shape[axis], shape[-1] = shape[-1], shape[axis]  # NB: restore shape
+                shape[axis] = 1
+            m = self.np_reshape(m, tuple(shape))
         return u, m
 
     def _np_argmin(self, a, key):
@@ -2972,14 +3043,36 @@ class Runtime:
                 u = self.np_concatenate((u0, u), axis=1)
         return u, m
 
-    def np_argmax(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+    def np_argmax(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True):
         """Returns the indices of the maximum values along an axis.
 
-        If no axis is given (default), array is flattened.
+        Default behavior similar to np.argmax() for NumPy arrays:
+
+         - the indices are returned as numbers (not as unit vectors),
+         - only the indices are returned (maximum values omitted).
 
         NB: Different defaults than for method call a.argmax().
+
+        If no axis is given (default), array a is flattened first.
+
+        If the indices are returned as unit vectors in an array u say,
+        then u is always of the same shape as the (possibly flattened) input array a.
+
+        If the indices are returned as numbers, the shape of the array of indices
+        is controlled by parameter keepdims. If keepdims is not set (default),
+        the shape of the indices is the shape of a with the specified axis removed
+        (converted to a scalar if no dimensions remain). Otherwise, if keepdims is
+        set, the axis along which the maximum is taken is left in the result as
+        dimension of size 1.
+
+        If the maximum values are returned as well, the shape of this part of the output is
+        also controlled by parameter keepdims. If keepdims is not set (default), a 1D array
+        of maximum values is returned with one entry per element of the given array a with
+        the given axis removed; if axis is None, the maximum is returned as a scalar.
+        Otherwise, if keepdims is set, the array of maximum values is of the same shape
+        as the given array a except that the dimension of the given axis is reduced to 1;
+        if axis is None, all axes are present as dimensions of size 1.
         """
-        # TODO: add keepdims=
         if key is None:
             key = lambda a: a
 
@@ -2987,6 +3080,7 @@ class Runtime:
         assert key_size in (1, a.shape[-1])
 
         shape = a.shape
+        ndim = a.ndim - key_size + 1  # number of dimensions corrected for key size
         if axis is None:
             if key_size == 1:
                 a = self.np_reshape(a, (1, a.size))
@@ -3006,14 +3100,18 @@ class Runtime:
                 # Collapse all dimensions except the last two:
                 a = self.np_reshape(a, (-1, a.shape[-2], key_size))
         u, m = self._np_argmax(a, key)
+        # u is a 2D array
         if not arg_unary:
             iv = np.arange(u.shape[1])
             if isinstance(a, self.SecureFixedPointArray):
                 iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
             u = u @ iv
         if axis is None:
-            u = u[0]
-            m = m[0][0]
+            if not arg_unary and keepdims:
+                # convert shape u from (1,) to (1,...,1)
+                u = self.np_reshape(u, (1,) * ndim)
+            else:
+                u = u[0]
         else:
             shape = list(shape)
             if key_size > 1:
@@ -3021,13 +3119,26 @@ class Runtime:
             if arg_unary:
                 shape[axis], shape[-1] = shape[-1], shape[axis]
             else:
-                del shape[axis]
+                if keepdims:
+                    shape[axis] = 1
+                else:
+                    del shape[axis]
             u = self.np_reshape(u, tuple(shape))
             if arg_unary:
                 u = self.np_swapaxes(u, axis, -1)
         if arg_only:
             return u
 
+        if axis is None:
+            if keepdims:
+                m = self.np_reshape(m, (1,) * ndim)
+            else:
+                m = m[0][0]
+        elif keepdims:
+            if arg_unary:
+                shape[axis], shape[-1] = shape[-1], shape[axis]  # NB: restore shape
+                shape[axis] = 1
+            m = self.np_reshape(m, tuple(shape))
         return u, m
 
     def _np_argmax(self, a, key):
