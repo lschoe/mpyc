@@ -677,6 +677,25 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(secfxp(-21.5) // 7.5)), -3.0)
             self.assertEqual(mpc.run(mpc.output(list(divmod(secfxp(21.5), 0.5)))), [43.0, 0.0])
 
+            if f != 64:
+                delta = 1.2 * 2**-f
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.sin(secfxp(math.pi/16)))),
+                                       math.sin(math.pi/16), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.cos(secfxp(-math.pi/8)))),
+                                       math.cos(-math.pi/8), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.sin(secfxp(-math.pi/4)))),
+                                       math.sin(-math.pi/4), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.cos(secfxp(math.pi/2)))),
+                                       math.cos(math.pi/2), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.sin(secfxp(1)))),
+                                       math.sin(1), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.cos(secfxp(-2)))),
+                                       math.cos(-2), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.tan(secfxp(0.5)))),
+                                       math.tan(0.5), delta=math.sqrt(1/delta)*delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.tan(secfxp(2)))),
+                                       math.tan(2), delta=2*math.sqrt(1/delta)*delta)
+
     def test_secflt(self):
         secflt = mpc.SecFlt()
         a = secflt(1.25)

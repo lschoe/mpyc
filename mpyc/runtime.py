@@ -25,6 +25,7 @@ from mpyc import finfields
 from mpyc import thresha
 from mpyc import sectypes
 from mpyc import asyncoro
+from mpyc import mpctools
 import mpyc.secgroups
 import mpyc.random
 import mpyc.statistics
@@ -1990,8 +1991,7 @@ class Runtime:
             x[i] = x[i] * a
         x = await self._reshare(x)
         if f and not a_integral:
-            x = self.trunc(x, f=f, l=stype.bit_length)
-            x = await self.gather(x)
+            x = await self.trunc(x, f=f, l=stype.bit_length)
         return x
 
     @mpc_coro
@@ -2100,8 +2100,7 @@ class Runtime:
                 x[i] >>= f  # NB: in-place rshift
         x = await self._reshare(x)
         if f and not x_integral and not y_integral:
-            x = self.trunc(x, f=f, l=sftype.bit_length)
-            x = await self.gather(x)
+            x = await self.trunc(x, f=f, l=sftype.bit_length)
         return x
 
     @mpc_coro
@@ -3672,6 +3671,111 @@ class Runtime:
         for _ in range(theta):
             c *= 2 - c * b
         return c * v
+
+    @mpc_coro
+    async def _cpx_mul(self, x, y):
+        """Secure complex product of 2-tuples x and y (one resharing)."""
+        # NB: ad hoc implementation for use in self.sincos() below
+        shx = isinstance(x[0], self.SecureObject)
+        shy = isinstance(y[0], self.SecureObject)
+        stype = type(x[0]) if shx else type(y[0])
+        f = stype.frac_length
+        x_integral = True
+        y_integral = True
+        x = list(x)
+        y = list(y)
+        if isinstance(x[0], float):
+            x[0] = round(x[0] * 2**f)
+            x_integral = False
+        if isinstance(x[1], float):
+            x[1] = round(x[1] * 2**f)
+            x_integral = False
+        if isinstance(y[0], float):
+            y[0] = round(y[0] * 2**f)
+            y_integral = False
+        if isinstance(y[1], float):
+            y[1] = round(y[1] * 2**f)
+            y_integral = False
+        x_integral = x_integral and x[0].integral and x[1].integral
+        y_integral = y_integral and y[0].integral and y[1].integral
+        await self.returnType((stype, x_integral and y_integral), 2)
+
+        if shx and shy:
+            x, y = await self.gather(x, y)
+        elif shx:
+            x = await self.gather(x)
+        else:
+            y = await self.gather(y)
+        a, b = x
+        c, d = y
+        z = [a * c - b * d, a * d + b * c]  # TODO: support complex multiplication in finite fields
+        if f and (x_integral or y_integral):
+            # NB: in-place rshifts
+            z[0] >>= f
+            z[1] >>= f
+        if shx and shy:
+            z = await self._reshare(z)
+        if f and not (x_integral or y_integral):
+            z = await self.trunc(z, f=f, l=stype.bit_length)
+        return z
+
+    @mpc_coro
+    async def sincos(self, a):
+        """Secure sine and cosine of fixed-point number a.
+
+        See "New Approach for Sine and Cosine in Secure Fixed-Point Arithmetic"
+        by Stan Korzilius and Berry Schoenmakers, to appear in the proceedings of
+        CSCML 2023, 7th International Symposium on Cyber Security Cryptography and
+        Machine Learning, LNCS 13914, Springer.
+        """
+        secfxp = type(a)
+        await self.returnType(secfxp, 2)
+
+        f = secfxp.frac_length
+        k = f + 6
+        secfxp2 = self.SecFxp(2*k)  # TODO: tune bit length and fractional length
+        n = 2**k
+        r_bits = self.random_bits(secfxp2, k)
+        psi = 0
+        for r_i in r_bits:
+            psi <<= 1
+            psi += r_i
+        r12 = r_bits[1] * r_bits[2]
+        s0 = 1 - 2*r_bits[0]
+        c = s0 * (1 - r_bits[1] - r_bits[2] + r12 + (r_bits[2] - 2*r12)/math.sqrt(2))
+        s = s0 * (r_bits[1] - r12 + r_bits[2]/math.sqrt(2))
+        cs_psi = [(c, -s)]
+        for i in range(3, k):
+            theta_i = math.pi / 2**i
+            c_i = 1 + r_bits[i] * (math.cos(theta_i) - 1)
+            s_i = r_bits[i] * -math.sin(theta_i)
+            cs_psi.append((c_i, s_i))
+        cs_psi = mpctools.reduce(self._cpx_mul, cs_psi)
+        R = self._random(secfxp2, 2**self.options.sec_param) << k
+
+        a = self.convert(a, secfxp2)
+        a = (a / (2*math.pi)) * n
+        a = self.trunc(a) << k
+        chi = await mpc.output(a + psi + R * n, raw=True)
+        chi = chi.value >> k
+        chi = (chi % n) * 2*math.pi/n
+        c, s = math.cos(chi), math.sin(chi)
+        c, s = self._cpx_mul(cs_psi, (c, s))
+        c, s = self.convert([c, s], secfxp)
+        return s, c
+
+    def sin(self, a):
+        """Secure sine of fixed-point number a."""
+        return self.sincos(a)[0]
+
+    def cos(self, a):
+        """Secure cosine of fixed-point number a."""
+        return self.sincos(a)[1]
+
+    def tan(self, a):
+        """Secure tangent of fixed-point number a."""
+        s, c = self.sincos(a)
+        return s / c
 
     def unit_vector(self, a, n):
         """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n.
