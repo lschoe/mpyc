@@ -632,7 +632,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
     # See Henri Cohen's book "A Course in Computational Algebraic Number Theory", Chapter 5.
     @classmethod
     def operation(cls, f1, f2, /):  # Cohen: Algorithm 5.4.7 (Shanks 1969)
-        a1, b1, c1 = f1
+        a1, b1, _ = f1
         a2, b2, c2 = f2
         s = (b1 + b2)/2
         _d, _, y1 = runtime.gcdext(a1, a2, l=type(a1).bit_length//2)

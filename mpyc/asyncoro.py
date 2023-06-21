@@ -169,23 +169,23 @@ class _AwaitableFuture:
         yield  # NB: makes __await__ iterable
 
 
-class _SharesCounter(Future):
-    """Count and gather all futures (shares) recursively for a given object."""
+class _SharesTallier(Future):
+    """Tally and gather all futures (shares) recursively for a given object."""
 
-    __slots__ = 'counter', 'obj'
+    __slots__ = 'tally', 'obj'
 
     def __init__(self, loop, obj):
         super().__init__(loop=loop)
-        self.counter = 0
+        self.tally = 0
         self._add_callbacks(obj)
-        if not self.counter:
+        if not self.tally:
             self.set_result(_get_results(obj))
         else:
             self.obj = obj
 
     def _decrement(self, _):
-        self.counter -= 1
-        if not self.counter:
+        self.tally -= 1
+        if not self.tally:
             self.set_result(_get_results(self.obj))
 
     def _add_callbacks(self, obj):
@@ -194,10 +194,10 @@ class _SharesCounter(Future):
                 if obj.share.done():
                     obj.share = obj.share.result()
                 else:
-                    self.counter += 1
+                    self.tally += 1
                     obj.share.add_done_callback(self._decrement)
         elif isinstance(obj, Future) and not obj.done():
-            self.counter += 1
+            self.tally += 1
             obj.add_done_callback(self._decrement)
         elif isinstance(obj, (list, tuple)):
             for x in obj:
@@ -238,7 +238,7 @@ def gather_shares(rt, *obj):
 
     if not rt.options.no_async:
         assert isinstance(obj, (list, tuple)), obj
-        return _SharesCounter(rt._loop, obj)
+        return _SharesTallier(rt._loop, obj)
 
     return _AwaitableFuture(_get_results(obj))
 

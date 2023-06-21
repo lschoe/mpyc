@@ -62,7 +62,7 @@ class FiniteFieldElement:
 
     __slots__ = 'value'
 
-    modulus = None
+    modulus: type  # set by subclass
     order = None
     characteristic = None
     ext_deg = None
