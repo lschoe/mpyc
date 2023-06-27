@@ -899,6 +899,10 @@ class Arithmetic(unittest.TestCase):
         cs_f = lambda b, i: [b * (2*i+1) + i**2, (b*2+1) * 3**i]
         self.assertEqual(mpc.run(mpc.output(mpc.find(x, 2, bits=False, cs_f=cs_f))), [4, 9])
 
+    def test_utils(self):
+        self.assertEqual(mpc.communication_cost(), 0)
+        self.assertEqual(mpc.communication_cost(per_user=True), [0])
+        self.assertGreater(mpc.elapsed_time(), 0)
 
 if __name__ == "__main__":
     unittest.main()
