@@ -3279,10 +3279,7 @@ class Runtime:
     @mpc_coro
     async def random_bits(self, sftype, n, signed=False):
         """n secure uniformly random bits of the given type."""
-        prss0 = False
         if issubclass(sftype, self.SecureObject):
-            if issubclass(sftype, self.SecureFiniteField):
-                prss0 = True
             await self.returnType((sftype, True), n)
             field = sftype.field
             f = sftype.frac_length
@@ -3307,12 +3304,9 @@ class Runtime:
         h = n
         while h > 0:
             rs = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
+            zs = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), h)
             # Compute and open the squares and compute square roots.
-            r2s = [r * r for r in rs]
-            if prss0:
-                z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), h)
-                for i in range(h):
-                    r2s[i] += z[i]
+            r2s = [field(r.value**2 + z.value) for r, z in zip(rs, zs)]
             r2s = await self.output(r2s, threshold=2*t)
             for r, r2 in zip(rs, r2s):
                 if r2.value != 0:
@@ -3329,10 +3323,7 @@ class Runtime:
     async def np_random_bits(self, sftype, n, signed=False):
         """Return shape-(n,) secure array of given type with uniformly random bits."""
         # TODO: extend to arbitrary shapes
-        prss0 = False
         if issubclass(sftype, self.SecureObject):
-            if issubclass(sftype, self.SecureFiniteField):
-                prss0 = True
             await self.returnType((sftype.array, True, (n,)))
             field = sftype.field
             f = sftype.frac_length
@@ -3358,11 +3349,9 @@ class Runtime:
         h = n
         while h:
             _r = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
+            z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), h)
             # Compute and open the squares and later compute square roots.
-            _r2 = _r * _r
-            if prss0:
-                z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), h)
-                _r2 += z
+            _r2 = field.array(_r.value**2 + z.value)
             _r2 = await self.output(_r2, threshold=2*t)
             mask = _r2.value != 0
             h -= np.count_nonzero(mask)
@@ -3977,6 +3966,10 @@ def setup():
         pid = options.index or 0
         base_port = options.base_port or 11365
         parties = [Party(i, 'localhost', base_port + i) for i in range(m)]
+
+    options.no_prss = options.no_prss or os.getenv('MPYC_NOPRSS') == '1'  # check if MPYC_NOPRSS set
+    if options.no_prss:
+        logging.info('Use of PRSS (pseudorandom secret sharing) disabled.')
 
     if options.threshold is None:
         options.threshold = (m-1)//2
