@@ -135,7 +135,8 @@ async def main():
         coefs = w_powers[[[(-j * k) % N for k in range(N)] for j in range(n)]]
     else:
         coefs = Zp.array([[w_powers[-j*k % N].value for k in range(N)] for j in range(n)])
-    sum_powers = np.sum(np.fromiter((np_pwlst(T[i+1][-1] / N, basis[i], N) for i in range(m)), 'O'))
+    sum_powers = np.sum(np.fromiter((np_pwlst(T[i+1][-1] / N, basis[i], N) for i in range(m)),
+                                    'O', count=m))
     x = coefs @ sum_powers
     Ax_bounded_by_b = np.all(A @ x <= b * cd)
     x_nonnegative = np.all(x >= 0)
@@ -145,7 +146,8 @@ async def main():
         coefs = w_powers[[[(-i * k) % N for k in range(N)] for i in range(N - m, N)]]
     else:
         coefs = Zp.array([[w_powers[-i*k % N].value for k in range(N)] for i in range(N - m, N)])
-    sum_powers = np.sum(np.fromiter((np_pwlst(T[0][j] / N, cobasis[j], N) for j in range(n)), 'O'))
+    sum_powers = np.sum(np.fromiter((np_pwlst(T[0][j] / N, cobasis[j], N) for j in range(n)),
+                                    'O', count=n))
     y = coefs @ sum_powers
     yA_bounded_by_c = np.all(y @ A >= c * cd)
     y_nonnegative = np.all(y >= 0)

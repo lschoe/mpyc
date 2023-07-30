@@ -60,7 +60,10 @@ async def bsgn_0(a):
 
     n = a.size
     s = mpc.np_random_bits(Zp, n, signed=True)  # n random signs
-    r2 = mpc._np_randoms(Zp, n) ** 2  # n random squares modulo p
+    r2 = mpc._np_randoms(Zp, n)
+    if mpc.options.no_prss:
+        r2 = await r2
+    r2 **= 2  # n random squares modulo p
     r2 = mpc._reshare(r2)
     s, r2 = await mpc.gather(s, r2)
     y = s * r2
@@ -87,7 +90,10 @@ async def bsgn_1(a):
 
     n = a.size
     s = mpc.np_random_bits(Zp, 3*n, signed=True)  # 3n random signs
-    r2 = mpc._np_randoms(Zp, 3*n) ** 2  # 3n random squares modulo p
+    r2 = mpc._np_randoms(Zp, 3*n)
+    if mpc.options.no_prss:
+        r2 = await r2
+    r2 **= 2  # 3n random squares modulo p
     r2 = mpc._reshare(r2)
     s, r2 = await mpc.gather(s, r2)
     s = s.reshape(3, n)
@@ -127,7 +133,10 @@ async def bsgn_2(a):
 
     n = a.size
     s = mpc.np_random_bits(Zp, 6*n, signed=True)  # 6n random signs
-    r2 = mpc._np_randoms(Zp, 6*n) ** 2  # 6n random squares modulo p
+    r2 = mpc._np_randoms(Zp, 6*n)
+    if mpc.options.no_prss:
+        r2 = await r2
+    r2 **= 2  # 6n random squares modulo p
     r2 = mpc._reshare(r2)
     s, r2 = await mpc.gather(s, r2)
     s = s.reshape(6, n)
@@ -144,7 +153,7 @@ async def bsgn_2(a):
     y = await mpc.output(y, threshold=2*mpc.threshold)
     t = np.sum(s[:5] * legendre_p(y[:5].value), axis=0)
     t = await mpc.output(t * y[5])
-    return Zp.array(s[5] * legendre_p(t.value)).reshape(a.shape)
+    return (s[5] * legendre_p(t.value)).reshape(a.shape)
 
 
 async def main():

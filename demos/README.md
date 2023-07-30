@@ -102,7 +102,7 @@ optional arguments:
 
 `python ridgeregression.py -i3 -a7`
 
-`python ridgeregression.py -M3`
+`python ridgeregression.py -M3 --no-prss`
 
 `python multilateration.py -i 3 4 5`
 

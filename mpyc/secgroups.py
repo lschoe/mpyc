@@ -525,7 +525,10 @@ async def _bit_length(a):  # TODO: integrate this function in mpyc.runtime
     for r_i in reversed(r_bits):
         r_modl <<= 1
         r_modl += r_i.value
-    r_divl = runtime._random(Zp, 1<<runtime.options.sec_param).value
+    r_divl = runtime._random(Zp, 1<<runtime.options.sec_param)
+    if runtime.options.no_prss:
+        r_divl = (await r_divl)[0]
+    r_divl = r_divl.value
     a = await runtime.gather(a)
     c = await runtime.output(a + ((1<<l) + (r_divl << l) + r_modl))
     c = c.value % (1<<l)

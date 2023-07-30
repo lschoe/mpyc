@@ -1,6 +1,6 @@
 """Support for natively asynchronous REPL with MPyC preloaded.
 
-To launch a natively asynch REPL with MPyC preloaded, run:
+To launch a natively async REPL with MPyC preloaded, run:
 
     python -m mpyc
 

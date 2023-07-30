@@ -98,6 +98,8 @@ async def bsgn_0(a):
 
     s = mpc.random_bits(Zp, 1, signed=True)  # random sign
     r = mpc._random(Zp)
+    if mpc.options.no_prss:
+        r = (await r)[0]
     r = mpc.prod([r, r])  # random square modulo p
     a, s, r = await mpc.gather(a, s, r)
     b = await mpc.prod([2*a+1, s[0], r])
@@ -117,6 +119,8 @@ async def vector_bsgn_0(x):
 
     s = mpc.random_bits(Zp, n, signed=True)  # n random signs
     r = mpc._randoms(Zp, n)
+    if mpc.options.no_prss:
+        r = await r
     r = mpc.schur_prod(r, r)  # n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
     y = [2*a+1 for a in x]
@@ -141,6 +145,8 @@ async def bsgn_1(a):
 
     s = mpc.random_bits(Zp, 3, signed=True)  # 3 random signs
     r = mpc._randoms(Zp, 3)
+    if mpc.options.no_prss:
+        r = await r
     r = mpc.schur_prod(r, r)  # 3 random squares modulo p
     a, s, r = await mpc.gather(a, s, r)
     y = [b + 2*i for b in (2*a+1,) for i in (-1, 0, 1)]
@@ -168,6 +174,8 @@ async def vector_bsgn_1(x):
 
     s = mpc.random_bits(Zp, 3*n, signed=True)  # 3n random signs
     r = mpc._randoms(Zp, 3*n)
+    if mpc.options.no_prss:
+        r = await r
     r = mpc.schur_prod(r, r)  # 3n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
     y = [b + 2*i for b in (2*a+1 for a in x) for i in (-1, 0, 1)]
@@ -200,6 +208,8 @@ async def bsgn_2(a):
 
     s = mpc.random_bits(Zp, 6, signed=True)  # 6 random signs
     r = mpc._randoms(Zp, 6)
+    if mpc.options.no_prss:
+        r = await r
     r = mpc.schur_prod(r, r)  # 6 random squares modulo p
     a, s, r = await mpc.gather(a, s, r)
     y = [b + 2*i for b in (2*a+1,) for i in (-2, -1, 0, 1, 2)]
@@ -224,6 +234,8 @@ async def vector_bsgn_2(x):
 
     s = mpc.random_bits(Zp, 6*n, signed=True)  # 6n random signs
     r = mpc._randoms(Zp, 6*n)
+    if mpc.options.no_prss:
+        r = await r
     r = mpc.schur_prod(r, r)  # 6n random squares modulo p
     x, s, r = await mpc.gather(x, s, r)
     y = [b + 2*i for b in (2*a+1 for a in x) for i in (-2, -1, 0, 1, 2)]
@@ -252,14 +264,17 @@ async def vector_sge(x):
     l = stype.bit_length
     k = mpc.options.sec_param
 
-    r_bits = await mpc.random_bits(Zp, (l+1) * n)
+    r_bits = mpc.random_bits(Zp, (l+1) * n)
+    r_divl = mpc._randoms(Zp, n, 1<<k)
+    r_bits = await r_bits
     r_bits = [b.value for b in r_bits]
     r_modl = [0] * n
     for j in range(n):
         for i in range(l-1, -1, -1):
             r_modl[j] <<= 1
             r_modl[j] += r_bits[l * j + i]
-    r_divl = mpc._randoms(Zp, n, 1<<k)
+    if mpc.options.no_prss:
+        r_divl = await r_divl
     x = await mpc.gather(x)
     x_r = [a + ((1<<l) + b) for a, b in zip(x, r_modl)]
     c = await mpc.output([a + (b.value << l) for a, b in zip(x_r, r_divl)])
