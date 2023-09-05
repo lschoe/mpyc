@@ -298,6 +298,54 @@ class Arithmetic(unittest.TestCase):
         u = mpc.np_unit_vector(secfxp(3), 7)
         self.assertEqual(mpc.run(mpc.output(np.argmax(u))), 3)
 
+        # Test the integral property
+        a1 = np.array([[-1.5, 2.5], [4.5, -8.5]])
+        a2 = np.array([[-1, 2], [4, -8]])
+        c1 = secfxp.array(a1)
+        c2 = secfxp.array(a2)
+        self.assertEqual(c1.integral, False)
+        self.assertEqual(c2.integral, True)
+        self.assertEqual(mpc.np_add(c1,c2).integral, False)
+        self.assertEqual(mpc.np_add(c2,c2).integral, True)
+        self.assertEqual(mpc.np_multiply(c1,c2).integral, False)
+        self.assertEqual(mpc.np_multiply(c2,c2).integral, True)
+        self.assertEqual(mpc.np_matmul(c1,c2).integral, False)
+        self.assertEqual(mpc.np_matmul(c2,c2).integral, True)
+
+        comb_array = mpc.np_hstack((c1,c2))
+        self.assertEqual(comb_array.shape, (2,4))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_hstack((c1,c1))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_hstack((c2,c2))
+        self.assertEqual(comb_array.integral, True)
+
+        comb_array = mpc.np_column_stack((c1,c2))
+        self.assertEqual(comb_array.shape, (2,4))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_column_stack((c1,c1))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_column_stack((c2,c2))
+        self.assertEqual(comb_array.integral, True)
+
+        comb_array = mpc.np_stack((c1,c2))
+        self.assertEqual(comb_array.shape, (2,2,2))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_stack((c1,c1))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_stack((c2,c2))
+        self.assertEqual(comb_array.integral, True)
+
+        comb_array = mpc.np_vstack((c1,c2))
+        self.assertEqual(comb_array.shape, (4,2))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_vstack((c1,c1))
+        self.assertEqual(comb_array.integral, False)
+        comb_array = mpc.np_vstack((c2,c2))
+        self.assertEqual(comb_array.integral, True)
+        
+
+
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal
