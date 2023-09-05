@@ -605,6 +605,18 @@ class Arithmetic(unittest.TestCase):
         c = mpc.run(mpc.output(mpc.to_bits(secfxp(-2**15))))
         self.assertEqual(c, [0]*31 + [1])
 
+        # Test integral property
+        c1 = secfxp(8)
+        self.assertEqual(c1.integral, True)
+        self.assertEqual((c1*0.5).integral, False)
+        c2 = secfxp(1.5)
+        self.assertEqual(c2.integral, False)
+        self.assertEqual((c1*c2).integral, False)
+        self.assertEqual((c1+c2).integral, False)
+        c2 = secfxp(1)
+        self.assertEqual((c1*c2).integral, True)
+        self.assertEqual((c1+c2).integral, True)
+
         for f in [8, 16, 32, 64]:
             secfxp = mpc.SecFxp(2*f)
             c = mpc.run(mpc.output(secfxp(1) + secfxp(1)))
