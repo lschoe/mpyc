@@ -2640,9 +2640,16 @@ class Runtime:
     @mpc_coro_no_pc
     async def np_vstack(self, tup):
         a = tup[0]
+        stype = type(a)
         shape = list(a.shape) if a.ndim >= 2 else [1, a.shape[0]]
         shape[0] = sum(a.shape[0] if a.shape[1:] else 1 for a in tup)
-        await self.returnType((type(a), tuple(shape)))
+
+        shape = tuple(shape)
+        if issubclass(stype, self.SecureFixedPointArray):
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in tup)
+            await self.returnType((stype, integral, shape))
+        else:
+            await self.returnType((stype, shape))
         tup = await self.gather(tup)
         return np.vstack(tup)
 
