@@ -48,18 +48,24 @@ class Arithmetic(unittest.TestCase):
         d = np.stack((c, c, c))
         np.assertEqual(mpc.run(mpc.output(c @ d)), a @ b)
         np.assertEqual(mpc.run(mpc.output(d @ d)), b @ b)
-        np.assertEqual(mpc.run(mpc.output(np.outer(c, c))), np.outer(a, a))
+        np.assertEqual(mpc.run(mpc.output(np.outer(c, a))), np.outer(a, a))
         np.assertEqual(mpc.run(mpc.output(np.stack((c, c), axis=1))), np.stack((a, a), axis=1))
         np.assertEqual(mpc.run(mpc.output(np.block([[c, c], [c, c]]))), np.block([[a, a], [a, a]]))
         np.assertEqual(mpc.run(mpc.output(np.block([[secint(9), -1]]))), np.block([[9, -1]]))
         np.assertEqual(mpc.run(mpc.output(np.vstack((c, c, c)))), np.vstack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.hstack((c, c, c)))), np.hstack((a, a, a)))
+        np.assertEqual(mpc.run(mpc.output(np.hstack((c[0, 0],)))), np.hstack((a[0, 0],)))
         np.assertEqual(mpc.run(mpc.output(np.dstack((c, c, c)))), np.dstack((a, a, a)))
+        np.assertEqual(mpc.run(mpc.output(np.dstack((c[0], c[0])))), np.dstack((a[0], a[0])))
+        np.assertEqual(mpc.run(mpc.output(np.dstack((c[0, 0],)))), np.dstack((a[0, 0],)))
         np.assertEqual(mpc.run(mpc.output(np.column_stack((c, c, c)))), np.column_stack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.row_stack((c, c, c)))), np.row_stack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.split(c, 2, 1)[0])), np.split(a, 2, 1)[0])
+        np.assertEqual(mpc.run(mpc.output(np.dsplit(d, 1)[0])), np.dsplit(b, 1)[0])
+        np.assertEqual(mpc.run(mpc.output(np.hsplit(c, 2)[0])), np.hsplit(a, 2)[0])
         np.assertEqual(mpc.run(mpc.output(np.vsplit(c, np.array([1]))[0])), np.vsplit(a, [1])[0])
         np.assertEqual(mpc.run(mpc.output(np.reshape(c, (-1,)))), np.reshape(a, (-1,)))
+        np.assertEqual(mpc.run(mpc.output(np.reshape(c, -1))), np.reshape(a, -1))
         np.assertEqual(mpc.run(mpc.output(np.fliplr(c))), np.fliplr(a))
         a1, a2 = a[:, :, 1], a[:, 0, :].reshape(2, 1)
         np.assertEqual(mpc.run(mpc.output(np.add(secint.array(a1), secint.array(a2)))), a1 + a2)
@@ -117,14 +123,23 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.where(False, 10, c))), a)
         a_ = a.signed_()
         np.assertEqual(mpc.run(mpc.output(np.amin(c))), np.amin(a_))
+        np.assertEqual(mpc.run(mpc.output(np.amin(c, keepdims=True))), np.amin(a_, keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.amin(c[0], axis=0))), np.amin(a_[0], axis=0))
         np.assertEqual(mpc.run(mpc.output(np.amin(c, axis=2))), np.amin(a_, axis=2))
+        np.assertEqual(mpc.run(mpc.output(np.amin(c, axis=2, keepdims=True))),
+                       np.amin(a_, axis=2, keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.amin(c, axis=(1, 2)))), np.amin(a_, axis=(1, 2)))
-        np.assertEqual(mpc.run(mpc.output(np.amin(c, axis=(0, 1)))), np.amin(a_, axis=(0, 1)))
+        np.assertEqual(mpc.run(mpc.output(np.amin(c, axis=(0, 1), keepdims=True))),
+                       np.amin(a_, axis=(0, 1), keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.amax(c))), np.amax(a_))
+        np.assertEqual(mpc.run(mpc.output(np.amax(c, keepdims=True))), np.amax(a_, keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.amax(c[0], axis=1))), np.amax(a_[0], axis=1))
         np.assertEqual(mpc.run(mpc.output(np.amax(c, axis=-2))), np.amax(a_, axis=-2))
+        np.assertEqual(mpc.run(mpc.output(np.amax(c, axis=-2, keepdims=True))),
+                       np.amax(a_, axis=-2, keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.amax(c, axis=(2, -3)))), np.amax(a_, axis=(2, -3)))
+        np.assertEqual(mpc.run(mpc.output(np.amax(c, axis=(1, 2), keepdims=True))),
+                       np.amax(a_, axis=(1, 2), keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.sort(c[..., :1]))), np.sort(a_[..., :1]))
 
         np.assertEqual(mpc.run(mpc.output(np.all(c == 0))), False)
@@ -140,6 +155,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.sort(d, axis=None))), np.sort(b.signed_(), axis=None))
         np.assertEqual(mpc.run(mpc.output(d.sort(key=lambda a: a+1))), np.sort(b.signed_()))
         np.assertEqual(mpc.run(mpc.output(np.argmin(d, axis=0))), np.argmin(b, axis=0))
+        np.assertEqual(mpc.run(mpc.output(np.argmin(d, axis=0, keepdims=True))),
+                       np.argmin(b, axis=0, keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.argmax(d, axis=2))), np.argmax(b, axis=2))
         b3 = np.stack((b, b+1, b-1)).signed_()
         d3 = np.stack((d, d+1, d-1))
@@ -150,8 +167,20 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(d3.argmin(axis=2, arg_unary=True, arg_only=True) @ u)),
                        np.argmin(b3, axis=2))
         np.assertEqual(mpc.run(mpc.output(np.argmax(d3, axis=1))), np.argmax(b3, axis=1))
+        np.assertEqual(mpc.run(mpc.output(np.argmax(d3, keepdims=True))), b3.argmax(keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.argmin(d3, axis=0))), np.argmin(b3, axis=0))
-        np.assertEqual(mpc.run(mpc.output(np.argmax(d3))), np.argmax(b3))
+        np.assertEqual(mpc.run(mpc.output(d3.argmin(keepdims=True, arg_unary=False)[0])),
+                       b3.argmin(keepdims=True))
+        np.assertEqual(mpc.run(mpc.output(d3.argmin(axis=0, keepdims=True, arg_unary=False)[0])),
+                       b3.argmin(axis=0, keepdims=True))
+        np.assertEqual(mpc.run(mpc.output(d3.argmin(axis=1, keepdims=True)[1])),
+                       np.amin(b3, axis=1, keepdims=True))
+        np.assertEqual(mpc.run(mpc.output(d3.argmax(axis=2, keepdims=True, arg_unary=False)[0])),
+                       b3.argmax(axis=2, keepdims=True))
+        np.assertEqual(mpc.run(mpc.output(d3.argmax(axis=-1, keepdims=True)[1])),
+                       np.amax(b3, axis=-1, keepdims=True))
+        np.assertEqual(mpc.run(mpc.output(d3.argmax(keepdims=True, arg_unary=False)[0])),
+                       np.argmax(b3, keepdims=True))
 
         class key:
             size = 2  # __lt__() assumes last dimension of size 2
@@ -190,9 +219,11 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(TypeError, len, secint.array(np.array(42)))
         np.assertEqual(mpc.run(mpc.output(c.copy())), mpc.run(mpc.output(c)))
         np.assertEqual(mpc.run(mpc.output(c.transpose([1, 2, 0]))), a.transpose([1, 2, 0]))
+        np.assertEqual(mpc.run(mpc.output(c[0, 0].transpose())), a[0, 0].transpose())
         np.assertEqual(mpc.run(mpc.output(c.swapaxes(0, 1))), a.swapaxes(0, 1))
         self.assertEqual(mpc.run(mpc.output(c.sum(initial=secint(-1)))), a.sum(initial=-1))
         np.assertEqual(mpc.run(mpc.output(c.sum(axis=0))), a.sum(axis=0))
+        np.assertEqual(mpc.run(mpc.output(c.sum(keepdims=True))), a.sum(keepdims=True))
         np.assertEqual(mpc.run(mpc.output(c.sum(axis=(0, 2), keepdims=True))),
                        a.sum(axis=(0, 2), keepdims=True))
         np.assertEqual(mpc.run(mpc.output(c**254 * c**0 * c**-253)), a)
@@ -225,7 +256,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(c, senders=0)))), a)
         np.assertEqual(mpc.run(mpc.output(mpc.input(c, senders=0))), a)
         np.assertEqual(mpc.run(mpc.output(mpc._reshare(c) @ c)), a @ a)
-        np.assertEqual(mpc.run(mpc.output(np.outer(c, c))), np.outer(a, a))
+        np.assertEqual(mpc.run(mpc.output(np.outer(secfxp.array(np.array([2, 2])), c))),
+                       np.outer([2, 2], a))
         b = mpc.run(mpc.output(c * c))
         np.assertEqual(b, a * a)
         self.assertTrue(np.issubdtype(b.dtype, np.floating))
@@ -274,12 +306,17 @@ class Arithmetic(unittest.TestCase):
         c = secfld.array(np.array([[-3, 0], [1, 2]]))
         np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c))), [[[1, 1], [0, 0]], [[1, 0], [0, 1]]])
         np.assertEqual(mpc.run(mpc.output(mpc.np_from_bits(mpc.np_to_bits(c[1])))), [1, 2])
-        c = mpc.np_random_bits(secfld, 25)
+        c = mpc._np_randoms(secfld, 5)
+        np.assertEqual(mpc.run(mpc.output(np.equal(c**6, c**3))), True)
+        c = mpc.np_random_bits(secfld, 15)
         np.assertEqual(mpc.run(mpc.output(np.equal(c**2, c))), True)
+        a = secfld.field.array([1, 2, 3] * 10)
+        c = secfld.array(a)
+        np.assertEqual(mpc.run(mpc.output(1/c)), 1/a)
 
         secfld = mpc.SecFld(3**2)
         self.assertRaises(TypeError, mpc.np_to_bits, mpc.SecFld(3**2).array(np.array(2)))
-        c = mpc.np_random_bits(secfld, 25)
+        c = mpc.np_random_bits(secfld, 15)
         np.assertEqual(mpc.run(mpc.output(np.equal(c**2, c))), True)
 
         secfld = mpc.SecFld(min_order=2**16)
@@ -287,7 +324,7 @@ class Arithmetic(unittest.TestCase):
         c = secfld.array(a)
         np.assertEqual(mpc.run(mpc.np_is_zero_public(c)), a == 0)
         self.assertEqual(mpc.run(mpc.output(c.flatten().tolist())), [-1, 0, 0, -1])
-        np.assertEqual(mpc.run(mpc.output(np.outer(c, c))), np.outer(a, a))
+        np.assertEqual(mpc.run(mpc.output(np.outer(a, c))), np.outer(a, a))
         np.assertEqual(mpc.run(mpc.output(np.roll(c, 1))), np.roll(a, 1))
         self.assertEqual(len(c), 1)
         self.assertEqual(len(c.T), 2)
@@ -295,6 +332,13 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c+1))), False)
         np.assertEqual(mpc.run(mpc.output(1/(c-1))), 1/(secfld.field.array(a)-1))
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_np_errors(self):
+        secfld = mpc.SecFld(2)
+        c = secfld.array(np.array([[1, 1], [0, 0]]))
+        self.assertRaises(ValueError, c.reshape, -1, -1)
+        self.assertRaises(ValueError, c.reshape, 3, -1)
 
     def test_async(self):
         mpc.options.no_async = False
@@ -653,6 +697,25 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(secfxp(-21.5) // 7.5)), -3.0)
             self.assertEqual(mpc.run(mpc.output(list(divmod(secfxp(21.5), 0.5)))), [43.0, 0.0])
 
+            if f != 64:
+                delta = 1.2 * 2**-f
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.sin(secfxp(math.pi/16)))),
+                                       math.sin(math.pi/16), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.cos(secfxp(-math.pi/8)))),
+                                       math.cos(-math.pi/8), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.sin(secfxp(-math.pi/4)))),
+                                       math.sin(-math.pi/4), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.cos(secfxp(math.pi/2)))),
+                                       math.cos(math.pi/2), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.sin(secfxp(1)))),
+                                       math.sin(1), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.cos(secfxp(-2)))),
+                                       math.cos(-2), delta=delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.tan(secfxp(0.5)))),
+                                       math.tan(0.5), delta=math.sqrt(1/delta)*delta)
+                self.assertAlmostEqual(mpc.run(mpc.output(mpc.tan(secfxp(2)))),
+                                       math.tan(2), delta=2*math.sqrt(1/delta)*delta)
+
     def test_secflt(self):
         secflt = mpc.SecFlt()
         a = secflt(1.25)
@@ -753,6 +816,8 @@ class Arithmetic(unittest.TestCase):
     def test_empty_input(self):
         secint = mpc.SecInt()
         self.assertEqual(mpc.run(mpc.gather([])), [])
+        self.assertEqual(mpc.input([]), [[]])
+        self.assertEqual(mpc.input([], senders=0), [])
         self.assertEqual(mpc.run(mpc.output([])), [])
         self.assertEqual(mpc._reshare([]), [])
         self.assertEqual(mpc.convert([], None), [])
@@ -853,6 +918,10 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(mpc.find(x, 2, bits=False, f=f))), [4, 9])
         cs_f = lambda b, i: [b * (2*i+1) + i**2, (b*2+1) * 3**i]
         self.assertEqual(mpc.run(mpc.output(mpc.find(x, 2, bits=False, cs_f=cs_f))), [4, 9])
+
+        secfld = mpc.SecFld(2)
+        for _ in range(5):
+            self.assertEqual(mpc.run(mpc.output(1/secfld(1))), 1)
 
 
 if __name__ == "__main__":

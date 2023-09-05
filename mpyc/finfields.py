@@ -62,7 +62,7 @@ class FiniteFieldElement:
 
     __slots__ = 'value'
 
-    modulus = None
+    modulus: type  # set by subclass
     order = None
     characteristic = None
     ext_deg = None
@@ -793,7 +793,7 @@ class FiniteFieldArray:
         if isinstance(a, np.ndarray):
             if func.__name__ in ('roll',  'diagonal', 'diag_flat'):
                 a = cls(a, check=False)
-            else:
+            elif func.__name__ != 'flatnonzero':
                 a = cls(a)
         elif isinstance(a, list):
             # for func like vsplit returning list of arrays

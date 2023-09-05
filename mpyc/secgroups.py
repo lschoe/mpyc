@@ -456,7 +456,7 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
         for a, b in zip(self.share, value):
             a.set_share(b.share)
 
-    def __getitem__(self, key):  # NB:  no set_item to prevent mutability
+    def __getitem__(self, key):  # NB: no set_item to prevent mutability
         return self.share[key]
 
     @classmethod
@@ -525,7 +525,10 @@ async def _bit_length(a):  # TODO: integrate this function in mpyc.runtime
     for r_i in reversed(r_bits):
         r_modl <<= 1
         r_modl += r_i.value
-    r_divl = runtime._random(Zp, 1<<runtime.options.sec_param).value
+    r_divl = runtime._random(Zp, 1<<runtime.options.sec_param)
+    if runtime.options.no_prss:
+        r_divl = (await r_divl)[0]
+    r_divl = r_divl.value
     a = await runtime.gather(a)
     c = await runtime.output(a + ((1<<l) + (r_divl << l) + r_modl))
     c = c.value % (1<<l)
@@ -591,7 +594,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
         for a, b in zip(self.share, value):
             a.set_share(b.share)
 
-    def __getitem__(self, key):  # NB:  no set_item to prevent mutability
+    def __getitem__(self, key):  # NB: no set_item to prevent mutability
         return self.share[key]
 
     @classmethod
@@ -632,7 +635,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
     # See Henri Cohen's book "A Course in Computational Algebraic Number Theory", Chapter 5.
     @classmethod
     def operation(cls, f1, f2, /):  # Cohen: Algorithm 5.4.7 (Shanks 1969)
-        a1, b1, c1 = f1
+        a1, b1, _ = f1
         a2, b2, c2 = f2
         s = (b1 + b2)/2
         _d, _, y1 = runtime.gcdext(a1, a2, l=type(a1).bit_length//2)

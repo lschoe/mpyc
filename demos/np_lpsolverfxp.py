@@ -105,13 +105,13 @@ async def main():
 
     logging.info('Solution x')
     x = np.sum(np.fromiter((T[i+1, -1] * mpc.np_unit_vector(basis[i], n + m)[:n] for i in range(m)),
-                           'O'))
+                           'O', count=m))
     Ax_bounded_by_b = np.all(A @ x <= 1.01 * b + 0.0001)
     x_nonnegative = np.all(x >= 0)
 
     logging.info('Dual solution y')
     y = np.sum(np.fromiter((T[0, j] * mpc.np_unit_vector(cobasis[j], n + m)[n:] for j in range(n)),
-                           'O'))
+                           'O', count=n))
     yA_bounded_by_c = np.all(y @ A >= np.where(c > 0, 1/1.01, 1.01) * c - 0.0001)
     y_nonnegative = np.all(y >= 0)
 

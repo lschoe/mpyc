@@ -17,7 +17,7 @@ import logging
 def _matmul_shape(shapeA, shapeB):
     """Return shape of A @ B for given shapes of A and B.
 
-    None is returned for the shape if A and B are both 1-D arrays,
+    None is returned for the shape if A and B are both 1D arrays,
     as A @ B is a scalar in this case, which has no shape.
 
     Note that A @ B does not allow A and/or B to be 0-D arrays.
@@ -146,8 +146,8 @@ def _item_shape(shape, key):
         shape_item.extend(shape[i:])
         return tuple(shape_item)
 
-    except Exception as e:  # IndexError, ValueError, or other
-        logging.debug(f'Exception "{e}" in mpyc.numpy._item_shape for {shape=} {key=}')
+    except Exception as exc:  # IndexError, ValueError, or other
+        logging.debug(f'Exception "{exc}" in mpyc.numpy._item_shape for {shape=} {key=}')
         # Let Numpy generate error message by calling a[key] for dummy array a of given shape:
         return np.empty(shape)[key]
 

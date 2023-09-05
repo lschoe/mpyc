@@ -56,10 +56,10 @@ The MPyC input() and output() methods are used to establish private input and ou
 For instance, to let party P[1] provide an input value V to the protocol, all parties
 issue the following call:
 
-    mpc.input(secnum(v), 1)
+    mpc.input(secint(v), 1)
 
 where party P[1] sets v=V for this call, and all other parties set v=None. This way all
-parties will obtain the (secret-shared) value V of the same secure type secnum.
+parties will obtain the (secret-shared) value V of the same secure type secint.
 
 Similarly, to let party P[2] receive a secret-shared value s as private output, all
 parties issue the following call:
@@ -91,27 +91,29 @@ if m%2 == 0:
     print('OT runs with odd number of parties only.')
     sys.exit()
 
-t = m//2
-message = [(None, None)] * t
-choice = [None] * t
-if mpc.pid == 0:
-    print('You are the trusted third party.')
-elif 1 <= mpc.pid <= t:
-    message[mpc.pid - 1] = (random.randint(0, 99), random.randint(0, 99))
-    print(f'You are sender {mpc.pid} holding messages '
-          f'{message[mpc.pid - 1][0]} and {message[mpc.pid - 1][1]}.')
-else:
-    choice[mpc.pid - t - 1] = random.randint(0, 1)
-    print(f'You are receiver {mpc.pid - t} with random choice bit {choice[mpc.pid - t - 1]}.')
 
-mpc.run(mpc.start())
+async def main():
+    t = m//2
+    message = [(None, None)] * t
+    choice = [None] * t
+    if mpc.pid == 0:
+        print('You are the trusted third party.')
+    elif 1 <= mpc.pid <= t:
+        message[mpc.pid - 1] = (random.randint(0, 99), random.randint(0, 99))
+        print(f'You are sender {mpc.pid} holding messages '
+              f'{message[mpc.pid - 1][0]} and {message[mpc.pid - 1][1]}.')
+    else:
+        choice[mpc.pid - t - 1] = random.randint(0, 1)
+        print(f'You are receiver {mpc.pid - t} with random choice bit {choice[mpc.pid - t - 1]}.')
 
-secnum = mpc.SecInt()
-for i in range(1, t+1):
-    x = mpc.input([secnum(message[i-1][0]), secnum(message[i-1][1])], i)
-    b = mpc.input(secnum(choice[i-1]), t + i)
-    a = mpc.run(mpc.output(mpc.if_else(b, x[1], x[0]), t + i))
-    if a is not None:
-        print(f'You have received message {a}.')
+    async with mpc:
+        secint = mpc.SecInt()
+        for i in range(1, t+1):
+            x = mpc.input([secint(message[i-1][0]), secint(message[i-1][1])], i)
+            b = mpc.input(secint(choice[i-1]), t + i)
+            a = await mpc.output(mpc.if_else(b, x[1], x[0]), t + i)
+            if a is not None:
+                print(f'You have received message {a}.')
 
-mpc.run(mpc.shutdown())
+if __name__ == '__main__':
+    mpc.run(main())

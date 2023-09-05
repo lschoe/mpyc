@@ -13,6 +13,8 @@ Leading coefficient a_n is 1, using 0 for the zero polynomial.
 The operators +,-,*,<<,//,%, and function divmod are overloaded.
 The operators <,<=,>,>=,==,!= are overloaded as well, using the
 lexicographic order for polynomials (zero polynomial is the smallest).
+Plus some SageMath-style functionality, for instance, to access
+coefficients using Python indexing and to reverse a polynomial.
 
 GCD, extended GCD, modular inverse and powers are all supported.
 A simple irreducibility test is provided as well as a basic
@@ -91,6 +93,33 @@ class Polynomial:
     def __int__(self):
         return self._to_int(self.value)
 
+    def __getitem__(self, key):  # NB: no set_item to prevent mutability
+        if isinstance(key, slice):
+            # TODO: consider SageMath-style slicing for prefixes
+            raise IndexError('slicing of polynomials not supported, use list() or similar')
+
+        if not isinstance(key, int):
+            # TODO: consider use of key.__index__() for more generality
+            raise IndexError('use int for indexing polynomials')
+
+        if key == -1 and not self.value:
+            return 0  # e.g., for zero polynomial z we get z[z.degree()] == 0
+
+        if key < 0:
+            raise IndexError('negative index not allowed for nonzero polynomials')
+
+        return self._getitem(key)
+
+    def _getitem(self, key):
+        try:
+            v = self.value[key]
+        except IndexError:
+            v = 0
+        return v
+
+    def __iter__(self):
+        yield from self.value
+
     def __call__(self, x):
         """Evaluate polynomial at given x."""
         p = type(self).p
@@ -154,8 +183,8 @@ class Polynomial:
                     c, i = term.split(f'{x}^')
                     c = 1 if c == '' else int(c)
                     i = int(i)
-            except Exception:
-                raise ValueError('ill formatted polynomial')
+            except Exception as exc:
+                raise ValueError('ill formatted polynomial') from exc
 
             d[i] = d.get(i, 0) + c
 
@@ -189,13 +218,41 @@ class Polynomial:
         return len(a) - 1
 
     @classmethod
+    def _monic(cls, a, lc_pinv=False):
+        a1 = a[-1] if a else 0
+        if a and a1 != 1:
+            p = cls.p
+            a = a[:]
+            a1 = int(gmpy2.invert(a1, p))
+            for i in range(len(a) - 1):
+                a[i] *= a1
+                a[i] %= p
+            a[-1] = 1
+        if lc_pinv:
+            return a, a1  # attach pseudoinverse of leading coefficient
+
+        return a
+
+    @staticmethod
+    def _reverse(a, d=None):
+        if d is None:
+            d = len(a) - 1
+        # d >= -1
+        a = a[:d+1]
+        a.extend([0] * (d + 1 - len(a)))
+        a.reverse()
+        while a and not a[-1]:
+            a.pop()
+        return a
+
+    @classmethod
     def _neg(cls, a):
         p = cls.p
         return [0 if a_i == 0 else p - a_i for a_i in a]
 
     @classmethod
     def _pos(cls, a):
-        return a[:]  # NB: return a copy
+        return a
 
     @classmethod
     def _add(cls, a, b):
@@ -215,7 +272,7 @@ class Polynomial:
     @classmethod
     def _sub(cls, a, b):
         p = cls.p
-        c = a[:] + [0] * (len(b) - len(a))
+        c = a + [0] * (len(b) - len(a))
         for i, b_i in enumerate(b):
             c[i] -= b_i
             if c[i] < 0:
@@ -262,7 +319,7 @@ class Polynomial:
         m = len(a)
         n = len(b)
         if m < n:
-            return a[:]
+            return a
 
         b1 = int(gmpy2.invert(b[-1], p))
         r = a[:]
@@ -285,7 +342,7 @@ class Polynomial:
         m = len(a)
         n = len(b)
         if m < n:
-            return [], a[:]
+            return [], a
 
         b1 = int(gmpy2.invert(b[-1], p))
         q, r = [0] * (m - n + 1), a[:]
@@ -321,17 +378,9 @@ class Polynomial:
 
     @classmethod
     def _gcd(cls, a, b):
-        p = cls.p
         while b:
             a, b = b, cls._mod(a, b)
-
-        # ensure monic a
-        if a and a[-1] != 1:
-            a1 = int(gmpy2.invert(a[-1], p))
-            for i in range(len(a) - 1):
-                a[i] *= a1
-                a[i] %= p
-            a[-1] = 1
+        a = cls._monic(a)
         return a
 
     @classmethod
@@ -344,13 +393,8 @@ class Polynomial:
             s, s1 = s1, cls._sub(s, cls._mul(q, s1))
             t, t1 = t1, cls._sub(t, cls._mul(q, t1))
 
-        # ensure monic a
-        if a and a[-1] != 1:
-            a1 = int(gmpy2.invert(a[-1], p))
-            for i in range(len(a) - 1):
-                a[i] *= a1
-                a[i] %= p
-            a[-1] = 1
+        a, a1 = cls._monic(a, lc_pinv=True)
+        if a1 > 2:
             for i in range(len(s)):
                 s[i] *= a1
                 s[i] %= p
@@ -431,6 +475,31 @@ class Polynomial:
     def degree(self):
         """Degree of polynomial (-1 for zero polynomial)."""
         return self._deg(self.value)
+
+    def monic(self, lc_pinv=False):
+        """Monic version of polynomial.
+
+        Zero polynomial remains unchanged.
+        If lc_pinv is set, inverse of leading coefficient is also returned (0 for zero polynomial).
+        """
+        cls = type(self)
+        a = cls._monic(self.value, lc_pinv=lc_pinv)
+        if lc_pinv:
+            a, a1 = a
+            return cls(a, check=False), a1
+
+        return cls(a, check=False)
+
+    def reverse(self, d=None):
+        """Reverse of polynomial (basically, coefficients in reverse order).
+
+        For example, reverse of x + 2x^2 + 3x^3 is 3 + 2x + x^2.
+        If d is None (default), d is set to the degree of the given poynomial.
+        Otherwise, the given polynomial is first padded with zeros or truncated
+        to attain the given degree d, d>=-1, before it is reversed.
+        """
+        cls = type(self)
+        return cls(cls._reverse(self.value, d=d), check=False)
 
     def __neg__(self):
         cls = type(self)
@@ -718,6 +787,15 @@ class BinaryPolynomial(Polynomial):
     def __int__(self):
         return self.value
 
+    def _getitem(self, key):
+        return (self.value >> key) & 1
+
+    def __iter__(self):
+        a = self.value
+        while a:
+            a, r = divmod(a, 2)
+            yield r
+
     def __call__(self, x):
         """Evaluate polynomial at given x."""
         return bin(self.value).count('1', 2)%2 if x%2 else 0
@@ -791,6 +869,23 @@ class BinaryPolynomial(Polynomial):
     @staticmethod
     def _deg(a):
         return a.bit_length() - 1
+
+    @staticmethod
+    def _monic(a, lc_pinv=False):
+        if lc_pinv:
+            return a, int(a != 0)
+
+        return a
+
+    @staticmethod
+    def _reverse(a, d=None):
+        e = 0 if d is None else d + 1 - a.bit_length()
+        if e < 0:
+            a &= (1 << d+1) - 1  # truncate to d+1 >= 0 least-significant bits
+        a = int(format(a, 'b')[::-1], 2)  # reverse bits in a
+        if e > 0:
+            a <<= e  # pad with e zeros
+        return a
 
     @staticmethod
     def _neg(a):

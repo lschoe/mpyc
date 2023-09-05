@@ -130,7 +130,8 @@ async def crypt_cycle(secgrp, M, public_out=True):
         M = secgrp.decode(M, Z)
     return M
 
-if __name__ == '__main__':
+
+async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--group', type=int, metavar='G',
                         help=('1=EC (default), 2=QR, 3=SG, 4=Cl'))
@@ -156,10 +157,10 @@ if __name__ == '__main__':
             secgrp = mpc.SecClassGroup(l=1024)
     print(f'Using secure group: {secgrp.__name__}')
 
-    mpc.run(mpc.start())
+    await mpc.start()
     print('Boardroom election')
     print('------------------')
-    mpc.run(election(secgrp))
+    await election(secgrp)
     print()
 
     print('Encryption/decryption tests')
@@ -167,10 +168,13 @@ if __name__ == '__main__':
     for m in range(args.batch_size):
         m += 1 + args.offset
         print(f'Plaintext sent: {m}')
-        p = mpc.run(crypt_cycle(secgrp, m, not args.no_public_output))
+        p = await crypt_cycle(secgrp, m, not args.no_public_output)
         if args.no_public_output:
             # p is a secure
-            p = mpc.run(mpc.output(p))
+            p = await mpc.output(p)
         print(f'Plaintext received: {p}')
         assert m == p, (m, p)
-    mpc.run(mpc.shutdown())
+    await mpc.shutdown()
+
+if __name__ == '__main__':
+    mpc.run(main())

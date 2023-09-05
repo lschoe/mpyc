@@ -25,6 +25,7 @@ from mpyc import finfields
 from mpyc import thresha
 from mpyc import sectypes
 from mpyc import asyncoro
+from mpyc import mpctools
 import mpyc.secgroups
 import mpyc.random
 import mpyc.statistics
@@ -95,13 +96,11 @@ class Runtime:
 
     @threshold.setter
     def threshold(self, t):
-        m = len(self.parties)
         self._threshold = t
-        # caching (m choose t):
-        self._bincoef = math.comb(m, t)
         if self.options.no_prss:
             return
 
+        m = len(self.parties)
         # generate new PRSS keys
         self.prfs.cache_clear()
         keys = {}
@@ -116,9 +115,6 @@ class Runtime:
 
         Return a mapping from sets of parties to PRFs.
         """
-        if self.options.no_prss:
-            raise NotImplementedError('Functionality not (yet) supported when PRSS is disabled.')
-
         f = {}
         for subset, key in self._prss_keys.items():
             f[subset] = thresha.PRF(key, bound)
@@ -248,7 +244,7 @@ class Runtime:
 
                 except Exception as exc:
                     logging.debug(exc)
-                time.sleep(0.1)
+                await asyncio.sleep(0.1)
 
         await self.parties[self.pid].protocol
         if self.options.ssl:
@@ -268,9 +264,10 @@ class Runtime:
         while self._pc_level > self._program_counter[1]:
             await asyncio.sleep(0)
         elapsed = time.time() - self.start_time
+        elapsed = str(datetime.timedelta(seconds=elapsed))  # format: YYYY-MM-DDTHH:MM:SS[.ffffff]
+        elapsed = elapsed[:-3] if elapsed[-7] == '.' else elapsed + '.000'  # keep milliseconds .fff
         nbytes = [peer.protocol.nbytes_sent if peer.pid != self.pid else 0 for peer in self.parties]
-        elapsed = datetime.timedelta(seconds=round(elapsed*1000)/1000)  # round to milliseconds
-        logging.info(f'Stop MPyC -- elapsed time: {str(elapsed)[:-3]}|bytes sent: {sum(nbytes)}')
+        logging.info(f'Stop MPyC -- elapsed time: {elapsed}|bytes sent: {sum(nbytes)}')
         logging.debug(f'Bytes sent per party: {" ".join(map(str, nbytes))}')
         m = len(self.parties)
         if m == 1:
@@ -386,6 +383,9 @@ class Runtime:
             senders = range(m)  # default
         senders = [senders] if senders_is_int else list(senders)
         y = self._distribute(x, senders)
+        if isinstance(y, Future):
+            return y
+
         if senders_is_int:
             y = y[0]
             if not x_is_list:
@@ -398,27 +398,41 @@ class Runtime:
     @mpc_coro
     async def _distribute(self, x, senders):
         """Distribute shares for each x provided by a sender."""
-        stype = type(x[0])  # all elts assumed of same type
-        if hasattr(stype, '_input'):
-            return stype._input(x, senders)
+        if x == []:
+            return [[] for _ in senders]
 
-        if isinstance(x[0], sectypes.SecureArray):
-            field = x[0].sectype.field
-            shape = x[0].shape  # TODO: consider multiple arrays
-        else:
-            field = stype.field
+        sftype = type(x[0])  # all elts assumed of same type
+        if issubclass(sftype, self.SecureObject):
+            if hasattr(sftype, '_input'):
+                return sftype._input(x, senders)
+
+            if issubclass(sftype, self.SecureArray):
+                field = sftype.sectype.field
+                shape = x[0].shape  # TODO: consider multiple arrays
+            else:
+                field = sftype.field
+                shape = None
+        elif issubclass(sftype, finfields.FiniteFieldElement):
+            field = sftype
             shape = None
-        if not stype.frac_length:
-            if shape is None:
-                rettype = stype
+        else:  # finfields.FiniteFieldArray
+            field = sftype.field
+            shape = x[0].shape
+
+        if issubclass(sftype, self.SecureObject):
+            if not sftype.frac_length:
+                if shape is None:
+                    rettype = sftype
+                else:
+                    rettype = (sftype, shape)
             else:
-                rettype = (stype, shape)
+                if shape is None:
+                    rettype = (sftype, x[0].integral)
+                else:
+                    rettype = (sftype, x[0].integral, shape)
+            await self.returnType(rettype, len(senders), len(x))
         else:
-            if shape is None:
-                rettype = (stype, x[0].integral)
-            else:
-                rettype = (stype, x[0].integral, shape)
-        await self.returnType(rettype, len(senders), len(x))
+            await self.returnType(Future)
 
         if shape is None or self.options.mix32_64bit:
             random_split = thresha.random_split
@@ -431,7 +445,8 @@ class Runtime:
         shares = [None] * len(senders)
         for i, peer_pid in enumerate(senders):
             if peer_pid == self.pid:
-                x = await self.gather(x)
+                if issubclass(sftype, self.SecureObject):
+                    x = await self.gather(x)
                 t = self.threshold
                 m = len(self.parties)
                 if shape is not None:
@@ -446,10 +461,10 @@ class Runtime:
             else:
                 shares[i] = self._receive_message(peer_pid)
         shares = await self.gather(shares)
-        if shape is None or self.options.mix32_64bit:
+        if shape is None:
             y = [[field(a) for a in unmarshal(r)] for r in shares]
         else:
-            y = [[field.array(unmarshal(r), check=False).reshape(shape) for r in shares]]
+            y = [[field.array(unmarshal(r), check=False).reshape(shape)] for r in shares]
         return y
 
     @mpc_coro
@@ -500,7 +515,7 @@ class Runtime:
             field = type(x[0])
             x = [a.value for a in x]
             shape = None
-        else:
+        else:  # finfields.FiniteFieldArray
             field = x[0].field
             x = x[0].value  # TODO: consider multiple arrays
             shape = x.shape
@@ -555,12 +570,12 @@ class Runtime:
         sftype = type(x[0])  # all elts assumed of same type
         if issubclass(sftype, self.SecureObject):
             if not sftype.frac_length:
-                if issubclass(sftype, sectypes.SecureArray):
+                if issubclass(sftype, self.SecureArray):
                     rettype = (sftype, x[0].shape)
                 else:
                     rettype = sftype
             else:
-                if issubclass(sftype, sectypes.SecureArray):
+                if issubclass(sftype, self.SecureArray):
                     rettype = (sftype, x[0].integral, x[0].shape)
                 else:
                     rettype = (sftype, x[0].integral)
@@ -614,8 +629,8 @@ class Runtime:
             y = y[0]
         return y
 
-    def convert(self, x, ttype):
-        """Secure conversion of (elements of) x to given ttype.
+    def convert(self, x, t_type):
+        """Secure conversion of (elements of) x to given t_type.
 
         Value x is a secure number, or a list of secure numbers.
         Converted values assumed to fit in target type.
@@ -628,59 +643,86 @@ class Runtime:
         if x == []:
             return []
 
-        if (isinstance(x[0], self.SecureFiniteField)
-                and issubclass(ttype, self.SecureFiniteField)):
+        s_type = type(x[0])  # all elts assumed of same type
+        if (issubclass(s_type, self.SecureFiniteField) and
+                issubclass(t_type, self.SecureFiniteField)):
             # conversion via secure integers
-            stype = type(x[0])
-            size = max(stype.field.order, ttype.field.order)
+            size = max(s_type.field.order, t_type.field.order)
             l = max(32, size.bit_length())
             secint = self.SecInt(l=l)
-            y = self._convert(self._convert(x, secint), ttype)
+            y = self._convert(self._convert(x, secint), t_type)
         else:
-            y = self._convert(x, ttype)
+            y = self._convert(x, t_type)
 
         if not x_is_list:
             y = y[0]
         return y
 
     @mpc_coro
-    async def _convert(self, x, ttype):
-        stype = type(x[0])  # source type
+    async def _convert(self, x, t_type):
+        s_type = type(x[0])  # source type
         n = len(x)
-        await self.returnType((ttype, not stype.frac_length), n)  # target type
+        await self.returnType((t_type, not s_type.frac_length), n)  # target type
+
         m = len(self.parties)
-        k = self.options.sec_param
-        l = min(stype.bit_length, ttype.bit_length)
-        if issubclass(stype, self.SecureFiniteField):
-            bound = stype.field.order
+        t = self.threshold
+        s_field = s_type.field
+        t_field = t_type.field
+        s_is_SecureFiniteField = issubclass(s_type, self.SecureFiniteField)
+        if s_is_SecureFiniteField:
+            bound = s_field.order
         else:
-            bound = (1<<(k + l)) // self._bincoef + 1
-        prfs = self.prfs(bound)
-        uci = self._prss_uci()  # NB: same uci in both calls for r below
+            k = self.options.sec_param
+            l = min(s_type.bit_length, t_type.bit_length)
+            if self.options.no_prss:
+                bound = (1<<(k + l)) // (t+1) + 1
+            else:
+                bound = (1<<(k + l)) // math.comb(m, t) + 1
+
+        if self.options.no_prss:
+            uci = self._program_counter[0] % m
+            senders = tuple((uci + i) % m for i in range(t+1))  # TODO: sort out load balancing
+            if self.pid in senders:
+                r = [secrets.randbelow(bound) for _ in range(n)]
+                s_r = [s_field(a) for a in r]
+                t_r = [t_field(a) for a in r]
+                del r
+            else:
+                s_r = [s_field(0)] * n
+                t_r = [t_field(0)] * n
+            s_r = self.input(s_r, senders=senders)
+            t_r = self.input(t_r, senders=senders)
+            s_r, t_r = await self.gather(s_r, t_r)
+            s_r = list(map(sum, zip(*s_r)))
+            t_r = list(map(sum, zip(*t_r)))
+        else:
+            prfs = self.prfs(bound)
+            uci = self._prss_uci()  # NB: same uci in calls for s_r and t_r
+            s_r = thresha.pseudorandom_share(s_field, m, self.pid, prfs, uci, n)
+            t_r = thresha.pseudorandom_share(t_field, m, self.pid, prfs, uci, n)
 
         x = await self.gather(x)
-        d = ttype.frac_length - stype.frac_length  # TODO: use integral attribute fxp
+        d = t_type.frac_length - s_type.frac_length  # TODO: use integral attribute fxp
         if d < 0:
-            x = await self.trunc(x, f=-d, l=stype.bit_length)  # TODO: take minimum with ttype or so
-        if stype.field.is_signed:
-            if issubclass(stype, self.SecureFiniteField):
-                offset = stype.field.modulus // 2
+            x = await self.trunc(x, f=-d, l=s_type.bit_length)  # TODO: take minimum with t_type?
+        if s_field.is_signed:
+            if s_is_SecureFiniteField:
+                offset = s_field.order // 2
             else:
                 offset = 1 << l-1
         else:
             offset = 0
-        r = thresha.pseudorandom_share(stype.field, m, self.pid, prfs, uci, n)
         for i in range(n):
-            x[i] = x[i].value + offset + r[i]
+            x[i] = x[i].value + offset + s_r[i]
+        del s_r
 
         x = await self.output(x)
-        r = thresha.pseudorandom_share(ttype.field, m, self.pid, prfs, uci, n)
         for i in range(n):
-            x[i] = x[i].value - r[i]
-            if issubclass(stype, self.SecureFiniteField):
-                x[i] = self._mod(ttype(x[i]), stype.field.modulus)
+            x[i] = x[i].value - t_r[i]
+            if s_is_SecureFiniteField:
+                x[i] = self._mod(t_type(x[i]), s_field.modulus)
             x[i] = x[i] - offset
-        if d > 0 and not issubclass(stype, self.SecureFiniteField):
+        if d > 0 and not s_is_SecureFiniteField:
             for i in range(n):
                 x[i] <<= d
         return x
@@ -719,6 +761,8 @@ class Runtime:
                 s += r_bits[f * j + i].value
             r_modf[j] = Zp(s)
         r_divf = self._randoms(Zp, n, 1 << k + l)
+        if self.options.no_prss:
+            r_divf = await r_divf
         if issubclass(sftype, self.SecureObject):
             x = await self.gather(x)
         c = await self.output([a + ((1 << l-1 + f) + (q.value << f) + r.value)
@@ -751,7 +795,10 @@ class Runtime:
         r_bits = await self.np_random_bits(Zp, f * n)
         r_modf = np.sum(r_bits.value.reshape((n, f)) << np.arange(f), axis=1)
         r_modf = r_modf.reshape(a.shape)
-        r_divf = self._np_randoms(Zp, n, 1 << k + l).value
+        r_divf = self._np_randoms(Zp, n, 1 << k + l)
+        if self.options.no_prss:
+            r_divf = await r_divf
+        r_divf = r_divf.value
         r_divf = r_divf.reshape(a.shape)
         if issubclass(sftype, self.SecureObject):
             a = await self.gather(a)
@@ -768,34 +815,52 @@ class Runtime:
     async def is_zero_public(self, a) -> Future:
         """Secure public zero test of a."""
         sftype = type(a)
-        if issubclass(sftype, sectypes.SecureFloat):
+        if issubclass(sftype, self.SecureFloat):
             return await sftype.is_zero_public(a)
 
         if issubclass(sftype, self.SecureObject):
             field = sftype.field
         else:
             field = sftype
-
-        m = len(self.parties)
-        t = self.threshold
-        if field.order.bit_length() <= 60:  # TODO: introduce MPyC parameter for failure probability
-            prfs = self.prfs(field.order)
-            while True:
-                r, s = self._randoms(field, 2)
-                z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
-                if await self.output(r * s + z[0], threshold=2*t):
-                    break
+        field_relative_size = field.order.bit_length() // self.options.sec_param
+        if field_relative_size == 0 and self.options.no_prss:
+            threshold = self.threshold  # will suffice due to reshare below
         else:
-            r = self._random(field)  # NB: failure r=0 with probability less than 2**-60
+            threshold = 2 * self.threshold
+
+        if field_relative_size >= 2:  # large fields
+            r = self._random(field)  # nonzero r with high probability
+            if self.options.no_prss:
+                r = (await r)[0]
+        else:  # small and medium-sized fields
+            while True:
+                r_s = self._randoms(field, 2)
+                if self.options.no_prss:
+                    r_s = await r_s
+                r, s = r_s
+                rs = r * s
+                if field_relative_size == 0:  # small fields
+                    if self.options.no_prss:
+                        rs = await self._reshare(rs)
+                    else:
+                        m = len(self.parties)
+                        prfs = self.prfs(field.order)
+                        z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs,
+                                                            self._prss_uci(), 1)
+                        rs += z[0]
+                if await self.output(rs, threshold=threshold):
+                    break  # nonzero r ensured because rs is nonzero
 
         if issubclass(sftype, self.SecureObject):
             a = await self.gather(a)
-        if field.order.bit_length() <= 60:
-            z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
-            b = a * r + z[0]
-        else:
-            b = a * r
-        c = await self.output(b, threshold=2*t)
+        b = a * r
+        if field_relative_size == 0:  # small fields
+            if self.options.no_prss:
+                b = await self._reshare(b)
+            else:
+                z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
+                b += z[0]
+        c = await self.output(b, threshold=threshold)
         return c == 0
 
     @mpc_coro
@@ -806,34 +871,51 @@ class Runtime:
             field = sftype.sectype.field
         else:
             field = sftype
+        field_relative_size = field.order.bit_length() // self.options.sec_param
+        if field_relative_size == 0 and self.options.no_prss:
+            threshold = self.threshold  # will suffice due to reshare below
+        else:
+            threshold = 2 * self.threshold
 
         n = a.size
-        m = len(self.parties)
-        t = self.threshold
-        if field.order.bit_length() <= 60:  # TODO: introduce MPyC parameter for failure probability
-            prfs = self.prfs(field.order)
+        if field_relative_size >= 2:  # large fields
+            r = self._np_randoms(field, n)  # nonzero r with high probability
+            if self.options.no_prss:
+                r = await r
+        else:  # small and medium-sized fields
             while True:
                 r = self._np_randoms(field, n)
                 s = self._np_randoms(field, n)
-                z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
-                if np.all(await self.output(r * s + z, threshold=2*t)):
-                    # TODO: handle failures for cases of small sec. param k (like 8),
-                    # small bit_length l (like 2) and large n (like 200); filter the 0s.
-                    break
-        else:
-            r = self._np_randoms(field, n)  # NB: failure r=0 with probability less than 2**-60
+                if self.options.no_prss:
+                    r, s = await self.gather(r, s)
+                rs = r * s
+                if field_relative_size == 0:  # small fields
+                    if self.options.no_prss:
+                        rs = await self._reshare(rs)
+                    else:
+                        m = len(self.parties)
+                        prfs = self.prfs(field.order)
+                        rs += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs,
+                                                              self._prss_uci(), n)
+                if np.all(await self.output(rs, threshold=threshold)):
+                    break  # nonzero r ensured because rs is nonzero
+                    # TODO: handle cases with low success probability (considering alternatives
+                    # such as multiplying t+1 uniformly random nonzero private input values in
+                    # log_2 (t+1) rounds, or producing extra candidates such that n successes
+                    # remain with high probability).
 
         if issubclass(sftype, self.SecureObject):
             a = await self.gather(a)
         shape = a.shape
         if len(shape) > 1:
             a = a.reshape(-1)
-        if field.order.bit_length() <= 60:
-            z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
-            b = a * r + z
-        else:
-            b = a * r
-        c = await self.output(b, threshold=2*t)
+        b = a * r
+        if field_relative_size == 0:  # small fields
+            if self.options.no_prss:
+                b = await self._reshare(b)
+            else:
+                b += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
+        c = await self.output(b, threshold=threshold)
         if len(shape) > 1:
             c = c.reshape(shape)
         return c == 0
@@ -1053,32 +1135,76 @@ class Runtime:
     async def reciprocal(self, a):
         """Secure reciprocal (multiplicative field inverse) of a, for nonzero a."""
         stype = type(a)
-        field = stype.field
         await self.returnType(stype)
-        a = await self.gather(a)
+        field = stype.field
         while True:
             r = self._random(field)
-            ar = await self.output(a * r, threshold=2*self.threshold)
-            if ar:
+            if self.options.no_prss:
+                r = (await r)[0]
+            a = await self.gather(a)
+            ar = a * r
+            threshold = 2 * self.threshold
+            if field.order.bit_length() < self.options.sec_param:  # TODO: use separate parameter
+                if self.options.no_prss:
+                    ar = await self._reshare(ar)
+                    threshold //= 2  # suffices due to reshare
+                else:
+                    m = len(self.parties)
+                    prfs = self.prfs(field.order)
+                    z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs,
+                                                        self._prss_uci(), 1)
+                    ar += z[0]
+            ar = await self.output(ar, threshold=threshold)
+            if ar:  # happens with probability 1 - 1/field.order, which is usually close to 1
                 break
-        r <<= stype.frac_length
+        r <<= stype.frac_length  # TODO: sort out secfxp case (also see self.pow())
         return r / ar
 
     @mpc_coro
     async def np_reciprocal(self, a):
         """Secure elementwise reciprocal (multiplicative field inverse) of a, for nonzero a."""
-        stype = type(a)
+        sftype = type(a)
         shape = a.shape
-        field = stype.sectype.field
-        await self.returnType((stype, shape))
-        a = await self.gather(a)
-        while True:  # TODO: will only succeed for large fields or small arrays a, cf np_random_bits
-            r = self._np_randoms(field, a.size).reshape(shape)
-            ar = await self.output(a * r, threshold=2*self.threshold)
-            if (ar != 0).all():
-                break
-        r <<= stype.frac_length
-        return r / ar
+        if issubclass(sftype, self.SecureArray):
+            await self.returnType((sftype, shape))
+            field = sftype.sectype.field
+            f = sftype.frac_length
+        else:  # for recursive calls
+            await self.returnType(Future)
+            field = sftype.field
+            f = 0
+
+        n = a.size
+        r = self._np_randoms(field, n)
+        if self.options.no_prss:
+            r = await r
+        if issubclass(sftype, self.SecureArray):
+            a = await self.gather(a)
+            a = a.reshape(-1)
+        ar = a * r
+        threshold = 2 * self.threshold
+        if field.order.bit_length() < self.options.sec_param:  # TODO: use separate parameter
+            if self.options.no_prss:
+                ar = await self._reshare(ar)
+                threshold //= 2  # suffices due to reshare
+            else:
+                m = len(self.parties)
+                prfs = self.prfs(field.order)
+                ar += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
+        ar = await self.output(ar, threshold=threshold)
+        if np.count_nonzero(ar.value) < n:
+            b = np.empty(n, dtype='O')
+            ar_nonzero = ar != 0
+            b[ar_nonzero] = (r[ar_nonzero] / ar[ar_nonzero]).value
+            del r, ar
+            b[~ar_nonzero] = (await self.np_reciprocal(a[~ar_nonzero])).value
+            b = field.array(b, check=False)
+        else:
+            b = r / ar
+        if f:
+            b <<= f  # TODO: sort out secfxp case (also see self.pow())
+        b = b.reshape(shape)
+        return b
 
     def pow(self, a, b):
         """Secure exponentiation a raised to the power of b, for public integer b."""
@@ -1191,14 +1317,18 @@ class Runtime:
         stype = type(a)
         await self.returnType((stype, True))
         Zp = stype.field
-
         k = self.options.sec_param
+
         z = self.random_bits(Zp, k)
-        u = self._randoms(Zp, k)
-        u2 = self.schur_prod(u, u)
-        a, u2, z = await self.gather(a, u2, z)
-        a = a.value
         r = self._randoms(Zp, k)
+        if self.options.no_prss:
+            r = await r
+        u2 = self.schur_prod(r, r)
+        r = self._randoms(Zp, k)
+        a, u2, z = await self.gather(a, u2, z)
+        if self.options.no_prss:
+            r = await r
+        a = a.value
         c = [Zp(a * r[i].value + (1-(z[i].value << 1)) * u2[i].value) for i in range(k)]
         # -1 is nonsquare for Blum p, u[i] !=0 w.v.h.p.
         # If a == 0, c[i] is square mod p iff z[i] == 0.
@@ -1229,17 +1359,21 @@ class Runtime:
         stype = type(a)
         await self.returnType((stype, True))
         Zp = stype.field
-
         l = l or stype.bit_length
-        r_bits = await self.random_bits(Zp, l)
+        k = self.options.sec_param
+
+        r_bits = self.random_bits(Zp, l)
+        r_divl = self._random(Zp, 1<<k)
+        r_bits = await r_bits
         r_modl = 0
         for r_i in reversed(r_bits):
             r_modl <<= 1
             r_modl += r_i.value
+        if self.options.no_prss:
+            r_divl = (await r_divl)[0]
+        r_divl = r_divl.value
         a = await self.gather(a)
         a_rmodl = a + ((1<<l) + r_modl)
-        k = self.options.sec_param
-        r_divl = self._random(Zp, 1<<k).value
         c = await self.output(a_rmodl + (r_divl << l))
         c = c.value % (1<<l)
 
@@ -1498,7 +1632,10 @@ class Runtime:
         a, b = await self.gather(a, b)
         if f:
             b >>= f
-        r = self._random(Zp, 1 << (l + k - 1)).value
+        r = self._random(Zp, 1 << (l + k - 1))
+        if self.options.no_prss:
+            r = (await r)[0]
+        r = r.value
         c = await self.output(a + ((1<<l) + (r << 1) + b.value))
         x = 1 - b if c.value & 1 else b  # xor
         if f:
@@ -1538,7 +1675,10 @@ class Runtime:
         for r_i in reversed(r_bits):
             r_modb <<= 1
             r_modb += r_i
-        r_divb = self._random(Zp, 1 << k).value
+        r_divb = self._random(Zp, 1 << k)
+        if self.options.no_prss:
+            r_divb = (await r_divb)[0]
+        r_divb = r_divb.value
         a = await self.gather(a)
         c = await self.output(a + ((1<<l) - ((1<<l) % b) + b * r_divb - r_modb))
         c = c.value % b
@@ -1577,7 +1717,10 @@ class Runtime:
             r_modl <<= 1
             r_modl += r_i.value
         k = self.options.sec_param
-        r_divl = self._random(field, 1<<(secint.bit_length + k - l)).value
+        r_divl = self._random(field, 1<<(secint.bit_length + k - l))
+        if self.options.no_prss:
+            r_divl = (await r_divl)[0]
+        r_divl = r_divl.value
         a = await self.gather(a)
         c = await self.output(a + ((1<<secint.bit_length) + (r_divl << l) + r_modl))
         c = c.value % (1<<l)
@@ -1990,8 +2133,7 @@ class Runtime:
             x[i] = x[i] * a
         x = await self._reshare(x)
         if f and not a_integral:
-            x = self.trunc(x, f=f, l=stype.bit_length)
-            x = await self.gather(x)
+            x = await self.trunc(x, f=f, l=stype.bit_length)
         return x
 
     @mpc_coro
@@ -2017,7 +2159,7 @@ class Runtime:
 
     def if_else(self, c, x, y):
         '''Secure selection between x and y based on condition c.'''
-        if isinstance(c, sectypes.SecureFixedPoint) and not c.integral:
+        if isinstance(c, self.SecureFixedPoint) and not c.integral:
             raise ValueError('condition must be integral')
 
         if x is y:  # introduced for github.com/meilof/oblif
@@ -2056,7 +2198,7 @@ class Runtime:
 
     def if_swap(self, c, x, y):
         '''Secure swap of x and y based on condition c.'''
-        if isinstance(c, sectypes.SecureFixedPoint) and not c.integral:
+        if isinstance(c, self.SecureFixedPoint) and not c.integral:
             raise ValueError('condition must be integral')
 
         if isinstance(x, list):
@@ -2100,8 +2242,7 @@ class Runtime:
                 x[i] >>= f  # NB: in-place rshift
         x = await self._reshare(x)
         if f and not x_integral and not y_integral:
-            x = self.trunc(x, f=f, l=sftype.bit_length)
-            x = await self.gather(x)
+            x = await self.trunc(x, f=f, l=sftype.bit_length)
         return x
 
     @mpc_coro
@@ -2360,7 +2501,7 @@ class Runtime:
         """Reverse (default) or permute the axes of array a.
 
         For 2D arrays, default result is the usual matrix transpose.
-        Parameter axes can be any permutation of 0,...,n-1 for nD array a.
+        Parameter axes can be any permutation of 0,...,n-1 for n-dimensional array a.
         """
         if a.ndim == 1:
             return a
@@ -2410,7 +2551,7 @@ class Runtime:
             shape[axis] = sum(a.shape[axis] for a in arrays)
             shape = tuple(shape)
         i = 0
-        while not isinstance(a := arrays[i], sectypes.SecureArray):
+        while not isinstance(a := arrays[i], self.SecureArray):
             i += 1
         stype = type(a)
         if issubclass(stype, self.SecureFixedPointArray):
@@ -2431,7 +2572,7 @@ class Runtime:
         the last dimension.
         """
         i = 0
-        while not isinstance(a := arrays[i], sectypes.SecureArray):
+        while not isinstance(a := arrays[i], self.SecureArray):
             i += 1
         shape = list(a.shape)
         shape.insert(axis, len(arrays))
@@ -2459,14 +2600,14 @@ class Runtime:
                 for a in s:
                     if cls := extract_type(a):
                         break
-            elif isinstance(s, sectypes.SecureObject):
+            elif isinstance(s, self.SecureObject):
                 cls = type(s)
             else:
                 cls = None
             return cls
 
         sectype = extract_type(arrays)
-        if not issubclass(sectype, sectypes.SecureArray):
+        if not issubclass(sectype, self.SecureArray):
             sectype = sectype.array
 
         def block_ndim(a, depth=0):
@@ -2510,11 +2651,11 @@ class Runtime:
         """Stack arrays in sequence horizontally (column wise).
 
         This is equivalent to concatenation along the second axis,
-        except for 1-D arrays where it concatenates along the first
+        except for 1D arrays where it concatenates along the first
         axis. Rebuilds arrays divided by hsplit.
         """
         i = 0
-        while not isinstance(a := tup[i], sectypes.SecureArray):
+        while not isinstance(a := tup[i], self.SecureArray):
             i += 1
         stype = type(a)
         shape = list(a.shape)
@@ -2536,14 +2677,14 @@ class Runtime:
         """Stack arrays in sequence depth wise (along third axis).
 
         This is equivalent to concatenation along the third axis
-        after 2-D arrays of shape (M,N) have been reshaped to
-        (M,N,1) and 1-D arrays of shape (N,) have been reshaped
+        after 2D arrays of shape (M,N) have been reshaped to
+        (M,N,1) and 1D arrays of shape (N,) have been reshaped
         to (1,N,1). Rebuilds arrays divided by dsplit.
         """
         a = tup[0]
         if a.ndim == 1:
             shape = (1, a.shape[0], len(tup))
-        if a.ndim == 2:
+        elif a.ndim == 2:
             shape = (a.shape[0], a.shape[1], len(tup))
         else:
             shape = list(a.shape)
@@ -2556,7 +2697,7 @@ class Runtime:
     @mpc_coro_no_pc
     async def np_column_stack(self, tup):
         i = 0
-        while not isinstance(a := tup[i], sectypes.SecureArray):
+        while not isinstance(a := tup[i], self.SecureArray):
             i += 1
         stype = type(a)
         shape_0 = a.shape[0]
@@ -2643,26 +2784,38 @@ class Runtime:
         """
         return c * (a - b) + b
 
-    def np_amin(self, a, axis=None):
+    def np_amin(self, a, axis=None, keepdims=False):
         """Secure minimum of array a, entirely or along the given axis (or axes).
 
-        If axis is None (default) the minimum of the array is returned (as a scalar).
+        If axis is None (default) the minimum of the array is returned.
         If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
-        The shape of the result is the shape of a with all specified axes removed
-        (converted to a scalar if no dimensions remain).
+
+        If keepdims is not set (default), the shape of the result is the shape of a with all
+        specified axes removed (converted to a scalar if no dimensions remain).
+        Otherwise, if keepdims is set, the axes along which the minimum is taken
+        are left in the result as dimensions of size 1.
         """
-        # TODO: other kwargs like keepdims and initial
+        # TODO: other kwargs like initial
         if axis is None:
+            if keepdims:
+                shape = [1] * a.ndim
             # Flatten a to 1D array:
             a = self.np_reshape(a, (-1,))
         elif isinstance(axis, tuple):
             axis = tuple(i % a.ndim for i in axis)
+            if keepdims:
+                shape = list(a.shape)
+                for i in axis:
+                    shape[i] = 1
             # Move specified axes to front:
             axes = axis + tuple(i for i in range(a.ndim) if i not in axis)
             a = self.np_transpose(a, axes=axes)
             # Flatten specified axes to one dimension:
             a = self.np_reshape(a, (-1,) + a.shape[len(axis):])
         elif axis := axis % a.ndim:
+            if keepdims:
+                shape = list(a.shape)
+                shape[axis] = 1
             # Move nonzero axis to front:
             axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
             a = self.np_transpose(a, axes=axes)
@@ -2674,28 +2827,44 @@ class Runtime:
             if n0:
                 m = self.np_concatenate((a[:1], m), axis=0)
             a = m
+
+        if keepdims:
+            return self.np_reshape(a, tuple(shape))
+
         return a[0]
 
-    def np_amax(self, a, axis=None):
+    def np_amax(self, a, axis=None, keepdims=False):
         """Secure maximum of array a, entirely or along the given axis (or axes).
 
-        If axis is None (default) the maximum of the array is returned (as a scalar).
+        If axis is None (default) the maximum of the array is returned.
         If axis is an int or a tuple of ints, the minimum along all specified axes is returned.
-        The shape of the result is the shape of a with all specified axes removed
-        (converted to a scalar if no dimensions remain).
+
+        If keepdims is not set (default), the shape of the result is the shape of a with all
+        specified axes removed (converted to a scalar if no dimensions remain).
+        Otherwise, if keepdims is set, the axes along which the maximum is taken
+        are left in the result as dimensions of size 1.
         """
-        # TODO: other kwargs like keepdims and initial
+        # TODO: other kwargs like initial
         if axis is None:
+            if keepdims:
+                shape = [1] * a.ndim
             # Flatten a to 1D array:
             a = self.np_reshape(a, (-1,))
         elif isinstance(axis, tuple):
             axis = tuple(i % a.ndim for i in axis)
+            if keepdims:
+                shape = list(a.shape)
+                for i in axis:
+                    shape[i] = 1
             # Move specified axes to front:
             axes = axis + tuple(i for i in range(a.ndim) if i not in axis)
             a = self.np_transpose(a, axes=axes)
             # Flatten specified axes to one dimension:
             a = self.np_reshape(a, (-1,) + a.shape[len(axis):])
         elif axis := axis % a.ndim:
+            if keepdims:
+                shape = list(a.shape)
+                shape[axis] = 1
             # Move nonzero axis to front:
             axes = (axis,) + tuple(range(axis)) + tuple(range(axis+1, a.ndim))
             a = self.np_transpose(a, axes=axes)
@@ -2707,6 +2876,10 @@ class Runtime:
             if n0:
                 m = self.np_concatenate((a[:1], m), axis=0)
             a = m
+
+        if keepdims:
+            return self.np_reshape(a, tuple(shape))
+
         return a[0]
 
     @mpc_coro_no_pc
@@ -2787,13 +2960,17 @@ class Runtime:
         shape = a.shape
         await self.returnType((stype, True, shape))
         Zp = stype.sectype.field
-
         n = a.size
         k = self.options.sec_param
+
         z = self.np_random_bits(Zp, k * n)
         r = self._np_randoms(Zp, k * n)
+        if self.options.no_prss:
+            r = await r
         u2 = self._reshare(r * r)
         r = self._np_randoms(Zp, k * n)
+        if self.options.no_prss:
+            r = await r
         a, u2, z = await self.gather(a, u2, z)
         a = a.value.reshape((n,))
         r = r.value.reshape((k, n))
@@ -2832,17 +3009,21 @@ class Runtime:
         stype = type(a)
         await self.returnType((stype, True, a.shape))
         Zp = stype.sectype.field
-
         n = a.size
         l = l or stype.sectype.bit_length
         k = self.options.sec_param
-        r_bits = (await self.np_random_bits(Zp, (l + int(not EQ)) * n)).value
+
+        r_bits = self.np_random_bits(Zp, (l + int(not EQ)) * n)
+        r_divl = self._np_randoms(Zp, n, 1<<k)
+        r_bits = (await r_bits).value
         if not EQ:
             s_sign = (r_bits[-n:] << 1) - 1
         r_bits = r_bits[:l*n].reshape((n, l))
         shifts = np.arange(l-1, -1, -1)
         r_modl = np.sum(r_bits << shifts, axis=1)
-        r_divl = self._np_randoms(Zp, n, 1<<k).value
+        if self.options.no_prss:
+            r_divl = await r_divl
+        r_divl = r_divl.value
         a = await self.gather(a)
         a_r = a.value.reshape((n,)) + (1<<l) + r_modl
         c = await self.output(Zp.array(a_r + (r_divl << l)))
@@ -2883,14 +3064,36 @@ class Runtime:
         z = z.reshape(a.shape)
         return z
 
-    def np_argmin(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+    def np_argmin(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True):
         """Returns the indices of the minimum values along an axis.
 
-        If no axis is given (default), array is flattened.
+        Default behavior similar to np.argmin() for NumPy arrays:
+
+         - the indices are returned as numbers (not as unit vectors),
+         - only the indices are returned (minimum values omitted).
 
         NB: Different defaults than for method call a.argmin().
+
+        If no axis is given (default), array a is flattened first.
+
+        If the indices are returned as unit vectors in an array u say,
+        then u is always of the same shape as the (possibly flattened) input array a.
+
+        If the indices are returned as numbers, the shape of the array of indices
+        is controlled by parameter keepdims. If keepdims is not set (default),
+        the shape of the indices is the shape of a with the specified axis removed
+        (converted to a scalar if no dimensions remain). Otherwise, if keepdims is
+        set, the axis along which the minimum is taken is left in the result as
+        dimension of size 1.
+
+        If the minimum values are returned as well, the shape of this part of the output is
+        also controlled by parameter keepdims. If keepdims is not set (default), a 1D array
+        of minimum values is returned with one entry per element of the given array a with
+        the given axis removed; if axis is None, the minimum is returned as a scalar.
+        Otherwise, if keepdims is set, the array of minimum values is of the same shape
+        as the given array a except that the dimension of the given axis is reduced to 1;
+        if axis is None, all axes are present as dimensions of size 1.
         """
-        # TODO: add keepdims=
         if key is None:
             key = lambda a: a
 
@@ -2898,6 +3101,7 @@ class Runtime:
         assert key_size in (1, a.shape[-1])
 
         shape = a.shape
+        ndim = a.ndim - key_size + 1  # number of dimensions corrected for key size
         if axis is None:
             if key_size == 1:
                 a = self.np_reshape(a, (1, a.size))
@@ -2924,8 +3128,11 @@ class Runtime:
                 iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
             u = u @ iv
         if axis is None:
-            u = u[0]
-            m = m[0][0]
+            if not arg_unary and keepdims:
+                # convert shape u from (1,) to (1,...,1)
+                u = self.np_reshape(u, (1,) * ndim)
+            else:
+                u = u[0]
         else:
             shape = list(shape)
             if key_size > 1:
@@ -2933,13 +3140,26 @@ class Runtime:
             if arg_unary:
                 shape[axis], shape[-1] = shape[-1], shape[axis]
             else:
-                del shape[axis]
+                if keepdims:
+                    shape[axis] = 1
+                else:
+                    del shape[axis]
             u = self.np_reshape(u, tuple(shape))
             if arg_unary:
                 u = self.np_swapaxes(u, axis, -1)
         if arg_only:
             return u
 
+        if axis is None:
+            if keepdims:
+                m = self.np_reshape(m, (1,) * ndim)
+            else:
+                m = m[0][0]
+        elif keepdims:
+            if arg_unary:
+                shape[axis], shape[-1] = shape[-1], shape[axis]  # NB: restore shape
+                shape[axis] = 1
+            m = self.np_reshape(m, tuple(shape))
         return u, m
 
     def _np_argmin(self, a, key):
@@ -2972,14 +3192,36 @@ class Runtime:
                 u = self.np_concatenate((u0, u), axis=1)
         return u, m
 
-    def np_argmax(self, a, axis=None, key=None, arg_unary=False, arg_only=True):
+    def np_argmax(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True):
         """Returns the indices of the maximum values along an axis.
 
-        If no axis is given (default), array is flattened.
+        Default behavior similar to np.argmax() for NumPy arrays:
+
+         - the indices are returned as numbers (not as unit vectors),
+         - only the indices are returned (maximum values omitted).
 
         NB: Different defaults than for method call a.argmax().
+
+        If no axis is given (default), array a is flattened first.
+
+        If the indices are returned as unit vectors in an array u say,
+        then u is always of the same shape as the (possibly flattened) input array a.
+
+        If the indices are returned as numbers, the shape of the array of indices
+        is controlled by parameter keepdims. If keepdims is not set (default),
+        the shape of the indices is the shape of a with the specified axis removed
+        (converted to a scalar if no dimensions remain). Otherwise, if keepdims is
+        set, the axis along which the maximum is taken is left in the result as
+        dimension of size 1.
+
+        If the maximum values are returned as well, the shape of this part of the output is
+        also controlled by parameter keepdims. If keepdims is not set (default), a 1D array
+        of maximum values is returned with one entry per element of the given array a with
+        the given axis removed; if axis is None, the maximum is returned as a scalar.
+        Otherwise, if keepdims is set, the array of maximum values is of the same shape
+        as the given array a except that the dimension of the given axis is reduced to 1;
+        if axis is None, all axes are present as dimensions of size 1.
         """
-        # TODO: add keepdims=
         if key is None:
             key = lambda a: a
 
@@ -2987,6 +3229,7 @@ class Runtime:
         assert key_size in (1, a.shape[-1])
 
         shape = a.shape
+        ndim = a.ndim - key_size + 1  # number of dimensions corrected for key size
         if axis is None:
             if key_size == 1:
                 a = self.np_reshape(a, (1, a.size))
@@ -3006,14 +3249,18 @@ class Runtime:
                 # Collapse all dimensions except the last two:
                 a = self.np_reshape(a, (-1, a.shape[-2], key_size))
         u, m = self._np_argmax(a, key)
+        # u is a 2D array
         if not arg_unary:
             iv = np.arange(u.shape[1])
             if isinstance(a, self.SecureFixedPointArray):
                 iv = type(a)(iv)  # TODO: remove once @ handles integral attrb for public values
             u = u @ iv
         if axis is None:
-            u = u[0]
-            m = m[0][0]
+            if not arg_unary and keepdims:
+                # convert shape u from (1,) to (1,...,1)
+                u = self.np_reshape(u, (1,) * ndim)
+            else:
+                u = u[0]
         else:
             shape = list(shape)
             if key_size > 1:
@@ -3021,13 +3268,26 @@ class Runtime:
             if arg_unary:
                 shape[axis], shape[-1] = shape[-1], shape[axis]
             else:
-                del shape[axis]
+                if keepdims:
+                    shape[axis] = 1
+                else:
+                    del shape[axis]
             u = self.np_reshape(u, tuple(shape))
             if arg_unary:
                 u = self.np_swapaxes(u, axis, -1)
         if arg_only:
             return u
 
+        if axis is None:
+            if keepdims:
+                m = self.np_reshape(m, (1,) * ndim)
+            else:
+                m = m[0][0]
+        elif keepdims:
+            if arg_unary:
+                shape[axis], shape[-1] = shape[-1], shape[axis]  # NB: restore shape
+                shape[axis] = 1
+            m = self.np_reshape(m, tuple(shape))
         return u, m
 
     def _np_argmax(self, a, key):
@@ -3071,7 +3331,10 @@ class Runtime:
 
         n = A.shape[-1]
         while True:
-            U = self._np_randoms(secnum.field, n**2).reshape(n, n)
+            U = self._np_randoms(secnum.field, n**2)
+            if self.options.no_prss:
+                U = await U
+            U = U.reshape(n, n)
             detU = self.prod(np.diag(U).tolist())  # detU != 0 with high probability
             detU = secnum(detU)
             if not await self.is_zero_public(detU):
@@ -3124,43 +3387,90 @@ class Runtime:
 
     def _random(self, sftype, bound=None):
         """Secure random value of the given type in the given range."""
-        return self._randoms(sftype, 1, bound)[0]
+        x = self._randoms(sftype, 1, bound)
+        if not isinstance(x, Future):
+            x = x[0]
+        return x
 
     def _randoms(self, sftype, n, bound=None):
-        """n secure random values of the given type in the given range."""
+        """Return n secure random values of the given type in the given range."""
         if issubclass(sftype, self.SecureObject):
             field = sftype.field
         else:
             field = sftype
+        m = len(self.parties)
+        t = self.threshold
         if bound is None:
             bound = field.order
         else:
-            bound = 1 << max(0, (bound // self._bincoef).bit_length() - 1)  # NB: rounded power of 2
-        m = len(self.parties)
-        prfs = self.prfs(bound)
-        shares = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
+            d = t+1 if self.options.no_prss else math.comb(m, t)
+            bound = 1 << max(0, (bound // d).bit_length() - 1)  # NB: rounded power of 2
+        if self.options.no_prss:
+            uci = self._program_counter[0] % m
+            senders = tuple((uci + i) % m for i in range(t+1))  # TODO: sort out load balancing
+            if self.pid in senders:
+                x = [field(secrets.randbelow(bound)) for _ in range(n)]
+            else:
+                x = [field(0)] * n
+            x = self.input(x, senders=senders)
+
+            @mpc_coro_no_pc
+            async def add_shares(x, n):
+                if issubclass(sftype, self.SecureObject):
+                    await self.returnType(sftype, n)
+                else:
+                    await self.returnType(Future)
+                x = await x
+                x = list(map(sum, zip(*x)))
+                return x
+
+            return add_shares(x, n)
+
+        x = thresha.pseudorandom_share(field, m, self.pid, self.prfs(bound), self._prss_uci(), n)
         if issubclass(sftype, self.SecureObject):
-            shares = [sftype(s) for s in shares]
-        return shares
+            x = [sftype(s) for s in x]
+        return x
 
     def _np_randoms(self, sftype, n, bound=None):
-        """n secure random values of the given type in the given range."""
-        if issubclass(sftype, self.SecureArray):
-            field = sftype.sectype.field
-        elif issubclass(sftype, self.SecureObject):
+        """Secure shape-(n,) array with random values of the given type in the given range."""
+        # TODO: extend to arbitrary shapes
+        if issubclass(sftype, self.SecureObject):
             field = sftype.field
         else:
             field = sftype
+        m = len(self.parties)
+        t = self.threshold
         if bound is None:
             bound = field.order
         else:
-            bound = 1 << max(0, (bound // self._bincoef).bit_length() - 1)  # NB: rounded power of 2
-        m = len(self.parties)
-        prfs = self.prfs(bound)
-        shares = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
+            d = t+1 if self.options.no_prss else math.comb(m, t)
+            bound = 1 << max(0, (bound // d).bit_length() - 1)  # NB: rounded power of 2
+        if self.options.no_prss:
+            uci = self._program_counter[0] % m
+            senders = tuple((uci + i) % m for i in range(t+1))  # TODO: sort out load balancing
+            if self.pid in senders:
+                x = field.array([secrets.randbelow(bound) for _ in range(n)])
+            else:
+                x = field.array(np.zeros(n, dtype=object), check=False)
+            x = self.input(x, senders=senders)
+
+            @mpc_coro_no_pc
+            async def add_shares(x):
+                if issubclass(sftype, self.SecureObject):
+                    await self.returnType((sftype.array, (n,)))
+                else:
+                    await self.returnType(Future)
+                x = await x
+                x = [a[0] for a in x]
+                x = sum(x)
+                return x
+
+            return add_shares(x)
+
+        x = thresha.np_pseudorandom_share(field, m, self.pid, self.prfs(bound), self._prss_uci(), n)
         if issubclass(sftype, self.SecureObject):
-            shares = sftype(shares)
-        return shares
+            x = sftype.array(x)
+        return x
 
     def random_bit(self, stype, signed=False):
         """Secure uniformly random bit of the given type."""
@@ -3168,11 +3478,8 @@ class Runtime:
 
     @mpc_coro
     async def random_bits(self, sftype, n, signed=False):
-        """n secure uniformly random bits of the given type."""
-        prss0 = False
+        """Return n secure uniformly random bits of the given type."""
         if issubclass(sftype, self.SecureObject):
-            if issubclass(sftype, self.SecureFiniteField):
-                prss0 = True
             await self.returnType((sftype, True), n)
             field = sftype.field
             f = sftype.frac_length
@@ -3180,49 +3487,78 @@ class Runtime:
             await self.returnType(Future)
             field = sftype
             f = 0
+        if not n:
+            return []
 
         m = len(self.parties)
-        if field.characteristic == 2:
+        t = self.threshold
+        p = field.characteristic
+        if p == 2:
+            if self.options.no_prss:
+                uci = self._program_counter[0] % m
+                senders = tuple((uci + i) % m for i in range(t+1))  # TODO: sort out load balancing
+                if self.pid in senders:
+                    bits = [field(secrets.randbits(1)) for _ in range(n)]
+                else:
+                    bits = [field(0)] * n
+                bits = self.input(bits, senders=senders)
+                bits = await bits
+                bits = list(map(sum, zip(*bits)))
+                return bits
+
             prfs = self.prfs(2)
             bits = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
             return bits
 
-        bits = [None] * n
+        if self.options.no_prss:
+            # Multiply t+1 uniformly random ±1 private input values in log_2 (t+1) rounds.
+            # Alternative: uniformly random secret value r, squared and opened as in PRSS case
+            # in 3 rounds, with break-even point at t=7, hence advantageous for m >= 15.
+            uci = self._program_counter[0] % m
+            senders = tuple((uci + i) % m for i in range(t+1))  # TODO: sort out load balancing
+            if self.pid in senders:
+                bits = [field(2*secrets.randbits(1)-1) for _ in range(n)]
+            else:
+                bits = [field(0)] * n
+            bits = self.input(bits, senders=senders)
+            bits = await bits
+            bits = list(map(list, zip(*bits)))
+            bits = [self.prod(x) for x in bits]
+            bits = await self.gather(bits)
+            for i in range(n):
+                bits[i] = bits[i].value
+        else:
+            bits = [None] * n
+            prfs = self.prfs(field.order)
+            h = n
+            while h > 0:
+                rs = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
+                zs = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), h)
+                # Compute and open the squares and compute square roots.
+                r2s = [field(r.value**2 + z.value) for r, z in zip(rs, zs)]
+                r2s = await self.output(r2s, threshold=2*t)
+                for r, r2 in zip(rs, r2s):
+                    if r2.value != 0:
+                        h -= 1
+                        bits[h] = r.value * field._sqrt(r2.value, INV=True)
+                        if not signed:
+                            bits[h] %= field.modulus
+
         if not signed:
-            p = field.characteristic
-            modulus = field.modulus
             q = (p+1) >> 1  # q = 1/2 mod p
-        prfs = self.prfs(field.order)
-        t = self.threshold
-        h = n
-        while h > 0:
-            rs = thresha.pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
-            # Compute and open the squares and compute square roots.
-            r2s = [r * r for r in rs]
-            if prss0:
-                z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), h)
-                for i in range(h):
-                    r2s[i] += z[i]
-            r2s = await self.output(r2s, threshold=2*t)
-            for r, r2 in zip(rs, r2s):
-                if r2.value != 0:
-                    h -= 1
-                    s = r.value * field._sqrt(r2.value, INV=True)
-                    if not signed:
-                        s %= modulus
-                        s += 1
-                        s *= q
-                    bits[h] = field(s << f)
+            for i in range(n):
+                bits[i] = (bits[i] + 1) * q
+        for i in range(n):
+            if f:
+                bits[i] <<= f
+            bits[i] = field(bits[i])
         return bits
 
     @mpc_coro
     async def np_random_bits(self, sftype, n, signed=False):
-        """Return shape-(n,) secure array of given type with uniformly random bits."""
+        """Return shape-(n,) secure array with uniformly random bits of given type."""
         # TODO: extend to arbitrary shapes
-        prss0 = False
         if issubclass(sftype, self.SecureObject):
-            if issubclass(sftype, self.SecureFiniteField):
-                prss0 = True
             await self.returnType((sftype.array, True, (n,)))
             field = sftype.field
             f = sftype.frac_length
@@ -3230,47 +3566,80 @@ class Runtime:
             await self.returnType(Future)
             field = sftype
             f = 0
+        if not n:
+            return field.array([])
 
         m = len(self.parties)
-        if field.characteristic == 2:
+        t = self.threshold
+        p = field.characteristic
+        if p == 2:
+            if self.options.no_prss:
+                uci = self._program_counter[0] % m
+                senders = tuple((uci + i) % m for i in range(t+1))  # TODO: sort out load balancing
+                if self.pid in senders:
+                    bits = field.array([secrets.randbits(1) for _ in range(n)], check=False)
+                else:
+                    bits = field.array(np.zeros(n, dtype=object), check=False)
+                bits = self.input(bits, senders=senders)
+                bits = await bits
+                bits = [a[0] for a in bits]
+                bits = sum(bits)
+                return bits
+
             prfs = self.prfs(2)
             bits = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), n)
             return bits
 
-        if not signed:
-            p = field.characteristic
-            modulus = field.modulus
-            q = (p+1) >> 1  # q = 1/2 mod p
-        prfs = self.prfs(field.order)
-        t = self.threshold
-        r = np.array([], dtype='O')
-        r2 = np.array([], dtype='O')
-        h = n
-        while h:
-            _r = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
-            # Compute and open the squares and later compute square roots.
-            _r2 = _r * _r
-            if prss0:
+        if self.options.no_prss:
+            uci = self._program_counter[0] % m
+            senders = tuple((uci + i) % m for i in range(t+1))  # TODO: sort out load balancing
+            if self.pid in senders:
+                bits = field.array(np.fromiter((2*secrets.randbits(1)-1 for _ in range(n)),
+                                               'O', count=n))
+            else:
+                bits = field.array(np.zeros(n, dtype=object), check=False)
+            bits = self.input(bits, senders=senders)
+            bits = await bits
+            bits = [a[0] for a in bits]
+            bits = np.stack(bits)
+            while (_n := bits.shape[0]) > 1:
+                n0 = _n%2
+                _s = bits[n0:(_n+1)//2] * bits[(_n+1)//2:]
+                _s = await self._reshare(_s)
+                if n0:
+                    _s = np.concatenate((bits[:1], _s), axis=0)
+                bits = _s
+            bits = bits[0].value
+        else:
+            prfs = self.prfs(field.order)
+            r = np.array([], dtype='O')
+            r2 = np.array([], dtype='O')
+            h = n
+            while h:
+                _r = thresha.np_pseudorandom_share(field, m, self.pid, prfs, self._prss_uci(), h)
                 z = thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), h)
-                _r2 += z
-            _r2 = await self.output(_r2, threshold=2*t)
-            mask = _r2.value != 0
-            h -= np.count_nonzero(mask)
-            if h:
-                r = np.append(r, _r.value[mask])
-                r2 = np.append(r2, _r2.value[mask])
-            # else: fast path for h == 0
-        if len(r):
-            r = np.append(r, _r.value)
-            r2 = np.append(r2, _r2.value)
-        else:  # fast path
-            r = _r.value
-            r2 = _r2.value
-        bits = r * field.array._sqrt(r2, INV=True)
+                # Compute and open the squares and later compute square roots.
+                _r2 = field.array(_r.value**2 + z.value)
+                _r2 = await self.output(_r2, threshold=2*t)
+                mask = _r2.value != 0
+                h -= np.count_nonzero(mask)
+                if h:
+                    r = np.append(r, _r.value[mask])
+                    r2 = np.append(r2, _r2.value[mask])
+                # else: fast path for h == 0
+            if len(r):
+                r = np.append(r, _r.value)
+                r2 = np.append(r2, _r2.value)
+            else:  # fast path
+                r = _r.value
+                r2 = _r2.value
+            bits = r * field.array._sqrt(r2, INV=True)
+            if not signed:
+                bits %= field.modulus
+
         if not signed:
-            bits %= modulus
             bits += 1
-            bits *= q
+            bits *= (p + 1) >> 1  # divide by 2
         bits <<= f
         return field.array(bits)
 
@@ -3339,7 +3708,10 @@ class Runtime:
             return self.convert(a_bits, stype)
 
         k = self.options.sec_param
-        r_divl = self._random(field, 1<<(stype.bit_length + k - l)).value
+        r_divl = self._random(field, 1<<(stype.bit_length + k - l))
+        if self.options.no_prss:
+            r_divl = (await r_divl)[0]
+        r_divl = r_divl.value
         a = await self.gather(a)
         if rshift_f:
             a = a >> f
@@ -3562,6 +3934,111 @@ class Runtime:
             c *= 2 - c * b
         return c * v
 
+    @mpc_coro
+    async def _cpx_mul(self, x, y):
+        """Secure complex product of 2-tuples x and y (one resharing)."""
+        # NB: ad hoc implementation for use in self.sincos() below
+        shx = isinstance(x[0], self.SecureObject)
+        shy = isinstance(y[0], self.SecureObject)
+        stype = type(x[0]) if shx else type(y[0])
+        f = stype.frac_length
+        x_integral = True
+        y_integral = True
+        x = list(x)
+        y = list(y)
+        if isinstance(x[0], float):
+            x[0] = round(x[0] * 2**f)
+            x_integral = False
+        if isinstance(x[1], float):
+            x[1] = round(x[1] * 2**f)
+            x_integral = False
+        if isinstance(y[0], float):
+            y[0] = round(y[0] * 2**f)
+            y_integral = False
+        if isinstance(y[1], float):
+            y[1] = round(y[1] * 2**f)
+            y_integral = False
+        x_integral = x_integral and x[0].integral and x[1].integral
+        y_integral = y_integral and y[0].integral and y[1].integral
+        await self.returnType((stype, x_integral and y_integral), 2)
+
+        if shx and shy:
+            x, y = await self.gather(x, y)
+        elif shx:
+            x = await self.gather(x)
+        else:
+            y = await self.gather(y)
+        a, b = x
+        c, d = y
+        z = [a * c - b * d, a * d + b * c]  # TODO: support complex multiplication in finite fields
+        if f and (x_integral or y_integral):
+            # NB: in-place rshifts
+            z[0] >>= f
+            z[1] >>= f
+        if shx and shy:
+            z = await self._reshare(z)
+        if f and not (x_integral or y_integral):
+            z = await self.trunc(z, f=f, l=stype.bit_length)
+        return z
+
+    @mpc_coro
+    async def sincos(self, a):
+        """Secure sine and cosine of fixed-point number a.
+
+        See "New Approach for Sine and Cosine in Secure Fixed-Point Arithmetic"
+        by Stan Korzilius and Berry Schoenmakers, to appear in the proceedings of
+        CSCML 2023, 7th International Symposium on Cyber Security Cryptography and
+        Machine Learning, LNCS 13914, Springer.
+        """
+        secfxp = type(a)
+        await self.returnType(secfxp, 2)
+
+        f = secfxp.frac_length
+        k = f + 6
+        secfxp2 = self.SecFxp(2*k)  # TODO: tune bit length and fractional length
+        n = 2**k
+        r_bits = self.random_bits(secfxp2, k)
+        psi = 0
+        for r_i in r_bits:
+            psi <<= 1
+            psi += r_i
+        r12 = r_bits[1] * r_bits[2]
+        s0 = 1 - 2*r_bits[0]
+        c = s0 * (1 - r_bits[1] - r_bits[2] + r12 + (r_bits[2] - 2*r12)/math.sqrt(2))
+        s = s0 * (r_bits[1] - r12 + r_bits[2]/math.sqrt(2))
+        cs_psi = [(c, -s)]
+        for i in range(3, k):
+            theta_i = math.pi / 2**i
+            c_i = 1 + r_bits[i] * (math.cos(theta_i) - 1)
+            s_i = r_bits[i] * -math.sin(theta_i)
+            cs_psi.append((c_i, s_i))
+        cs_psi = mpctools.reduce(self._cpx_mul, cs_psi)
+        R = self._random(secfxp2, 2**self.options.sec_param) << k
+
+        a = self.convert(a, secfxp2)
+        a = (a / (2*math.pi)) * n
+        a = self.trunc(a) << k
+        chi = await mpc.output(a + psi + R * n, raw=True)
+        chi = chi.value >> k
+        chi = (chi % n) * 2*math.pi/n
+        c, s = math.cos(chi), math.sin(chi)
+        c, s = self._cpx_mul(cs_psi, (c, s))
+        c, s = self.convert([c, s], secfxp)
+        return s, c
+
+    def sin(self, a):
+        """Secure sine of fixed-point number a."""
+        return self.sincos(a)[0]
+
+    def cos(self, a):
+        """Secure cosine of fixed-point number a."""
+        return self.sincos(a)[1]
+
+    def tan(self, a):
+        """Secure tangent of fixed-point number a."""
+        s, c = self.sincos(a)
+        return s / c
+
     def unit_vector(self, a, n):
         """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n.
 
@@ -3604,7 +4081,10 @@ class Runtime:
         r >>= f
         a = await self.gather(a)
         a >>= f
-        R = 1 + self._random(type(a), 1<<self.options.sec_param)
+        R = self._random(type(a), 1<<self.options.sec_param)
+        if self.options.no_prss:
+            R = (await R)[0]
+        R += 1
         c = await self.output(a - r + R * n)
         c = c.value % n
         # rotate u over c positions to the right
@@ -3762,6 +4242,10 @@ def setup():
         pid = options.index or 0
         base_port = options.base_port or 11365
         parties = [Party(i, 'localhost', base_port + i) for i in range(m)]
+
+    options.no_prss = options.no_prss or os.getenv('MPYC_NOPRSS') == '1'  # check if MPYC_NOPRSS set
+    if options.no_prss:
+        logging.info('Use of PRSS (pseudorandom secret sharing) disabled.')
 
     if options.threshold is None:
         options.threshold = (m-1)//2

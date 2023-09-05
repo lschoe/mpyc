@@ -57,7 +57,7 @@ def np_random_split(field, s, t, m):
     n = len(s)
     _randbelow = secrets.randbelow
     order = field.order
-    C = np.fromiter((_randbelow(order) for _ in range(t * n)), dtype='O').reshape(t, n)
+    C = np.fromiter((_randbelow(order) for _ in range(t * n)), 'O', count=t * n).reshape(t, n)
     V = np.vander(np.array([tp(i) for i in range(1, m+1)], dtype='O'), N=t+1, increasing=True)
     # NB: each entry in first column of V is a 1 of type int (also if tp is gfpx.Polynomial)
     shares = (V @ np.concatenate((s.reshape(1, n), C))) % p

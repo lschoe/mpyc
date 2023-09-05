@@ -549,7 +549,7 @@ class EllipticCurvePoint(FiniteGroupElement):
     _identity = None
     gap = None
 
-    def __getitem__(self, key):  # NB:  no __setitem__ to prevent mutability
+    def __getitem__(self, key):  # NB: no __setitem__ to prevent mutability
         return self.value[key]
 
     # TODO: reconsider use of properties x, y, z (and t) ... currently used for pairings

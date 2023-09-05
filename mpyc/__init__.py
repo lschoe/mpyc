@@ -5,7 +5,7 @@ where parties interact by exchanging messages via peer-to-peer connections.
 The MPC protocols are based on Shamir's threshold secret sharing scheme
 and withstand passive adversaries controlling less than half of the parties.
 
-Secure integer and fixed-point arithmetic is supported for parameterized
+Secure integer and fixed-point arithmetic are supported for parameterized
 number ranges, also including support for comparison and bitwise operations.
 Secure finite field arithmetic is supported for fields of arbitrary order.
 Secure NumPy arrays over these basic types are available as well.
@@ -29,7 +29,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.9.2'
+__version__ = '0.9.4'
 __license__ = 'MIT License'
 
 import os
