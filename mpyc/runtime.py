@@ -2401,14 +2401,23 @@ class Runtime:
 
     @mpc_coro_no_pc
     async def np_update(self, a, key, value):
-        """Return secure array a modified by update a[key]=value.
+        """Return secure array modified by update a[key]=value.
 
         Also value can be a secure array or object.
         But key is in the clear.
 
         Differs from __setitem__() which works in-place, returning None.
         """
-        await self.returnType((type(a), a.shape))
+        stype = type(a)
+        shape = a.shape
+    
+        if issubclass(stype, self.SecureFixedPointArray):
+            integral = value.integral and a.integral
+            await self.returnType((stype, integral, shape))
+            a.integral = integral # We modify also the array because its values are modified in-place
+        else:
+            await self.returnType((stype, shape))
+
         a = await self.gather(a)
         if isinstance(value, self.SecureObject):
             value = await self.gather(value)
