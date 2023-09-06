@@ -2410,11 +2410,12 @@ class Runtime:
         """
         stype = type(a)
         shape = a.shape
-    
+
         if issubclass(stype, self.SecureFixedPointArray):
             integral = value.integral and a.integral
             await self.returnType((stype, integral, shape))
-            a.integral = integral # We modify also the array because its values are modified in-place
+            a.integral = integral
+            # We also modify the input array because its values are modified in-place
         else:
             await self.returnType((stype, shape))
 

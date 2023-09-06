@@ -299,7 +299,6 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(np.argmax(u))), 3)
 
         # Test the integral property
-        
         a1 = np.array([[-1.5, 2.5], [4.5, -8.5]])
         a2 = np.array([[-1, 2], [4, -8]])
         c1 = secfxp.array(a1)
@@ -364,24 +363,23 @@ class Arithmetic(unittest.TestCase):
         c3 = mpc.np_update(c1, (0,0), secfxp(3))
         self.assertEqual(c1.integral, False)
         self.assertEqual(c3.integral, False)
-        self.assertEqual(mpc.run(mpc.output(c1[0,0])), 3)
-        self.assertEqual(mpc.run(mpc.output(c3[0,0])), 3)
-        c3 = mpc.np_update(c2, (0,0), secfxp(3))
+        self.assertEqual(mpc.run(mpc.output(c1[0, 0])), 3)
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3)
+        c3 = mpc.np_update(c2, (0, 0), secfxp(3))
         self.assertEqual(c2.integral, True)
         self.assertEqual(c3.integral, True)
-        self.assertEqual(mpc.run(mpc.output(c2[0,0])), 3)
-        self.assertEqual(mpc.run(mpc.output(c3[0,0])), 3)
-        c3 = mpc.np_update(c1, (0,0), secfxp(3.5))
-        self.assertEqual(mpc.run(mpc.output(c1[0,0])), 3.5)
-        self.assertEqual(mpc.run(mpc.output(c3[0,0])), 3.5)
+        self.assertEqual(mpc.run(mpc.output(c2[0, 0])), 3)
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3)
+        c3 = mpc.np_update(c1, (0, 0), secfxp(3.5))
+        self.assertEqual(mpc.run(mpc.output(c1[0, 0])), 3.5)
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
         self.assertEqual(c1.integral, False)
         self.assertEqual(c3.integral, False)
-        c3 = mpc.np_update(c2, (0,0), secfxp(3.5))
-        self.assertEqual(mpc.run(mpc.output(c2[0,0])), 3.5)
-        self.assertEqual(mpc.run(mpc.output(c3[0,0])), 3.5)
+        c3 = mpc.np_update(c2, (0, 0), secfxp(3.5))
+        self.assertEqual(mpc.run(mpc.output(c2[0, 0])), 3.5)
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
         self.assertEqual(c3.integral, False)
         self.assertEqual(c2.integral, False)
-
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
