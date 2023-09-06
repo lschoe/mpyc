@@ -298,6 +298,33 @@ class Arithmetic(unittest.TestCase):
         u = mpc.np_unit_vector(secfxp(3), 7)
         self.assertEqual(mpc.run(mpc.output(np.argmax(u))), 3)
 
+        # Test the integral property
+        a1 = np.array([[-1.5, 2.5], [4.5, -8.5]])
+        a2 = np.array([[-1, 2], [4, -8]])
+        c1 = secfxp.array(a1)
+        c2 = secfxp.array(a2)
+        self.assertEqual(c1.integral, False)
+        self.assertEqual(c2.integral, True)
+        self.assertEqual((c1 + c2).integral, False)
+        self.assertEqual(np.add(c2, c2).integral, True)
+        self.assertEqual((c1 * c2).integral, False)
+        self.assertEqual(np.multiply(c2, c2).integral, True)
+        self.assertEqual(np.matmul(c1, c2).integral, False)
+        self.assertEqual((c2 @ c2).integral, True)
+
+        self.assertEqual(np.hstack((c1, c2)).integral, False)
+        self.assertEqual(np.hstack((c1, c1)).integral, False)
+        self.assertEqual(np.hstack((c2, c2)).integral, True)
+        self.assertEqual(np.column_stack((c1, c2)).integral, False)
+        self.assertEqual(np.column_stack((c1, a1)).integral, False)
+        self.assertEqual(np.column_stack((c2, c2)).integral, True)
+        self.assertEqual(np.stack((c1, c2)).integral, False)
+        self.assertEqual(np.stack((c2, a1)).integral, False)
+        self.assertEqual(np.stack((c2, c2, a2)).integral, True)
+        self.assertEqual(np.vstack((c1, a2)).integral, False)
+        self.assertEqual(np.vstack((c1, c1)).integral, False)
+        self.assertEqual(np.vstack((c2, c2)).integral, True)
+
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal
@@ -604,6 +631,18 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c, [0]*16 + [1]*16)
         c = mpc.run(mpc.output(mpc.to_bits(secfxp(-2**15))))
         self.assertEqual(c, [0]*31 + [1])
+
+        # Test integral property
+        c1 = secfxp(8)
+        self.assertEqual(c1.integral, True)
+        self.assertEqual((c1*0.5).integral, False)
+        c2 = secfxp(1.5)
+        self.assertEqual(c2.integral, False)
+        self.assertEqual((c1*c2).integral, False)
+        self.assertEqual((c1+c2).integral, False)
+        c2 = secfxp(1)
+        self.assertEqual((c1*c2).integral, True)
+        self.assertEqual((c1+c2).integral, True)
 
         for f in [8, 16, 32, 64]:
             secfxp = mpc.SecFxp(2*f)
