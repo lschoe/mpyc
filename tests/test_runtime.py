@@ -302,7 +302,6 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(np.argmax(u))), 3)
 
         # Test the integral property
-
         a1 = np.array([[-1.5, 2.5], [4.5, -8.5]])
         a2 = np.array([[-1, 2], [4, -8]])
         c1 = secfxp.array(a1)
