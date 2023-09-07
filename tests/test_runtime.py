@@ -349,7 +349,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.amax(c2).integral, True)
         self.assertEqual(np.amax(c2, axis=0).integral, True)
         self.assertEqual(np.amax(c1).integral, False)
-        self.assertEqual(np.amax(c1, axis=0).integral, False)    
+        self.assertEqual(np.amax(c1, axis=0).integral, False)
 
         self.assertEqual(np.argmin(c2).integral, True)
         self.assertEqual(np.argmin(c2, axis=0).integral, True)
@@ -358,7 +358,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.argmax(c2).integral, True)
         self.assertEqual(np.argmax(c2, axis=0).integral, True)
         self.assertEqual(np.argmax(c1).integral, True)
-        self.assertEqual(np.argmax(c1, axis=0).integral, True)    
+        self.assertEqual(np.argmax(c1, axis=0).integral, True)
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
