@@ -325,6 +325,11 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.vstack((c1, c1)).integral, False)
         self.assertEqual(np.vstack((c2, c2)).integral, True)
 
+        self.assertEqual(np.sum(c2).integral, True)
+        self.assertEqual(np.sum(c2, axis=0).integral, True)
+        self.assertEqual(np.sum(c1).integral, False)
+        self.assertEqual(np.sum(c1, axis=0).integral, False)
+
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal

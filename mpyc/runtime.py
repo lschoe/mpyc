@@ -2909,9 +2909,15 @@ class Runtime:
             else:
                 shape = tuple(s for i, s in enumerate(a.shape) if i not in axes)
         if shape == ():
-            await self.returnType(sectype)
+            if isinstance(a, self.SecureFixedPointArray):
+                await self.returnType((sectype, a.integral))
+            else:
+                await self.returnType(sectype)
         else:
-            await self.returnType((type(a), shape))
+            if isinstance(a, self.SecureFixedPointArray):
+                await self.returnType((type(a), a.integral, shape))
+            else:
+                await self.returnType((type(a), shape))
         a, initial = await self.gather(a, initial)
         return np.sum(a, axis=axis, keepdims=keepdims, initial=initial.value)
         # TODO: handle switch from initial (field elt) to initial.value inside finfields.py
