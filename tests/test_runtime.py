@@ -325,6 +325,41 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.vstack((c1, c1)).integral, False)
         self.assertEqual(np.vstack((c2, c2)).integral, True)
 
+        self.assertEqual(np.sum(c2).integral, True)
+        self.assertEqual(np.sum(c2, axis=0).integral, True)
+        self.assertEqual(np.sum(c1).integral, False)
+        self.assertEqual(np.sum(c1, axis=0).integral, False)
+
+        self.assertEqual(mpc.np_sgn(c1).integral, True)
+        self.assertEqual(mpc.np_sgn(c2).integral, True)
+        self.assertEqual(np.absolute(c1).integral, False)
+        self.assertEqual(np.absolute(c2).integral, True)
+
+        self.assertEqual(np.minimum(c1, c2).integral, False)
+        self.assertEqual(np.minimum(c1, c1).integral, False)
+        self.assertEqual(np.minimum(c2, c2).integral, True)
+        self.assertEqual(np.maximum(c1, c2).integral, False)
+        self.assertEqual(np.maximum(c1, c1).integral, False)
+        self.assertEqual(np.maximum(c2, c2).integral, True)
+
+        self.assertEqual(np.amin(c2).integral, True)
+        self.assertEqual(np.amin(c2, axis=0).integral, True)
+        self.assertEqual(np.amin(c1).integral, False)
+        self.assertEqual(np.amin(c1, axis=0).integral, False)
+        self.assertEqual(np.amax(c2).integral, True)
+        self.assertEqual(np.amax(c2, axis=0).integral, True)
+        self.assertEqual(np.amax(c1).integral, False)
+        self.assertEqual(np.amax(c1, axis=0).integral, False)
+
+        self.assertEqual(np.argmin(c2).integral, True)
+        self.assertEqual(np.argmin(c2, axis=0).integral, True)
+        self.assertEqual(np.argmin(c1).integral, True)
+        self.assertEqual(np.argmin(c1, axis=0).integral, True)
+        self.assertEqual(np.argmax(c2).integral, True)
+        self.assertEqual(np.argmax(c2, axis=0).integral, True)
+        self.assertEqual(np.argmax(c1).integral, True)
+        self.assertEqual(np.argmax(c1, axis=0).integral, True)
+
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal
