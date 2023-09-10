@@ -214,6 +214,9 @@ class Arithmetic(unittest.TestCase):
                        [a_.argmax(), np.amax(a_)])
         np.assertEqual(mpc.run(mpc.output(c_.argmax(arg_only=True))), [0, 1, 0])
 
+        self.assertEqual(mpc.run(mpc.output(c_.tolist())), a_.tolist())
+        np.assertEqual(mpc.run(mpc.output(mpc.np_fromlist(c_.tolist()))), a_)
+
         self.assertEqual(mpc.run(mpc.output(list(c.flat))), list(a.flat))
         self.assertEqual(len(c), len(a))
         self.assertRaises(TypeError, len, secint.array(np.array(42)))
@@ -310,15 +313,24 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c1[0, 0].integral, False)
         self.assertEqual(c2[0, 0].integral, True)
 
+        self.assertEqual(c1.flatten().tolist()[0].integral, False)
+        self.assertEqual(c2.flatten().tolist()[0].integral, True)
+        self.assertEqual(mpc.np_fromlist([secfxp(-1.5), secfxp(2.5)]).integral, False)
+        self.assertEqual(mpc.np_fromlist([secfxp(-1), secfxp(2)]).integral, True)
+
         self.assertEqual((c1 + c2).integral, False)
         self.assertEqual(np.add(c2, c2).integral, True)
         self.assertEqual((c1 * c2).integral, False)
         self.assertEqual(np.multiply(c2, c2).integral, True)
+        self.assertEqual(np.matmul(c1, c1).integral, False)
         self.assertEqual(np.matmul(c1, c2).integral, False)
         self.assertEqual((c2 @ c2).integral, True)
         self.assertEqual(np.outer(c1, c1).integral, False)
         self.assertEqual(np.outer(c2, c2).integral, True)
         self.assertEqual(np.outer(c1, c2).integral, False)
+        self.assertEqual((c2[0, :] @ c2[:, 0]).integral, True)  # Cover lines related scalar outputs
+        self.assertEqual((c1[0, :] @ c1[:, 0]).integral, False)
+        self.assertEqual((c1[0, :] @ c2[:, 0]).integral, False)
 
         self.assertEqual(np.hstack((c1, c2)).integral, False)
         self.assertEqual(np.hstack((c1, c1)).integral, False)
