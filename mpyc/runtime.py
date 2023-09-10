@@ -2618,7 +2618,7 @@ class Runtime:
                     integral = integral and extract_integral(a)
             elif isinstance(s, self.SecureObject):
                 integral = s.integral
-            else: # TODO: extend to cleartext numpy arrays?
+            else:  # TODO: extend to cleartext numpy arrays?
                 raise NotImplementedError
             return integral
 
@@ -2654,7 +2654,7 @@ class Runtime:
         else:
             rettype = (sectype, block_shape(arrays))
         await self.returnType(rettype)
-        
+
         arrays = await self.gather(arrays)  # TODO: handle secfxp
         return np.block(arrays)
 
@@ -2794,7 +2794,7 @@ class Runtime:
         if issubclass(stype, self.SecureFixedPointArray):
             rettype = (stype, a.integral, a.shape)
         else:
-            rettype = (stype, a.shape) 
+            rettype = (stype, a.shape)
         await self.returnType(rettype)
         a = await self.gather(a)
         return np.fliplr(a)

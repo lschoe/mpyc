@@ -307,8 +307,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(c2.integral, True)
         self.assertEqual(c1.copy().integral, False)
         self.assertEqual(c2.copy().integral, True)
-        self.assertEqual(c1[0,0].integral, False)
-        self.assertEqual(c2[0,0].integral, True)
+        self.assertEqual(c1[0, 0].integral, False)
+        self.assertEqual(c2[0, 0].integral, True)
 
         self.assertEqual((c1 + c2).integral, False)
         self.assertEqual(np.add(c2, c2).integral, True)
@@ -373,8 +373,8 @@ class Arithmetic(unittest.TestCase):
 
         self.assertEqual(np.fliplr(c1).integral, False)
         self.assertEqual(np.fliplr(c2).integral, True)
-        self.assertEqual(c1.swapaxes(0,1).integral, False)
-        self.assertEqual(c2.swapaxes(0,1).integral, True)
+        self.assertEqual(c1.swapaxes(0, 1).integral, False)
+        self.assertEqual(c2.swapaxes(0, 1).integral, True)
         self.assertEqual(c1.transpose().integral, False)
         self.assertEqual(c2.transpose().integral, True)
 
@@ -388,7 +388,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.hsplit(c2, 1)[0].integral, True)
         self.assertEqual(np.vsplit(c1, 1)[0].integral, False)
         self.assertEqual(np.vsplit(c2, 1)[0].integral, True)
-        
+
         self.assertEqual(np.concatenate((c1, c1)).integral, False)
         self.assertEqual(np.concatenate((c2, c2)).integral, True)
         self.assertEqual(np.concatenate((c1, c2)).integral, False)
