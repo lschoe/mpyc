@@ -2407,17 +2407,16 @@ class Runtime:
         But key is in the clear.
 
         Differs from __setitem__() which works in-place, returning None.
+        MUST be used as follows: a = np_update(a, key, value).
         """
         stype = type(a)
         shape = a.shape
 
         if issubclass(stype, self.SecureFixedPointArray):
-            integral = value.integral and a.integral
-            await self.returnType((stype, integral, shape))
-            a.integral = integral
-            # We also modify the input array because its values are modified in-place
+            rettype = (stype, value.integral and a.integral, shape)
         else:
-            await self.returnType((stype, shape))
+            rettype = (stype, shape)
+        await self.returnType(rettype)
 
         a = await self.gather(a)
         if isinstance(value, self.SecureObject):
