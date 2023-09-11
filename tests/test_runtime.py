@@ -408,26 +408,31 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.append(c2, c2).integral, True)
         self.assertEqual(np.append(c1, c2).integral, False)
 
-        c3 = mpc.np_update(c1, (0, 0), secfxp(3))
-        self.assertEqual(c1.integral, False)
+        c3 = c1.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3))
         self.assertEqual(c3.integral, False)
-        self.assertEqual(mpc.run(mpc.output(c1[0, 0])), 3)
         self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3)
-        c3 = mpc.np_update(c2, (0, 0), secfxp(3))
-        self.assertEqual(c2.integral, True)
+        c3 = c2.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3))
         self.assertEqual(c3.integral, True)
-        self.assertEqual(mpc.run(mpc.output(c2[0, 0])), 3)
         self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3)
-        c3 = mpc.np_update(c1, (0, 0), secfxp(3.5))
-        self.assertEqual(mpc.run(mpc.output(c1[0, 0])), 3.5)
+        c1 = c1.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3.5))
         self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
-        self.assertEqual(c1.integral, False)
         self.assertEqual(c3.integral, False)
+        c3 = c2.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3.5))
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
+        self.assertEqual(c3.integral, False)
+
+        # Test of an incorrect np_update call
         c3 = mpc.np_update(c2, (0, 0), secfxp(3.5))
-        self.assertEqual(mpc.run(mpc.output(c2[0, 0])), 3.5)
         self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
         self.assertEqual(c3.integral, False)
-        self.assertEqual(c2.integral, False)
+        # The input array is only partially updated (e.g., integral not updated)
+        # => the correct call is "a = np_update(a, key, value)"
+        self.assertEqual(mpc.run(mpc.output(c2[0, 0])), 3.5)  # Updated
+        self.assertEqual(c2.integral, True)  # Not updated
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
