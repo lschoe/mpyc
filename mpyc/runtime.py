@@ -2529,13 +2529,14 @@ class Runtime:
         if a.ndim and axis1 - axis2 in (0, a.ndim, -a.ndim):
             return a
 
-        shape = list(a.shape)
         stype = type(a)
+        shape = list(a.shape)
         shape[axis1], shape[axis2] = shape[axis2], shape[axis1]
+        shape = tuple(shape)
         if issubclass(stype, self.SecureFixedPointArray):
-            rettype = (stype, a.integral, tuple(shape))
+            rettype = (stype, a.integral, shape)
         else:
-            rettype = ((stype, tuple(shape)))
+            rettype = (stype, shape)
         await self.returnType(rettype)
         a = await self.gather(a)
         return a.swapaxes(axis1, axis2)
@@ -2611,17 +2612,6 @@ class Runtime:
                 cls = None
             return cls
 
-        def extract_integral(s):
-            integral = True
-            if isinstance(s, list):
-                for a in s:
-                    integral = integral and extract_integral(a)
-            elif isinstance(s, self.SecureObject):
-                integral = s.integral
-            else:  # TODO: extend to cleartext numpy arrays?
-                raise NotImplementedError
-            return integral
-
         sectype = extract_type(arrays)
         if not issubclass(sectype, self.SecureArray):
             sectype = sectype.array
@@ -2649,12 +2639,21 @@ class Runtime:
         def block_shape(a):
             return tuple(_block_shape(a, block_ndim(a))[0])  # TODO: move this to mpyc.numpy module
 
+        def extract_integral(s):
+            if isinstance(s, list):
+                integral = all(extract_integral(a) for a in s)
+            elif isinstance(s, self.SecureObject):
+                integral = s.integral
+            else:  # TODO: extend to cleartext numpy arrays?
+                raise NotImplementedError
+
+            return integral
+
         if issubclass(sectype, self.SecureFixedPointArray):
             rettype = (sectype, extract_integral(arrays), block_shape(arrays))
         else:
             rettype = (sectype, block_shape(arrays))
         await self.returnType(rettype)
-
         arrays = await self.gather(arrays)  # TODO: handle secfxp
         return np.block(arrays)
 
@@ -2744,8 +2743,8 @@ class Runtime:
     @mpc_coro_no_pc
     async def np_split(self, ary, indices_or_sections, axis=0):
         """Split an array into multiple sub-arrays as views into ary."""
-        shape = list(ary.shape)
         stype = type(ary)
+        shape = list(ary.shape)
         if isinstance(indices_or_sections, int):
             N = indices_or_sections
         else:
