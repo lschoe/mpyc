@@ -408,6 +408,23 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.append(c2, c2).integral, True)
         self.assertEqual(np.append(c1, c2).integral, False)
 
+        c3 = c1.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3))
+        self.assertEqual(c3.integral, False)
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3)
+        c3 = c2.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3))
+        self.assertEqual(c3.integral, True)
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3)
+        c1 = c1.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3.5))
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
+        self.assertEqual(c3.integral, False)
+        c3 = c2.copy()
+        c3 = mpc.np_update(c3, (0, 0), secfxp(3.5))
+        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
+        self.assertEqual(c3.integral, False)
+
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal
