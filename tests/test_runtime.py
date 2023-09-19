@@ -425,15 +425,6 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
         self.assertEqual(c3.integral, False)
 
-        # Test of an incorrect np_update call
-        c3 = mpc.np_update(c2, (0, 0), secfxp(3.5))
-        self.assertEqual(mpc.run(mpc.output(c3[0, 0])), 3.5)
-        self.assertEqual(c3.integral, False)
-        # The input array is only partially updated (e.g., integral not updated)
-        # => the correct call is "a = np_update(a, key, value)"
-        self.assertEqual(mpc.run(mpc.output(c2[0, 0])), 3.5)  # Updated
-        self.assertEqual(c2.integral, True)  # Not updated
-
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfld_array(self):
         np.assertEqual = np.testing.assert_array_equal

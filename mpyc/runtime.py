@@ -2411,9 +2411,9 @@ class Runtime:
         """
         stype = type(a)
         shape = a.shape
-
         if issubclass(stype, self.SecureFixedPointArray):
-            rettype = (stype, value.integral and a.integral, shape)
+            # TODO: value without integral attribute
+            rettype = (stype, a.integral and value.integral, shape)
         else:
             rettype = (stype, shape)
         await self.returnType(rettype)
