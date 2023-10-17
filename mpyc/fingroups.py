@@ -742,10 +742,20 @@ class EdwardsExtended(EdwardsCurvePoint):
         x1, y1, z1, t1 = pt1
         x2, y2, z2, t2 = pt2
         r1, r2, r3, r4 = y1 - x1, y2 - x2, y1 + x1, y2 + x2
-        r1, r2, r3, r4 = r1 * r2, r3 * r4, 2*cls.d * t1 * t2, 2*z1 * z2
+        r1, r2, r3, r4 = r1 * r2, r3 * r4, 2*cls.d * t1 * t2, 2 * z1 * z2
         r1, r2, r3, r4 = r2 - r1, r4 - r3, r4 + r3, r2 + r1
         pt3 = r1 * r2, r3 * r4, r2 * r3, r1 * r4
         return cls(pt3, check=False)
+
+    @classmethod
+    def operation2(cls, pt, /):
+        """Doubling (twisted a=-1) Edwards point in extended projective coordinates."""
+        # specialized addition for case pt1=pt2
+        x, y, z, t = pt
+        r1, r2, r3, r4 = (y - x)**2, (y + x)**2, 2*cls.d * t**2, 2 * z**2
+        r1, r2, r3, r4 = r2 - r1, r4 - r3, r4 + r3, r2 + r1
+        pt2 = r1 * r2, r3 * r4, r2 * r3, r1 * r4
+        return cls(pt2, check=False)
 
     def normalize(self):
         cls = type(self)
