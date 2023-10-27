@@ -276,7 +276,7 @@ class Runtime:
         # m > 1
         self.parties[self.pid].protocol = Future(loop=self._loop)
         logging.debug('Synchronize with all parties before shutdown')
-        await self.gather(self.transfer(self.pid))
+        await self.transfer(self.pid)
 
         # Close connections to all parties > self.pid.
         logging.debug('Closing connections with other parties')
@@ -2288,7 +2288,7 @@ class Runtime:
                     s >>= f  # NB: in-place rshift
                 C[ni + j] = s
         if shA and shB:
-            C = await self.gather(self._reshare(C))
+            C = await self._reshare(C)
         if f and not A_integral and not B_integral:
             C = self.trunc(C, f=f, l=stype.bit_length)
             C = await self.gather(C)
@@ -3421,7 +3421,7 @@ class Runtime:
             b_i = b[i].value
             for j in range(n2):
                 A[ni + j] = field(A[ni + j].value * d - b_i * c[j].value)
-        A = await self.gather(self._reshare(A))
+        A = await self._reshare(A)
         f = stype.frac_length
         if f:
             A = self.trunc(A, f=f, l=stype.bit_length)

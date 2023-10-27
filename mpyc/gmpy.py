@@ -81,7 +81,7 @@ def ratrec(x, y, N=None, D=None):
 
 def prev_prime(x):
     """Return the greatest probable prime number < x, if any."""
-    # TODO: some future release of gmpy2 will likely support this function
+    # TODO: future releases of gmpy2 will support this function (using GMP 6.3+)
     if x <= 2:
         raise ValueError(f'no smaller prime')
 

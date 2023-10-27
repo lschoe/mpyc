@@ -4,7 +4,7 @@ MPyC command line
 =================
 
 An MPyC program is a Python program that uses the MPyC runtime,
-typically by including ``from mypc.runtime import mpc``.
+typically by including ``from mpyc.runtime import mpc``.
 A range of options is available to control the
 MPyC program and its runtime from the command line.
 

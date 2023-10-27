@@ -12,7 +12,9 @@ jobs:
       - MPYC_NONUMPY=1
       - MPYC_NOGMPY=1
   - python: 3.11
-    install: pip install numpy gmpy2
+    install: pip install numpy==1.24.* gmpy2
+  - python: 3.12
+    install: pip install numpy
 before_install:
   - pip install --upgrade pip
   - pip install coverage

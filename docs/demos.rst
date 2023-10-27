@@ -82,10 +82,15 @@ The actual code of the 'Hello world!' demo is very simple:
 
    from mpyc.runtime import mpc
 
-   mpc.run(mpc.start())
-   print(''.join(mpc.run(mpc.transfer('Hello world!'))))
-   mpc.run(mpc.shutdown())
 
+   async def main():
+       await mpc.start()
+       print(''.join(await mpc.transfer('Hello world!')))
+       await mpc.shutdown()
+
+   if __name__ == '__main__':
+       mpc.run(main())
+	   
 There is not much secrecy in this program, as the hello messages are broadcast using ``mpc.transfer()`` such that
 each party gets a hello message from all other parties (including one from itself).
 
@@ -114,14 +119,14 @@ oneliner producing ``m**2 = 49`` as output:
 
 .. code-block:: python
 
-   mpc.output(mpc.sum(mpc.input(mpc.SecInt(2*l+1)(2*mpc.pid + 1))))
+   await mpc.output(mpc.sum(mpc.input(mpc.SecInt(2*l+1)(2*i+1))))
 
 To understand the mechanics of this oneliner, we look at all intermediate results:
 
 .. code-block:: python
 
    secint = mpc.SecInt(2*l+1)  # secure integers of bit length 2l+1
-   a = secint(2*mpc.pid + 1)   # set a = 2i+1 for party i, i=0,...,m-1
+   a = secint(2*i+1)           # set a = 2i+1 for party i = mpc.pid
    s = mpc.input(a)            # secret-share a with all other parties
    b = mpc.sum(s)              # sum of secret-shared entries of s
    f = mpc.output(b)           # value of secret-shared sum in the clear
@@ -160,7 +165,7 @@ is:
 
 .. code-block:: python
 
-   mpc.output(mpc.prod(mpc.input(mpc.SecInt(m+2)(2))))
+   await mpc.output(mpc.prod(mpc.input(mpc.SecInt(m+2)(2))))
 
 Here, ``mpc.prod(s)`` securely computes the product of all entries of ``s``. The MPyC runtime will organize
 the computation of this product such that all required secure multiplications are done in a logarithmic number of rounds,
@@ -307,7 +312,7 @@ The heart of the program looks as follows:
 	for i in range(1, t+1):
   	    x = mpc.input([secnum(message[i-1][0]), secnum(message[i-1][1])], i)
 	    b = mpc.input(secnum(choice[i-1]), t + i)
-	    a = mpc.run(mpc.output(mpc.if_else(b, x[1], x[0]), t + i))
+	    a = await mpc.output(mpc.if_else(b, x[1], x[0]), t + i)
 
 The final line arranges that only receiver :math:`t+i` gets number ``a = x[b]`` as private output.
 All other parties will get ``a = None`` here. The implementation of ``mpc.if_else(b, x[1], x[0])``
@@ -599,12 +604,12 @@ An encryption with a 128-bit AES key runs as follows::
    $ python aes.py -M3 -1
    AES-128 encryption only.
    AES polynomial: x^8+x^4+x^3+x+1
-   2021-06-24 14:08:35,605 Start MPyC runtime v0.7.7
-   2021-06-24 14:08:35,729 All 3 parties connected.
+   2023-10-27 17:00:22,325 Start MPyC runtime v0.9.4
+   2023-10-27 17:00:22,860 All 3 parties connected.
    Plaintext:   00112233445566778899aabbccddeeff
    AES-128 key: 000102030405060708090a0b0c0d0e0f
    Ciphertext:  69c4e0d86a7b0430d8cdb78070b4c55a
-   2021-06-24 14:08:36,387 Stop MPyC runtime -- elapsed time: 0:00:00.782005
+   2023-10-27 17:00:23,254 Stop MPyC -- elapsed time: 0:00:00.393|bytes sent: 62538
 
 This way multiple parties are able to perform encryptions and decryptions, without ever exposing any plaintexts or AES keys.
 
