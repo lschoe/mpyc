@@ -32,8 +32,6 @@ import mpyc.statistics
 import mpyc.seclists
 
 Future = asyncio.Future
-mpc_coro = asyncoro.mpc_coro
-mpc_coro_no_pc = asyncoro._mpc_coro_no_pc
 
 
 class Runtime:
@@ -63,7 +61,8 @@ class Runtime:
     SecInt = staticmethod(sectypes.SecInt)
     SecFxp = staticmethod(sectypes.SecFxp)
     SecFlt = staticmethod(sectypes.SecFlt)
-    coroutine = staticmethod(mpc_coro)
+    gather = asyncoro.gather_shares
+    coroutine = staticmethod(asyncoro.mpc_coro)
     returnType = staticmethod(asyncoro.returnType)
     seclist = mpyc.seclists.seclist
     SecGrp = staticmethod(mpyc.secgroups.SecGrp)
@@ -138,9 +137,6 @@ class Runtime:
                 data = protocol.receive(pc)
             out_shares[peer_pid] = data
         return out_shares
-
-    def gather(self, *obj):
-        return asyncoro.gather_shares(self, *obj)
 
     async def barrier(self, name=None):
         """Barrier for runtime, using optional string name for easy identification."""
@@ -300,7 +296,7 @@ class Runtime:
 
         await self.shutdown()
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def transfer(self, obj, senders=None, receivers=None, sender_receivers=None) -> Future:
         """Transfer pickable Python objects between specified parties.
 
@@ -395,7 +391,7 @@ class Runtime:
                 y = [a[0] for a in y]
         return y
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _distribute(self, x, senders):
         """Distribute shares for each x provided by a sender."""
         if x == []:
@@ -467,7 +463,7 @@ class Runtime:
             y = [[field.array(unmarshal(r), check=False).reshape(shape)] for r in shares]
         return y
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def output(self, x, receivers=None, threshold=None, raw=False):
         """Output the value of x to the receivers specified.
 
@@ -559,7 +555,7 @@ class Runtime:
             y = y[0]
         return y
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _reshare(self, x):
         x_is_list = isinstance(x, list)
         if not x_is_list:
@@ -658,7 +654,7 @@ class Runtime:
             y = y[0]
         return y
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _convert(self, x, t_type):
         s_type = type(x[0])  # source type
         n = len(x)
@@ -727,7 +723,7 @@ class Runtime:
                 x[i] <<= d
         return x
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def trunc(self, x, f=None, l=None):
         """Secure truncation of f least significant bits of (elements of) x.
 
@@ -773,7 +769,7 @@ class Runtime:
             y = y[0]
         return y
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_trunc(self, a, f=None, l=None):
         """Secure truncation of f least significant bits of (elements of) a.
 
@@ -811,7 +807,7 @@ class Runtime:
         """Secure public equality test of a and b."""
         return self.is_zero_public(a - b)
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def is_zero_public(self, a) -> Future:
         """Secure public zero test of a."""
         sftype = type(a)
@@ -863,7 +859,7 @@ class Runtime:
         c = await self.output(b, threshold=threshold)
         return c == 0
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_is_zero_public(self, a) -> Future:
         """Secure public zero test of a, elementwise."""
         sftype = type(a)
@@ -920,7 +916,7 @@ class Runtime:
             c = c.reshape(shape)
         return c == 0
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def neg(self, a):
         """Secure negation (additive inverse) of a."""
         stype = type(a)
@@ -931,7 +927,7 @@ class Runtime:
         a = await self.gather(a)
         return -a
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def pos(self, a):
         """Secure unary + applied to a."""
         stype = type(a)
@@ -942,7 +938,7 @@ class Runtime:
         a = await self.gather(a)
         return +a
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def add(self, a, b):
         """Secure addition of a and b."""
         stype = type(a)
@@ -953,7 +949,7 @@ class Runtime:
         a, b = await self.gather(a, b)
         return a + b
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def sub(self, a, b):
         """Secure subtraction of a and b."""
         stype = type(a)
@@ -964,7 +960,7 @@ class Runtime:
         a, b = await self.gather(a, b)
         return a - b
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_add(self, a, b):
         """Secure addition of a and b, elementwise with broadcast."""
         stype = type(a)
@@ -978,7 +974,7 @@ class Runtime:
         a, b = await self.gather(a, b)
         return a + b
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_subtract(self, a, b):
         """Secure subtraction of a and b, elementwise with broadcast."""
         stype = type(b) if isinstance(b, self.SecureArray) else type(a)
@@ -992,7 +988,7 @@ class Runtime:
         a, b = await self.gather(a, b)
         return a - b
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def mul(self, a, b):
         """Secure multiplication of a and b."""
         stype = type(a)
@@ -1028,7 +1024,7 @@ class Runtime:
             c = self.trunc(stype(c), f=f - z)
         return c
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_multiply(self, a, b):
         """Secure multiplication of a and b, elementwise with broadcast."""
         stype = type(a)
@@ -1131,7 +1127,7 @@ class Runtime:
             c = b.reciprocal()
         return self.np_multiply(a, c)
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def reciprocal(self, a):
         """Secure reciprocal (multiplicative field inverse) of a, for nonzero a."""
         stype = type(a)
@@ -1160,7 +1156,7 @@ class Runtime:
         r <<= stype.frac_length  # TODO: sort out secfxp case (also see self.pow())
         return r / ar
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_reciprocal(self, a):
         """Secure elementwise reciprocal (multiplicative field inverse) of a, for nonzero a."""
         sftype = type(a)
@@ -1311,7 +1307,7 @@ class Runtime:
 
         return self.sgn(a, EQ=True)
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _is_zero(self, a):  # a la [NO07]
         """Probabilistic zero test."""
         stype = type(a)
@@ -1343,7 +1339,7 @@ class Runtime:
         e <<= stype.frac_length
         return e
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def sgn(self, a, l=None, LT=False, EQ=False):
         """Secure sign(um) of a, return -1 if a < 0 else 0 if a == 0 else 1.
 
@@ -1618,7 +1614,7 @@ class Runtime:
         a = self.np_swapaxes(a, axis, -1)  # restore original axis
         return a
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def lsb(self, a):
         """Secure least significant bit of a."""  # a la [ST06]
         stype = type(a)
@@ -1642,7 +1638,7 @@ class Runtime:
             x <<= f
         return x
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def mod(self, a, b):
         """Secure modulo reduction."""
         # TODO: optimize for integral a of type secfxp
@@ -1658,7 +1654,7 @@ class Runtime:
         f = stype.frac_length
         return r * 2**-f
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _mod(self, a, b):
         """Secure modulo reduction, for public b."""  # a la [GMS10]
         stype = type(a)
@@ -1700,7 +1696,7 @@ class Runtime:
         z = Zp(1 - s_sign if g else 1 + s_sign)/2
         return (c + r_modb - z * b)<<f
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def trailing_zeros(self, a, l=None):
         """Secure extraction of l least significant (or all) bits of a,
         only correct up to and including the least significant 1 (if any).
@@ -1842,7 +1838,7 @@ class Runtime:
         # TODO: consider further reduction of coefficients s and t
         return pow_of_2 * g, s, t
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def sum(self, x, start=0):
         """Secure sum of all elements in x, similar to Python's built-in sum()."""
         if iter(x) is x:
@@ -1863,7 +1859,7 @@ class Runtime:
         s = sum(a.value for a in x)
         return stype.field(s)
 
-    @mpc_coro  # no_pc possible if no reshare and no trunc
+    @asyncoro.mpc_coro  # no_pc possible if no reshare and no trunc
     async def in_prod(self, x, y):
         """Secure dot product of x and y (one resharing)."""
         if x == []:
@@ -1902,7 +1898,7 @@ class Runtime:
             s = self.trunc(stype(s))
         return s
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def prod(self, x, start=1):
         """Secure product of all elements in x, similar to Python's math.prod().
 
@@ -1951,7 +1947,7 @@ class Runtime:
             n = len(x)
         return x[0]
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def all(self, x):
         """Secure all of elements in x, similar to Python's built-in all().
 
@@ -2044,7 +2040,7 @@ class Runtime:
         """
         return 1 - self.np_prod(1 - a, axis=axis)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def vector_add(self, x, y):
         """Secure addition of vectors x and y."""
         if x == []:
@@ -2065,7 +2061,7 @@ class Runtime:
             x[i] = x[i] + y[i]
         return x
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def vector_sub(self, x, y):
         """Secure subtraction of vectors x and y."""
         if x == []:
@@ -2086,7 +2082,7 @@ class Runtime:
             x[i] = x[i] - y[i]
         return x
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def matrix_add(self, A, B, tr=False):
         """Secure addition of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
@@ -2098,7 +2094,7 @@ class Runtime:
                 A[i][j] = A[i][j] + (B[j][i] if tr else B[i][j])
         return A
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def matrix_sub(self, A, B, tr=False):
         """Secure subtraction of matrices A and (transposed) B."""
         A, B = [r[:] for r in A], [r[:] for r in B]
@@ -2110,7 +2106,7 @@ class Runtime:
                 A[i][j] = A[i][j] - (B[j][i] if tr else B[i][j])
         return A
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def scalar_mul(self, a, x):
         """Secure scalar multiplication of scalar a with vector x."""
         if x == []:
@@ -2136,7 +2132,7 @@ class Runtime:
             x = await self.trunc(x, f=f, l=stype.bit_length)
         return x
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _if_else_list(self, a, x, y):
         x, y = x[:], y[:]
         n = len(x)
@@ -2171,7 +2167,7 @@ class Runtime:
             z = c * (x - y) + y
         return z
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _if_swap_list(self, a, x, y):
         x, y = x[:], y[:]
         n = len(x)
@@ -2208,7 +2204,7 @@ class Runtime:
             z = [x + d, y - d]
         return z
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def schur_prod(self, x, y):
         """Secure entrywise multiplication of vectors x and y."""
         if x == []:
@@ -2245,7 +2241,7 @@ class Runtime:
             x = await self.trunc(x, f=f, l=sftype.bit_length)
         return x
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def matrix_prod(self, A, B, tr=False):
         """Secure matrix product of A with (transposed) B."""
         if A is B:
@@ -2299,7 +2295,7 @@ class Runtime:
             C = [C[ni:ni + n2] for ni in range(0, n1 * n2, n2)]
         return C
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_matmul(self, A, B):
         """Secure matrix product of arrays A and B, with broadcast."""
         shA = isinstance(A, self.SecureObject)
@@ -2342,7 +2338,7 @@ class Runtime:
                 C = self.np_trunc(stype(C, shape=shape))
         return C
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_outer(self, a, b):
         """Secure outer product of vectors a and b.
 
@@ -2379,7 +2375,7 @@ class Runtime:
             c = self.np_trunc(stype(c, shape=shape))
         return c
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_getitem(self, a, key):
         """Secure array a, index/slice key."""
         stype = type(a)
@@ -2399,7 +2395,7 @@ class Runtime:
 
     # TODO: investigate options for np_setitem, for now use np_update(), see sha3 demo and np_sort()
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_update(self, a, key, value):
         """Return secure array modified by update a[key]=value.
 
@@ -2424,7 +2420,7 @@ class Runtime:
         a.__setitem__(key, value)
         return a
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_flatten(self, a, order='C'):
         """Return 1D copy of a.
 
@@ -2439,7 +2435,7 @@ class Runtime:
         a = await self.gather(a)
         return a.flatten(order)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_tolist(self, a):
         """Return array a as an nested list of Python scalars.
 
@@ -2454,7 +2450,7 @@ class Runtime:
         a = await self.gather(a)
         return a.tolist()
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_fromlist(self, x):
         """List of secure numbers to 1D array."""
         stype = type(x[0])
@@ -2467,7 +2463,7 @@ class Runtime:
         x = await self.gather(x)
         return stype.field.array([a.value for a in x], check=False)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_reshape(self, a, shape, order='C'):
         stype = type(a)
         if isinstance(shape, int):
@@ -2491,7 +2487,7 @@ class Runtime:
         a = await self.gather(a)
         return a.reshape(shape, order=order)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_copy(self, a, order='K'):
         # Note that numpy.copy() puts order='K', but ndarray.copy() puts order='C'.
         # Therefore, we put order='K' here and let SecureArray.copy() call np_copy() with order='C'.
@@ -2505,7 +2501,7 @@ class Runtime:
         a = await self.gather(a)
         return a.copy(order=order)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_transpose(self, a, axes=None):
         """Reverse (default) or permute the axes of array a.
 
@@ -2529,7 +2525,7 @@ class Runtime:
         a = await self.gather(a)
         return a.transpose(axes)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_swapaxes(self, a, axis1, axis2):
         """Interchange two given axes of array a.
 
@@ -2550,7 +2546,7 @@ class Runtime:
         a = await self.gather(a)
         return a.swapaxes(axis1, axis2)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_concatenate(self, arrays, axis=0):
         """Join a sequence of arrays along an existing axis.
 
@@ -2578,7 +2574,7 @@ class Runtime:
         arrays = await self.gather(arrays)
         return np.concatenate(arrays, axis=axis)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_stack(self, arrays, axis=0):
         """Join a sequence of arrays along a new axis.
 
@@ -2602,7 +2598,7 @@ class Runtime:
         arrays = await self.gather(arrays)
         return np.stack(arrays, axis=axis)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_block(self, arrays):
         """Assemble an array from nested lists of blocks given by arrays.
 
@@ -2666,7 +2662,7 @@ class Runtime:
         arrays = await self.gather(arrays)  # TODO: handle secfxp
         return np.block(arrays)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_vstack(self, tup):
         a = tup[0]
         stype = type(a)
@@ -2682,7 +2678,7 @@ class Runtime:
         tup = await self.gather(tup)
         return np.vstack(tup)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_hstack(self, tup):
         """Stack arrays in sequence horizontally (column wise).
 
@@ -2708,7 +2704,7 @@ class Runtime:
         tup = await self.gather(tup)
         return np.hstack(tup)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_dstack(self, tup):
         """Stack arrays in sequence depth wise (along third axis).
 
@@ -2730,7 +2726,7 @@ class Runtime:
         tup = await self.gather(tup)
         return np.dstack(tup)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_column_stack(self, tup):
         i = 0
         while not isinstance(a := tup[i], self.SecureArray):
@@ -2749,7 +2745,7 @@ class Runtime:
 
     np_row_stack = np_vstack
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_split(self, ary, indices_or_sections, axis=0):
         """Split an array into multiple sub-arrays as views into ary."""
         stype = type(ary)
@@ -2791,7 +2787,7 @@ class Runtime:
         """
         return self.np_concatenate((arr, values), axis=axis)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_fliplr(self, a):
         """Reverse the order of elements along axis 1 (left/right).
 
@@ -2928,7 +2924,7 @@ class Runtime:
 
         return a[0]
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_sum(self, a, axis=None, keepdims=False, initial=0):
         """Secure sum of array elements over a given axis (or axes)."""
         sectype = type(a).sectype
@@ -2962,7 +2958,7 @@ class Runtime:
         return np.sum(a, axis=axis, keepdims=keepdims, initial=initial.value)
         # TODO: handle switch from initial (field elt) to initial.value inside finfields.py
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_roll(self, a, shift, axis=None):
         """Roll array elements (cyclically) along a given axis.
 
@@ -2973,7 +2969,7 @@ class Runtime:
         a = await self.gather(a)
         return np.roll(a, shift, axis=axis)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_negative(self, a):
         """Secure elementwise negation -a (additive inverse) of a."""
         if not a.frac_length:
@@ -3003,7 +2999,7 @@ class Runtime:
 
         return self.np_sgn(d, EQ=True)
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _np_is_zero(self, a):
         """Probabilistic elementwise zero test of array a.
 
@@ -3044,7 +3040,7 @@ class Runtime:
         e = e.reshape(shape)
         return e
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_sgn(self, a, l=None, LT=False, EQ=False):
         """Secure elementwise sign(um) of array a.
 
@@ -3373,7 +3369,7 @@ class Runtime:
                 u = self.np_concatenate((u0, u), axis=1)
         return u, m
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_det(self, A):
         """Secure determinant for nonsingular matrices."""
         # TODO: allow case det(A)=0 (obliviously)
@@ -3406,7 +3402,7 @@ class Runtime:
         detA = detLUA / detU
         return detA
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def gauss(self, A, d, b, c):
         """Secure Gaussian elimination A d - b c."""
         n1, n2 = len(A), len(A[0])
@@ -3467,17 +3463,17 @@ class Runtime:
                 x = [field(0)] * n
             x = self.input(x, senders=senders)
 
-            @mpc_coro_no_pc
-            async def add_shares(x, n):
+            @asyncoro.mpc_coro_no_pc
+            async def add_shares(x):
                 if issubclass(sftype, self.SecureObject):
                     await self.returnType(sftype, n)
                 else:
                     await self.returnType(Future)
                 x = await x
-                x = list(map(sum, zip(*x)))
+                x = [field(sum(a.value for a in _)) for _ in zip(*x)]
                 return x
 
-            return add_shares(x, n)
+            return add_shares(x)
 
         x = thresha.pseudorandom_share(field, m, self.pid, self.prfs(bound), self._prss_uci(), n)
         if issubclass(sftype, self.SecureObject):
@@ -3507,15 +3503,16 @@ class Runtime:
                 x = field.array(np.zeros(n, dtype=object), check=False)
             x = self.input(x, senders=senders)
 
-            @mpc_coro_no_pc
+            @asyncoro.mpc_coro_no_pc
             async def add_shares(x):
                 if issubclass(sftype, self.SecureObject):
                     await self.returnType((sftype.array, (n,)))
                 else:
                     await self.returnType(Future)
                 x = await x
-                x = [a[0] for a in x]
-                x = sum(x)
+                x = (a[0].value for a in x)
+                x = np.sum(np.fromiter(x, 'O', count=t+1))
+                x = field.array(x)
                 return x
 
             return add_shares(x)
@@ -3529,7 +3526,7 @@ class Runtime:
         """Secure uniformly random bit of the given type."""
         return self.random_bits(stype, 1, signed)[0]
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def random_bits(self, sftype, n, signed=False):
         """Return n secure uniformly random bits of the given type."""
         if issubclass(sftype, self.SecureObject):
@@ -3607,7 +3604,7 @@ class Runtime:
             bits[i] = field(bits[i])
         return bits
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_random_bits(self, sftype, n, signed=False):
         """Return shape-(n,) secure array with uniformly random bits of given type."""
         # TODO: extend to arbitrary shapes
@@ -3722,7 +3719,7 @@ class Runtime:
             c[i] = x[i] + y[i] - c[i]*2 + (c[i-1] if i > 0 else 0)
         return c
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def to_bits(self, a, l=None):
         """Secure extraction of l (or all) least significant bits of a."""  # a la [ST06].
         stype = type(a)
@@ -3777,7 +3774,7 @@ class Runtime:
             a_bits = [field(0) for _ in range(f)] + a_bits
         return a_bits
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_to_bits(self, a, l=None):
         """Secure extraction of l (or all) least significant bits of a."""  # a la [ST06].
         # TODO: other cases than characteristic=2 case, see self.to_bits()
@@ -3805,7 +3802,7 @@ class Runtime:
             if field.ext_deg > 1:
                 raise TypeError('Binary field or prime field required.')
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def from_bits(self, x):
         """Recover secure number from its binary representation x."""
         # TODO: also handle negative numbers with sign bit (NB: from_bits() in random.py)
@@ -3822,7 +3819,7 @@ class Runtime:
             s += a.value
         return stype.field(s)
 
-    @mpc_coro_no_pc
+    @asyncoro.mpc_coro_no_pc
     async def np_from_bits(self, x):
         """Recover secure numbers from their binary representations in x."""
         # TODO: also handle negative numbers with sign bit (NB: from_bits() in random.py)
@@ -3949,7 +3946,7 @@ class Runtime:
             y = tuple(y)
         return (nf, y) if e is None else y
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def indexOf(self, x, a, bits=False):
         """Return index of the first occurrence of a in x.
 
@@ -3968,6 +3965,11 @@ class Runtime:
         return ix
 
     def _norm(self, a):  # signed normalization factor
+        if isinstance(a, self.SecureArray):
+            # TODO: vectorized version of _norm()
+            v = list(map(self._norm, self.np_tolist(a.flatten())))
+            return mpc.np_fromlist(v).reshape(*a.shape)
+
         l = type(a).bit_length
         f = type(a).frac_length
         x = self.to_bits(a)  # low to high bits
@@ -3987,7 +3989,7 @@ class Runtime:
             c *= 2 - c * b
         return c * v
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def _cpx_mul(self, x, y):
         """Secure complex product of 2-tuples x and y (one resharing)."""
         # NB: ad hoc implementation for use in self.sincos() below
@@ -4034,7 +4036,7 @@ class Runtime:
             z = await self.trunc(z, f=f, l=stype.bit_length)
         return z
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def sincos(self, a):
         """Secure sine and cosine of fixed-point number a.
 
@@ -4115,7 +4117,7 @@ class Runtime:
         # u is (a-1)st unit vector of length n-1 (if 1<=a<n) or all-0 vector of length n-1 (if a=0).
         return [type(a)(1) - self.sum(u)] + u
 
-    @mpc_coro
+    @asyncoro.mpc_coro
     async def np_unit_vector(self, a, n):
         """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n.
 

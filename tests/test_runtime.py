@@ -275,8 +275,13 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.sort(c, axis=None))), np.sort(a, axis=None))
         np.assertEqual(mpc.run(mpc.output(np.sort(c, axis=0))), np.sort(a, axis=0))
 
-        secfxp = mpc.SecFxp(64)
+        f = 32
+        secfxp = mpc.SecFxp(2*f)
         c = secfxp.array(a)
+        np.testing.assert_allclose(mpc.run(mpc.output(c / 2.45)), a / 2.45, rtol=0, atol=2**(1-f))
+        np.testing.assert_allclose(mpc.run(mpc.output(c / 2.5)), a / 2.5, rtol=0, atol=2**(2-f))
+        np.testing.assert_allclose(mpc.run(mpc.output(1 / c)), 1 / a, rtol=0, atol=2**(1-f))
+        np.testing.assert_allclose(mpc.run(mpc.output(c / c)), 1, rtol=0, atol=2**(3-f))
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
         np.assertEqual(mpc.run(mpc.output(np.sum(c, axis=(-2, 1)))), np.sum(a, axis=(-2, 1)))

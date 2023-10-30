@@ -379,7 +379,7 @@ def _ncopy(nested_list):
     return nested_list
 
 
-def _mpc_coro_no_pc(func):
+def mpc_coro_no_pc(func):
     return mpc_coro(func, pc=False)
 
 
