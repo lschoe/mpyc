@@ -33,6 +33,7 @@ async def id3(T, R) -> asyncio.Future:
         CT = np.stack(tuple(GI(S[A] @ T_SC) for A in R))
         k = CT.argmax(key=SecureFraction, arg_unary=False, arg_only=True)
         A = list(R)[await mpc.output(k)]
+        del T_SC, CT  # release memory
         logging.info(f'Attribute node {A}')
         T_SA = T * S[A]
         if args.parallel_subtrees:

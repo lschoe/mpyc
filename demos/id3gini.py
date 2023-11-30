@@ -77,7 +77,7 @@ async def id3(T, R) -> asyncio.Future:
         T_SC = [mpc.schur_prod(T, v) for v in S[C]]
         gains = [GI(mpc.matrix_prod(S[A], T_SC, True)) for A in R]
         k = await mpc.output(mpc.argmax(gains, key=SecureFraction)[0])
-        del gains  # release memory
+        del T_SC, gains  # release memory
         A = list(R)[k]
         T_SA = [mpc.schur_prod(T, v) for v in S[A]]
         logging.info(f'Attribute node {A}')
