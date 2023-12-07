@@ -161,24 +161,8 @@ try:
     np._matmul_shape = _matmul_shape
     np._item_shape = _item_shape
 
-    if np.lib.NumpyVersion(np.__version__) < '1.22.0':
-        logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.22+.')
-
     if np.lib.NumpyVersion(np.__version__) < '1.23.0':
-        __fromiter = np.fromiter
-
-        def _fromiter(iterable, dtype, **kwargs):
-            if np.dtype(dtype) != object:
-                return __fromiter(iterable, dtype, **kwargs)
-
-            # No dtype=object for np.fromiter(), workaround via 1D array:
-            x = list(iterable)
-            a = np.empty(len(x), dtype=object)
-            for i in range(len(x)):
-                a[i] = x[i]
-            return a
-
-        np.fromiter = _fromiter
+        logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.23+.')
 except ImportError:
     del _matmul_shape
     del _item_shape

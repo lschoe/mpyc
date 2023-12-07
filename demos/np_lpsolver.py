@@ -131,10 +131,7 @@ async def main():
     print(f'max = {mx} / {cd} / {scale} = {mx / cd / scale} in {iteration} iterations')
 
     logging.info('Solution x')  # TODO: support np.vander() for finite field Vandermonde arrays
-    if np.lib.NumpyVersion(np.__version__) >= '1.23.0':
-        coefs = w_powers[[[(-j * k) % N for k in range(N)] for j in range(n)]]
-    else:
-        coefs = Zp.array([[w_powers[-j*k % N].value for k in range(N)] for j in range(n)])
+    coefs = w_powers[[[(-j * k) % N for k in range(N)] for j in range(n)]]
     sum_powers = np.sum(np.fromiter((np_pwlst(T[i+1][-1] / N, basis[i], N) for i in range(m)),
                                     'O', count=m))
     x = coefs @ sum_powers
@@ -142,10 +139,7 @@ async def main():
     x_nonnegative = np.all(x >= 0)
 
     logging.info('Dual solution y')
-    if np.lib.NumpyVersion(np.__version__) >= '1.23.0':
-        coefs = w_powers[[[(-i * k) % N for k in range(N)] for i in range(N - m, N)]]
-    else:
-        coefs = Zp.array([[w_powers[-i*k % N].value for k in range(N)] for i in range(N - m, N)])
+    coefs = w_powers[[[(-i * k) % N for k in range(N)] for i in range(N - m, N)]]
     sum_powers = np.sum(np.fromiter((np_pwlst(T[0][j] / N, cobasis[j], N) for j in range(n)),
                                     'O', count=n))
     y = coefs @ sum_powers

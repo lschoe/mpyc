@@ -4,7 +4,7 @@ and computation of secret-shared values.
 
 import sys
 import traceback
-import struct
+from struct import pack, unpack_from
 import itertools
 import functools
 import typing
@@ -53,10 +53,10 @@ class MessageExchanger(Protocol):
         self.transport = transport
         if self.peer_pid is not None:  # this party is client (peer is server)
             rt = self.runtime
-            m = len(rt.parties)
-            t = rt.threshold
             pid_keys = [rt.pid.to_bytes(2, 'little')]  # send pid
             if not rt.options.no_prss:
+                m = len(rt.parties)
+                t = rt.threshold
                 for subset in itertools.combinations(range(m), m - t):
                     if subset[0] == rt.pid and self.peer_pid in subset:
                         pid_keys.append(rt._prss_keys[subset])  # send PRSS keys
@@ -67,13 +67,12 @@ class MessageExchanger(Protocol):
         """Send payload labeled with pc to the peer.
 
         Message format consists of three parts:
-         1. payload_size (4 bytes unsigned int)
-         2. pc (8 bytes signed int)
+         1. pc (8 bytes signed int)
+         2. payload_size (4 bytes unsigned int)
          3. payload (byte string of length payload_size).
         """
         payload_size = len(payload)
-        fmt = f'<Iq{payload_size}s'
-        self.transport.write(struct.pack(fmt, payload_size, pc, payload))
+        self.transport.write(pack(f'<qI{payload_size}s', pc, payload_size, payload))
         self.nbytes_sent += 12 + payload_size
 
     def data_received(self, data):
@@ -85,11 +84,12 @@ class MessageExchanger(Protocol):
         First message from peer is processed differently if peer is a client.
         """
         self.bytes.extend(data)
+        data = self.bytes
         if self.peer_pid is None:  # peer is client (this party is server)
-            if len(self.bytes) < 2:
+            if len(data) < 2:
                 return
 
-            peer_pid = int.from_bytes(self.bytes[:2], 'little')
+            peer_pid = int.from_bytes(data[:2], 'little')
             len_packet = 2
             rt = self.runtime
             if not rt.options.no_prss:
@@ -98,7 +98,7 @@ class MessageExchanger(Protocol):
                 for subset in itertools.combinations(range(m), m - t):
                     if subset[0] == peer_pid and rt.pid in subset:
                         len_packet += 16
-                if len(self.bytes) < len_packet:
+                if len(data) < len_packet:
                     return
 
             # record new protocol peer
@@ -108,26 +108,23 @@ class MessageExchanger(Protocol):
                 len_packet = 2
                 for subset in itertools.combinations(range(m), m - t):
                     if subset[0] == peer_pid and rt.pid in subset:
-                        rt._prss_keys[subset] = self.bytes[len_packet:len_packet + 16]
+                        rt._prss_keys[subset] = data[len_packet:len_packet + 16]
                         len_packet += 16
-            del self.bytes[:len_packet]
+            del data[:len_packet]
             self._key_transport_done()
 
-        while self.bytes:
-            if len(self.bytes) < 4:
-                return
-
-            payload_size = struct.unpack_from('<I', self.bytes)[0]
+        while len(data) >= 12:
+            pc, payload_size = unpack_from('<qI', data)
             len_packet = payload_size + 12
-            if len(self.bytes) < len_packet:
-                return
-
-            pc, payload = struct.unpack_from(f'<q{payload_size}s', self.bytes, 4)
-            del self.bytes[:len_packet]
+            if len(data) < len_packet:
+                break
+            payload = unpack_from(f'{payload_size}s', data, 12)[0]
+            del data[:len_packet]
             if pc in self.buffers:
                 self.buffers.pop(pc).set_result(payload)
             else:
                 self.buffers[pc] = payload
+        self.bytes = data
 
     def receive(self, pc):
         """Receive payload labeled with given pc from the peer."""

@@ -85,17 +85,15 @@ class FiniteFieldElement:
     @classmethod
     def to_bytes(cls, x):
         """Return byte string representing the given list/ndarray of integers x."""
-        byte_order = 'little'
         r = cls.byte_length
-        return r.to_bytes(2, byte_order) + b''.join(v.to_bytes(r, byte_order) for v in x)
+        return b''.join(v.to_bytes(r, 'little') for v in x)
 
-    @staticmethod
-    def from_bytes(data):
+    @classmethod
+    def from_bytes(cls, data):
         """Return the list of integers represented by the given byte string."""
-        byte_order = 'little'
         from_bytes = int.from_bytes  # cache
-        r = from_bytes(data[:2], byte_order)
-        return [from_bytes(data[i:i+r], byte_order) for i in range(2, len(data), r)]
+        r = cls.byte_length
+        return [from_bytes(data[i:i+r], 'little') for i in range(0, len(data), r)]
 
     def __add__(self, other):
         """Addition."""
