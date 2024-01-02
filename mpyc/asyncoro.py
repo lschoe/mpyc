@@ -51,6 +51,24 @@ class MessageExchanger(Protocol):
         to the peer as well as any PRSS keys.
         """
         self.transport = transport
+        if 'winloop' in str(self.runtime._loop):
+            # Workaround to avoid problems with handling of high/low watermarks when
+            # running MPyC demos with large communication complexity.
+            # For example, "python np_lpsolver.py -i5 -M3 -E1"
+            # gives "OSError: [Errno 4088] Unknown error"  (4088 stands for UV_EAGAIN).
+            # Winloop 0.1.0 default setting, with FLOW_CONTROL_HIGH_WATER = 64:
+            #   high = 65536 = FLOW_CONTROL_HIGH_WATER * 1024
+            #   low  = 16    = FLOW_CONTROL_HIGH_WATER // 4
+            # Workaround:
+            self.transport.set_write_buffer_limits(high=2**18)
+            # With high=2**18, problem still present for cases with even larger communication
+            # complexity, like "python np_lpsolver.py -i5 -M3 -E1", and setting
+            # high=2**22 resolves this case as well.
+            # Alternative workaround: set high=0 to disable use of high/low watermarks.
+            # NB: these workarounds do not work with SSL,
+            # for example, "python np_lpsolver.py -i5 -M3 -E1 --ssl"
+            # keeps giving "OSError: [Errno 4088] Unknown error" whatever we set for high and low.
+            print(f'workaround for Winloop: {self.transport.get_write_buffer_limits()=}')
         if self.peer_pid is not None:  # this party is client (peer is server)
             rt = self.runtime
             pid_keys = [rt.pid.to_bytes(2, 'little')]  # send pid
@@ -141,7 +159,18 @@ class MessageExchanger(Protocol):
         Otherwise, if the connection is lost unexpectedly, exc may indicate the cause.
         """
         if exc:
-            raise exc
+            if 'winloop' in str(self.runtime._loop):
+                # Workaround to suppress seemingly spurious UV_EOF (4095) exception from winloop.
+                # For example, "python helloworld.py -M2 --output-file -E1"
+                # creates a file "party2_1.log" with the error present.
+                # Does not happen over SSL, which makes sense as for SSL
+                # self.transport.can_write_eof() == False.
+                if exc.errno == 4095:  # NB: exc is an OSError in Winloop 0.1.0
+                    print(f'suppressed UV_EOF error in connection_lost(): {type(exc)=} {exc=}')
+                else:
+                    raise exc
+            else:
+                raise exc
 
         rt = self.runtime
         rt.parties[self.peer_pid].protocol = None

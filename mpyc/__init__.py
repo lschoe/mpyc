@@ -29,7 +29,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.9.6'
+__version__ = '0.9.7'
 __license__ = 'MIT License'
 
 import os
@@ -37,6 +37,7 @@ import sys
 import argparse
 import logging
 import importlib.util
+import asyncio
 
 
 def get_arg_parser():
@@ -68,6 +69,8 @@ def get_arg_parser():
                        help='enable SSL connections')
     group.add_argument('-W', '--workers', type=int, metavar='w',
                        help='maximum number of worker threads per party')
+    group.add_argument('-E', '--event-loop', type=int, metavar='e',
+                       help='0=asyncio_default 1=uvloop/winloop 2=WindowsSelector')
 
     group = parser.add_argument_group('MPyC parameters')
     group.add_argument('-L', '--bit-length', type=int, metavar='l',
@@ -160,5 +163,17 @@ if os.getenv('READTHEDOCS') != 'True':
             logging.info('Use of package gmpy2 inside MPyC disabled.')
             if not env_no_gmpy2:
                 os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
+
+    # Set event loop policy early (e.g., before mpyc.__main__.py is imported).
+    if options.event_loop == 1:
+        if sys.platform.startswith('win32'):
+            from winloop import EventLoopPolicy
+        else:
+            from uvloop import EventLoopPolicy
+        asyncio.set_event_loop_policy(EventLoopPolicy())
+    elif options.event_loop == 2 and sys.platform.startswith('win32'):
+        # override default asyncio.WindowsProactorEventLoopPolicy
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    logging.debug(f'Event loop policy: {type(asyncio.get_event_loop_policy())}')
 
     del options, env_max_workers, env_no_numpy, env_no_gmpy2
