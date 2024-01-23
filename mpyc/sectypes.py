@@ -952,13 +952,26 @@ class SecureFloat(SecureNumber):
         return [[cls(a) for a in zip(x_s, x_e)] for x_s, x_e in zip(shares_s, shares_e)]
 
     @classmethod
-    async def _output(cls, x, receivers, threshold):
+    async def _output(cls, x, receivers, threshold):  # TODO: consider use of mpyc_coro
         """Called by runtime.output()."""
         x_s = [a.share[0] for a in x]
         x_s = await runtime.output(x_s, receivers, threshold)
-        e_0 = cls.exponent_type(0)
-        x_e = [x[i].share[1] if x_s[i] else e_0 for i in range(len(x))]
+        if len(receivers) == len(runtime.parties):
+            e_0 = cls.exponent_type(0)
+            x_e = [a.share[1] if x_s[i] else e_0 for i, a in enumerate(x)]
+        else:
+            leader = min(receivers)
+            if runtime.pid == leader:
+                s_0 = [cls.exponent_type(x_s[i] != 0) for i in range(len(x))]
+            else:
+                s_0 = [cls.exponent_type(None)] * len(x)
+            s_0 = runtime.input(s_0, senders=leader)
+            x_e = [a.share[1] for a in x]
+            x_e = runtime.schur_prod(x_e, s_0)
         x_e = await runtime.output(x_e, receivers, threshold)
+        if x_e[0] is None:
+            return x_e
+
         # TODO: consider normalization to eliminate case abs(s)=1 (or case abs(s)=0.5)
         assert all(s == 0 or 0.5 <= abs(s) <= 1 for s in x_s), (x_s, x_e)
         assert all(s != 0 or e == 0 for s, e in zip(x_s, x_e)), (x_s, x_e)

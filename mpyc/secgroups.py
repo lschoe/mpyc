@@ -194,6 +194,9 @@ class SecureFiniteGroup(SecureObject):
         else:
             x = [a.share for a in x]
         y = await runtime.output(x, receivers, threshold)
+        if y[0] is None:
+            return y
+
         if issubclass(cls, SecureSymmetricGroupElement):
             y = list(map(int, y))
         if is_tuple:
