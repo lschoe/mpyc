@@ -23,8 +23,8 @@ import asyncio
 from mpyc.numpy import np
 from mpyc import finfields
 from mpyc import thresha
-from mpyc import sectypes
 from mpyc import asyncoro
+from mpyc import sectypes
 from mpyc import mpctools
 import mpyc.secgroups
 import mpyc.random

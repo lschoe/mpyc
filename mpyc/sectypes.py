@@ -12,114 +12,71 @@ from mpyc import gmpy as gmpy2
 from mpyc import gfpx
 from mpyc import finfields
 from mpyc import fingroups
+from mpyc import asyncoro
 
 runtime = None
 
+SecureObject = asyncoro.SecureObject
 
 if np:
+    # dynamically add __array_ufunc__() and __array_function__ methods to SecureObject
     import operator
     from numpy.core import umath as um
 
+    binary_ops = {um.less: operator.lt, um.less_equal: operator.le,
+                  um.equal: operator.eq, um.not_equal: operator.ne,
+                  um.greater: operator.gt, um.greater_equal: operator.ge,
+                  um.add: operator.add, um.subtract: operator.sub,
+                  um.multiply: operator.mul, um.divide: operator.truediv,
+                  um.floor_divide: operator.floordiv, um.remainder: operator.mod,
+                  um.divmod: divmod, um.power: operator.pow,
+                  um.left_shift: operator.lshift, um.right_shift: operator.rshift}
+    # um.bitwise_and: operator.and_, um.bitwise_xor, operator.xor, um.bitwise_or, operator.or_}
+    unary_ops = {um.negative: operator.neg, um.positive: operator.pos,
+                 um.absolute: operator.abs}
+    # um.invert, operator.invert}
 
-class SecureObject:
-    """A secret-shared object.
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """Delegate __array_ufunc__ call to corresponding operator call.
 
-    An MPC protocol operates on secret-shared objects of type SecureObject.
-    The basic Python operators are overloaded by SecureObject classes.
-    An expression like a * b will create a new SecureObject, which will
-    eventually contain the product of a and b. The product is computed
-    asynchronously, using an instance of a specific cryptographic protocol.
-    """
-
-    __slots__ = 'share'
-
-    def __init__(self, value=None):
-        """Initialize share.
-
-        If value is None (default), the SecureObject starts out as an empty
-        placeholder (implemented as a Future).
+        Provisional support for calls like np.less(secint(9), 10).
         """
-        if value is None:
-            value = Future(loop=runtime._loop)
-        self.share = value
+        # TODO: handle method and kwargs
+        # TODO: handle np.arrays in inputs
+        inputs = list(inputs)
+        for i in range(len(inputs)):  # NB: also supports things like secint(7) + np.int32(4)
+            if isinstance(inputs[i], np.integer):
+                inputs[i] = int(inputs[i])
+            elif isinstance(inputs[i], np.floating):
+                inputs[i] = float(inputs[i])
+        if op := binary_ops.get(ufunc):
+            if isinstance(inputs[0], SecureObject):
+                return op(inputs[0], inputs[1])
 
-    def set_share(self, value):
-        """Set share to the given value.
+            if op == operator.sub:
+                return inputs[1].__rsub__(inputs[0])
 
-        The share is set directly (or recursively, for a composite SecureObject),
-        using callbacks if value contains Futures that are not yet done.
+            return op(inputs[1], inputs[0])
+
+        if op := unary_ops.get(ufunc):
+            return op(inputs[0])
+
+        try:
+            func = eval(f'runtime.np_{ufunc.__name__}')
+        except AttributeError:
+            raise TypeError(f'np.{ufunc.__name__} not supported for {type(self).__name__}')
+
+        return func(*inputs, **kwargs)
+
+    def __array_function__(self, func, types, args, kwargs):
+        """Redirect __array_function__ call to array class, if any.
+
+        To support calls like np.block([[secint(9), -1], [1, secint(7)]]).
         """
-        if isinstance(value, Future):
-            if value.done():
-                self.share.set_result(value.result())
-            else:
-                value.add_done_callback(lambda x: self.share.set_result(x.result()))
-        else:
-            self.share.set_result(value)
+        return self.array.__array_function__(self, func, types, args, kwargs)
 
-    def __deepcopy__(self, memo):
-        """Let SecureObjects behave as immutable objects.
-
-        Introduced for github.com/meilof/oblif.
-        """
-        return self
-
-    def __bool__(self):
-        """Use of secret-shared objects in Boolean expressions makes no sense."""
-        raise TypeError('cannot use secure type in Boolean expressions')
-
-    if np:
-        binary_ops = {um.less: operator.lt, um.less_equal: operator.le,
-                      um.equal: operator.eq, um.not_equal: operator.ne,
-                      um.greater: operator.gt, um.greater_equal: operator.ge,
-                      um.add: operator.add, um.subtract: operator.sub,
-                      um.multiply: operator.mul, um.divide: operator.truediv,
-                      um.floor_divide: operator.floordiv, um.remainder: operator.mod,
-                      um.divmod: divmod, um.power: operator.pow,
-                      um.left_shift: operator.lshift, um.right_shift: operator.rshift}
-        # um.bitwise_and: operator.and_, um.bitwise_xor, operator.xor, um.bitwise_or, operator.or_}
-        unary_ops = {um.negative: operator.neg, um.positive: operator.pos,
-                     um.absolute: operator.abs}
-        # um.invert, operator.invert}
-
-        def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-            """Delegate __array_ufunc__ call to corresponding operator call.
-
-            Provisional support for calls like np.less(secint(9), 10).
-            """
-            # TODO: handle method and kwargs
-            # TODO: handle np.arrays in inputs
-            inputs = list(inputs)
-            for i in range(len(inputs)):  # NB: also supports things like secint(7) + np.int32(4)
-                if isinstance(inputs[i], np.integer):
-                    inputs[i] = int(inputs[i])
-                elif isinstance(inputs[i], np.floating):
-                    inputs[i] = float(inputs[i])
-            if op := SecureObject.binary_ops.get(ufunc):
-                if isinstance(inputs[0], SecureObject):
-                    return op(inputs[0], inputs[1])
-
-                if op == operator.sub:
-                    return inputs[1].__rsub__(inputs[0])
-
-                return op(inputs[1], inputs[0])
-
-            if op := SecureObject.unary_ops.get(ufunc):
-                return op(inputs[0])
-
-            try:
-                func = eval(f'runtime.np_{ufunc.__name__}')
-            except AttributeError:
-                raise TypeError(f'np.{ufunc.__name__} not supported for {type(self).__name__}')
-
-            return func(*inputs, **kwargs)
-
-        def __array_function__(self, func, types, args, kwargs):
-            """Redirect __array_function__ call to array class, if any.
-
-            To support calls like np.block([[secint(9), -1], [1, secint(7)]]).
-            """
-            return self.array.__array_function__(self, func, types, args, kwargs)
+    setattr(SecureObject, '__array_ufunc__', __array_ufunc__)
+    setattr(SecureObject, '__array_function__', __array_function__)
 
 
 class SecureNumber(SecureObject):
@@ -952,7 +909,8 @@ class SecureFloat(SecureNumber):
         return [[cls(a) for a in zip(x_s, x_e)] for x_s, x_e in zip(shares_s, shares_e)]
 
     @classmethod
-    async def _output(cls, x, receivers, threshold):  # TODO: consider use of mpyc_coro
+    @asyncoro.mpc_coro
+    async def _output(cls, x, receivers, threshold) -> Future:
         """Called by runtime.output()."""
         x_s = [a.share[0] for a in x]
         x_s = await runtime.output(x_s, receivers, threshold)

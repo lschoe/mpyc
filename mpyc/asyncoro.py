@@ -9,7 +9,6 @@ import itertools
 import functools
 import typing
 from asyncio import Protocol, Future, Task
-from mpyc.sectypes import SecureObject
 
 runtime = None
 
@@ -180,6 +179,54 @@ class MessageExchanger(Protocol):
     def close_connection(self):
         """Close connection with the peer."""
         self.transport.close()
+
+
+class SecureObject:
+    """A secret-shared object.
+
+    An MPC protocol operates on secret-shared objects of type SecureObject.
+    The basic Python operators are overloaded by SecureObject classes.
+    An expression like a * b will create a new SecureObject, which will
+    eventually contain the product of a and b. The product is computed
+    asynchronously, using an instance of a specific cryptographic protocol.
+    """
+
+    __slots__ = 'share'
+
+    def __init__(self, value=None):
+        """Initialize share.
+
+        If value is None (default), the SecureObject starts out as an empty
+        placeholder (implemented as a Future).
+        """
+        if value is None:
+            value = Future(loop=runtime._loop)
+        self.share = value
+
+    def set_share(self, value):
+        """Set share to the given value.
+
+        The share is set directly (or recursively, for a composite SecureObject),
+        using callbacks if value contains Futures that are not yet done.
+        """
+        if isinstance(value, Future):
+            if value.done():
+                self.share.set_result(value.result())
+            else:
+                value.add_done_callback(lambda x: self.share.set_result(x.result()))
+        else:
+            self.share.set_result(value)
+
+    def __deepcopy__(self, memo):
+        """Let SecureObjects behave as immutable objects.
+
+        Introduced for github.com/meilof/oblif.
+        """
+        return self
+
+    def __bool__(self):
+        """Use of secret-shared objects in Boolean expressions makes no sense."""
+        raise TypeError('cannot use secure type in Boolean expressions')
 
 
 class _AwaitableFuture:

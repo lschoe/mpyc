@@ -8,8 +8,8 @@
 4. [finfields](https://lschoe.github.io/mpyc/mpyc.finfields.html): arbitrary finite fields, including binary fields and prime fields
 5. [fingroups](https://lschoe.github.io/mpyc/mpyc.fingroups.html): finite groups, in particular for use in cryptography (elliptic curves, Schnorr groups, etc.)
 6. [thresha](https://lschoe.github.io/mpyc/mpyc.thresha.html): threshold Shamir (and also pseudorandom) secret sharing
-7. [sectypes](https://lschoe.github.io/mpyc/mpyc.sectypes.html): SecInt/Fld/Fxp/Flt types for secure (secret-shared) integer/finite-field/fixed-/floating-point values
-8. [asyncoro](https://lschoe.github.io/mpyc/mpyc.asyncoro.html): asynchronous communication and computation of secret-shared values
+7. [asyncoro](https://lschoe.github.io/mpyc/mpyc.asyncoro.html): asynchronous communication and computation of secret-shared values
+8. [sectypes](https://lschoe.github.io/mpyc/mpyc.sectypes.html): SecInt/Fld/Fxp/Flt types for secure (secret-shared) integer/finite-field/fixed-/floating-point values
 9. [runtime](https://lschoe.github.io/mpyc/mpyc.runtime.html): core MPC protocols (many hidden by Python's operator overloading)
 10. [mpctools](https://lschoe.github.io/mpyc/mpyc.mpctools.html): reduce and accumulate with log round complexity
 11. [seclists](https://lschoe.github.io/mpyc/mpyc.seclists.html): secure lists with oblivious access and updates

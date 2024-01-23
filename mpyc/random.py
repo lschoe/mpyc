@@ -22,8 +22,8 @@ when n is equal to the order of sectype's finite field.
 
 import math
 import itertools
-from mpyc import sectypes
 from mpyc import asyncoro
+from mpyc import sectypes
 
 runtime = None
 

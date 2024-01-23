@@ -29,9 +29,9 @@ should be adequate. Later: With better amortized complexity, e.g., square root O
 """
 
 from asyncio import Future
+from mpyc import asyncoro
 from mpyc.sectypes import SecureObject, SecureFixedPoint
 from mpyc.random import random_unit_vector
-from mpyc import asyncoro
 
 runtime = None
 

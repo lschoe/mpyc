@@ -25,10 +25,10 @@ function in Python's statistics module.
 import sys
 from math import fsum, sqrt
 import statistics
-from mpyc.sectypes import SecureObject, SecureInteger, SecureFixedPoint
 from mpyc import asyncoro
-from mpyc import random
+from mpyc.sectypes import SecureObject, SecureInteger, SecureFixedPoint
 from mpyc.mpctools import reduce
+from mpyc import random
 
 runtime = None
 
