@@ -29,7 +29,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.9.7'
+__version__ = '0.9.8'
 __license__ = 'MIT License'
 
 import os
@@ -69,8 +69,6 @@ def get_arg_parser():
                        help='enable SSL connections')
     group.add_argument('-W', '--workers', type=int, metavar='w',
                        help='maximum number of worker threads per party')
-    group.add_argument('-E', '--event-loop', type=int, metavar='e',
-                       help='0=asyncio_default 1=uvloop/winloop 2=WindowsSelector')
 
     group = parser.add_argument_group('MPyC parameters')
     group.add_argument('-L', '--bit-length', type=int, metavar='l',
@@ -89,6 +87,8 @@ def get_arg_parser():
                        help='disable use of gmpy2 package')
     group.add_argument('--no-numpy', action='store_true',
                        help='disable use of numpy package')
+    group.add_argument('--no-uvloop',  action='store_true',
+                       help='disable use of uvloop (winloop) package')
     group.add_argument('--no-prss', action='store_true',
                        help='disable use of PRSS (pseudorandom secret sharing)')
     group.add_argument('--mix32-64bit', action='store_true',
@@ -164,16 +164,27 @@ if os.getenv('READTHEDOCS') != 'True':
             if not env_no_gmpy2:
                 os.environ['MPYC_NOGMPY'] = '1'  # NB: MPYC_NOGMPY also set for subprocesses
 
-    # Set event loop policy early (e.g., before mpyc.__main__.py is imported).
-    if options.event_loop == 1:
-        if sys.platform.startswith('win32'):
+    # Load uvloop (winloop) if available and not disabled.
+    env_no_uvloop = int(os.getenv('MPYC_NOUVLOOP', '0'))
+    EventLoopPolicy = None
+    if importlib.util.find_spec('winloop' if sys.platform.startswith('win32') else 'uvloop'):
+        # uvloop (winloop) package available
+        if options.no_uvloop or env_no_uvloop:
+            logging.info(f'Use of package uvloop (winloop) inside MPyC disabled.')
+        elif sys.platform.startswith('win32'):
             from winloop import EventLoopPolicy
+            logging.debug(f'Load winloop')
         else:
-            from uvloop import EventLoopPolicy
-        asyncio.set_event_loop_policy(EventLoopPolicy())
-    elif options.event_loop == 2 and sys.platform.startswith('win32'):
+            from uvloop import EventLoopPolicy, _version
+            logging.debug(f'Load uvloop version {_version.__version__}')
+            del _version
+    # Hidden feature to set selector loop on Windows (only via MPYC_NOUVLOOP).
+    if env_no_uvloop == 2 and sys.platform.startswith('win32'):
         # override default asyncio.WindowsProactorEventLoopPolicy
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        EventLoopPolicy = asyncio.WindowsSelectorEventLoopPolicy
+    if EventLoopPolicy:
+        # set event loop policy early (e.g., before mpyc.__main__.py is imported)
+        asyncio.set_event_loop_policy(EventLoopPolicy())
     logging.debug(f'Event loop policy: {type(asyncio.get_event_loop_policy())}')
 
-    del options, env_max_workers, env_no_numpy, env_no_gmpy2
+    del options, env_max_workers, env_no_numpy, env_no_gmpy2, env_no_uvloop, EventLoopPolicy

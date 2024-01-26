@@ -34,6 +34,8 @@ Use `pip install numpy` to enable support for secure NumPy arrays in MPyC, along
 
 Use `pip install gmpy2` to run MPyC with the package [gmpy2](https://pypi.org/project/gmpy2/) for considerably better performance.
 
+Use `pip install uvloop` (or `pip install winloop` on Windows) to replace Python's default asyncio event loop in MPyC for generally improved performance.
+
 ### Some Tips
 
 - Try `run-all.sh` or `run-all.bat` in the `demos` directory to have a quick look at all pure Python demos.
