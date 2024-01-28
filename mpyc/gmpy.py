@@ -79,19 +79,24 @@ def ratrec(x, y, N=None, D=None):
     raise ValueError('rational reconstruction not possible')
 
 
-def prev_prime(x):
-    """Return the greatest probable prime number < x, if any."""
-    # TODO: future releases of gmpy2 will support this function (using GMP 6.3+)
-    if x <= 2:
-        raise ValueError(f'no smaller prime')
+try:
+    if os.getenv('MPYC_NOGMPY') == '1':
+        raise ImportError  # stub for gmpy2.prev_prime() will be loaded
 
-    if x == 3:
-        return 2
+    from gmpy2 import prev_prime  # only available from gmpy2 2.2+ based on GMP 6.3+
+except ImportError:
+    def prev_prime(x):
+        """Return the greatest probable prime number < x, if any."""
+        if x < 3:
+            raise ValueError('x must be >= 3')
 
-    x -= 1 + x%2
-    while not is_prime(x):
-        x -= 2
-    return x
+        if x == 3:
+            return 2
+
+        x -= 1 + x%2
+        while not is_prime(x):
+            x -= 2
+        return x
 
 
 try:

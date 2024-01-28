@@ -718,8 +718,8 @@ class FiniteFieldArray:
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         # TODO: make more general
         cls = type(self)
-        if any(isinstance(a, np.ndarray) and a.dtype != object and a.dtype not in cls._mix_types
-               for a in inputs):
+        if any(isinstance(a, np.ndarray) and a.dtype != object
+               and not issubclass(a.dtype.type, cls._mix_types) for a in inputs):
             return NotImplemented
 
         if ufunc.__name__ == 'equal':
@@ -1358,9 +1358,7 @@ class PrimeFieldArray(FiniteFieldArray):
 
     _mix_types = int
     if np:
-        _mix_types = (int, np.int64, np.int32, np.int16, np.int8,
-                      np.uint64, np.uint32, np.uint16, np.uint8)
-        # TODO: consider use of np.integer
+        _mix_types = (int, np.integer)
 
     @classmethod
     def intarray(cls, a):
@@ -1383,10 +1381,11 @@ class PrimeFieldArray(FiniteFieldArray):
     def signed_(self):
         """Return signed integer representation, symmetric around zero."""
         p = self.field.modulus
-        f = np.vectorize(lambda a: a - p if a > p>>1 else a, otypes='O')
-        return f(self.value)
-        # TODO: check following alternative, issue with np.where result containing floats
-        # return self.value - np.where(self.value > p>>1, p, 0)
+        return np.where(self.value > p>>1, self.value - p, self.value)
+        # NB: avoiding np.where(..., p, 0) which causes issues with floats, as
+        # np.result_type(1 << 63, 0) returns dtype('float64'), but
+        # np.result_type(1 << 62, 0) returns dtype('int64'), and
+        # np.result_type(1 << 64, 0) returns dtype('O').
 
     def unsigned_(self):
         """Return unsigned integer representation."""
@@ -1467,8 +1466,7 @@ class ExtensionFieldArray(FiniteFieldArray):
 
     _mix_types = (int, gfpx.Polynomial)
     if np:
-        _mix_types += (np.int64, np.int32, np.int16, np.int8,
-                       np.uint64, np.uint32, np.uint16, np.uint8)
+        _mix_types += (np.integer,)
 
     @classmethod
     def _pow(cls, a, b):  # NB: exponents assumed to be integer(s)
@@ -1534,8 +1532,7 @@ class BinaryFieldArray(ExtensionFieldArray):
 
     _mix_types = (int, gfpx.BinaryPolynomial)
     if np:
-        _mix_types += (np.int64, np.int32, np.int16, np.int8,
-                       np.uint64, np.uint32, np.uint16, np.uint8)
+        _mix_types += (np.integer,)
 
     @classmethod
     def _is_sqr(cls, a):

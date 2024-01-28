@@ -33,9 +33,12 @@ def GFpX(p):
     if not gmpy2.is_prime(p):
         raise ValueError('number is not prime')
 
-    BasePolynomial = BinaryPolynomial if p == 2 else Polynomial
-    GFpPolynomial = type(f'GF({p})[{X}]', (BasePolynomial,), {'__slots__': ()})
-    GFpPolynomial.p = p
+    if p == 2:
+        GFpPolynomial = BinaryPolynomial
+        GFpPolynomial.__name__ = f'GF({p})[{X}]'
+    else:
+        GFpPolynomial = type(f'GF({p})[{X}]', (Polynomial,), {'__slots__': ()})
+        GFpPolynomial.p = p
     globals()[f'GF({p})[{X}]'] = GFpPolynomial  # NB: exploit unique name dynamic Polynomial type
     return GFpPolynomial
 

@@ -76,6 +76,10 @@ To enhance the performance of MPyC with faster integer arithmetic, install the
 `gmpy2 <https://gmpy2.readthedocs.io>`_ package, e.g.,
 using ``pip install gmpy2``.
 
+To enhance the performance of MPyC with an alternative event loop, install the
+`uvloop <https://uvloop.readthedocs.io>`_ package, e.g.,
+using ``pip install uvloop`` on Mac/Linux and currently ``pip install winloop`` on Windows.
+
 PyPy / Nuitka
 -------------
 
