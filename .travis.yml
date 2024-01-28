@@ -6,7 +6,6 @@ jobs:
       - MPYC_NOPRSS=1
     install: pip install numpy==1.23.* gmpy2 uvloop
   - python: pypy3.9-7.3.9
-    install: pip install numpy==1.25.*
   - python: 3.10
     env:
       - MPYC_NONUMPY=1
