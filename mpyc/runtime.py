@@ -4041,9 +4041,10 @@ class Runtime:
         """Secure sine and cosine of fixed-point number a.
 
         See "New Approach for Sine and Cosine in Secure Fixed-Point Arithmetic"
-        by Stan Korzilius and Berry Schoenmakers, to appear in the proceedings of
-        CSCML 2023, 7th International Symposium on Cyber Security Cryptography and
-        Machine Learning, LNCS 13914, Springer.
+        by Stan Korzilius and Berry Schoenmakers, which appeared in the proceedings
+        of CSCML 2023, 7th International Symposium on Cyber Security, Cryptology
+        and Machine Learning, LNCS 13914, pp. 307-319, Springer (see
+        https://doi.org/10.1007/978-3-031-34671-2).
         """
         secfxp = type(a)
         await self.returnType(secfxp, 2)
