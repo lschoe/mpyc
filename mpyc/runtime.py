@@ -4310,6 +4310,7 @@ def setup():
     rt = Runtime(pid, parties, options)
     sectypes.runtime = rt
     asyncoro.runtime = rt
+    mpyc.mpctools.runtime = rt
     mpyc.seclists.runtime = rt
     mpyc.secgroups.runtime = rt
     mpyc.random.runtime = rt
