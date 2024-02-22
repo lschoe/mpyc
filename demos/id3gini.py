@@ -1,5 +1,7 @@
 """Demo decision tree learning using ID3.
 
+See np_id3gini.py for a reimplementation of this demo using secure arrays.
+
 This demo implements Protocol 4.1 from the paper 'Practical Secure Decision
 Tree Learning in a Teletreatment Application' by Sebastiaan de Hoogh, Berry
 Schoenmakers, Ping Chen, and Harm op den Akker, which appeared at the 18th

@@ -1,5 +1,7 @@
 """Demo Threshold AES cipher.
 
+See np_aes.py for a reimplementation of this demo using secure arrays.
+
 The demo performs an AES encryption followed by an AES decryption
 for a 128-bit AES key and a 256-bit AES key, cf. the examples in
 Appendices C.1 and C.3 of the Advanced Encryption Standard (FIPS 197).

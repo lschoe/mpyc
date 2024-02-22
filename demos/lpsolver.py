@@ -1,5 +1,7 @@
 """Demo Linear Programming (LP) solver, using secure integer arithmetic.
 
+See np_lpsolver.py for a reimplementation of this demo using secure arrays.
+
 The LP solver returns a solution to the following problem:
 
     Given m x n matrix A, length-m vector b >= 0, and length-n vector c.

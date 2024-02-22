@@ -1,5 +1,7 @@
 """Demo Binarized Neural Network (Multilayer Perceptron) MNIST classifier.
 
+See np_bnnmnist.py for a reimplementation of this demo using secure arrays.
+
 MPyC demo accompanying the paper 'Fast Secure Comparison for Medium-Sized
 Integers and Its Application in Binarized Neural Networks' by Mark Abspoel,
 Niek J. Bouman, Berry Schoenmakers, and Niels de Vreede, Cryptographer's

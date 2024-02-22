@@ -1,5 +1,7 @@
 """Demo Convolutional Neural Network (CNN) MNIST classifier.
 
+See np_cnnmnist.py for a reimplementation of this demo using secure arrays.
+
 The MNIST dataset of handwritten digits consists of a training set of
 60,000 images and a test set of 10,000 images. The training images have been
 used in the clear to obtain a highly reliable CNN classifier. The demo

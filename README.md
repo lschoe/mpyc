@@ -55,6 +55,6 @@ By running `python -m mpyc` instead you even get this REPL with the MPyC runtime
 
 - Directory `demos\.config` contains configuration info used to run MPyC with multiple parties.
 The file `gen.bat` shows how to generate fresh key material for SSL. To generate SSL key material of your own, first run
-`pip install cryptography` (alternatively, run `pip install pyOpenSSL`).
+`pip install cryptography`.
 
 Copyright &copy; 2018-2024 Berry Schoenmakers

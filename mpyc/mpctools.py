@@ -46,8 +46,8 @@ def accumulate(x, f=operator.add, initial=_no_value):
     the accumulated results over all (nonempty) prefixes of the given iterable x.
 
     The applications of f are arranged such that the maximum depth is logarithmic
-    in the number of elements of x, at the cost of increasing the total number of
-    applications of f by a logarithmic factor as well.
+    in the number of elements of x, potentially at the cost of increasing the total
+    number of applications of f by a logarithmic factor as well.
 
     In contrast, Python's itertools.accumulate() higher-order function arranges
     the applications of f in a linear fashion, as in general it cannot be assumed
@@ -62,8 +62,8 @@ def accumulate(x, f=operator.add, initial=_no_value):
         x.insert(0, initial)
     n = len(x)
     if runtime.options.no_prss and n >= 32:
-        # Minimize f-complexity of acc(0, n).
-        # For n=2^k, k>=0: f-complexity=2n - 2 - log2 n calls, f-depth=max(2 log2 n - 1, 0) rounds.
+        # Minimize f-complexity of acc(0, n) a la Brent-Kung.
+        # For n=2^k, k>=0: f-complexity=2n-2-k calls, f-depth=max(2k-2, k) rounds.
         def acc(i, j):
             h = (i + j)//2
             if i < h:
@@ -74,8 +74,8 @@ def accumulate(x, f=operator.add, initial=_no_value):
                 acc(h, j)
                 x[j-1] = f(a, x[j-1])
     else:
-        # Minimize f-depth of acc(0, n)
-        # For n=2^k, k>=0: f-complexity=(n/2) log2 n calls, f-depth=log2 n rounds.
+        # Minimize f-depth of acc(0, n) a la Sklansky.
+        # For n=2^k, k>=0: f-complexity=(n/2)k calls, f-depth=k rounds.
         def acc(i, j):
             h = (i + j)//2
             if i < h:

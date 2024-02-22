@@ -1,5 +1,7 @@
 """Demo Threshold One-Way Hash Chains.
 
+See np_onewayhashchains.py for a reimplementation of this demo using secure arrays.
+
 This MPyC demo shows how to generate and reverse one-way hash chains in a multiparty setting.
 The seed for a hash chain, which serves as the private key, is generated jointly at random such
 that no party learns any information about it. Subsequently, the hash chain is built and

@@ -1,5 +1,7 @@
 """Demo Linear Programming (LP) solver, using secure fixed-point arithmetic.
 
+See np_lpsolverfxp.py for a reimplementation of this demo using secure arrays.
+
 See the demo lpsolver.py for background and explanation.
 
 Unlike the lpsolver.py demo which is based on exact (hence deterministic) secure
