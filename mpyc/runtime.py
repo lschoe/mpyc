@@ -108,6 +108,31 @@ class Runtime:
                 keys[subset] = secrets.token_bytes(16)  # 128-bit key
         self._prss_keys = keys
 
+    def _prss_keys_to_peer(self, peer_pid):
+        """Return PRSS keys to be sent to peer."""
+        m = len(self.parties)
+        t = self.threshold
+        keys = []
+        for subset in itertools.combinations(range(m), m - t):
+            if subset[0] == self.pid and peer_pid in subset:
+                keys.append(self._prss_keys[subset])
+        return keys
+
+    def _prss_keys_from_peer(self, peer_pid, data=None):
+        """Store PRSS keys received from peer.
+
+        If data is not given, return the size of PRSS keys to be stored.
+        """
+        m = len(self.parties)
+        t = self.threshold
+        len_packet = 0
+        for subset in itertools.combinations(range(m), m - t):
+            if subset[0] == peer_pid and self.pid in subset:
+                if data is not None:
+                    self._prss_keys[subset] = data[len_packet:len_packet + 16]
+                len_packet += 16
+        return len_packet
+
     @functools.cache
     def prfs(self, bound):
         """PRFs with codomain range(bound) for pseudorandom secret sharing.

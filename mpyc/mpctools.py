@@ -12,7 +12,8 @@ import operator
 
 runtime = None
 
-_no_value = type('', (object,), {'__repr__': lambda self: '<no value>'})
+_no_value = type('mpyc.mpctools.NoValueType', (object,), {'__repr__': lambda self: '<no value>'})()
+_no_value.__doc__ = 'Represents "empty" value, different from any other object including None.'
 
 
 def reduce(f, x, initial=_no_value):
@@ -27,8 +28,8 @@ def reduce(f, x, initial=_no_value):
     may even be of different types.
 
     If initial is provided (possibly equal to None), it is placed before the
-    items of x (hence effectively serves as a default when x is empty). If
-    initial is not given and x contains only one item, that item is returned.
+    items of x (hence effectively serves as a default when x is empty). If no
+    initial value is given and x contains only one item, that item is returned.
    """
     x = list(x)
     if initial is not _no_value:

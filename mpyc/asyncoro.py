@@ -5,7 +5,6 @@ and computation of secret-shared values.
 import sys
 import traceback
 from struct import pack, unpack_from
-import itertools
 import functools
 import typing
 from asyncio import Protocol, Future, Task
@@ -54,11 +53,7 @@ class MessageExchanger(Protocol):
             rt = self.runtime
             pid_keys = [rt.pid.to_bytes(2, 'little')]  # send pid
             if not rt.options.no_prss:
-                m = len(rt.parties)
-                t = rt.threshold
-                for subset in itertools.combinations(range(m), m - t):
-                    if subset[0] == rt.pid and self.peer_pid in subset:
-                        pid_keys.append(rt._prss_keys[subset])  # send PRSS keys
+                pid_keys.extend(rt._prss_keys_to_peer(self.peer_pid))  # send PRSS keys
             transport.writelines(pid_keys)
             self._key_transport_done()
 
@@ -89,27 +84,18 @@ class MessageExchanger(Protocol):
                 return
 
             peer_pid = int.from_bytes(data[:2], 'little')
-            len_packet = 2
+            del data[:2]
             rt = self.runtime
             if not rt.options.no_prss:
-                m = len(rt.parties)
-                t = rt.threshold
-                for subset in itertools.combinations(range(m), m - t):
-                    if subset[0] == peer_pid and rt.pid in subset:
-                        len_packet += 16
+                len_packet = rt._prss_keys_from_peer(peer_pid)
                 if len(data) < len_packet:
                     return
 
             # record new protocol peer
             self.peer_pid = peer_pid
             if not rt.options.no_prss:
-                # store keys received from peer
-                len_packet = 2
-                for subset in itertools.combinations(range(m), m - t):
-                    if subset[0] == peer_pid and rt.pid in subset:
-                        rt._prss_keys[subset] = data[len_packet:len_packet + 16]
-                        len_packet += 16
-            del data[:len_packet]
+                rt._prss_keys_from_peer(peer_pid, data)  # store PRSS keys from peer
+                del data[:len_packet]
             self._key_transport_done()
 
         while len(data) >= 12:
