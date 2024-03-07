@@ -477,9 +477,22 @@ class Arithmetic(unittest.TestCase):
         a = mpc.SecInt()(7)
         b = a * a
         mpc.run(mpc.barrier())
+        mpc.run(mpc.throttler(0.5))
+        mpc.run(mpc.throttler(0.5))
+        self.assertRaises(ValueError, mpc.run, mpc.throttler(1.5))
         self.assertEqual(mpc.run(mpc.output(b)), 49)
         self.assertEqual(mpc.run(mpc.output(mpc.scalar_mul(a, [-a, a]))), [-49, 49])
         mpc.options.no_async = True
+
+    @unittest.skipIf(mpc.options.no_prss, 'PRSS (pseudorandom secret sharing) disabled')
+    def test_prss_keys(self):
+        from mpyc.runtime import Party, Runtime
+        p0 = Party(0)
+        p1 = Party(1)
+        rt0 = Runtime(0, [p0, p1], mpc.options)
+        rt1 = Runtime(1, [p0, p1], mpc.options)
+        rt1._prss_keys_from_peer(0, rt0._prss_keys_to_peer(1)[0])
+        self.assertEqual(rt0._prss_keys, rt1._prss_keys)
 
     def test_io(self):
         x = ({4, 3}, [1 - 1j, 2.5], 0, range(7))

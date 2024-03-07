@@ -25,7 +25,7 @@ class MessageExchanger(Protocol):
 
         The connection between the two parties will be set up with one party
         listening (as server) for the other party to connect (as client).
-        If peer_pid=None, party rt.pid starts as server and the peer start as
+        If peer_pid=None, party rt.pid starts as server and the peer starts as
         client, and the other way around otherwise. Once the connection is made,
         the client will immediately send its pid to the server.
         """
@@ -35,12 +35,6 @@ class MessageExchanger(Protocol):
         self.buffers = {}
         self.transport = None
         self.nbytes_sent = 0
-
-    def _key_transport_done(self):
-        rt = self.runtime
-        rt.parties[self.peer_pid].protocol = self
-        if all(p.protocol is not None for p in rt.parties):
-            rt.parties[rt.pid].protocol.set_result(None)
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -55,7 +49,7 @@ class MessageExchanger(Protocol):
             if not rt.options.no_prss:
                 pid_keys.extend(rt._prss_keys_to_peer(self.peer_pid))  # send PRSS keys
             transport.writelines(pid_keys)
-            self._key_transport_done()
+            rt.set_protocol(self.peer_pid, self)
 
     def send(self, pc, payload):
         """Send payload labeled with pc to the peer.
@@ -84,19 +78,19 @@ class MessageExchanger(Protocol):
                 return
 
             peer_pid = int.from_bytes(data[:2], 'little')
-            del data[:2]
             rt = self.runtime
             if not rt.options.no_prss:
                 len_packet = rt._prss_keys_from_peer(peer_pid)
-                if len(data) < len_packet:
+                if len(data) < len_packet + 2:
                     return
 
             # record new protocol peer
             self.peer_pid = peer_pid
+            del data[:2]
             if not rt.options.no_prss:
                 rt._prss_keys_from_peer(peer_pid, data)  # store PRSS keys from peer
                 del data[:len_packet]
-            self._key_transport_done()
+            rt.set_protocol(self.peer_pid, self)
 
         while len(data) >= 12:
             pc, payload_size = unpack_from('<qI', data)
@@ -128,10 +122,7 @@ class MessageExchanger(Protocol):
         if exc:
             raise exc
 
-        rt = self.runtime
-        rt.parties[self.peer_pid].protocol = None
-        if all(p.protocol is None for p in rt.parties if p.pid != rt.pid):
-            rt.parties[rt.pid].protocol.set_result(None)
+        self.runtime.unset_protocol(self.peer_pid)
 
     def close_connection(self):
         """Close connection with the peer."""

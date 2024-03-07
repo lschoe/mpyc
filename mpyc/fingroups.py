@@ -1386,12 +1386,8 @@ def _calculate_gap(l):
     Gap must be a multiple of 4.
     """
     gap = l
-    while True:
-        gap1 = round(3.5 * l * math.log(gap))
-        if gap != gap1:
-            gap = gap1
-        else:
-            break
+    while gap != (gap := round(3.5 * l * math.log(gap))):
+        pass
     return gap - gap%4
 
 

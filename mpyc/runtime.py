@@ -176,7 +176,9 @@ class Runtime:
 
     async def throttler(self, load_percentage=1.0, name=None):
         """Throttle runtime by given percentage (default 1.0), using optional name for barrier."""
-        assert 0.0 <= load_percentage <= 1.0, 'percentage as decimal fraction between 0.0 and 1.0'
+        if not 0.0 <= load_percentage <= 1.0:
+            raise ValueError('percentage required as decimal fraction between 0.0 and 1.0')
+
         self.aggregate_load += load_percentage * 10000
         if self.aggregate_load < 10000:
             return
@@ -4171,6 +4173,16 @@ class Runtime:
         # rotate u over c positions to the right
         u = np.roll(u, c)
         return u
+
+    def set_protocol(self, peer_pid, protocol):
+        self.parties[peer_pid].protocol = protocol
+        if all(p.protocol is not None for p in self.parties if p.pid != self.pid):
+            self.parties[self.pid].protocol.set_result(None)
+
+    def unset_protocol(self, peer_pid):
+        self.parties[peer_pid].protocol = None
+        if all(p.protocol is None for p in self.parties if p.pid != self.pid):
+            self.parties[self.pid].protocol.set_result(None)
 
 
 @dataclass
