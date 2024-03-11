@@ -56,6 +56,9 @@ if np:
             if op == operator.sub:
                 return inputs[1].__rsub__(inputs[0])
 
+            if op == operator.truediv:
+                return inputs[1].__rtruediv__(inputs[0])
+
             return op(inputs[1], inputs[0])
 
         if op := unary_ops.get(ufunc):

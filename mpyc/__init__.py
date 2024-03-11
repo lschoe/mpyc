@@ -29,7 +29,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.9.9'
+__version__ = '0.9.10'
 __license__ = 'MIT License'
 
 import os
@@ -170,10 +170,10 @@ if os.getenv('READTHEDOCS') != 'True':
     if importlib.util.find_spec('winloop' if sys.platform.startswith('win32') else 'uvloop'):
         # uvloop (winloop) package available
         if options.no_uvloop or env_no_uvloop:
-            logging.info(f'Use of package uvloop (winloop) inside MPyC disabled.')
+            logging.info('Use of package uvloop (winloop) inside MPyC disabled.')
         elif sys.platform.startswith('win32'):
             from winloop import EventLoopPolicy
-            logging.debug(f'Load winloop')
+            logging.debug('Load winloop')
         else:
             from uvloop import EventLoopPolicy, _version
             logging.debug(f'Load uvloop version {_version.__version__}')

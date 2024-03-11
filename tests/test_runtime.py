@@ -238,6 +238,7 @@ class Arithmetic(unittest.TestCase):
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_secfxp_array(self):
         np.assertEqual = np.testing.assert_array_equal
+        np.assertAlmostEqual = np.testing.assert_allclose
 
         secfxp = mpc.SecFxp(12)
         a = np.array([[-1.5, 2.5], [4.5, -8.5]])
@@ -252,6 +253,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c * np.array([1.5, 2.5]))), a * np.array([1.5, 2.5]))
         np.assertEqual(mpc.run(mpc.output(c * secfxp(2.5))), a * 2.5)
         np.assertEqual(mpc.run(mpc.output(c * 2.5)), a * 2.5)
+        np.assertEqual(mpc.run(mpc.output(c / secfxp.field(2))), a / 2)
+        np.assertEqual(mpc.run(mpc.output(c / secfxp.field.array([2]))), a / 2)
 
         # NB: NumPy dispatcher converts np.int8 to int
         np.assertEqual(mpc.run(mpc.output(c * np.int8(2))), a * 2)
@@ -278,10 +281,17 @@ class Arithmetic(unittest.TestCase):
         f = 32
         secfxp = mpc.SecFxp(2*f)
         c = secfxp.array(a)
-        np.testing.assert_allclose(mpc.run(mpc.output(c / 2.45)), a / 2.45, rtol=0, atol=2**(1-f))
-        np.testing.assert_allclose(mpc.run(mpc.output(c / 2.5)), a / 2.5, rtol=0, atol=2**(2-f))
-        np.testing.assert_allclose(mpc.run(mpc.output(1 / c)), 1 / a, rtol=0, atol=2**(1-f))
-        np.testing.assert_allclose(mpc.run(mpc.output(c / c)), 1, rtol=0, atol=2**(3-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(c / 0.5)), a / 0.5, rtol=0, atol=0)
+        np.assertAlmostEqual(mpc.run(mpc.output(c / 2.45)), a / 2.45, rtol=0, atol=2**(1-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(c / 2.5)), a / 2.5, rtol=0, atol=2**(2-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(c / c[0, 1])), a / 2.5, rtol=0, atol=2**(3-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(1 / c)), 1 / a, rtol=0, atol=2**(1-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(secfxp(1.5) / c)), 1.5 / a, rtol=0, atol=2**(1-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(1.5 / c)), 1.5 / a, rtol=0, atol=2**(1-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(a / c)), 1, rtol=0, atol=2**(3-f))
+        np.assertAlmostEqual(mpc.run(mpc.output((2*a).astype(int) / c)), 2, rtol=0, atol=2**(4-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(c / a)), 1, rtol=0, atol=2**(0-f))
+        np.assertAlmostEqual(mpc.run(mpc.output(c / c)), 1, rtol=0, atol=2**(3-f))
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
         np.assertEqual(mpc.run(mpc.output(np.sum(c, axis=(-2, 1)))), np.sum(a, axis=(-2, 1)))
@@ -824,6 +834,7 @@ class Arithmetic(unittest.TestCase):
             self.assertAlmostEqual(mpc.run(mpc.output(c / d)), t, delta=2**(3-f))
             t = -s[3] / s[2]
             self.assertAlmostEqual(mpc.run(mpc.output(-d / c)), t, delta=2**(3-f))
+            self.assertEqual(mpc.run(mpc.output(secfxp(2) / secfxp.field(2))), 1)
 
             self.assertEqual(mpc.run(mpc.output(mpc.sgn(+a))), s[0] > 0)
             self.assertEqual(mpc.run(mpc.output(mpc.sgn(-a))), -(s[0] > 0))

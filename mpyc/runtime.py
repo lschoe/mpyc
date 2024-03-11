@@ -1115,8 +1115,6 @@ class Runtime:
         if f:
             if isinstance(b, (int, float)):
                 c = 1/b
-                if c.is_integer():
-                    c = round(c)
             else:
                 c = b.reciprocal() << f
         else:
@@ -1140,17 +1138,15 @@ class Runtime:
 
         # isinstance(a, self.SecureArray) ensured
         if f:
-            if isinstance(b, (int, float)):
+            if isinstance(b, (int, float, np.ndarray)):
                 c = 1/b
-                if c.is_integer():
-                    c = round(c)
             elif isinstance(b, self.SecureFixedPoint):
                 c = self._rec(b)
             else:
                 c = b.reciprocal() << f
         else:
             if not isinstance(b, field.array):
-                b = field.array(b)  # TODO: see if this can be used for case f != 0 as well
+                b = field.array(b)
             c = b.reciprocal()
         return self.np_multiply(a, c)
 
