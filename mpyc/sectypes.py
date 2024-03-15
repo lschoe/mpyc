@@ -21,7 +21,7 @@ SecureObject = asyncoro.SecureObject
 if np:
     # dynamically add __array_ufunc__() and __array_function__ methods to SecureObject
     import operator
-    from numpy.core import umath as um
+    from numpy.core import umath as um  # TODO: numpy.core deprecated in Numpy 2.0+, use numpy._core
 
     binary_ops = {um.less: operator.lt, um.less_equal: operator.le,
                   um.equal: operator.eq, um.not_equal: operator.ne,
@@ -1008,6 +1008,9 @@ class SecureArray(SecureObject):
 
     def __array_function__(self, func, types, args, kwargs):
         # minimal redirect for now
+        if f'{func.__name__}' == 'vstack':
+            # NB: Numpy 2.0 inserts keyword arguments for np.vstack when converting deprecated np.row_stack call.
+            kwargs = {}
         return eval(f'runtime.np_{func.__name__}')(*args, **kwargs)
 
     @property

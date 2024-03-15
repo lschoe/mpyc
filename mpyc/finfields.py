@@ -708,6 +708,9 @@ class FiniteFieldArray:
     _mix_types: type  # or tuple of types
 
     def __init__(self, value, check=True, copy=False):
+        if np.lib.NumpyVersion(np.__version__) >= '2.0.0b1':
+            if copy is False:
+                copy = None
         value = np.array(value, dtype=object, copy=copy)
         if check:
             # TODO: check dtype and type of entries of value (filter float)
@@ -796,7 +799,7 @@ class FiniteFieldArray:
         elif isinstance(a, list):
             # for func like vsplit returning list of arrays
             a = list(map(cls, a))
-        elif isinstance(a, bool):
+        elif isinstance(a, bool) or a is np.True_ or a is np.False_:
             pass
         elif not isinstance(a, tuple):  # shape
             a = cls.field(a)

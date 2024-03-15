@@ -29,11 +29,12 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.9.10'
+__version__ = '0.9.11'
 __license__ = 'MIT License'
 
 import os
 import sys
+import platform
 import argparse
 import logging
 import importlib.util
@@ -127,7 +128,7 @@ if os.getenv('READTHEDOCS') != 'True':
         logging.basicConfig(format='{asctime} {message}', style='{', level=level, stream=sys.stdout)
         logging.debug(f'Set logging level to {level}: {logging.getLevelName(level)}')
         del ch, level
-    logging.debug(f'On {sys.platform=}')
+    logging.debug(f'Python {platform.python_version()} on {sys.platform} ({platform.platform()})')
 
     # Experimental speedup for mpyc.finfields.PrimeFieldArray._sqrt() using multithreading.
     env_max_workers = os.getenv('MPYC_MAXWORKERS')  # check if variable MPYC_MAXWORKERS is set
