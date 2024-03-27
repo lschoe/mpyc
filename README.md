@@ -25,7 +25,7 @@ The [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) has some more info and 
 
 ## Installation
 
-Pure Python, no dependencies. Python 3.9+ (following [NumPy's deprecation policy](https://numpy.org/neps/nep-0029-deprecation_policy.html#support-table)).
+Pure Python, no dependencies. Python 3.9+ (following [SPEC 0 — Minimum Supported Dependencies](https://scientific-python.org/specs/spec-0000/)).
 
 Run `pip install .` in the root directory (containing file `setup.py`).\
 Or, run `pip install -e .`, if you want to edit the MPyC source files.
