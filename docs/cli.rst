@@ -42,7 +42,7 @@ reserving lower case for the single-letter options of MPyC programs:
 
 .. argparse::
    :module: mpyc
-   :func: get_arg_parser
+   :func: _get_arg_parser
    :prog: mpycprog.py
 
    MPyC configuration : @before

@@ -59,7 +59,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.dstack((c[0], c[0])))), np.dstack((a[0], a[0])))
         np.assertEqual(mpc.run(mpc.output(np.dstack((c[0, 0],)))), np.dstack((a[0, 0],)))
         np.assertEqual(mpc.run(mpc.output(np.column_stack((c, c, c)))), np.column_stack((a, a, a)))
-        np.assertEqual(mpc.run(mpc.output(np.row_stack((c, c, c)))), np.row_stack((a, a, a)))
+        if np.lib.NumpyVersion(np.__version__) < '2.0.0b1':
+            np.assertEqual(mpc.run(mpc.output(np.row_stack((c, c, c)))), np.row_stack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.split(c, 2, 1)[0])), np.split(a, 2, 1)[0])
         np.assertEqual(mpc.run(mpc.output(np.dsplit(d, 1)[0])), np.dsplit(b, 1)[0])
         np.assertEqual(mpc.run(mpc.output(np.hsplit(c, 2)[0])), np.hsplit(a, 2)[0])

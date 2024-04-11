@@ -4,16 +4,16 @@ MPyC package
 .. automodule:: mpyc
     :members:
 
-mpyc.gmpy
----------
-
-.. automodule:: mpyc.gmpy
-    :members:
-
 mpyc.numpy
 ----------
 
 .. automodule:: mpyc.numpy
+    :members:
+
+mpyc.gmpy
+---------
+
+.. automodule:: mpyc.gmpy
     :members:
 
 mpyc.gfpx

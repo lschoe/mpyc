@@ -41,7 +41,7 @@ import importlib.util
 import asyncio
 
 
-def get_arg_parser():
+def _get_arg_parser():
     """Return parser for command line arguments passed to the MPyC runtime."""
     parser = argparse.ArgumentParser(add_help=False)
 
@@ -108,7 +108,7 @@ def get_arg_parser():
 
 
 if os.getenv('READTHEDOCS') != 'True':
-    options = get_arg_parser().parse_known_args()[0]
+    options = _get_arg_parser().parse_known_args()[0]
     if options.VERSION or options.HELP:
         options.no_log = True
 

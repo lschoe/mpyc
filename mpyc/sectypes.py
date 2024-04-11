@@ -1009,7 +1009,8 @@ class SecureArray(SecureObject):
     def __array_function__(self, func, types, args, kwargs):
         # minimal redirect for now
         if f'{func.__name__}' == 'vstack':
-            # NB: Numpy 2.0 inserts keyword arguments for np.vstack when converting deprecated np.row_stack call.
+            # NB: Numpy 2.0 inserts keyword arguments for np.vstack
+            # when converting deprecated np.row_stack call.
             kwargs = {}
         return eval(f'runtime.np_{func.__name__}')(*args, **kwargs)
 

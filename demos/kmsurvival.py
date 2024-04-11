@@ -77,11 +77,9 @@ from lifelines import KaplanMeierFitter
 from mpyc.runtime import mpc
 
 
-def fit_plot(T1, T2, E1, E2, title, unit_of_time, label1, label2):
-    kmf1 = KaplanMeierFitter()
-    kmf2 = KaplanMeierFitter()
-    ax = kmf1.fit(T1, E1, label=label1, alpha=0.05).plot(show_censors=True)
-    ax = kmf2.fit(T2, E2, label=label2, alpha=0.05).plot(ax=ax, show_censors=True)
+def plot_fits(kmf1, kmf2, title, unit_of_time):
+    ax = kmf1.plot(show_censors=True)
+    ax = kmf2.plot(ax=ax, show_censors=True)
     ax.set_title(title)
     if unit_of_time:
         plt.xlabel(f'timeline ({unit_of_time})')
@@ -89,7 +87,6 @@ def fit_plot(T1, T2, E1, E2, title, unit_of_time, label1, label2):
     plt.tight_layout()
     figname = ax.figure.canvas.manager.get_window_title()
     ax.figure.canvas.manager.set_window_title(f'Party {mpc.pid} - {figname}')
-    return kmf1, kmf2
 
 
 def events_to_table(maxT, T, E):
@@ -261,12 +258,15 @@ async def main():
           ' for own events in the clear')
 
     if args.print_tables or args.plot_curves:
-        plt.figure(1)
-        title = f'Party {mpc.pid}: {name} Survival - individual events'
-        kmf1, kmf2 = fit_plot(T1, T2, E1, E2, title, unit_of_time, label1, label2)
+        kmf1 = KaplanMeierFitter(alpha=0.05, label=label1).fit(T1, E1)
+        kmf2 = KaplanMeierFitter(alpha=0.05, label=label2).fit(T2, E2)
         if args.print_tables:
             print(kmf1.event_table)
             print(kmf2.event_table)
+        if args.plot_curves:
+            plt.figure(1)
+            title = f'Party {mpc.pid}: {name} Survival - individual events'
+            plot_fits(kmf1, kmf2, title, unit_of_time)
 
     # expand to timeline 1..maxT and add all input data homomorphically per group
     d1, n1 = events_to_table(maxT, T1, E1)
@@ -286,14 +286,15 @@ async def main():
           ' for aggregated events in the clear')
 
     if args.print_tables or args.plot_curves:
-        plt.figure(2)
-        title = f'Party {mpc.pid}: {name} Survival - aggregated by {stride} {unit_of_time}'
-        kmf1, kmf2 = fit_plot([t * stride for t in T1], [t * stride for t in T2], E1, E2,
-                              title, unit_of_time, label1, label2)
+        kmf1 = KaplanMeierFitter(alpha=0.05, label=label1).fit([t * stride for t in T1], E1)
+        kmf2 = KaplanMeierFitter(alpha=0.05, label=label2).fit([t * stride for t in T2], E2)
         if args.print_tables:
             print(kmf1.event_table)
             print(kmf2.event_table)
         if args.plot_curves:
+            plt.figure(2)
+            title = f'Party {mpc.pid}: {name} Survival - aggregated by {stride} {unit_of_time}'
+            plot_fits(kmf1, kmf2, title, unit_of_time)
             plt.show()
 
     logging.info('Optimized secure logrank test on all individual events.')

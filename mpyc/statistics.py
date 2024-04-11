@@ -602,11 +602,11 @@ def linear_regression(x, y):
     """
     n = len(x)
     if len(y) != n:
-        raise statistics.StatisticsError('covariance requires that both inputs '
+        raise statistics.StatisticsError('linear regression requires that both inputs '
                                          'have same number of data points')
 
     if n < 2:
-        raise statistics.StatisticsError('covariance requires at least two data points')
+        raise statistics.StatisticsError('linear regression requires at least two data points')
 
     sectype = type(x[0])  # all elts of x assumed of same type
     if not issubclass(sectype, SecureObject):

@@ -4224,7 +4224,7 @@ def generate_configs(m, addresses):
 
 def setup():
     """Setup a runtime."""
-    parser = mpyc.get_arg_parser()
+    parser = mpyc._get_arg_parser()
     argv = sys.argv  # keep raw args
     options, args = parser.parse_known_args()
     if options.VERSION:

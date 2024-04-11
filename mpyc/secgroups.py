@@ -733,6 +733,11 @@ def _toSecGrpFunc(GroupFunc):
     globals()[name] = SecGrpFunc
 
 
+SecSymmetricGroup: type
+SecQuadraticResidues: type
+SecSchnorrGroup: type
+SecEllipticCurve: type
+SecClassGroup: type
 _toSecGrpFunc(fg.SymmetricGroup)     # make SecSymmetricGroup as secure SymmetricGroup version
 _toSecGrpFunc(fg.QuadraticResidues)  # make SecQuadraticResidues as secure QuadraticResidues version
 _toSecGrpFunc(fg.SchnorrGroup)       # make SecSchnorrGroup as secure SchnorrGroup version

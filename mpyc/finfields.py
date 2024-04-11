@@ -801,7 +801,11 @@ class FiniteFieldArray:
             a = list(map(cls, a))
         elif isinstance(a, bool) or a is np.True_ or a is np.False_:
             pass
-        elif not isinstance(a, tuple):  # shape
+        elif func.__name__.startswith('atleast_'):
+            a = tuple(map(lambda _: cls(_, check=False), a))
+        elif isinstance(a, tuple):
+            pass  # e.g., for func like shape
+        else:
             a = cls.field(a)
         return a
 
@@ -1341,8 +1345,6 @@ class FiniteFieldArray:
             return self.field(a)
 
         return type(self)(a, check=True)
-
-    # TODO: add atleast1d(a), atleast2d(a), atleast3d(a)
 
     def transpose(self, *axes):
         a = self.value.transpose(*axes)

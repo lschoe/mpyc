@@ -317,8 +317,7 @@ class _Awaitable:
 
 def _nested_list(rt, n, dims):
     if dims:
-        n0 = dims[0]
-        dims = dims[1:]
+        n0, *dims = dims
         s = [_nested_list(rt, n0, dims) for _ in range(n)]
     else:
         s = [rt() for _ in range(n)]
