@@ -23,7 +23,7 @@ setup(
               'secret sharing', 'Shamir threshold scheme',
               'pseudorandom secret sharing', 'PRSS'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Framework :: AsyncIO',
         'Framework :: Jupyter',

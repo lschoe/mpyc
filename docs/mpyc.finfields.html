@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.finfields</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/finfields.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/finfields.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/finfields.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/finfields.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;supports&nbsp;finite&nbsp;(Galois)&nbsp;fields.<br>
 &nbsp;<br>
 Function&nbsp;GF&nbsp;creates&nbsp;types&nbsp;implementing&nbsp;finite&nbsp;fields.<br>
@@ -346,11 +346,9 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <hr>
 Class methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="BinaryFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="BinaryFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
 
-<hr>
-Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="BinaryFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
+<dl><dt><a name="BinaryFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
@@ -363,8 +361,6 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 <dl><dt><strong>ext_deg</strong> = None</dl>
 
 <dl><dt><strong>is_signed</strong> = None</dl>
-
-<dl><dt><strong>modulus</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -639,11 +635,9 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <hr>
 Class methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="ExtensionFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="ExtensionFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
 
-<hr>
-Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="ExtensionFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
+<dl><dt><a name="ExtensionFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
@@ -658,8 +652,6 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 <dl><dt><strong>ext_deg</strong> = None</dl>
 
 <dl><dt><strong>is_signed</strong> = None</dl>
-
-<dl><dt><strong>modulus</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -908,11 +900,9 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="FiniteFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="FiniteFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
 
-<hr>
-Static methods defined here:<br>
-<dl><dt><a name="FiniteFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
+<dl><dt><a name="FiniteFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -920,7 +910,7 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__annotations__</strong> = {'_mix_types': &lt;class 'type'&gt;, 'array': &lt;class 'type'&gt;}</dl>
+<dl><dt><strong>__annotations__</strong> = {'_mix_types': &lt;class 'type'&gt;, 'array': &lt;class 'type'&gt;, 'modulus': &lt;class 'type'&gt;}</dl>
 
 <dl><dt><strong>byte_length</strong> = None</dl>
 
@@ -929,8 +919,6 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>ext_deg</strong> = None</dl>
 
 <dl><dt><strong>is_signed</strong> = None</dl>
-
-<dl><dt><strong>modulus</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -1229,11 +1217,9 @@ Field&nbsp;elements&nbsp;can&nbsp;thus&nbsp;be&nbsp;used&nbsp;directly&nbsp;in&n
 
 <hr>
 Class methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="PrimeFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="PrimeFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
 
-<hr>
-Static methods inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
-<dl><dt><a name="PrimeFieldElement-from_bytes"><strong>from_bytes</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;list&nbsp;of&nbsp;integers&nbsp;represented&nbsp;by&nbsp;the&nbsp;given&nbsp;byte&nbsp;string.</tt></dd></dl>
+<dl><dt><a name="PrimeFieldElement-to_bytes"><strong>to_bytes</strong></a>(x)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;byte&nbsp;string&nbsp;representing&nbsp;the&nbsp;given&nbsp;list/ndarray&nbsp;of&nbsp;integers&nbsp;x.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.finfields.html#FiniteFieldElement">FiniteFieldElement</a>:<br>
@@ -1246,8 +1232,6 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 <dl><dt><strong>characteristic</strong> = None</dl>
 
 <dl><dt><strong>ext_deg</strong> = None</dl>
-
-<dl><dt><strong>modulus</strong> = None</dl>
 
 <dl><dt><strong>order</strong> = None</dl>
 
@@ -1262,7 +1246,7 @@ Data and other attributes inherited from <a href="mpyc.finfields.html#FiniteFiel
 &nbsp;<br>
 Also&nbsp;creates&nbsp;corresponding&nbsp;array&nbsp;type.</tt></dd></dl>
  <dl><dt><a name="-find_irreducible"><strong>find_irreducible</strong></a>(p, d)</dt><dd><tt>Find&nbsp;smallest&nbsp;irreducible&nbsp;polynomial&nbsp;of&nbsp;degree&nbsp;d&nbsp;over&nbsp;<a href="#-GF">GF</a>(p).</tt></dd></dl>
- <dl><dt><a name="-find_prime_root"><strong>find_prime_root</strong></a>(l, blum=True, n=1)</dt><dd><tt>Find&nbsp;smallest&nbsp;prime&nbsp;of&nbsp;bit&nbsp;length&nbsp;at&nbsp;least&nbsp;l&nbsp;satisfying&nbsp;given&nbsp;constraints.<br>
+ <dl><dt><a name="-find_prime_root"><strong>find_prime_root</strong></a>(l, blum=True, n=1)</dt><dd><tt>Find&nbsp;prime&nbsp;of&nbsp;bit&nbsp;length&nbsp;at&nbsp;least&nbsp;l&nbsp;satisfying&nbsp;given&nbsp;constraints.<br>
 &nbsp;<br>
 Default&nbsp;is&nbsp;to&nbsp;return&nbsp;Blum&nbsp;primes&nbsp;(primes&nbsp;p&nbsp;with&nbsp;p&nbsp;%&nbsp;4&nbsp;==&nbsp;3).<br>
 Also,&nbsp;a&nbsp;primitive&nbsp;root&nbsp;w&nbsp;is&nbsp;returned&nbsp;of&nbsp;prime&nbsp;order&nbsp;at&nbsp;least&nbsp;n&nbsp;(0&nbsp;&lt;&nbsp;w&nbsp;&lt;&nbsp;p).</tt></dd></dl>

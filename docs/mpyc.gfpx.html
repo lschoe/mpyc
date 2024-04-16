@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.gfpx</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/gfpx.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/gfpx.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/gfpx.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/gfpx.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;supports&nbsp;arithmetic&nbsp;with&nbsp;polynomials&nbsp;over&nbsp;GF(p).<br>
 &nbsp;<br>
 Polynomials&nbsp;over&nbsp;GF(p)&nbsp;are&nbsp;represented&nbsp;as&nbsp;coefficient&nbsp;lists.<br>
@@ -24,6 +24,8 @@ Leading&nbsp;coefficient&nbsp;a_n&nbsp;is&nbsp;1,&nbsp;using&nbsp;0&nbsp;for&nbs
 The&nbsp;operators&nbsp;+,-,*,&lt;&lt;,//,%,&nbsp;and&nbsp;function&nbsp;divmod&nbsp;are&nbsp;overloaded.<br>
 The&nbsp;operators&nbsp;&lt;,&lt;=,&gt;,&gt;=,==,!=&nbsp;are&nbsp;overloaded&nbsp;as&nbsp;well,&nbsp;using&nbsp;the<br>
 lexicographic&nbsp;order&nbsp;for&nbsp;polynomials&nbsp;(zero&nbsp;polynomial&nbsp;is&nbsp;the&nbsp;smallest).<br>
+Plus&nbsp;some&nbsp;SageMath-style&nbsp;functionality,&nbsp;for&nbsp;instance,&nbsp;to&nbsp;access<br>
+coefficients&nbsp;using&nbsp;Python&nbsp;indexing&nbsp;and&nbsp;to&nbsp;reverse&nbsp;a&nbsp;polynomial.<br>
 &nbsp;<br>
 GCD,&nbsp;extended&nbsp;GCD,&nbsp;modular&nbsp;inverse&nbsp;and&nbsp;powers&nbsp;are&nbsp;all&nbsp;supported.<br>
 A&nbsp;simple&nbsp;irreducibility&nbsp;test&nbsp;is&nbsp;provided&nbsp;as&nbsp;well&nbsp;as&nbsp;a&nbsp;basic<br>
@@ -81,6 +83,8 @@ Methods defined here:<br>
 
 <dl><dt><a name="BinaryPolynomial-__int__"><strong>__int__</strong></a>(self)</dt></dl>
 
+<dl><dt><a name="BinaryPolynomial-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
+
 <dl><dt><a name="BinaryPolynomial-to_bytes"><strong>to_bytes</strong></a>(self, length, byteorder)</dt><dd><tt>Return&nbsp;a&nbsp;bytes&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;representing&nbsp;a&nbsp;polynomial.</tt></dd></dl>
 
 <hr>
@@ -102,6 +106,8 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 <dl><dt><a name="BinaryPolynomial-__floordiv__"><strong>__floordiv__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="BinaryPolynomial-__ge__"><strong>__ge__</strong></a>(self, other)</dt><dd><tt>Greater-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
+
+<dl><dt><a name="BinaryPolynomial-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
 
 <dl><dt><a name="BinaryPolynomial-__gt__"><strong>__gt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;greater-than&nbsp;comparison.</tt></dd></dl>
 
@@ -148,6 +154,18 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 <dl><dt><a name="BinaryPolynomial-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="BinaryPolynomial-degree"><strong>degree</strong></a>(self)</dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;(-1&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+
+<dl><dt><a name="BinaryPolynomial-monic"><strong>monic</strong></a>(self, lc_pinv=False)</dt><dd><tt>Monic&nbsp;version&nbsp;of&nbsp;polynomial.<br>
+&nbsp;<br>
+Zero&nbsp;polynomial&nbsp;remains&nbsp;unchanged.<br>
+If&nbsp;lc_pinv&nbsp;is&nbsp;set,&nbsp;inverse&nbsp;of&nbsp;leading&nbsp;coefficient&nbsp;is&nbsp;also&nbsp;returned&nbsp;(0&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+
+<dl><dt><a name="BinaryPolynomial-reverse"><strong>reverse</strong></a>(self, d=None)</dt><dd><tt>Reverse&nbsp;of&nbsp;polynomial&nbsp;(basically,&nbsp;coefficients&nbsp;in&nbsp;reverse&nbsp;order).<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;reverse&nbsp;of&nbsp;x&nbsp;+&nbsp;2x^2&nbsp;+&nbsp;3x^3&nbsp;is&nbsp;3&nbsp;+&nbsp;2x&nbsp;+&nbsp;x^2.<br>
+If&nbsp;d&nbsp;is&nbsp;None&nbsp;(default),&nbsp;d&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;degree&nbsp;of&nbsp;the&nbsp;given&nbsp;poynomial.<br>
+Otherwise,&nbsp;the&nbsp;given&nbsp;polynomial&nbsp;is&nbsp;first&nbsp;padded&nbsp;with&nbsp;zeros&nbsp;or&nbsp;truncated<br>
+to&nbsp;attain&nbsp;the&nbsp;given&nbsp;degree&nbsp;d,&nbsp;d&gt;=-1,&nbsp;before&nbsp;it&nbsp;is&nbsp;reversed.</tt></dd></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.gfpx.html#Polynomial">Polynomial</a>:<br>
@@ -221,6 +239,8 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 
 <dl><dt><a name="Polynomial-__ge__"><strong>__ge__</strong></a>(self, other)</dt><dd><tt>Greater-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
 
+<dl><dt><a name="Polynomial-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
+
 <dl><dt><a name="Polynomial-__gt__"><strong>__gt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;greater-than&nbsp;comparison.</tt></dd></dl>
 
 <dl><dt><a name="Polynomial-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;polynomials&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
@@ -228,6 +248,8 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 <dl><dt><a name="Polynomial-__init__"><strong>__init__</strong></a>(self, value=0, check=True)</dt><dd><tt>Initialize&nbsp;polynomial&nbsp;to&nbsp;given&nbsp;value&nbsp;(zero&nbsp;polynomial,&nbsp;by&nbsp;default).</tt></dd></dl>
 
 <dl><dt><a name="Polynomial-__int__"><strong>__int__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Polynomial-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="Polynomial-__le__"><strong>__le__</strong></a>(self, other)</dt><dd><tt>Less-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
 
@@ -270,6 +292,18 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 <dl><dt><a name="Polynomial-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="Polynomial-degree"><strong>degree</strong></a>(self)</dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;(-1&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-monic"><strong>monic</strong></a>(self, lc_pinv=False)</dt><dd><tt>Monic&nbsp;version&nbsp;of&nbsp;polynomial.<br>
+&nbsp;<br>
+Zero&nbsp;polynomial&nbsp;remains&nbsp;unchanged.<br>
+If&nbsp;lc_pinv&nbsp;is&nbsp;set,&nbsp;inverse&nbsp;of&nbsp;leading&nbsp;coefficient&nbsp;is&nbsp;also&nbsp;returned&nbsp;(0&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+
+<dl><dt><a name="Polynomial-reverse"><strong>reverse</strong></a>(self, d=None)</dt><dd><tt>Reverse&nbsp;of&nbsp;polynomial&nbsp;(basically,&nbsp;coefficients&nbsp;in&nbsp;reverse&nbsp;order).<br>
+&nbsp;<br>
+For&nbsp;example,&nbsp;reverse&nbsp;of&nbsp;x&nbsp;+&nbsp;2x^2&nbsp;+&nbsp;3x^3&nbsp;is&nbsp;3&nbsp;+&nbsp;2x&nbsp;+&nbsp;x^2.<br>
+If&nbsp;d&nbsp;is&nbsp;None&nbsp;(default),&nbsp;d&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;degree&nbsp;of&nbsp;the&nbsp;given&nbsp;poynomial.<br>
+Otherwise,&nbsp;the&nbsp;given&nbsp;polynomial&nbsp;is&nbsp;first&nbsp;padded&nbsp;with&nbsp;zeros&nbsp;or&nbsp;truncated<br>
+to&nbsp;attain&nbsp;the&nbsp;given&nbsp;degree&nbsp;d,&nbsp;d&gt;=-1,&nbsp;before&nbsp;it&nbsp;is&nbsp;reversed.</tt></dd></dl>
 
 <dl><dt><a name="Polynomial-to_bytes"><strong>to_bytes</strong></a>(self, length, byteorder)</dt><dd><tt>Return&nbsp;a&nbsp;bytes&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;representing&nbsp;a&nbsp;polynomial.</tt></dd></dl>
 

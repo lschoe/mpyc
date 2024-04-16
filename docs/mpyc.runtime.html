@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.runtime</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/runtime.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/runtime.py</a></font></td></tr></table>
     <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
 &nbsp;<br>
 Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
@@ -32,13 +32,14 @@ are&nbsp;made&nbsp;available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&
 <a href="https://docs.python.org/3/library/itertools.html">itertools</a><br>
 <a href="https://docs.python.org/3/library/logging.html">logging</a><br>
 <a href="https://docs.python.org/3/library/math.html">math</a><br>
-<a href="mpyc.html">mpyc</a><br>
-</td><td width="25%" valign=top><a href="mpyc.numpy.html">mpyc.numpy</a><br>
+<a href="mpyc.mpctools.html">mpyc.mpctools</a><br>
+</td><td width="25%" valign=top><a href="mpyc.html">mpyc</a><br>
+<a href="mpyc.numpy.html">mpyc.numpy</a><br>
 <a href="https://docs.python.org/3/library/os.html">os</a><br>
 <a href="https://docs.python.org/3/library/pickle.html">pickle</a><br>
 <a href="https://docs.python.org/3/library/secrets.html">secrets</a><br>
-<a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
+<a href="https://docs.python.org/3/library/sys.html">sys</a><br>
 <a href="mpyc.thresha.html">mpyc.thresha</a><br>
 <a href="https://docs.python.org/3/library/time.html">time</a><br>
 </td></tr></table></td></tr></table><p>
@@ -158,10 +159,12 @@ the&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;is&nbsp;returned
 
 <dl><dt>async <a name="Runtime-barrier"><strong>barrier</strong></a>(self, name=None)</dt><dd><tt>Barrier&nbsp;for&nbsp;runtime,&nbsp;using&nbsp;optional&nbsp;string&nbsp;name&nbsp;for&nbsp;easy&nbsp;identification.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-convert"><strong>convert</strong></a>(self, x, ttype)</dt><dd><tt>Secure&nbsp;conversion&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x&nbsp;to&nbsp;given&nbsp;ttype.<br>
+<dl><dt><a name="Runtime-convert"><strong>convert</strong></a>(self, x, t_type)</dt><dd><tt>Secure&nbsp;conversion&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x&nbsp;to&nbsp;given&nbsp;t_type.<br>
 &nbsp;<br>
 Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
 Converted&nbsp;values&nbsp;assumed&nbsp;to&nbsp;fit&nbsp;in&nbsp;target&nbsp;type.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-cos"><strong>cos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;cosine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-div"><strong>div</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;division&nbsp;of&nbsp;a&nbsp;by&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
 
@@ -222,7 +225,7 @@ incurring&nbsp;some&nbsp;overhead.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-from_bits"><strong>from_bits</strong></a>(self, x)</dt><dd><tt>Recover&nbsp;secure&nbsp;number&nbsp;from&nbsp;its&nbsp;binary&nbsp;representation&nbsp;x.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-gather"><strong>gather</strong></a>(self, *obj)</dt></dl>
+<dl><dt><a name="Runtime-gather"><strong>gather</strong></a> = gather_shares(rt, *obj)</dt><dd><tt>Gather&nbsp;all&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shares).</tt></dd></dl>
 
 <dl><dt><a name="Runtime-gauss"><strong>gauss</strong></a>(self, A, d, b, c)</dt><dd><tt>Secure&nbsp;Gaussian&nbsp;elimination&nbsp;A&nbsp;d&nbsp;-&nbsp;b&nbsp;c.</tt></dd></dl>
 
@@ -323,19 +326,25 @@ If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;int
 The&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all&nbsp;specified&nbsp;axes&nbsp;removed<br>
 (converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).</tt></dd></dl>
 
-<dl><dt><a name="Runtime-np_amax"><strong>np_amax</strong></a>(self, a, axis=None)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
+<dl><dt><a name="Runtime-np_amax"><strong>np_amax</strong></a>(self, a, axis=None, keepdims=False)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
 &nbsp;<br>
-If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;the&nbsp;maximum&nbsp;of&nbsp;the&nbsp;array&nbsp;is&nbsp;returned&nbsp;(as&nbsp;a&nbsp;scalar).<br>
+If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;the&nbsp;maximum&nbsp;of&nbsp;the&nbsp;array&nbsp;is&nbsp;returned.<br>
 If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;the&nbsp;minimum&nbsp;along&nbsp;all&nbsp;specified&nbsp;axes&nbsp;is&nbsp;returned.<br>
-The&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all&nbsp;specified&nbsp;axes&nbsp;removed<br>
-(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).</tt></dd></dl>
+&nbsp;<br>
+If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all<br>
+specified&nbsp;axes&nbsp;removed&nbsp;(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).<br>
+Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;axes&nbsp;along&nbsp;which&nbsp;the&nbsp;maximum&nbsp;is&nbsp;taken<br>
+are&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-np_amin"><strong>np_amin</strong></a>(self, a, axis=None)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
+<dl><dt><a name="Runtime-np_amin"><strong>np_amin</strong></a>(self, a, axis=None, keepdims=False)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
 &nbsp;<br>
-If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;the&nbsp;minimum&nbsp;of&nbsp;the&nbsp;array&nbsp;is&nbsp;returned&nbsp;(as&nbsp;a&nbsp;scalar).<br>
+If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;the&nbsp;minimum&nbsp;of&nbsp;the&nbsp;array&nbsp;is&nbsp;returned.<br>
 If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;the&nbsp;minimum&nbsp;along&nbsp;all&nbsp;specified&nbsp;axes&nbsp;is&nbsp;returned.<br>
-The&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all&nbsp;specified&nbsp;axes&nbsp;removed<br>
-(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).</tt></dd></dl>
+&nbsp;<br>
+If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all<br>
+specified&nbsp;axes&nbsp;removed&nbsp;(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).<br>
+Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;axes&nbsp;along&nbsp;which&nbsp;the&nbsp;minimum&nbsp;is&nbsp;taken<br>
+are&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-np_any"><strong>np_any</strong></a>(self, a, axis=None)</dt><dd><tt>Secure&nbsp;any-predicate&nbsp;for&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
 &nbsp;<br>
@@ -349,17 +358,63 @@ The&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&
 If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default),&nbsp;arr&nbsp;and&nbsp;values&nbsp;are&nbsp;flattened&nbsp;first.<br>
 Otherwise,&nbsp;arr&nbsp;and&nbsp;values&nbsp;must&nbsp;all&nbsp;be&nbsp;of&nbsp;the&nbsp;same&nbsp;shape,&nbsp;except&nbsp;along&nbsp;the&nbsp;given&nbsp;axis.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-np_argmax"><strong>np_argmax</strong></a>(self, a, axis=None, key=None, arg_unary=False, arg_only=True)</dt><dd><tt>Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;maximum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_argmax"><strong>np_argmax</strong></a>(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True)</dt><dd><tt>Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;maximum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
 &nbsp;<br>
-If&nbsp;no&nbsp;axis&nbsp;is&nbsp;given&nbsp;(default),&nbsp;array&nbsp;is&nbsp;flattened.<br>
+Default&nbsp;behavior&nbsp;similar&nbsp;to&nbsp;np.<a href="#Runtime-argmax">argmax</a>()&nbsp;for&nbsp;NumPy&nbsp;arrays:<br>
 &nbsp;<br>
-NB:&nbsp;Different&nbsp;defaults&nbsp;than&nbsp;for&nbsp;method&nbsp;call&nbsp;a.<a href="#Runtime-argmax">argmax</a>().</tt></dd></dl>
+&nbsp;-&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;as&nbsp;numbers&nbsp;(not&nbsp;as&nbsp;unit&nbsp;vectors),<br>
+&nbsp;-&nbsp;only&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;(maximum&nbsp;values&nbsp;omitted).<br>
+&nbsp;<br>
+NB:&nbsp;Different&nbsp;defaults&nbsp;than&nbsp;for&nbsp;method&nbsp;call&nbsp;a.<a href="#Runtime-argmax">argmax</a>().<br>
+&nbsp;<br>
+If&nbsp;no&nbsp;axis&nbsp;is&nbsp;given&nbsp;(default),&nbsp;array&nbsp;a&nbsp;is&nbsp;flattened&nbsp;first.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;as&nbsp;unit&nbsp;vectors&nbsp;in&nbsp;an&nbsp;array&nbsp;u&nbsp;say,<br>
+then&nbsp;u&nbsp;is&nbsp;always&nbsp;of&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;the&nbsp;(possibly&nbsp;flattened)&nbsp;input&nbsp;array&nbsp;a.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;as&nbsp;numbers,&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;array&nbsp;of&nbsp;indices<br>
+is&nbsp;controlled&nbsp;by&nbsp;parameter&nbsp;keepdims.&nbsp;If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),<br>
+the&nbsp;shape&nbsp;of&nbsp;the&nbsp;indices&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;the&nbsp;specified&nbsp;axis&nbsp;removed<br>
+(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).&nbsp;Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is<br>
+set,&nbsp;the&nbsp;axis&nbsp;along&nbsp;which&nbsp;the&nbsp;maximum&nbsp;is&nbsp;taken&nbsp;is&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as<br>
+dimension&nbsp;of&nbsp;size&nbsp;1.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;maximum&nbsp;values&nbsp;are&nbsp;returned&nbsp;as&nbsp;well,&nbsp;the&nbsp;shape&nbsp;of&nbsp;this&nbsp;part&nbsp;of&nbsp;the&nbsp;output&nbsp;is<br>
+also&nbsp;controlled&nbsp;by&nbsp;parameter&nbsp;keepdims.&nbsp;If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),&nbsp;a&nbsp;1D&nbsp;array<br>
+of&nbsp;maximum&nbsp;values&nbsp;is&nbsp;returned&nbsp;with&nbsp;one&nbsp;entry&nbsp;per&nbsp;element&nbsp;of&nbsp;the&nbsp;given&nbsp;array&nbsp;a&nbsp;with<br>
+the&nbsp;given&nbsp;axis&nbsp;removed;&nbsp;if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;the&nbsp;maximum&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;scalar.<br>
+Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;array&nbsp;of&nbsp;maximum&nbsp;values&nbsp;is&nbsp;of&nbsp;the&nbsp;same&nbsp;shape<br>
+as&nbsp;the&nbsp;given&nbsp;array&nbsp;a&nbsp;except&nbsp;that&nbsp;the&nbsp;dimension&nbsp;of&nbsp;the&nbsp;given&nbsp;axis&nbsp;is&nbsp;reduced&nbsp;to&nbsp;1;<br>
+if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;all&nbsp;axes&nbsp;are&nbsp;present&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-np_argmin"><strong>np_argmin</strong></a>(self, a, axis=None, key=None, arg_unary=False, arg_only=True)</dt><dd><tt>Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;minimum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_argmin"><strong>np_argmin</strong></a>(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True)</dt><dd><tt>Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;minimum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
 &nbsp;<br>
-If&nbsp;no&nbsp;axis&nbsp;is&nbsp;given&nbsp;(default),&nbsp;array&nbsp;is&nbsp;flattened.<br>
+Default&nbsp;behavior&nbsp;similar&nbsp;to&nbsp;np.<a href="#Runtime-argmin">argmin</a>()&nbsp;for&nbsp;NumPy&nbsp;arrays:<br>
 &nbsp;<br>
-NB:&nbsp;Different&nbsp;defaults&nbsp;than&nbsp;for&nbsp;method&nbsp;call&nbsp;a.<a href="#Runtime-argmin">argmin</a>().</tt></dd></dl>
+&nbsp;-&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;as&nbsp;numbers&nbsp;(not&nbsp;as&nbsp;unit&nbsp;vectors),<br>
+&nbsp;-&nbsp;only&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;(minimum&nbsp;values&nbsp;omitted).<br>
+&nbsp;<br>
+NB:&nbsp;Different&nbsp;defaults&nbsp;than&nbsp;for&nbsp;method&nbsp;call&nbsp;a.<a href="#Runtime-argmin">argmin</a>().<br>
+&nbsp;<br>
+If&nbsp;no&nbsp;axis&nbsp;is&nbsp;given&nbsp;(default),&nbsp;array&nbsp;a&nbsp;is&nbsp;flattened&nbsp;first.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;as&nbsp;unit&nbsp;vectors&nbsp;in&nbsp;an&nbsp;array&nbsp;u&nbsp;say,<br>
+then&nbsp;u&nbsp;is&nbsp;always&nbsp;of&nbsp;the&nbsp;same&nbsp;shape&nbsp;as&nbsp;the&nbsp;(possibly&nbsp;flattened)&nbsp;input&nbsp;array&nbsp;a.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;indices&nbsp;are&nbsp;returned&nbsp;as&nbsp;numbers,&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;array&nbsp;of&nbsp;indices<br>
+is&nbsp;controlled&nbsp;by&nbsp;parameter&nbsp;keepdims.&nbsp;If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),<br>
+the&nbsp;shape&nbsp;of&nbsp;the&nbsp;indices&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;the&nbsp;specified&nbsp;axis&nbsp;removed<br>
+(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).&nbsp;Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is<br>
+set,&nbsp;the&nbsp;axis&nbsp;along&nbsp;which&nbsp;the&nbsp;minimum&nbsp;is&nbsp;taken&nbsp;is&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as<br>
+dimension&nbsp;of&nbsp;size&nbsp;1.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;minimum&nbsp;values&nbsp;are&nbsp;returned&nbsp;as&nbsp;well,&nbsp;the&nbsp;shape&nbsp;of&nbsp;this&nbsp;part&nbsp;of&nbsp;the&nbsp;output&nbsp;is<br>
+also&nbsp;controlled&nbsp;by&nbsp;parameter&nbsp;keepdims.&nbsp;If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),&nbsp;a&nbsp;1D&nbsp;array<br>
+of&nbsp;minimum&nbsp;values&nbsp;is&nbsp;returned&nbsp;with&nbsp;one&nbsp;entry&nbsp;per&nbsp;element&nbsp;of&nbsp;the&nbsp;given&nbsp;array&nbsp;a&nbsp;with<br>
+the&nbsp;given&nbsp;axis&nbsp;removed;&nbsp;if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;the&nbsp;minimum&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;scalar.<br>
+Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;array&nbsp;of&nbsp;minimum&nbsp;values&nbsp;is&nbsp;of&nbsp;the&nbsp;same&nbsp;shape<br>
+as&nbsp;the&nbsp;given&nbsp;array&nbsp;a&nbsp;except&nbsp;that&nbsp;the&nbsp;dimension&nbsp;of&nbsp;the&nbsp;given&nbsp;axis&nbsp;is&nbsp;reduced&nbsp;to&nbsp;1;<br>
+if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;all&nbsp;axes&nbsp;are&nbsp;present&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-np_block"><strong>np_block</strong></a>(self, arrays)</dt><dd><tt>Assemble&nbsp;an&nbsp;array&nbsp;from&nbsp;nested&nbsp;lists&nbsp;of&nbsp;blocks&nbsp;given&nbsp;by&nbsp;arrays.<br>
 &nbsp;<br>
@@ -385,8 +440,8 @@ Default&nbsp;axis&nbsp;is&nbsp;0.</tt></dd></dl>
 <dl><dt><a name="Runtime-np_dstack"><strong>np_dstack</strong></a>(self, tup)</dt><dd><tt>Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;depth&nbsp;wise&nbsp;(along&nbsp;third&nbsp;axis).<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;concatenation&nbsp;along&nbsp;the&nbsp;third&nbsp;axis<br>
-after&nbsp;2-D&nbsp;arrays&nbsp;of&nbsp;shape&nbsp;(M,N)&nbsp;have&nbsp;been&nbsp;reshaped&nbsp;to<br>
-(M,N,1)&nbsp;and&nbsp;1-D&nbsp;arrays&nbsp;of&nbsp;shape&nbsp;(N,)&nbsp;have&nbsp;been&nbsp;reshaped<br>
+after&nbsp;2D&nbsp;arrays&nbsp;of&nbsp;shape&nbsp;(M,N)&nbsp;have&nbsp;been&nbsp;reshaped&nbsp;to<br>
+(M,N,1)&nbsp;and&nbsp;1D&nbsp;arrays&nbsp;of&nbsp;shape&nbsp;(N,)&nbsp;have&nbsp;been&nbsp;reshaped<br>
 to&nbsp;(1,N,1).&nbsp;Rebuilds&nbsp;arrays&nbsp;divided&nbsp;by&nbsp;dsplit.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-np_equal"><strong>np_equal</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;==&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</tt></dd></dl>
@@ -412,7 +467,7 @@ Columns&nbsp;are&nbsp;preserved,&nbsp;but&nbsp;appear&nbsp;in&nbsp;a&nbsp;differ
 <dl><dt><a name="Runtime-np_hstack"><strong>np_hstack</strong></a>(self, tup)</dt><dd><tt>Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;horizontally&nbsp;(column&nbsp;wise).<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;concatenation&nbsp;along&nbsp;the&nbsp;second&nbsp;axis,<br>
-except&nbsp;for&nbsp;1-D&nbsp;arrays&nbsp;where&nbsp;it&nbsp;concatenates&nbsp;along&nbsp;the&nbsp;first<br>
+except&nbsp;for&nbsp;1D&nbsp;arrays&nbsp;where&nbsp;it&nbsp;concatenates&nbsp;along&nbsp;the&nbsp;first<br>
 axis.&nbsp;Rebuilds&nbsp;arrays&nbsp;divided&nbsp;by&nbsp;hsplit.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-np_is_zero_public"><strong>np_is_zero_public</strong></a>(self, a) -&gt; _asyncio.Future</dt><dd><tt>Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a,&nbsp;elementwise.</tt></dd></dl>
@@ -443,7 +498,7 @@ Input&nbsp;arrays&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;flattened&nbsp;if&nbsp;no
 
 <dl><dt><a name="Runtime-np_prod"><strong>np_prod</strong></a>(self, a, axis=None)</dt><dd><tt>Secure&nbsp;product&nbsp;of&nbsp;array&nbsp;elements&nbsp;over&nbsp;a&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).</tt></dd></dl>
 
-<dl><dt><a name="Runtime-np_random_bits"><strong>np_random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><tt>Return&nbsp;shape-(n,)&nbsp;secure&nbsp;array&nbsp;of&nbsp;given&nbsp;type&nbsp;with&nbsp;uniformly&nbsp;random&nbsp;bits.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_random_bits"><strong>np_random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><tt>Return&nbsp;shape-(n,)&nbsp;secure&nbsp;array&nbsp;with&nbsp;uniformly&nbsp;random&nbsp;bits&nbsp;of&nbsp;given&nbsp;type.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-np_reciprocal"><strong>np_reciprocal</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;reciprocal&nbsp;(multiplicative&nbsp;field&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;nonzero&nbsp;a.</tt></dd></dl>
 
@@ -500,7 +555,7 @@ The&nbsp;nested&nbsp;list&nbsp;is&nbsp;a.ndim&nbsp;levels&nbsp;deep&nbsp;(scalar
 <dl><dt><a name="Runtime-np_transpose"><strong>np_transpose</strong></a>(self, a, axes=None)</dt><dd><tt>Reverse&nbsp;(default)&nbsp;or&nbsp;permute&nbsp;the&nbsp;axes&nbsp;of&nbsp;array&nbsp;a.<br>
 &nbsp;<br>
 For&nbsp;2D&nbsp;arrays,&nbsp;default&nbsp;result&nbsp;is&nbsp;the&nbsp;usual&nbsp;matrix&nbsp;transpose.<br>
-Parameter&nbsp;axes&nbsp;can&nbsp;be&nbsp;any&nbsp;permutation&nbsp;of&nbsp;0,...,n-1&nbsp;for&nbsp;nD&nbsp;array&nbsp;a.</tt></dd></dl>
+Parameter&nbsp;axes&nbsp;can&nbsp;be&nbsp;any&nbsp;permutation&nbsp;of&nbsp;0,...,n-1&nbsp;for&nbsp;n-dimensional&nbsp;array&nbsp;a.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-np_trunc"><strong>np_trunc</strong></a>(self, a, f=None, l=None)</dt><dd><tt>Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;a.<br>
 &nbsp;<br>
@@ -512,12 +567,13 @@ Unit&nbsp;vector&nbsp;returned&nbsp;as&nbsp;secure&nbsp;NumPy&nbsp;array.<br>
 &nbsp;<br>
 NB:&nbsp;Value&nbsp;of&nbsp;a&nbsp;is&nbsp;reduced&nbsp;modulo&nbsp;n&nbsp;(almost&nbsp;for&nbsp;free).</tt></dd></dl>
 
-<dl><dt><a name="Runtime-np_update"><strong>np_update</strong></a>(self, a, key, value)</dt><dd><tt>Return&nbsp;secure&nbsp;array&nbsp;a&nbsp;modified&nbsp;by&nbsp;update&nbsp;a[key]=value.<br>
+<dl><dt><a name="Runtime-np_update"><strong>np_update</strong></a>(self, a, key, value)</dt><dd><tt>Return&nbsp;secure&nbsp;array&nbsp;modified&nbsp;by&nbsp;update&nbsp;a[key]=value.<br>
 &nbsp;<br>
 Also&nbsp;value&nbsp;can&nbsp;be&nbsp;a&nbsp;secure&nbsp;array&nbsp;or&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
 But&nbsp;key&nbsp;is&nbsp;in&nbsp;the&nbsp;clear.<br>
 &nbsp;<br>
-Differs&nbsp;from&nbsp;__setitem__()&nbsp;which&nbsp;works&nbsp;in-place,&nbsp;returning&nbsp;None.</tt></dd></dl>
+Differs&nbsp;from&nbsp;__setitem__()&nbsp;which&nbsp;works&nbsp;in-place,&nbsp;returning&nbsp;None.<br>
+MUST&nbsp;be&nbsp;used&nbsp;as&nbsp;follows:&nbsp;a&nbsp;=&nbsp;<a href="#Runtime-np_update">np_update</a>(a,&nbsp;key,&nbsp;value).</tt></dd></dl>
 
 <dl><dt><a name="Runtime-np_vsplit"><strong>np_vsplit</strong></a>(self, ary, indices_or_sections)</dt><dd><tt>Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;vertically&nbsp;(row-wise).</tt></dd></dl>
 
@@ -559,7 +615,7 @@ Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</tt></dd></dl>
 
 <dl><dt><a name="Runtime-random_bit"><strong>random_bit</strong></a>(self, stype, signed=False)</dt><dd><tt>Secure&nbsp;uniformly&nbsp;random&nbsp;bit&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
 
-<dl><dt><a name="Runtime-random_bits"><strong>random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><tt>n&nbsp;secure&nbsp;uniformly&nbsp;random&nbsp;bits&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
+<dl><dt><a name="Runtime-random_bits"><strong>random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><tt>Return&nbsp;n&nbsp;secure&nbsp;uniformly&nbsp;random&nbsp;bits&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-reciprocal"><strong>reciprocal</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;reciprocal&nbsp;(multiplicative&nbsp;field&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;nonzero&nbsp;a.</tt></dd></dl>
 
@@ -568,6 +624,8 @@ Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</tt></dd></dl>
 <dl><dt><a name="Runtime-scalar_mul"><strong>scalar_mul</strong></a>(self, a, x)</dt><dd><tt>Secure&nbsp;scalar&nbsp;multiplication&nbsp;of&nbsp;scalar&nbsp;a&nbsp;with&nbsp;vector&nbsp;x.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-schur_prod"><strong>schur_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;entrywise&nbsp;multiplication&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-set_protocol"><strong>set_protocol</strong></a>(self, peer_pid, protocol)</dt></dl>
 
 <dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, l=None, LT=False, EQ=False)</dt><dd><tt>Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;return&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.<br>
 &nbsp;<br>
@@ -582,6 +640,16 @@ return&nbsp;1&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;t
 <dl><dt>async <a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
 &nbsp;<br>
 Close&nbsp;all&nbsp;connections,&nbsp;if&nbsp;any.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-sin"><strong>sin</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;sine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-sincos"><strong>sincos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;sine&nbsp;and&nbsp;cosine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.<br>
+&nbsp;<br>
+See&nbsp;"New&nbsp;Approach&nbsp;for&nbsp;Sine&nbsp;and&nbsp;Cosine&nbsp;in&nbsp;Secure&nbsp;Fixed-Point&nbsp;Arithmetic"<br>
+by&nbsp;Stan&nbsp;Korzilius&nbsp;and&nbsp;Berry&nbsp;Schoenmakers,&nbsp;which&nbsp;appeared&nbsp;in&nbsp;the&nbsp;proceedings<br>
+of&nbsp;CSCML&nbsp;2023,&nbsp;7th&nbsp;International&nbsp;Symposium&nbsp;on&nbsp;Cyber&nbsp;Security,&nbsp;Cryptology<br>
+and&nbsp;Machine&nbsp;Learning,&nbsp;LNCS&nbsp;13914,&nbsp;pp.&nbsp;307-319,&nbsp;Springer&nbsp;(see<br>
+<a href="https://doi.org/10.1007/978-3-031-34671-2">https://doi.org/10.1007/978-3-031-34671-2</a>).</tt></dd></dl>
 
 <dl><dt><a name="Runtime-sorted"><strong>sorted</strong></a>(self, x, key=None, reverse=False)</dt><dd><tt>Return&nbsp;a&nbsp;new&nbsp;securely&nbsp;sorted&nbsp;list&nbsp;with&nbsp;elements&nbsp;from&nbsp;x&nbsp;in&nbsp;ascending&nbsp;order.<br>
 &nbsp;<br>
@@ -600,6 +668,8 @@ Open&nbsp;connections&nbsp;with&nbsp;other&nbsp;parties,&nbsp;if&nbsp;any.</tt><
 <dl><dt><a name="Runtime-sub"><strong>sub</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
 
 <dl><dt><a name="Runtime-sum"><strong>sum</strong></a>(self, x, start=0)</dt><dd><tt>Secure&nbsp;sum&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-sum">sum</a>().</tt></dd></dl>
+
+<dl><dt><a name="Runtime-tan"><strong>tan</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;tangent&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</tt></dd></dl>
 
 <dl><dt>async <a name="Runtime-throttler"><strong>throttler</strong></a>(self, load_percentage=1.0, name=None)</dt><dd><tt>Throttle&nbsp;runtime&nbsp;by&nbsp;given&nbsp;percentage&nbsp;(default&nbsp;1.0),&nbsp;using&nbsp;optional&nbsp;name&nbsp;for&nbsp;barrier.</tt></dd></dl>
 
@@ -633,6 +703,8 @@ Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f&nbsp;for&nbsp;a&nbsp
 <dl><dt><a name="Runtime-unit_vector"><strong>unit_vector</strong></a>(self, a, n)</dt><dd><tt>Length-n&nbsp;unit&nbsp;vector&nbsp;[0]*a&nbsp;+&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1-a)&nbsp;for&nbsp;secret&nbsp;a,&nbsp;assuming&nbsp;0&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;n.<br>
 &nbsp;<br>
 NB:&nbsp;If&nbsp;a&nbsp;=&nbsp;n,&nbsp;unit&nbsp;vector&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1)&nbsp;is&nbsp;returned.&nbsp;See&nbsp;mpyc.statistics.</tt></dd></dl>
+
+<dl><dt><a name="Runtime-unset_protocol"><strong>unset_protocol</strong></a>(self, peer_pid)</dt></dl>
 
 <dl><dt><a name="Runtime-vector_add"><strong>vector_add</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
 
@@ -718,7 +790,7 @@ SchnorrGroup(p=None,&nbsp;q=None,&nbsp;g=None,&nbsp;l=None,&nbsp;n=None):<br>
 &nbsp;<br>
 Create&nbsp;type&nbsp;for&nbsp;Schnorr&nbsp;group&nbsp;of&nbsp;odd&nbsp;prime&nbsp;order&nbsp;q.<br>
 &nbsp;<br>
-If&nbsp;q&nbsp;is&nbsp;not&nbsp;given,&nbsp;q&nbsp;will&nbsp;be&nbsp;the&nbsp;smallest&nbsp;n-bit&nbsp;prime,&nbsp;n&gt;=2.<br>
+If&nbsp;q&nbsp;is&nbsp;not&nbsp;given,&nbsp;q&nbsp;will&nbsp;be&nbsp;the&nbsp;largest&nbsp;n-bit&nbsp;prime,&nbsp;n&gt;=2.<br>
 If&nbsp;p&nbsp;is&nbsp;not&nbsp;given,&nbsp;p&nbsp;will&nbsp;be&nbsp;the&nbsp;least&nbsp;l-bit&nbsp;prime,&nbsp;l&gt;n,&nbsp;such&nbsp;that&nbsp;q&nbsp;divides&nbsp;p-1.<br>
 &nbsp;<br>
 If&nbsp;l&nbsp;and/or&nbsp;n&nbsp;are&nbsp;not&nbsp;given,&nbsp;default&nbsp;bit&nbsp;lengths&nbsp;will&nbsp;be&nbsp;set&nbsp;(2&lt;=n&lt;l).</tt></dd></dl>
@@ -786,7 +858,7 @@ demanding&nbsp;performance-wise&nbsp;(due&nbsp;to&nbsp;dependence&nbsp;on&nbsp;s
 
 <dl><dt><strong>SecureNumber</strong> = &lt;class 'mpyc.sectypes.SecureNumber'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;numbers.</tt></dl>
 
-<dl><dt><strong>SecureObject</strong> = &lt;class 'mpyc.sectypes.SecureObject'&gt;<dd><tt>A&nbsp;secret-shared&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
+<dl><dt><strong>SecureObject</strong> = &lt;class 'mpyc.asyncoro.SecureObject'&gt;<dd><tt>A&nbsp;secret-shared&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
 &nbsp;<br>
 An&nbsp;MPC&nbsp;protocol&nbsp;operates&nbsp;on&nbsp;secret-shared&nbsp;objects&nbsp;of&nbsp;type&nbsp;SecureObject.<br>
 The&nbsp;basic&nbsp;Python&nbsp;operators&nbsp;are&nbsp;overloaded&nbsp;by&nbsp;SecureObject&nbsp;classes.<br>
@@ -840,7 +912,7 @@ a&nbsp;strict&nbsp;but&nbsp;less&nbsp;efficient&nbsp;approach.<br>
 If&nbsp;these&nbsp;functions&nbsp;are&nbsp;called&nbsp;with&nbsp;plain&nbsp;data,&nbsp;the&nbsp;call&nbsp;is&nbsp;relayed&nbsp;to&nbsp;the&nbsp;corresponding<br>
 function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</tt></dl>
 
-<dl><dt><strong>version</strong> = '0.9'</dl>
+<dl><dt><strong>version</strong> = '0.10'</dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">

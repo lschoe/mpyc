@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.mpctools</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/mpctools.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/mpctools.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/mpctools.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/mpctools.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;currently&nbsp;provides&nbsp;alternative&nbsp;implementations&nbsp;for&nbsp;two<br>
 functions&nbsp;in&nbsp;Python's&nbsp;itertools&nbsp;and&nbsp;functools&nbsp;modules,&nbsp;respectively.<br>
 &nbsp;<br>
@@ -32,21 +32,21 @@ time&nbsp;complexity,&nbsp;and&nbsp;communication&nbsp;complexity.</tt></p>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-accumulate"><strong>accumulate</strong></a>(x, f=&lt;built-in function add&gt;, iv=None)</dt><dd><tt>For&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments,&nbsp;make&nbsp;an&nbsp;iterator&nbsp;that&nbsp;returns<br>
+<td width="100%"><dl><dt><a name="-accumulate"><strong>accumulate</strong></a>(x, f=&lt;built-in function add&gt;, initial=&lt;no value&gt;)</dt><dd><tt>For&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments,&nbsp;make&nbsp;an&nbsp;iterator&nbsp;that&nbsp;returns<br>
 the&nbsp;accumulated&nbsp;results&nbsp;over&nbsp;all&nbsp;(nonempty)&nbsp;prefixes&nbsp;of&nbsp;the&nbsp;given&nbsp;iterable&nbsp;x.<br>
 &nbsp;<br>
 The&nbsp;applications&nbsp;of&nbsp;f&nbsp;are&nbsp;arranged&nbsp;such&nbsp;that&nbsp;the&nbsp;maximum&nbsp;depth&nbsp;is&nbsp;logarithmic<br>
-in&nbsp;the&nbsp;number&nbsp;of&nbsp;elements&nbsp;of&nbsp;x,&nbsp;at&nbsp;the&nbsp;cost&nbsp;of&nbsp;increasing&nbsp;the&nbsp;total&nbsp;number&nbsp;of<br>
-applications&nbsp;of&nbsp;f&nbsp;by&nbsp;a&nbsp;logarithmic&nbsp;factor&nbsp;as&nbsp;well.<br>
+in&nbsp;the&nbsp;number&nbsp;of&nbsp;elements&nbsp;of&nbsp;x,&nbsp;potentially&nbsp;at&nbsp;the&nbsp;cost&nbsp;of&nbsp;increasing&nbsp;the&nbsp;total<br>
+number&nbsp;of&nbsp;applications&nbsp;of&nbsp;f&nbsp;by&nbsp;a&nbsp;logarithmic&nbsp;factor&nbsp;as&nbsp;well.<br>
 &nbsp;<br>
 In&nbsp;contrast,&nbsp;Python's&nbsp;itertools.<a href="#-accumulate">accumulate</a>()&nbsp;higher-order&nbsp;function&nbsp;arranges<br>
 the&nbsp;applications&nbsp;of&nbsp;f&nbsp;in&nbsp;a&nbsp;linear&nbsp;fashion,&nbsp;as&nbsp;in&nbsp;general&nbsp;it&nbsp;cannot&nbsp;be&nbsp;assumed<br>
 that&nbsp;f&nbsp;is&nbsp;associative&nbsp;(and&nbsp;that&nbsp;the&nbsp;arguments&nbsp;to&nbsp;f&nbsp;are&nbsp;even&nbsp;of&nbsp;the&nbsp;same&nbsp;type).<br>
 &nbsp;<br>
-If&nbsp;iv&nbsp;is&nbsp;provided,&nbsp;the&nbsp;accumulation&nbsp;leads&nbsp;off&nbsp;with&nbsp;this&nbsp;initial&nbsp;value&nbsp;so&nbsp;that<br>
-the&nbsp;output&nbsp;has&nbsp;one&nbsp;more&nbsp;element&nbsp;than&nbsp;the&nbsp;input&nbsp;iterable.&nbsp;Otherwise,&nbsp;the&nbsp;number<br>
-of&nbsp;elements&nbsp;output&nbsp;matches&nbsp;the&nbsp;input&nbsp;iterable&nbsp;x.</tt></dd></dl>
- <dl><dt><a name="-reduce"><strong>reduce</strong></a>(f, x, iv=None)</dt><dd><tt>Apply&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments&nbsp;to&nbsp;the&nbsp;items&nbsp;of&nbsp;iterable&nbsp;x.<br>
+If&nbsp;initial&nbsp;is&nbsp;provided&nbsp;(possibly&nbsp;equal&nbsp;to&nbsp;None),&nbsp;the&nbsp;accumulation&nbsp;leads&nbsp;off<br>
+with&nbsp;this&nbsp;initial&nbsp;value&nbsp;so&nbsp;that&nbsp;the&nbsp;output&nbsp;has&nbsp;one&nbsp;more&nbsp;element&nbsp;than&nbsp;the&nbsp;input<br>
+iterable.&nbsp;Otherwise,&nbsp;the&nbsp;number&nbsp;of&nbsp;elements&nbsp;output&nbsp;matches&nbsp;the&nbsp;input&nbsp;iterable&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-reduce"><strong>reduce</strong></a>(f, x, initial=&lt;no value&gt;)</dt><dd><tt>Apply&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments&nbsp;to&nbsp;the&nbsp;items&nbsp;of&nbsp;iterable&nbsp;x.<br>
 &nbsp;<br>
 The&nbsp;applications&nbsp;of&nbsp;f&nbsp;are&nbsp;arranged&nbsp;in&nbsp;a&nbsp;binary&nbsp;tree&nbsp;of&nbsp;logarithmic&nbsp;depth,<br>
 thus&nbsp;limiting&nbsp;the&nbsp;overall&nbsp;round&nbsp;complexity&nbsp;of&nbsp;the&nbsp;secure&nbsp;computation.<br>
@@ -56,8 +56,15 @@ the&nbsp;applications&nbsp;of&nbsp;f&nbsp;in&nbsp;a&nbsp;linear&nbsp;chain&nbsp;
 and&nbsp;in&nbsp;this&nbsp;case&nbsp;f&nbsp;is&nbsp;not&nbsp;required&nbsp;to&nbsp;be&nbsp;associative;&nbsp;the&nbsp;arguments&nbsp;to&nbsp;f<br>
 may&nbsp;even&nbsp;be&nbsp;of&nbsp;different&nbsp;types.<br>
 &nbsp;<br>
-If&nbsp;iv&nbsp;is&nbsp;provided,&nbsp;it&nbsp;is&nbsp;placed&nbsp;before&nbsp;the&nbsp;items&nbsp;of&nbsp;x&nbsp;(hence&nbsp;effectively<br>
-serves&nbsp;as&nbsp;a&nbsp;default&nbsp;when&nbsp;x&nbsp;is&nbsp;empty).&nbsp;If&nbsp;iv&nbsp;is&nbsp;not&nbsp;given&nbsp;and&nbsp;x&nbsp;contains<br>
-only&nbsp;one&nbsp;item,&nbsp;that&nbsp;item&nbsp;is&nbsp;returned.</tt></dd></dl>
-</td></tr></table>
+If&nbsp;initial&nbsp;is&nbsp;provided&nbsp;(possibly&nbsp;equal&nbsp;to&nbsp;None),&nbsp;it&nbsp;is&nbsp;placed&nbsp;before&nbsp;the<br>
+items&nbsp;of&nbsp;x&nbsp;(hence&nbsp;effectively&nbsp;serves&nbsp;as&nbsp;a&nbsp;default&nbsp;when&nbsp;x&nbsp;is&nbsp;empty).&nbsp;If&nbsp;no<br>
+initial&nbsp;value&nbsp;is&nbsp;given&nbsp;and&nbsp;x&nbsp;contains&nbsp;only&nbsp;one&nbsp;item,&nbsp;that&nbsp;item&nbsp;is&nbsp;returned.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>runtime</strong> = None</td></tr></table>
 </body></html>

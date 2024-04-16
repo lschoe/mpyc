@@ -4,7 +4,7 @@ and computation of secret-shared values.
 
 import sys
 import traceback
-from struct import pack, unpack_from
+import struct
 import functools
 import typing
 from asyncio import Protocol, Future, Task
@@ -60,7 +60,7 @@ class MessageExchanger(Protocol):
          3. payload (byte string of length payload_size).
         """
         payload_size = len(payload)
-        self.transport.write(pack(f'<qI{payload_size}s', pc, payload_size, payload))
+        self.transport.write(struct.pack(f'<qI{payload_size}s', pc, payload_size, payload))
         self.nbytes_sent += 12 + payload_size
 
     def data_received(self, data):
@@ -93,11 +93,11 @@ class MessageExchanger(Protocol):
             rt.set_protocol(self.peer_pid, self)
 
         while len(data) >= 12:
-            pc, payload_size = unpack_from('<qI', data)
+            pc, payload_size = struct.unpack_from('<qI', data)
             len_packet = payload_size + 12
             if len(data) < len_packet:
                 break
-            payload = unpack_from(f'{payload_size}s', data, 12)[0]
+            payload = struct.unpack_from(f'{payload_size}s', data, 12)[0]
             del data[:len_packet]
             if pc in self.buffers:
                 self.buffers.pop(pc).set_result(payload)

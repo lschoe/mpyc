@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.gmpy</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/gmpy.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/gmpy.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/gmpy.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/gmpy.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;collects&nbsp;all&nbsp;gmpy2&nbsp;functions&nbsp;used&nbsp;by&nbsp;MPyC.<br>
 &nbsp;<br>
 Stubs&nbsp;only&nbsp;using&nbsp;Python&nbsp;built-ins&nbsp;are&nbsp;provided&nbsp;in&nbsp;case&nbsp;the&nbsp;gmpy2&nbsp;package&nbsp;is&nbsp;not&nbsp;available.<br>
@@ -70,6 +70,7 @@ Return&nbsp;the&nbsp;next&nbsp;_probable_&nbsp;prime&nbsp;number&nbsp;&gt;&nbsp;
 &nbsp;<br>
 Return&nbsp;(x**y)&nbsp;mod&nbsp;m.&nbsp;Same&nbsp;as&nbsp;the&nbsp;three&nbsp;argument&nbsp;version&nbsp;of&nbsp;Python's<br>
 built-in&nbsp;pow(),&nbsp;but&nbsp;converts&nbsp;all&nbsp;three&nbsp;arguments&nbsp;to&nbsp;mpz.</tt></dd></dl>
+ <dl><dt><a name="-prev_prime"><strong>prev_prime</strong></a>(x)</dt><dd><tt>Return&nbsp;the&nbsp;greatest&nbsp;probable&nbsp;prime&nbsp;number&nbsp;&lt;&nbsp;x,&nbsp;if&nbsp;any.</tt></dd></dl>
  <dl><dt><a name="-ratrec"><strong>ratrec</strong></a>(x, y, N=None, D=None)</dt><dd><tt>Return&nbsp;rational&nbsp;reconstruction&nbsp;(n,&nbsp;d)&nbsp;of&nbsp;x&nbsp;modulo&nbsp;y.<br>
 That&nbsp;is,&nbsp;&nbsp;n/d&nbsp;=&nbsp;x&nbsp;(mod&nbsp;y)&nbsp;with&nbsp;-N&nbsp;&lt;=&nbsp;n&nbsp;&lt;=&nbsp;N&nbsp;and&nbsp;0&nbsp;&lt;&nbsp;d&nbsp;&lt;=&nbsp;D,<br>
 provided&nbsp;2*N*D&nbsp;&lt;&nbsp;y.<br>

@@ -798,7 +798,7 @@ class FiniteFieldArray:
                 a = cls(a)
         elif isinstance(a, list):
             # for func like vsplit returning list of arrays
-            a = list(map(cls, a))
+            a = list(map(lambda _: cls(_, check=False), a))
         elif isinstance(a, bool) or a is np.True_ or a is np.False_:
             pass
         elif func.__name__.startswith('atleast_'):

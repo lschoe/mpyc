@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.secgroups</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.9/mpyc/secgroups.py">github.com/lschoe/mpyc/blob/v0.9/mpyc/secgroups.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/secgroups.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/secgroups.py</a></font></td></tr></table>
     <p><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;(secret-shared)&nbsp;types&nbsp;of&nbsp;finite&nbsp;groups&nbsp;in&nbsp;MPyC.<br>
 &nbsp;<br>
 Secure&nbsp;versions&nbsp;of&nbsp;all&nbsp;groups&nbsp;supported&nbsp;by&nbsp;the&nbsp;module&nbsp;mpyc.fingroups&nbsp;are&nbsp;available:<br>
@@ -35,7 +35,7 @@ symmetric&nbsp;groups,&nbsp;quadratic&nbsp;residues,&nbsp;elliptic&nbsp;curve&nb
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)
+<dt><font face="helvetica, arial"><a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)
 </font></dt><dd>
 <dl>
 <dt><font face="helvetica, arial"><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a>
@@ -65,7 +65,7 @@ Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;class
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.secgroups.html#SecureClassGroupForm">SecureClassGroupForm</a></dd>
 <dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
-<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
@@ -78,7 +78,7 @@ Enforce&nbsp;value&nbsp;is&nbsp;a&nbsp;tuple.</tt></dd></dl>
 
 <dl><dt><a name="SecureClassGroupForm-set_share"><strong>set_share</strong></a>(self, value)</dt><dd><tt>Set&nbsp;share&nbsp;to&nbsp;the&nbsp;given&nbsp;value.<br>
 &nbsp;<br>
-The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>),<br>
+The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.asyncoro.html#SecureObject">SecureObject</a>),<br>
 using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbsp;are&nbsp;not&nbsp;yet&nbsp;done.</tt></dd></dl>
 
 <hr>
@@ -156,7 +156,7 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 <dl><dt><strong>identity</strong> = None</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Methods inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><a name="SecureClassGroupForm-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
 &nbsp;<br>
 To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
@@ -172,15 +172,9 @@ Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&n
 Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Data descriptors inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
-<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
-
-<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -195,7 +189,7 @@ Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;ellip
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.secgroups.html#SecureEllipticCurvePoint">SecureEllipticCurvePoint</a></dd>
 <dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
-<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
@@ -210,7 +204,7 @@ Enforce&nbsp;value&nbsp;is&nbsp;a&nbsp;tuple.</tt></dd></dl>
 
 <dl><dt><a name="SecureEllipticCurvePoint-set_share"><strong>set_share</strong></a>(self, value)</dt><dd><tt>Set&nbsp;share&nbsp;to&nbsp;the&nbsp;given&nbsp;value.<br>
 &nbsp;<br>
-The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>),<br>
+The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.asyncoro.html#SecureObject">SecureObject</a>),<br>
 using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbsp;are&nbsp;not&nbsp;yet&nbsp;done.</tt></dd></dl>
 
 <hr>
@@ -288,7 +282,7 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 <dl><dt><strong>identity</strong> = None</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Methods inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><a name="SecureEllipticCurvePoint-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
 &nbsp;<br>
 To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
@@ -304,20 +298,14 @@ Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&n
 Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Data descriptors inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
-<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
-
-<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="SecureFiniteGroup">class <strong>SecureFiniteGroup</strong></a>(<a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="SecureFiniteGroup">class <strong>SecureFiniteGroup</strong></a>(<a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#SecureFiniteGroup">SecureFiniteGroup</a>(value=None)<br>
@@ -326,7 +314,7 @@ Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;fin
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
-<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
@@ -398,7 +386,7 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>identity</strong> = None</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Methods inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><a name="SecureFiniteGroup-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
 &nbsp;<br>
 To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
@@ -415,24 +403,18 @@ Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 
 <dl><dt><a name="SecureFiniteGroup-__init__"><strong>__init__</strong></a>(self, value=None)</dt><dd><tt>Initialize&nbsp;share.<br>
 &nbsp;<br>
-If&nbsp;value&nbsp;is&nbsp;None&nbsp;(default),&nbsp;the&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>&nbsp;starts&nbsp;out&nbsp;as&nbsp;an&nbsp;empty<br>
+If&nbsp;value&nbsp;is&nbsp;None&nbsp;(default),&nbsp;the&nbsp;<a href="mpyc.asyncoro.html#SecureObject">SecureObject</a>&nbsp;starts&nbsp;out&nbsp;as&nbsp;an&nbsp;empty<br>
 placeholder&nbsp;(implemented&nbsp;as&nbsp;a&nbsp;Future).</tt></dd></dl>
 
 <dl><dt><a name="SecureFiniteGroup-set_share"><strong>set_share</strong></a>(self, value)</dt><dd><tt>Set&nbsp;share&nbsp;to&nbsp;the&nbsp;given&nbsp;value.<br>
 &nbsp;<br>
-The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>),<br>
+The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.asyncoro.html#SecureObject">SecureObject</a>),<br>
 using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbsp;are&nbsp;not&nbsp;yet&nbsp;done.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Data descriptors inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
-<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
-
-<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -447,7 +429,7 @@ Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;quadr
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.secgroups.html#SecureQuadraticResidue">SecureQuadraticResidue</a></dd>
 <dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
-<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
@@ -456,7 +438,7 @@ Methods defined here:<br>
 
 <dl><dt><a name="SecureQuadraticResidue-set_share"><strong>set_share</strong></a>(self, value)</dt><dd><tt>Set&nbsp;share&nbsp;to&nbsp;the&nbsp;given&nbsp;value.<br>
 &nbsp;<br>
-The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>),<br>
+The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.asyncoro.html#SecureObject">SecureObject</a>),<br>
 using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbsp;are&nbsp;not&nbsp;yet&nbsp;done.</tt></dd></dl>
 
 <hr>
@@ -534,7 +516,7 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 <dl><dt><strong>identity</strong> = None</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Methods inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><a name="SecureQuadraticResidue-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
 &nbsp;<br>
 To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
@@ -550,15 +532,9 @@ Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&n
 Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Data descriptors inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
-<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
-
-<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -573,7 +549,7 @@ Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;Schno
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.secgroups.html#SecureSchnorrGroupElement">SecureSchnorrGroupElement</a></dd>
 <dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
-<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
@@ -582,7 +558,7 @@ Methods defined here:<br>
 
 <dl><dt><a name="SecureSchnorrGroupElement-set_share"><strong>set_share</strong></a>(self, value)</dt><dd><tt>Set&nbsp;share&nbsp;to&nbsp;the&nbsp;given&nbsp;value.<br>
 &nbsp;<br>
-The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>),<br>
+The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.asyncoro.html#SecureObject">SecureObject</a>),<br>
 using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbsp;are&nbsp;not&nbsp;yet&nbsp;done.</tt></dd></dl>
 
 <hr>
@@ -660,7 +636,7 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 <dl><dt><strong>identity</strong> = None</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Methods inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><a name="SecureSchnorrGroupElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
 &nbsp;<br>
 To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
@@ -676,15 +652,9 @@ Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&n
 Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Data descriptors inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
-<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
-
-<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -699,7 +669,7 @@ Common&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;symme
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.secgroups.html#SecureSymmetricGroupElement">SecureSymmetricGroupElement</a></dd>
 <dd><a href="mpyc.secgroups.html#SecureFiniteGroup">SecureFiniteGroup</a></dd>
-<dd><a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a></dd>
+<dd><a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
@@ -710,7 +680,7 @@ Enforce&nbsp;value&nbsp;is&nbsp;a&nbsp;tuple.</tt></dd></dl>
 
 <dl><dt><a name="SecureSymmetricGroupElement-set_share"><strong>set_share</strong></a>(self, value)</dt><dd><tt>Set&nbsp;share&nbsp;to&nbsp;the&nbsp;given&nbsp;value.<br>
 &nbsp;<br>
-The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.sectypes.html#SecureObject">SecureObject</a>),<br>
+The&nbsp;share&nbsp;is&nbsp;set&nbsp;directly&nbsp;(or&nbsp;recursively,&nbsp;for&nbsp;a&nbsp;composite&nbsp;<a href="mpyc.asyncoro.html#SecureObject">SecureObject</a>),<br>
 using&nbsp;callbacks&nbsp;if&nbsp;value&nbsp;contains&nbsp;Futures&nbsp;that&nbsp;are&nbsp;not&nbsp;yet&nbsp;done.</tt></dd></dl>
 
 <hr>
@@ -786,7 +756,7 @@ Data and other attributes inherited from <a href="mpyc.secgroups.html#SecureFini
 <dl><dt><strong>identity</strong> = None</dl>
 
 <hr>
-Methods inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Methods inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><a name="SecureSymmetricGroupElement-__array_function__"><strong>__array_function__</strong></a>(self, func, types, args, kwargs)</dt><dd><tt>Redirect&nbsp;__array_function__&nbsp;call&nbsp;to&nbsp;array&nbsp;class,&nbsp;if&nbsp;any.<br>
 &nbsp;<br>
 To&nbsp;support&nbsp;calls&nbsp;like&nbsp;np.block([[secint(9),&nbsp;-1],&nbsp;[1,&nbsp;secint(7)]]).</tt></dd></dl>
@@ -802,15 +772,9 @@ Provisional&nbsp;support&nbsp;for&nbsp;calls&nbsp;like&nbsp;np.less(secint(9),&n
 Introduced&nbsp;for&nbsp;github.com/meilof/oblif.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
+Data descriptors inherited from <a href="mpyc.asyncoro.html#SecureObject">mpyc.asyncoro.SecureObject</a>:<br>
 <dl><dt><strong>share</strong></dt>
 </dl>
-<hr>
-Data and other attributes inherited from <a href="mpyc.sectypes.html#SecureObject">mpyc.sectypes.SecureObject</a>:<br>
-<dl><dt><strong>binary_ops</strong> = {&lt;ufunc 'less'&gt;: &lt;built-in function lt&gt;, &lt;ufunc 'less_equal'&gt;: &lt;built-in function le&gt;, &lt;ufunc 'equal'&gt;: &lt;built-in function eq&gt;, &lt;ufunc 'not_equal'&gt;: &lt;built-in function ne&gt;, &lt;ufunc 'greater'&gt;: &lt;built-in function gt&gt;, &lt;ufunc 'greater_equal'&gt;: &lt;built-in function ge&gt;, &lt;ufunc 'add'&gt;: &lt;built-in function add&gt;, &lt;ufunc 'subtract'&gt;: &lt;built-in function sub&gt;, &lt;ufunc 'multiply'&gt;: &lt;built-in function mul&gt;, &lt;ufunc 'divide'&gt;: &lt;built-in function truediv&gt;, ...}</dl>
-
-<dl><dt><strong>unary_ops</strong> = {&lt;ufunc 'negative'&gt;: &lt;built-in function neg&gt;, &lt;ufunc 'positive'&gt;: &lt;built-in function pos&gt;, &lt;ufunc 'absolute'&gt;: &lt;built-in function abs&gt;}</dl>
-
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
@@ -869,7 +833,7 @@ SchnorrGroup(p=None,&nbsp;q=None,&nbsp;g=None,&nbsp;l=None,&nbsp;n=None):<br>
 &nbsp;<br>
 Create&nbsp;type&nbsp;for&nbsp;Schnorr&nbsp;group&nbsp;of&nbsp;odd&nbsp;prime&nbsp;order&nbsp;q.<br>
 &nbsp;<br>
-If&nbsp;q&nbsp;is&nbsp;not&nbsp;given,&nbsp;q&nbsp;will&nbsp;be&nbsp;the&nbsp;smallest&nbsp;n-bit&nbsp;prime,&nbsp;n&gt;=2.<br>
+If&nbsp;q&nbsp;is&nbsp;not&nbsp;given,&nbsp;q&nbsp;will&nbsp;be&nbsp;the&nbsp;largest&nbsp;n-bit&nbsp;prime,&nbsp;n&gt;=2.<br>
 If&nbsp;p&nbsp;is&nbsp;not&nbsp;given,&nbsp;p&nbsp;will&nbsp;be&nbsp;the&nbsp;least&nbsp;l-bit&nbsp;prime,&nbsp;l&gt;n,&nbsp;such&nbsp;that&nbsp;q&nbsp;divides&nbsp;p-1.<br>
 &nbsp;<br>
 If&nbsp;l&nbsp;and/or&nbsp;n&nbsp;are&nbsp;not&nbsp;given,&nbsp;default&nbsp;bit&nbsp;lengths&nbsp;will&nbsp;be&nbsp;set&nbsp;(2&lt;=n&lt;l).</tt></dd></dl>
@@ -889,5 +853,6 @@ Create&nbsp;type&nbsp;for&nbsp;symmetric&nbsp;group&nbsp;of&nbsp;degree&nbsp;n,&
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>runtime</strong> = None</td></tr></table>
+<td width="100%"><strong>__annotations__</strong> = {'SecClassGroup': &lt;class 'type'&gt;, 'SecEllipticCurve': &lt;class 'type'&gt;, 'SecQuadraticResidues': &lt;class 'type'&gt;, 'SecSchnorrGroup': &lt;class 'type'&gt;, 'SecSymmetricGroup': &lt;class 'type'&gt;}<br>
+<strong>runtime</strong> = None</td></tr></table>
 </body></html>
