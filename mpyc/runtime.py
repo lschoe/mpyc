@@ -770,6 +770,8 @@ class Runtime:
             l = l or sftype.bit_length
             if f is None:
                 f = sftype.frac_length
+            if issubclass(sftype, self.SecureFixedPoint):
+                l += f
         else:
             await self.returnType(Future)
             Zp = sftype
@@ -783,12 +785,12 @@ class Runtime:
                 s <<= 1
                 s += r_bits[f * j + i].value
             r_modf[j] = Zp(s)
-        r_divf = self._randoms(Zp, n, 1 << k + l)
+        r_divf = self._randoms(Zp, n, 1 << k + l - f)
         if self.options.no_prss:
             r_divf = await r_divf
         if issubclass(sftype, self.SecureObject):
             x = await self.gather(x)
-        c = await self.output([a + ((1 << l-1 + f) + (q.value << f) + r.value)
+        c = await self.output([a + ((1 << l-1) + (q.value << f) + r.value)
                                for a, q, r in zip(x, r_divf, r_modf)])
         c = [c.value % (1<<f) for c in c]
         y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
@@ -810,6 +812,8 @@ class Runtime:
             l = l or sftype.sectype.bit_length
             if f is None:
                 f = sftype.frac_length
+            if issubclass(sftype, self.SecureFixedPoint):
+                l += f
         else:
             await self.returnType(Future)
             Zp = sftype.field
@@ -818,14 +822,14 @@ class Runtime:
         r_bits = await self.np_random_bits(Zp, f * n)
         r_modf = np.sum(r_bits.value.reshape((n, f)) << np.arange(f), axis=1)
         r_modf = r_modf.reshape(a.shape)
-        r_divf = self._np_randoms(Zp, n, 1 << k + l)
+        r_divf = self._np_randoms(Zp, n, 1 << k + l - f)
         if self.options.no_prss:
             r_divf = await r_divf
         r_divf = r_divf.value
         r_divf = r_divf.reshape(a.shape)
         if issubclass(sftype, self.SecureObject):
             a = await self.gather(a)
-        c = await self.output(Zp.array(a.value + (1 << l-1 + f) + (r_divf << f) + r_modf))
+        c = await self.output(Zp.array(a.value + (1 << l-1) + (r_divf << f) + r_modf))
         c = c.value & ((1<<f) - 1)
         y = Zp.array(a.value + r_modf - c) >> f
         return y

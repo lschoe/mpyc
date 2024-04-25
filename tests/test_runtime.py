@@ -99,6 +99,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c @ c)), a @ a)
         np.assertEqual(mpc.run(mpc.output(c @ a)), a @ a)
         np.assertEqual(mpc.run(mpc.output(a @ c)), a @ a)
+        self.assertAlmostEqual(mpc.run(mpc.output(mpc.trunc(np.sum(np.abs(d)), 3))), 1, delta=1)
+        self.assertAlmostEqual(mpc.run(mpc.output(mpc.trunc(-np.sum(np.abs(d)), 3))), -2, delta=1)
 
         self.assertEqual(mpc.run(mpc.output(c)).dtype, object)
 
@@ -727,6 +729,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(mpc.run(mpc.output(secint(5) // 2)), 2)
         self.assertEqual(mpc.run(mpc.output(secint(50) // 2)), 25)
         self.assertEqual(mpc.run(mpc.output(secint(50) // 4)), 12)
+        self.assertAlmostEqual(mpc.run(mpc.output(mpc.trunc(secint(50), 2))), 12, delta=1)
+        self.assertAlmostEqual(mpc.run(mpc.output(mpc.trunc(secint(-50), 2))), -13, delta=1)
         self.assertEqual(mpc.run(mpc.output(secint(11) << 3)), 88)
         self.assertEqual(mpc.run(mpc.output(secint(-11) << 3)), -88)
         self.assertEqual(mpc.run(mpc.output(secint(70) >> 2)), 17)
