@@ -108,7 +108,7 @@ async def random_derangement(n):                  # returns list of n secint ele
 # 
 # 4. `mpc.returnType(rettype)` to define the return type of an MPyC coroutine.
 # 
-# We have defined function `random_derangement` as a coroutine because from its body we call function `mpc.is_zero_public`, which is also a coroutine, and we need its the result to follow the correct branch of the `if` statement. The execution of `random_derangement` is suspended at the `await` keyword, and will be resumed once the result `mpc.is_zero_public(t)` is available.
+# We have defined function `random_derangement` as a coroutine because from its body we call function `mpc.is_zero_public`, which is also a coroutine, and we need the result to follow the correct branch of the `if` statement. The execution of `random_derangement` is suspended at the `await` keyword, and will be resumed once the result `mpc.is_zero_public(t)` is available.
 # 
 # ## Random permutations from random unit vectors
 # 

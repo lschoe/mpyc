@@ -1,0 +1,9 @@
+coverage:
+  status:
+    patch:
+      default:
+        threshold: 10%
+        only_pulls: true
+    project:
+      default:
+        threshold: 1%
