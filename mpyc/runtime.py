@@ -2815,6 +2815,21 @@ class Runtime:
         return self.np_concatenate((arr, values), axis=axis)
 
     @asyncoro.mpc_coro_no_pc
+    async def np_flip(self, a, axis=None):
+        """Reverse the order of elements in an array along the given axis.
+
+        The shape of the array is preserved, but the elements are reordered.
+        """
+        stype = type(a)
+        if issubclass(stype, self.SecureFixedPointArray):
+            rettype = (stype, a.integral, a.shape)
+        else:
+            rettype = (stype, a.shape)
+        await self.returnType(rettype)
+        a = await self.gather(a)
+        return np.flip(a)
+
+    @asyncoro.mpc_coro_no_pc
     async def np_fliplr(self, a):
         """Reverse the order of elements along axis 1 (left/right).
 
@@ -2829,6 +2844,65 @@ class Runtime:
         await self.returnType(rettype)
         a = await self.gather(a)
         return np.fliplr(a)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_flipud(self, a):
+        """Reverse the order of elements along axis 0 (up/down).
+
+        For a 2D array, this flips the entries in each column in the up/down direction.
+        Rows are preserved, but appear in a different order than before.
+        """
+        stype = type(a)
+        if issubclass(stype, self.SecureFixedPointArray):
+            rettype = (stype, a.integral, a.shape)
+        else:
+            rettype = (stype, a.shape)
+        await self.returnType(rettype)
+        a = await self.gather(a)
+        return np.flipud(a)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_roll(self, a, shift, axis=None):
+        """Roll array elements (cyclically) along a given axis.
+
+        If axis is None (default), array is flattened before cyclic shift,
+        and original shape is restored afterwards.
+        """
+        stype = type(a)
+        if issubclass(stype, self.SecureFixedPointArray):
+            rettype = (stype, a.integral, a.shape)
+        else:
+            rettype = (stype, a.shape)
+        await self.returnType(rettype)
+        a = await self.gather(a)
+        return np.roll(a, shift, axis=axis)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_rot90(self, a, k=1, axes=(0, 1)):
+        """Rotate an array k times by 90 degrees in the plane specified by axes.
+
+        Rotation direction is from the first towards the second axis.
+        """
+        if len(axes) != 2:
+            raise ValueError('len(axes) must be 2.')
+
+        if not (axes[0] - axes[1]) % a.ndim:
+            raise ValueError('Axes must be different.')
+
+        if not (-a.ndim <= axes[0] < a.ndim and -a.ndim <= axes[1] < a.ndim):
+            raise ValueError(f'Axes={axes} out of range for array of ndim={a.ndim}.')
+
+        stype = type(a)
+        shape = list(a.shape)
+        shape[axes[0]], shape[axes[1]] = shape[axes[1]], shape[axes[0]]
+        shape = tuple(shape)
+        if issubclass(stype, self.SecureFixedPointArray):
+            rettype = (stype, a.integral, shape)
+        else:
+            rettype = (stype, shape)
+        await self.returnType(rettype)
+        a = await self.gather(a)
+        return np.rot90(a, k=k, axes=axes)
 
     def np_minimum(self, a, b):
         """Secure elementwise minimum of a and b.
@@ -2984,17 +3058,6 @@ class Runtime:
         a, initial = await self.gather(a, initial)
         return np.sum(a, axis=axis, keepdims=keepdims, initial=initial.value)
         # TODO: handle switch from initial (field elt) to initial.value inside finfields.py
-
-    @asyncoro.mpc_coro_no_pc
-    async def np_roll(self, a, shift, axis=None):
-        """Roll array elements (cyclically) along a given axis.
-
-        If axis is None (default), array is flattened before cyclic shift,
-        and original shape is restored afterwards.
-        """
-        await self.returnType((type(a), a.shape))
-        a = await self.gather(a)
-        return np.roll(a, shift, axis=axis)
 
     @asyncoro.mpc_coro_no_pc
     async def np_negative(self, a):
