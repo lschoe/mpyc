@@ -646,6 +646,13 @@ def _SecFld(field):
     name = f'Array{secfld.__name__}'
     secarray = type(name, (SecureFiniteFieldArray,), {'__slots__': ()})
     secarray.sectype = secfld
+    if secfld.subfield:
+        @classmethod
+        def out_conv(cls, a):  # field -> subfield
+            assert np.all(np.vectorize(lambda _: _.degree())(a.value) <= 0)
+            return secfld.subfield.array(np.vectorize(int)(a), check=False)
+
+        secarray._output_conversion = out_conv
     globals()[name] = secarray  # TODO: check name dynamic type sufficiently unique
     secfld.array = secarray
     return secfld
