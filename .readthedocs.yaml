@@ -2,7 +2,7 @@ version: 2
 formats: all
 python:
   install:
-    - method: setuptools
+    - method: pip
       path: .
     - requirements: docs/requirements.txt
 build:
