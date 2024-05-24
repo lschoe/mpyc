@@ -44,7 +44,7 @@ the `MPyC repo <https://github.com/lschoe/mpyc>`_ for a local copy including all
 This way it will also be easy to get updates and switch between versions. The same content
 is also available as a ZIP file `mpyc-master.zip <https://github.com/lschoe/mpyc/archive/refs/heads/master.zip>`_.
 
-From the root directory of your local copy (containing ``setup.py``) you may then run::
+From the root directory of your local copy (containing ``pyproject.toml``) you may then run::
 
    pip install .
 

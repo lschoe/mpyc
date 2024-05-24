@@ -30,7 +30,6 @@ and statistics (securely mimicking Python’s statistics module).
 """
 
 __version__ = '0.10.1'
-__license__ = 'MIT License'
 
 import os
 import sys

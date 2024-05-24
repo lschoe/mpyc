@@ -27,7 +27,7 @@ The [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) has some more info and 
 
 Pure Python, no dependencies. Python 3.9+ (following [SPEC 0 -- Minimum Supported Dependencies](https://scientific-python.org/specs/spec-0000/)).
 
-Run `pip install .` in the root directory (containing file `setup.py`).\
+Run `pip install .` in the root directory (containing file `pyproject.toml`).\
 Or, run `pip install -e .`, if you want to edit the MPyC source files.
 
 Use `pip install numpy` to enable support for secure NumPy arrays in MPyC, along with vectorized implementations.

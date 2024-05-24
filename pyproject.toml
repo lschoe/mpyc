@@ -1,0 +1,45 @@
+[build-system]
+requires = ['setuptools>=62']
+build-backend = 'setuptools.build_meta'
+
+[tool.setuptools]
+packages = ['mpyc']
+
+[tool.setuptools.dynamic]
+version = {attr = 'mpyc.__version__'}
+
+[project]
+name = 'mpyc'
+dynamic = ['version']
+authors = [{name = 'Berry Schoenmakers', email = 'berry@win.tue.nl'}]
+description = 'MPyC for Multiparty Computation in Python'
+readme = 'README.md'
+keywords=['crypto', 'cryptography', 'multiparty computation', 'MPC',
+          'secret sharing', 'Shamir threshold scheme',
+          'pseudorandom secret sharing', 'PRSS']
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Framework :: AsyncIO',
+    'Framework :: Jupyter',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Education',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3 :: Only',
+    'Topic :: Security :: Cryptography',
+    'Topic :: Software Development :: Libraries :: Application Frameworks',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: System :: Distributed Computing'
+]
+license = {text = 'MIT License'}
+requires-python = '>=3.9'
+
+[project.urls]
+documentation = 'https://mpyc.readthedocs.io'
+discussions = 'https://github.com/lschoe/mpyc/discussions'
+'release notes' = 'https://github.com/lschoe/mpyc/releases'
+homepage = 'https://www.win.tue.nl/~berry/mpyc/'
+repository =  'https://github.com/lschoe/mpyc'

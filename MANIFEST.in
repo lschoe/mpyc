@@ -1,4 +1,3 @@
 recursive-include mpyc *.py
-recursive-exclude mpyc *.md
 include LICENSE
 include README.md
