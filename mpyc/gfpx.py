@@ -397,7 +397,7 @@ class Polynomial:
             t, t1 = t1, cls._sub(t, cls._mul(q, t1))
 
         a, a1 = cls._monic(a, lc_pinv=True)
-        if a1 > 2:
+        if a1 >= 2:
             for i in range(len(s)):
                 s[i] *= a1
                 s[i] %= p
