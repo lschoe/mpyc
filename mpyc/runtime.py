@@ -210,6 +210,28 @@ class Runtime:
         else:
             logging.disable(logging.INFO)
 
+    @asyncoro.mpc_coro
+    async def peek(self, x, label='') -> None:
+        """Peek at the value of secret-shared x,
+        for "informational" and debugging purposes only.
+
+        For secure object x (or list of secure objects compatible with
+        runtime.output()), the value is logged once its computation is done.
+
+        In debug mode, the moment at which the task for the computation of x is
+        scheduled is logged, and the value of this party's secret share of x is
+        logged once the task for the computation of x has completed.
+
+        To facilitate matching of scheduled with completed tasks, an "address"
+        based on the program counter is included as well the given label, if any.
+        """
+        txt = f'Peek at {abs(mpc._program_counter[0]) % (1<<24):#08x}:'
+        if label:
+            txt += f' {label}'
+        logging.debug(f'{txt} Task scheduled')
+        logging.info(f'{txt} Task output {await self.output(x)}')
+        logging.debug(f'{txt} Party {self.pid}\'s share {await self.gather(x)}')
+
     async def start(self):
         """Start the MPyC runtime.
 

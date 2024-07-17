@@ -25,6 +25,7 @@ class Arithmetic(unittest.TestCase):
         a = FF.array([[[-1, 1], [1, -1]]])  # 3D array
         np.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(a, senders=0)))), a)
         c = secint.array(a)
+        mpc.peek(c, label='secint.array')
         a = a.copy()  # NB: needed to pass tests with inplace operations
         self.assertTrue((a == mpc.run(mpc.output(mpc.np_sgn(c)))).all())  # via FF array __eq__
         self.assertTrue((mpc.run(mpc.output(mpc.np_sgn(c))) == a).all())  # via FF array ufunc equal
@@ -251,6 +252,7 @@ class Arithmetic(unittest.TestCase):
         secfxp = mpc.SecFxp(12)
         a = np.array([[-1.5, 2.5], [4.5, -8.5]])
         c = secfxp.array(a)
+        mpc.peek(c)
 
         np.assertEqual(mpc.run(mpc.output(c + np.array([1, 2]))), a + np.array([1, 2]))
         np.assertEqual(mpc.run(mpc.output(c * np.array([1, 2]))), a * np.array([1, 2]))
@@ -464,6 +466,7 @@ class Arithmetic(unittest.TestCase):
 
         secfld = mpc.SecFld(2**2)
         c = secfld.array(np.array([[-3, 0], [1, 2]]))
+        mpc.peek(c)
         np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c))), [[[1, 1], [0, 0]], [[1, 0], [0, 1]]])
         np.assertEqual(mpc.run(mpc.output(mpc.np_from_bits(mpc.np_to_bits(c[1])))), [1, 2])
         c = mpc._np_randoms(secfld, 5)
@@ -681,6 +684,7 @@ class Arithmetic(unittest.TestCase):
         secint = mpc.SecInt()
         a = secint(12)
         b = secint(13)
+        mpc.peek(b)
         self.assertEqual(mpc.run(mpc.output(mpc.input(a, 0))), 12)
         self.assertEqual(mpc.run(mpc.output(mpc.input([a, b], 0))), [12, 13])
         self.assertEqual(mpc.run(mpc.output(-a)), -12)
@@ -911,6 +915,7 @@ class Arithmetic(unittest.TestCase):
         secflt = mpc.SecFlt()
         a = secflt(1.25)
         b = secflt(2.5)
+        mpc.peek(b)
         self.assertEqual(mpc.run(mpc.output(mpc.input(a, 0))), 1.25)
         self.assertEqual(mpc.run(mpc.output(a + b)), 3.75)
         self.assertEqual(mpc.run(mpc.output(-a + -b)), -3.75)

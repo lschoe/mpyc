@@ -217,6 +217,9 @@ class _SharesTallier(Future):
                 else:
                     self.tally += 1
                     obj.share.add_done_callback(self._decrement)
+            elif isinstance(obj.share, tuple):
+                for x in obj.share:
+                    self._add_callbacks(x)
         elif isinstance(obj, Future) and not obj.done():
             self.tally += 1
             obj.add_done_callback(self._decrement)
@@ -229,6 +232,9 @@ def _get_results(obj):
     if isinstance(obj, SecureObject):
         if isinstance(obj.share, Future):
             return obj.share.result()
+
+        elif isinstance(obj.share, tuple):
+            return tuple(map(_get_results, obj.share))
 
         return obj.share
 
@@ -254,6 +260,9 @@ def gather_shares(rt, *obj):
     if isinstance(obj, SecureObject):
         if isinstance(obj.share, Future):
             return obj.share
+
+        elif isinstance(obj.share, tuple):
+            return gather_shares(rt, obj.share)
 
         return _AwaitableFuture(obj.share)
 

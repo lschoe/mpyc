@@ -8,7 +8,7 @@ class Arithmetic(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        mpc.logging(False)
 
     @classmethod
     def tearDownClass(cls):
@@ -22,7 +22,9 @@ class Arithmetic(unittest.TestCase):
         b = a @ a
         secgrp = mpc.SecGrp(group)
         c = secgrp(a)
+        mpc.peek(c)
         d = a @ c
+        mpc.peek([c, d])
         self.assertEqual(mpc.run(mpc.output(d)), b)
         e = ~c
         f = e @ b
@@ -70,6 +72,7 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(h)), g2)
 
             a = secgrp(g)
+            mpc.peek([a, a])
             self.assertRaises(TypeError, operator.truediv, 2, a)
             self.assertRaises(TypeError, operator.add, a, a)
             self.assertRaises(TypeError, operator.add, g, a)
@@ -99,6 +102,7 @@ class Arithmetic(unittest.TestCase):
             self.assertEqual(mpc.run(mpc.output(2*secgrp(g))), g^2)
             bp4 = 4*g
             sec_bp4 = 4*secgrp(g) + secgrp.identity
+            mpc.peek([sec_bp4, sec_bp4])
             self.assertEqual(mpc.run(mpc.output(-sec_bp4)), -bp4)
             sec_bp8 = secgrp.repeat(bp4, secfld(2))
             self.assertEqual(mpc.run(mpc.output(sec_bp8)), bp4 + bp4)
@@ -141,6 +145,7 @@ class Arithmetic(unittest.TestCase):
         secgrp = mpc.SecGrp(group)
         g = group.generator
         a = secgrp(g)^6
+        mpc.peek(a)
         self.assertEqual(mpc.run(mpc.output(a)), g^6)
         self.assertEqual(mpc.run(mpc.output(a * (a^-1))), group.identity)
         m, z = group.encode(5)

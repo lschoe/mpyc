@@ -6,6 +6,10 @@ from mpyc.seclists import seclist, secindex
 
 class Arithmetic(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        mpc.logging(False)
+
     def test_secfld(self):
         secfld = mpc.SecFld(101)
         s = seclist([], secfld)
@@ -25,6 +29,7 @@ class Arithmetic(unittest.TestCase):
         s[5] = 9
         del s[2:4]
         self.assertEqual(mpc.run(mpc.output(list(s))), [1, 2, 6, 9])
+        mpc.peek(list(s))
 
         secfld2 = mpc.SecFld()
         self.assertRaises(TypeError, seclist, [secfld(1)], secfld2)
