@@ -137,7 +137,7 @@ parties actually connect and disconnect:
 We define function ``main()`` as a coroutine (``async`` function) to enable the
 use of ``await`` statements. To call and execute coroutine ``main()``,
 we use ``mpc.run(main())`` , much the same as one needs to do with any
-`coroutine <https://docs.python.org/3/library/asyncio-task.html#id1>`_ in Python.
+`coroutine <https://docs.python.org/3/library/asyncio-task.html#coroutines>`_ in Python.
 
 An example run between three parties on `localhost` looks as follows:
 
