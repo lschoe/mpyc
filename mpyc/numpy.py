@@ -161,8 +161,8 @@ try:
     np._matmul_shape = _matmul_shape
     np._item_shape = _item_shape
 
-    if np.lib.NumpyVersion(np.__version__) < '1.23.0':
-        logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.23+.')
+    if np.lib.NumpyVersion(np.__version__) < '1.24.0':
+        logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.24+.')
 except ImportError:
     del _matmul_shape
     del _item_shape

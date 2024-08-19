@@ -1,16 +1,10 @@
-import sys
-import unittest
 import random
 import statistics
+import unittest
 from mpyc.runtime import mpc
 from mpyc.statistics import (mean, variance, stdev, pvariance, pstdev,
                              mode, median, median_low, median_high, quantiles,
                              covariance, correlation, linear_regression)
-
-if sys.version_info.minor < 10:
-    statistics.covariance = covariance
-    statistics.correlation = correlation
-    statistics.linear_regression = linear_regression
 
 
 class Arithmetic(unittest.TestCase):

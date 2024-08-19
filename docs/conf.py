@@ -14,6 +14,7 @@
 #
 import os
 import sys
+from mpyc.__init__ import __version__
 # sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -23,7 +24,6 @@ project = 'MPyC'
 copyright = '2018 - 2024, Berry Schoenmakers'
 author = 'Berry Schoenmakers'
 
-from mpyc.__init__ import __version__
 # The short X.Y version
 version = __version__
 # The full version, including alpha/beta/rc tags

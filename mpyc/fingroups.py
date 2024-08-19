@@ -1056,14 +1056,15 @@ def _EllipticCurve(curvename, coordinates):
             raise ValueError('invalid curvename')
 
         name = f'E({gf.__name__}){curvename}{coordinates}'
-        if coordinates == 'extended':
-            base = EdwardsExtended
-        elif coordinates == 'affine':
-            base = EdwardsAffine
-        elif coordinates == 'projective':
-            base = EdwardsProjective
-        else:
-            raise ValueError('invalid coordinates')
+        match coordinates:
+            case 'extended':
+                base = EdwardsExtended
+            case 'affine':
+                base = EdwardsAffine
+            case 'projective':
+                base = EdwardsProjective
+            case _:
+                raise ValueError('invalid coordinates')
 
         EC = type(name, (base,), {'__slots__': ()})
         EC.field = gf
@@ -1097,14 +1098,15 @@ def _EllipticCurve(curvename, coordinates):
             raise ValueError('invalid curvename')
 
         name = f'E({gf.__name__}){curvename}{coordinates}'
-        if coordinates == 'jacobian':
-            base = WeierstrassJacobian
-        elif coordinates == 'affine':
-            base = WeierstrassAffine
-        elif coordinates == 'projective':
-            base = WeierstrassProjective
-        else:
-            raise ValueError('invalid coordinates')
+        match coordinates:
+            case 'jacobian':
+                base = WeierstrassJacobian
+            case 'affine':
+                base = WeierstrassAffine
+            case 'projective':
+                base = WeierstrassProjective
+            case _:
+                raise ValueError('invalid coordinates')
 
         EC = type(name, (base,), {'__slots__': ()})
         EC.field = gf
@@ -1128,14 +1130,15 @@ def _EllipticCurve(curvename, coordinates):
         gf = GF(p)
 
         name = f'E({gf.__name__}){curvename}{coordinates}'
-        if coordinates == 'jacobian':
-            base = WeierstrassJacobian
-        elif coordinates == 'affine':
-            base = WeierstrassAffine
-        elif coordinates == 'projective':
-            base = WeierstrassProjective
-        else:
-            raise ValueError('invalid coordinates')
+        match coordinates:
+            case 'jacobian':
+                base = WeierstrassJacobian
+            case 'affine':
+                base = WeierstrassAffine
+            case 'projective':
+                base = WeierstrassProjective
+            case _:
+                raise ValueError('invalid coordinates')
 
         EC = type(name, (base,), {'__slots__': ()})
         EC.field = gf

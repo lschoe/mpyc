@@ -1,7 +1,7 @@
-import unittest
 import operator
 import itertools
 import functools
+import unittest
 from mpyc.runtime import mpc
 import mpyc.mpctools
 

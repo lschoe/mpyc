@@ -4,7 +4,7 @@ functions in Python's itertools and functools modules, respectively.
 The alternative implementations can be used as drop-in replacements, however,
 potentially enhancing the performance when used in secure computations. More
 specifically, these implementations are aimed at reducing the overall round
-complexity, possible at the expense of increasing overall space complexity,
+complexity, possibly at the expense of increasing overall space complexity,
 time complexity, and communication complexity.
 """
 

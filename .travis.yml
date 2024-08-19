@@ -1,17 +1,15 @@
 dist: jammy
 language: python
 jobs:
-  - python: 3.9
-    env:
-      - MPYC_NOPRSS=1
-    install: pip install numpy==1.23.* gmpy2 uvloop
-  - python: pypy3.9-7.3.9
   - python: 3.10
     env:
       - MPYC_NONUMPY=1
       - MPYC_NOGMPY=1
       - MPYC_NOUVLOOP=1
+  - python: pypy3.10-7.3.16
   - python: 3.11
+    env:
+      - MPYC_NOPRSS=1
     install: pip install numpy==1.24.* gmpy2
   - python: 3.12
     install: pip install numpy uvloop

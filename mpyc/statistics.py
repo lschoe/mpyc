@@ -22,7 +22,6 @@ If these functions are called with plain data, the call is relayed to the corres
 function in Python's statistics module.
 """
 
-import sys
 from math import fsum, sqrt
 import statistics
 from mpyc import asyncoro
@@ -506,14 +505,7 @@ def covariance(x, y):
 
     sectype = type(x[0])  # all elts of x assumed of same type
     if not issubclass(sectype, SecureObject):
-        if sys.version_info.minor >= 10:
-            return statistics.covariance(x, y)
-
-        # inline code of statistics.covariance() copied from Python 3.10.0:
-        xbar = fsum(x) / n
-        ybar = fsum(y) / n
-        sxy = fsum((xi - xbar) * (yi - ybar) for xi, yi in zip(x, y))
-        return sxy / (n - 1)
+        return statistics.covariance(x, y)
 
     if issubclass(sectype, SecureFixedPoint):
         xbar = runtime.sum(x) / n
@@ -549,20 +541,7 @@ def correlation(x, y):
 
     sectype = type(x[0])  # all elts of x assumed of same type
     if not issubclass(sectype, SecureObject):
-        if sys.version_info.minor >= 10:
-            return statistics.correlation(x, y)
-
-        # inline code of statistics.correlation() copied from Python 3.10.0:
-        xbar = fsum(x) / n
-        ybar = fsum(y) / n
-        sxy = fsum((xi - xbar) * (yi - ybar) for xi, yi in zip(x, y))
-        sxx = fsum((xi - xbar) ** 2.0 for xi in x)
-        syy = fsum((yi - ybar) ** 2.0 for yi in y)
-        try:
-            return sxy / sqrt(sxx * syy)
-
-        except ZeroDivisionError:
-            raise statistics.StatisticsError('at least one of the inputs is constant') from None
+        return statistics.correlation(x, y)
 
     if issubclass(sectype, SecureFixedPoint):
         xbar = runtime.sum(x) / n
@@ -575,13 +554,6 @@ def correlation(x, y):
         return sxy / (_fsqrt(sxx) * _fsqrt(syy))
 
     raise TypeError('secure fixed-point type required')
-
-
-if sys.version_info.minor >= 10:
-    LinearRegression = statistics.LinearRegression
-else:
-    from collections import namedtuple
-    LinearRegression = namedtuple('LinearRegression', ('slope', 'intercept'))
 
 
 def linear_regression(x, y):
@@ -610,21 +582,7 @@ def linear_regression(x, y):
 
     sectype = type(x[0])  # all elts of x assumed of same type
     if not issubclass(sectype, SecureObject):
-        if sys.version_info.minor >= 10:
-            return statistics.linear_regression(x, y)
-
-        # inline code of statistics.linear_regression() adapted from Python 3.10.0:
-        xbar = fsum(x) / n
-        ybar = fsum(y) / n
-        sxy = fsum((xi - xbar) * (yi - ybar) for xi, yi in zip(x, y))
-        sxx = fsum((xi - xbar) ** 2.0 for xi in x)
-        try:
-            slope = sxy / sxx   # equivalent to:  covariance(x, y) / variance(x)
-        except ZeroDivisionError:
-            raise statistics.StatisticsError('x is constant') from None
-
-        intercept = ybar - slope * xbar
-        return LinearRegression(slope=slope, intercept=intercept)
+        return statistics.linear_regression(x, y)
 
     if issubclass(sectype, SecureFixedPoint):
         xbar = runtime.sum(x) / n
@@ -635,7 +593,7 @@ def linear_regression(x, y):
         sxx = runtime.in_prod(xxbar, xxbar)
         slope = sxy / sxx
         intercept = ybar - slope * xbar
-        return LinearRegression(slope=slope, intercept=intercept)
+        return statistics.LinearRegression(slope=slope, intercept=intercept)
 
     # TODO: implement for secure integers as well
     raise TypeError('secure fixed-point type required')
