@@ -4,13 +4,13 @@
 
 Use `-H`, `--HELP` option with any demo to see the MPyC help message.
 
-`python secretsanta.py -H`
+`python secretsanta.py -H` (or, use `python -m mpyc -H`)
 
 ```
 usage: secretsanta.py [-V] [-H] [-h] [-C ini] [-P addr] [-M m] [-I i] [-T t]
-                      [-B b] [--ssl] [-L l] [-K k] [--log-level ll]
+                      [-B b] [--ssl] [-W w] [-L l] [-K k] [--log-level ll]
                       [--no-log] [--no-async] [--no-barrier] [--no-gmpy2]
-                      [--no-numpy] [--no-prss] [--mix32-64bit]
+                      [--no-numpy] [--no-uvloop] [--no-prss] [--mix32-64bit]
                       [--output-windows] [--output-file] [-f F]
 
 MPyC help:
@@ -26,6 +26,7 @@ MPyC configuration:
   -T t, --threshold t   threshold t, 0<=t<m/2
   -B b, --base-port b   use port number b+i for party i
   --ssl                 enable SSL connections
+  -W w, --workers w     maximum number of worker threads per party
 
 MPyC parameters:
   -L l, --bit-length l  default bit length l for secure numbers
@@ -36,6 +37,7 @@ MPyC parameters:
   --no-barrier          disable barriers
   --no-gmpy2            disable use of gmpy2 package
   --no-numpy            disable use of numpy package
+  --no-uvloop           disable use of uvloop (winloop) package
   --no-prss             disable use of PRSS (pseudorandom secret sharing)
   --mix32-64bit         enable mix of 32-bit and 64-bit platforms
 
@@ -129,3 +131,5 @@ optional arguments:
 [4demos](4demos.ipynb) gives quick access to demos secretsanta.py, id3gini.py, lpsolver.py, np_cnnmnist.py.
 
 [OneWayHashChainsExplained](OneWayHashChainsExplained.ipynb) shows a more advanced MPyC program.
+
+[PrefixOrExplained](PrefixOrExplained.ipynb) is about the design of `mpyc.mpctools.accumulate()`, showing 10 ways to compute prefix-or.
