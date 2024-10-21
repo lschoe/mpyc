@@ -202,9 +202,10 @@ complexity(prefix_or1, 16)
 # In[13]:
 
 
+no_prss = mpc.options.no_prss
 mpc.options.no_prss = True  # disable PRSS temporarily
 complexity(prefix_or1, 32)
-mpc.options.no_prss = False  # back to default
+mpc.options.no_prss = no_prss
 
 
 # The or-complexity is now reduced to $2n-2-\log_2 n$ for inputs of length $n=2^k$. The trade-off is that the or-depth increases by almost a factor of 2, as it becomes $2\log_2 n -2$. The underlying method due to Brent&ndash;Kung is explained in Section 3.
