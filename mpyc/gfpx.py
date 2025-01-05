@@ -304,6 +304,9 @@ class Polynomial:
 
     @classmethod
     def _lshift(cls, a, n):
+        if not a:
+            return []
+
         return [0] * n + a
 
     @classmethod
