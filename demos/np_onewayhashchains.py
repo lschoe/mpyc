@@ -163,7 +163,7 @@ async def main():
         else:  # output stage
             await xprint(f'{r:4} x{2**(k+1) - 1 - r:<4} =', v)
         r += 1
-    print(f'Performed {k * 2**(k-1) = } hashes in total.')
+    print(f'Performed {k * 2**(k-1)=} hashes in total.')
 
     await mpc.shutdown()
 

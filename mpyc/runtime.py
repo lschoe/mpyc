@@ -152,17 +152,6 @@ class Runtime:
         """Receive data from given peer, labeled by current program counter."""
         return self.parties[peer_pid].protocol.receive(self._program_counter[0])
 
-    def _exchange_shares(self, in_shares):
-        pc = self._program_counter[0]
-        out_shares = [None] * len(in_shares)
-        for peer_pid, data in enumerate(in_shares):
-            if peer_pid != self.pid:
-                protocol = self.parties[peer_pid].protocol
-                protocol.send(pc, data)
-                data = protocol.receive(pc)
-            out_shares[peer_pid] = data
-        return out_shares
-
     async def barrier(self, name=None):
         """Barrier for runtime, using optional string name for easy identification."""
         if self.options.no_barrier:
@@ -648,22 +637,40 @@ class Runtime:
             shape = x.shape
             x = x.reshape(-1)  # in-place flatten
 
+        if shape is None or self.options.mix32_64bit:
+            random_split = thresha.random_split
+            recombine = thresha.recombine
+            marshal = field.to_bytes
+            unmarshal = field.from_bytes
+        else:
+            random_split = thresha.np_random_split
+            recombine = thresha.np_recombine
+            marshal = pickle.dumps
+            unmarshal = pickle.loads
         m = len(self.parties)
-        if shape is None or self.options.mix32_64bit:
-            shares = thresha.random_split(field, x, t, m)
-            shares = [field.to_bytes(elts) for elts in shares]
+        uci = self._program_counter[0] % m  # for basic load balancing
+
+        # Let 2t+1 parties each send shares of their share to all parties.
+        if (self.pid - uci) % m <= 2*t:
+            shares = random_split(field, x, t, m)
+            for peer_pid, data in enumerate(shares):
+                if peer_pid != self.pid:
+                    self._send_message(peer_pid, marshal(data))
+                else:
+                    own_share = data
         else:
-            shares = thresha.np_random_split(field, x, t, m)
-            shares = [pickle.dumps(elts) for elts in shares]
-        # Recombine the first 2t+1 output_shares.
-        shares = self._exchange_shares(shares)
-        shares = await self.gather(shares[:2*t+1])
-        if shape is None or self.options.mix32_64bit:
-            points = [(j+1, field.from_bytes(s)) for j, s in enumerate(shares)]
-            y = thresha.recombine(field, points)
-        else:
-            points = [(j+1, pickle.loads(s)) for j, s in enumerate(shares)]
-            y = thresha.np_recombine(field, points)
+            own_share = None
+
+        # Receive and recombine 2t+1 shares, possibly including this party's own share.
+        shares = [None] * (2*t+1)
+        for peer_pid in range(uci, uci + 2*t+1):
+            if peer_pid % m != self.pid:
+                shares[peer_pid - uci] = self._receive_message(peer_pid % m)
+        shares = await self.gather(shares)
+        points = [((uci + j) % m + 1, unmarshal(s)) for j, s in enumerate(shares) if s is not None]
+        if own_share is not None:
+            points.append((self.pid + 1, own_share))
+        y = recombine(field, points)
         if shape is None:
             y = [field(a) for a in y]
         elif self.options.mix32_64bit:
