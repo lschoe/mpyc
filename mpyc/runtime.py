@@ -1327,7 +1327,14 @@ class Runtime:
 
     def xor(self, a, b):
         """Secure bitwise xor of a and b."""
-        return a + b
+        a_bits = self.to_bits(a)
+        b_bits = self.to_bits(b)
+        and_bits = self.schur_prod(a_bits, b_bits)
+        xor_bits = self.vector_sub(
+            self.vector_add(a_bits, b_bits),
+            self.vector_add(and_bits, and_bits)
+        )
+        return self.from_bits(xor_bits)
 
     def invert(self, a):
         """Secure bitwise inverse (not) of a."""
