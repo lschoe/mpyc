@@ -30,7 +30,7 @@ example Alice is not interested in Bob but Bob is interested in Alice, Bob
 may feel embarrassed afterwards because he expressed interest in her; if he
 would have known beforehand that Alice was not interested anyway, he might
 have told Alice that he was not interested either. See also this YouTube
-video https://youtu.be/JnmESTrsQbg by TNO.
+video https://youtu.be/WRU_nUeqVu8 by TNO.
 
 Matching without embarrassments corresponds to unanimous voting with t=1.
 Alice acts as party P[0], Bob as party P[1], and P[2] is the trusted (third)
