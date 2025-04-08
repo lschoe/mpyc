@@ -162,10 +162,14 @@ class Polynomial:
 
     @staticmethod
     def _from_list(a):
+        # NB: no copy
+        while a and not a[-1]:
+            a.pop()
         return a
 
     @staticmethod
     def _to_list(a):
+        # NB: no copy
         return a.value
 
     @classmethod
