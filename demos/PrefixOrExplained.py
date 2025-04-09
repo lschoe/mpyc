@@ -341,7 +341,7 @@ complexity(prefix_or6, 16)
 # 
 # Without proof we note that the or-depth is equal to $2 \log_2 n - 1$ for $n\geq2$. 
 
-# The or-complexity $T_n$ of about $3n$ still includes some double work, however. For example, the output `pf(0, x)[1]` is simply discarded, as it is equal to `pf(0, x)[0][-1]`, hence redundant. To avoid these spurious computations, we define outputs `b, y = pf(a, x)` such that `y + [b]` is equal to the desired prefix-or. That is, we omit the last element from the output `y` compared to function `prefix_or6()` above.
+# The or-complexity $T_n$ of about $3n$ still includes some double work, however. For example, the output `pf(0, x)[1]` is simply discarded, as it is equal to `pf(0, x)[0][-1]`, hence redundant. To avoid these spurious computations, we define outputs `y, b = pf(a, x)` such that `y + [b]` is equal to the desired prefix-or. That is, we omit the last element from the output `y` compared to function `prefix_or6()` above.
 
 # In[22]:
 
