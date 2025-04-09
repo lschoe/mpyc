@@ -537,6 +537,14 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(np.diagflat(F_a), np.diagflat(a))
         np.assertEqual(np.diagonal(F_a), np.diagonal(a))
         np.assertEqual(np.vander(F_b[0]), np.vander(b[0]))
+        np.assertEqual(np.convolve(F_a[0][:-2], F_b[0]), np.convolve(a[0][:-2], b[0]))
+        np.assertEqual(np.convolve(F_a[0], [1, 2, 3]), np.convolve(a[0], [1, 2, 3]))
+        np.assertEqual(np.convolve(F_a[0], (1, 2, 3)), np.convolve(a[0], (1, 2, 3)))
+        np.assertEqual(np.convolve(F_a[0], range(3)), np.convolve(a[0], range(3)))
+        np.assertEqual(np.convolve(F_a[0], F_b[0], mode='same'),
+                       np.convolve(a[0], b[0], mode='same'))
+        np.assertEqual(np.convolve(F_a[0], F_b[0], mode='valid'),
+                       np.convolve(a[0], b[0], mode='valid'))
 
     @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
     def test_array_getsetitem(self):

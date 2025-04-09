@@ -50,6 +50,14 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c @ d)), a @ b)
         np.assertEqual(mpc.run(mpc.output(d @ d)), b @ b)
         np.assertEqual(mpc.run(mpc.output(np.outer(c, a))), np.outer(a, a))
+        np.assertEqual(mpc.run(mpc.output(np.convolve(c[0][0], a[0][0]))),
+                       np.convolve(a[0][0], a[0][0]))
+        np.assertEqual(mpc.run(mpc.output(np.convolve(c[0][0], np.array([1, 2, 3])))),
+                       np.convolve(a[0][0], np.array([1, 2, 3])))
+        np.assertEqual(mpc.run(mpc.output(np.convolve(c[0][0], (1, 2, 3)))),
+                       np.convolve(a[0][0], (1, 2, 3)))
+        np.assertEqual(mpc.run(mpc.output(np.convolve(c[0][0], range(5)))),
+                       np.convolve(a[0][0], range(5)))
         np.assertEqual(mpc.run(mpc.output(np.stack((c, c), axis=1))), np.stack((a, a), axis=1))
         np.assertEqual(mpc.run(mpc.output(np.block([[c, c], [c, c]]))), np.block([[a, a], [a, a]]))
         np.assertEqual(mpc.run(mpc.output(np.block([[secint(9), -1]]))), np.block([[9, -1]]))
@@ -274,6 +282,9 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(mpc._reshare(c) @ c)), a @ a)
         np.assertEqual(mpc.run(mpc.output(np.outer(secfxp.array(np.array([2, 2])), c))),
                        np.outer([2, 2], a))
+        np.assertEqual(mpc.run(mpc.output(np.convolve(c[0], c[1]))), np.convolve(a[0], a[1]))
+        np.assertEqual(mpc.run(mpc.output(np.convolve(np.array([2.5, 2.5, 3]), c[0], mode='same'))),
+                       np.convolve([2.5, 2.5, 3], a[0], mode='same'))
         b = mpc.run(mpc.output(c * c))
         np.assertEqual(b, a * a)
         self.assertTrue(np.issubdtype(b.dtype, np.floating))
@@ -353,6 +364,10 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.outer(c1, c1).integral, False)
         self.assertEqual(np.outer(c2, c2).integral, True)
         self.assertEqual(np.outer(c1, c2).integral, False)
+        self.assertEqual(np.convolve(c1[0], c1[0]).integral, False)
+        self.assertEqual(np.convolve(c2[0], c2[0]).integral, True)
+        self.assertEqual(np.convolve(a2[0], c2[0]).integral, True)
+        self.assertEqual(np.convolve(c1[0], c2[0]).integral, False)
         self.assertEqual((c2[0, :] @ c2[:, 0]).integral, True)  # Cover lines related scalar outputs
         self.assertEqual((c1[0, :] @ c1[:, 0]).integral, False)
         self.assertEqual((c1[0, :] @ c2[:, 0]).integral, False)
@@ -488,6 +503,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.np_is_zero_public(c)), a == 0)
         self.assertEqual(mpc.run(mpc.output(c.flatten().tolist())), [-1, 0, 0, -1])
         np.assertEqual(mpc.run(mpc.output(np.outer(a, c))), np.outer(a, a))
+        np.assertEqual(mpc.run(mpc.output(np.convolve(a[0][0], c[0][0]))),
+                       np.convolve(a[0][0], a[0][0]))
         np.assertEqual(mpc.run(mpc.output(np.roll(c, 1))), np.roll(a, 1))
         self.assertEqual(len(c), 1)
         self.assertEqual(len(c.T), 2)
@@ -505,6 +522,9 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, np.rot90, c, 1, (1,))
         self.assertRaises(ValueError, np.rot90, c, 1, (1, 1))
         self.assertRaises(ValueError, np.rot90, c, 1, (1, 2))
+        self.assertRaises(ValueError, np.convolve, c, c)
+        self.assertRaises(ValueError, np.convolve, c[0], c[0][:0])
+        self.assertRaises(ValueError, np.convolve, c[0][:0], c[0])
 
     def test_async(self):
         mpc.options.no_async = False

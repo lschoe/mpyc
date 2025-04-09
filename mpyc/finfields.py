@@ -786,6 +786,8 @@ class FiniteFieldArray:
                 args[i] = tuple(arg)
             elif isinstance(arg, list):
                 args[i] = [a.value if isinstance(a, (cls, cls.field)) else a for a in arg]
+            elif func.__name__ == 'convolve':
+                pass
             elif not isinstance(arg, int) and not isinstance(arg, np.ndarray):
                 return NotImplemented
 

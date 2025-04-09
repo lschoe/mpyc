@@ -2431,6 +2431,62 @@ class Runtime:
             c = self.np_trunc(stype(c, shape=shape))
         return c
 
+    @asyncoro.mpc_coro
+    async def np_convolve(self, a, b, mode='full'):
+        """Secure convolution of nonempty 1D arrays a and b."""
+        # TODO: extend to more kinds of sequences for a and/or b
+        m, n = len(a), len(b)  # NB: assuming a.ndim == 1 and b.ndim == 1
+        if max(m, n) == 0:
+            raise ValueError('a cannot be empty')
+
+        if min(m, n) == 0:
+            raise ValueError('v cannot be empty')  # NB: 2nd parameter is called v in np.convolve
+
+        if not isinstance(a, self.SecureObject):
+            a, b = b, a
+            shb = False
+        else:
+            shb = isinstance(b, self.SecureObject)
+        stype = type(a)
+        match mode:
+            case 'full':
+                shape = (m + n - 1,)
+            case 'same':
+                shape = (max(m, n),)
+            case 'valid':
+                shape = (max(m, n) - min(m, n) + 1,)
+        f = stype.frac_length
+        if not f:
+            await self.returnType((stype, shape))
+        else:
+            a_integral = a.integral
+            b_integral = shb and b.integral
+            z = 0
+            if not shb:
+                if np.issubdtype(b.dtype, np.integer):
+                    z = f
+                elif np.issubdtype(b.dtype, np.floating):
+                    # NB: unlike for self.mul() no test if all entries happen to be integral
+                    # Scale to Python int entries (by setting otypes='O', prevents overflow):
+                    b = np.vectorize(round, otypes='O')(b * 2**f)
+                # TODO: handle b.dtype=object, checking if all elts are int
+            await self.returnType((stype, a_integral and (b_integral or z == f), shape))
+
+        if not shb:
+            a = await self.gather(a)
+        elif a is b:
+            a = b = await self.gather(a)
+        else:
+            a, b = await self.gather(a, b)
+        c = np.convolve(a, b, mode=mode)
+        if f and (a_integral or b_integral) and z != f:
+            c >>= f - z  # NB: in-place rshift
+        if shb:
+            c = self._reshare(c)
+        if f and not (a_integral or b_integral) and z != f:
+            c = self.np_trunc(stype(c, shape=shape), f=f - z)
+        return c
+
     @asyncoro.mpc_coro_no_pc
     async def np_getitem(self, a, key):
         """Secure array a, index/slice key."""
