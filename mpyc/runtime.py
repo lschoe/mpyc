@@ -1193,8 +1193,7 @@ class Runtime:
             r = self._random(field)
             if self.options.no_prss:
                 r = (await r)[0]
-            a = await self.gather(a)
-            ar = a * r
+            ar = await self.gather(a) * r
             threshold = 2 * self.threshold
             if field.order.bit_length() < self.options.sec_param:  # TODO: use separate parameter
                 if self.options.no_prss:
