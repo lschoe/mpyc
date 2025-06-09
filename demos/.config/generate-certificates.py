@@ -55,7 +55,19 @@ def create_certificate(csr, ca_csr, ca_key, serial):
     ).add_extension(
         x509.BasicConstraints(ca=ca, path_length=None),
         critical=True
-    ).sign(ca_key, SHA256())
+    ).add_extension(
+        x509.AuthorityKeyIdentifier.from_issuer_public_key((csr if ca else ca_csr).public_key()),
+        critical=False
+    )
+    if ca:
+        crt = crt.add_extension(
+            x509.SubjectKeyIdentifier.from_public_key(csr.public_key()),
+            critical=False
+        ).add_extension(
+            x509.KeyUsage(True, False, False, False, False, True, False, False, False),
+            critical=False
+        )
+    crt = crt.sign(ca_key, SHA256())
     return crt
 
 
