@@ -56,7 +56,7 @@ def create_certificate(csr, ca_csr, ca_key, serial):
         x509.BasicConstraints(ca=ca, path_length=None),
         critical=True
     ).add_extension(
-        x509.AuthorityKeyIdentifier.from_issuer_public_key((csr if ca else ca_csr).public_key()),
+        x509.AuthorityKeyIdentifier.from_issuer_public_key(ca_csr.public_key()),
         critical=False
     )
     if ca:
