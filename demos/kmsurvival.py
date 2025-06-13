@@ -122,12 +122,11 @@ async def logrank_test(secfxp, d1, d2, n1, n2):
         print(f'Progress ... {round(100*(j+1)/maxT)}%', end='\r')
         d_j = d1[j] + d2[j]
         n_j = n1[j] + n2[j]
-        a = d_j * n1[j]
         b = n_j * (n_j - 1)
-        c = 1/(n_j * b)  # NB: using only one fixed-point division /
-        detot += d1[j] - a * b * c
-        vtot += a * n2[j] * (n_j - d_j) * c
-        await mpc.throttler(0.01, name=f'logrank_test@j={j}')
+        c = d_j * n1[j] / (n_j * b)  # NB: using only one fixed-point division /
+        detot += d1[j] - b * c
+        vtot += n2[j] * (n_j - d_j) * c
+        await mpc.throttler(0.04, name=f'logrank_test@j={j}')
     chi = await mpc.output(detot**2 / vtot)
     p = scipy.stats.chi2.sf(chi, 1)
     return lifelines.statistics.StatisticalResult(p_value=p, test_statistic=chi)
