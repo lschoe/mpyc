@@ -203,9 +203,7 @@ async def main():
         name = name[:-4]
     else:
         df = eval('lifelines.datasets.load_' + name)()
-    if name == 'lung':
-        df['status'] = df['status'] - 1  # 1-2 -> 0-1 = censored-death
-    elif name == 'stanford_heart_transplants':
+    if name == 'stanford_heart_transplants':
         df = df[(df['transplant'] == 1) | ~df['id'].isin(set(df[df['transplant'] == 1]['id']))]
         df['time'] = round(df['stop'] - df['start'] + 0.5)
     elif name == 'kidney_transplant':
