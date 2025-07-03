@@ -1050,7 +1050,18 @@ class Runtime:
 
     @asyncoro.mpc_coro
     async def mul(self, a, b):
-        """Secure multiplication of a and b."""
+        """Secure multiplication of a and b.
+
+        This is performed via the Gennaro-Rabin-Rabin (GRR98) protocol, cf.
+        Section 3.1 of https://mit6875.github.io/PAPERS/GennaroRabinRabin.pdf.
+
+        This function computes their local share of [a*b] with respect to a
+        degree 2t polynomial, then distributes a random polynomial H of degree
+        t whose constant coefficient is the local share of [a*b]. During
+        _reshare, thresha.recombine is used to recombine the shares of H using
+        Lagrange coefficients, which in turn reproduces a party's share of
+        [a*b] with respect to a new polynomial of degree at most t.
+        """
         stype = type(a)
         shb = isinstance(b, self.SecureObject)
         f = stype.frac_length
