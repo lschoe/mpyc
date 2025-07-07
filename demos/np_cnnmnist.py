@@ -40,8 +40,6 @@ def scale_int(x, f2):
 
 def load(name, f, a=2):
     W = np.load(os.path.join('data', 'cnn', 'W_' + name + '.npy'))
-    if name.startswith('conv'):
-        W = np.flip(W, axis=3)  # for use with np.convolve()
     b = np.load(os.path.join('data', 'cnn', 'b_' + name + '.npy'))
     if issubclass(secnum, mpc.SecureInteger):
         W = secnum.array(scale_int(W, 1 << f))
@@ -76,7 +74,7 @@ async def convolvetensor(x, W, b):
             for l in range(r):
                 for I in range(m):
                     i_s2 = I - s2
-                    Z[I] = sum(np.convolve(x[i, l, i_d], W[j, l, i_d - i_s2], mode='same')
+                    Z[I] = sum(np.correlate(x[i, l, i_d], W[j, l, i_d - i_s2], mode='same')
                                for i_d in range(max(0, i_s2), min(i_s2+s, m)))
                 Y[i, j] += Z
     Y += b[:, np.newaxis, np.newaxis]
