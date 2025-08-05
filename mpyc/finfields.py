@@ -13,6 +13,7 @@ Much of the NumPy API can be used to manipulate these arrays as well.
 """
 
 import os
+import logging
 import functools
 from mpyc.numpy import np
 from mpyc import gmpy as gmpy2
@@ -27,19 +28,22 @@ def GF(modulus):
     if isinstance(modulus, gfpx.Polynomial):
         field = xGF(modulus)
     else:
-        if isinstance(modulus, tuple):
-            p, n, w = modulus
-        else:
+        if not isinstance(modulus, tuple):
             p = modulus
             if p == 2:
                 n, w = 1, 1
             else:
                 n, w = 2, p-1
-        field = pGF(p, n, w)
+            modulus = (p, n, w)
+        field = pGF(*modulus)
+    if np:
+        array = arrayGF(field, modulus)
+        field.array = array
+    return field
 
-    if not np:
-        return field
 
+@functools.cache
+def arrayGF(field, modulus):
     if issubclass(field, PrimeFieldElement):
         BaseFFArray = PrimeFieldArray
     elif issubclass(field, BinaryFieldElement):
@@ -47,11 +51,13 @@ def GF(modulus):
     else:  # issubclass(field, ExtensionFieldElement)
         BaseFFArray = ExtensionFieldArray
     name = f'Array{field.__name__}'
+    if name in globals():
+        name += f'{{{modulus=}}}'
+        logging.debug(f'Duplicate field name extended to {name}')
     array = type(name, (BaseFFArray,), {'__slots__': ()})
     array.field = field
-    field.array = array
     globals()[name] = array  # NB: exploit (almost?) unique name dynamic array type
-    return field
+    return array
 
 
 class FiniteFieldElement:
