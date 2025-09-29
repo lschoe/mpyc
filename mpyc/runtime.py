@@ -3144,6 +3144,48 @@ class Runtime:
         # TODO: handle switch from initial (field elt) to initial.value inside finfields.py
 
     @asyncoro.mpc_coro_no_pc
+    async def np_cumsum(self, a, axis=None):
+        """Secure cumulative sum of array a along given axis.
+
+        If axis is None, array a is flattened first.
+        """
+        shape = (a.size,) if a.shape == () or axis is None else a.shape
+        if isinstance(a, self.SecureFixedPointArray):
+            rettype = (type(a), a.integral, shape)
+        else:
+            rettype = (type(a), shape)
+        await self.returnType(rettype)
+        a = await self.gather(a)
+        return np.cumsum(a, axis=axis)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_cumulative_sum(self, a, axis=None, include_initial=False):
+        """Secure cumulative sum of array a along given axis.
+
+        Only for 0D and 1D arrays, axis is allowed to be None.
+        If include_initial holds, the initial zero(s) are included in the output.
+        """
+        if axis is None:
+            if a.ndim < 2:
+                axis = 0
+            else:
+                raise ValueError('For arrays which have more than one dimension '
+                                 '``axis`` argument is required.')
+
+        shape = (a.size,) if a.shape == () else a.shape
+        if include_initial:
+            shape = list(shape)
+            shape[axis] += 1
+            shape = tuple(shape)
+        if isinstance(a, self.SecureFixedPointArray):
+            rettype = (type(a), a.integral, shape)
+        else:
+            rettype = (type(a), shape)
+        await self.returnType(rettype)
+        a = await self.gather(a)
+        return np.cumulative_sum(a, axis=axis, include_initial=include_initial)
+
+    @asyncoro.mpc_coro_no_pc
     async def np_negative(self, a):
         """Secure elementwise negation -a (additive inverse) of a."""
         if not a.frac_length:
