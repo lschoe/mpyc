@@ -1382,7 +1382,7 @@ class SecureFixedPointArray(SecureArray):
                     if np.issubdtype(value.dtype, np.integer):
                         # Convert np.integer to Python int entries, to prevent overflow:
                         value = value.astype(object)
-                    value <<= self.frac_length  # NB: fails for np.floating entries in array value
+                    value = value << self.frac_length  # NB: fails for np.floating entries in value
                     value = self.sectype.field.array(value)
                 else:
                     raise TypeError(f'Invalid dtype {value.dtype}')

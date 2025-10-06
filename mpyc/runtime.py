@@ -83,7 +83,11 @@ class Runtime:
         self._logging_enabled = not options.no_log
         self._program_counter = [0, 0]  # [hopping-counter, program-depth]
         self._pc_level = 0  # used for implementation of barriers
-        self._loop = asyncio.get_event_loop()  # cache event loop
+        try:  # cache event loop
+            self._loop = asyncio.get_event_loop()
+        except RuntimeError:  # NB: raised in Python 3.14+
+            self._loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self._loop)
         self._loop.set_exception_handler(asyncoro.exception_handler)  # exceptions re MPyC coroutine
         self.start_time = None
         self.aggregate_load = 0.0 * 10000  # unit: basis point 0.0001 = 0.01%
@@ -214,7 +218,7 @@ class Runtime:
         To facilitate matching of scheduled with completed tasks, an "address"
         based on the program counter is included as well the given label, if any.
         """
-        txt = f'Peek at {abs(mpc._program_counter[0]) % (1<<24):#08x}:'
+        txt = f'Peek at {abs(self._program_counter[0]) % (1<<24):#08x}:'
         if label:
             txt += f' {label}'
         logging.debug(f'{txt} Task scheduled')
@@ -2031,7 +2035,7 @@ class Runtime:
             f = 0
             await self.returnType(Future)
 
-        n = len(x)  # TODO: for sufficiently large n use mpc.eq(mpc.sum(x), n) instead
+        n = len(x)  # TODO: for sufficiently large n use self.eq(self.sum(x), n) instead
         while n > 1:
             h = [x[i] * x[i+1] for i in range(n%2, n, 2)]
             if f:
@@ -2911,7 +2915,7 @@ class Runtime:
             rettype = (stype, a.shape)
         await self.returnType(rettype)
         a = await self.gather(a)
-        return np.flip(a)
+        return np.flip(a, axis=axis)
 
     @asyncoro.mpc_coro_no_pc
     async def np_fliplr(self, a):
@@ -3935,6 +3939,41 @@ class Runtime:
             c[i] = x[i] + y[i] - c[i]*2 + (c[i-1] if i > 0 else 0)
         return c
 
+    def np_add_bits(self, a, b):
+        """Secure binary addition of arrays of bit vectors a and b."""
+        # NB: assume a is secure array
+        if not a.size:
+            return a.copy()
+
+        def f(i, j, high=False):
+            n = j - i
+            if n == 1:
+                a_i = a[..., i:i+1]
+                b_i = b[..., i:i+1]
+                c = a_i * b_i
+                if high:
+                    d = a_i + b_i - c*2
+            else:
+                h = i + n//2
+                e1 = f(i, h, high=high)
+                c2, d2 = f(h, j, high=True)
+                c1 = e1[0] if high else e1
+                c2 += c1[..., -1, np.newaxis] * d2
+                c = self.np_concatenate((c1, c2), axis=-1)
+                if high:
+                    d1 = e1[1]
+                    d2 *= d1[..., -1, np.newaxis]
+                    d = self.np_concatenate((d1, d2), axis=-1)
+            e = (c, d) if high else c
+            return e
+
+        n = a.shape[-1]
+        c = f(0, n)
+        # c = prefix carries for addition of a and b
+        c_1 = np.roll(c, 1, axis=-1)
+        c_1 = self.np_update(c_1, (..., 0), type(c).sectype(0))
+        return a + b - c*2 + c_1
+
     @asyncoro.mpc_coro
     async def to_bits(self, a, l=None):
         """Secure extraction of l (or all) least significant bits of a."""  # a la [ST06].
@@ -3969,8 +4008,8 @@ class Runtime:
             if field.ext_deg > 1:
                 raise TypeError('Binary field or prime field required.')
 
-            a = self.convert(a, self.SecInt(l=1+stype.field.order.bit_length()))
-            a_bits = self.to_bits(a)
+            a = self.convert(a, self.SecInt(l=1+stype.bit_length))
+            a_bits = self.to_bits(a, l=l)
             return self.convert(a_bits, stype)
 
         k = self.options.sec_param
@@ -3984,7 +4023,7 @@ class Runtime:
         c = await self.output(a + ((1<<stype.bit_length) + (r_divl << l) - r_modl))
         c = c.value % (1<<l)
         c_bits = [(c >> i) & 1 for i in range(l)]
-        r_bits = [stype(r.value) for r in r_bits]  # TODO: drop .value, fix secfxp(r) if r field elt
+        r_bits = [stype(r.value if f else r) for r in r_bits]  # NB: .value required for secfxp
         a_bits = self.add_bits(r_bits, c_bits)
         if rshift_f:
             a_bits = [field(0) for _ in range(f)] + a_bits
@@ -3993,7 +4032,6 @@ class Runtime:
     @asyncoro.mpc_coro
     async def np_to_bits(self, a, l=None):
         """Secure extraction of l (or all) least significant bits of a."""  # a la [ST06].
-        # TODO: other cases than characteristic=2 case, see self.to_bits()
         stype = type(a).sectype
         if l is None:
             l = stype.bit_length
@@ -4001,22 +4039,62 @@ class Runtime:
         shape = a.shape + (l,)
         await self.returnType((type(a), True, shape))
         field = stype.field
+        f = stype.frac_length
+        rshift_f = f and a.integral  # optimization for integral fixed-point numbers
+        if rshift_f:
+            # f least significant bits of a are all 0
+            if f >= l:
+                return field.array(np.zeros(shape, dtype='O'), check=False)
+
+            l -= f
+            shape = a.shape + (l,)
+
+        n = a.size
+        r_bits = await self.np_random_bits(field, n * l)
+        r_bits = r_bits.reshape(shape)
+        shifts = np.arange(l)
+        r_modl = np.sum(r_bits.value << shifts, axis=-1)
 
         if issubclass(stype, self.SecureFiniteField):
             if field.characteristic == 2:
-                n = a.size
-                r_bits = await self.np_random_bits(field, n * l)
-                r_bits = r_bits.reshape(shape)
-                shifts = np.arange(l)
-                r_modl = np.sum(r_bits.value << shifts, axis=a.ndim)
                 a = await self.gather(a)
                 c = await self.output(a + r_modl)
                 c = np.vectorize(int, otypes='O')(c.value)
-                c_bits = np.right_shift.outer(c, shifts) & 1
+                c_bits = np.int8(np.right_shift.outer(c, shifts) & 1)
                 return c_bits + r_bits
 
             if field.ext_deg > 1:
                 raise TypeError('Binary field or prime field required.')
+
+            # TODO: np_convert()
+            a = self.np_tolist(a.flatten())
+            a = self.convert(a, self.SecInt(l=1+stype.bit_length))
+            a = self.np_fromlist(a)
+            a_bits = self.np_to_bits(a, l=l)
+            a_bits = self.np_tolist(a_bits.flatten())
+            a_bits = self.convert(a_bits, stype)
+            a_bits = self.np_fromlist(a_bits).reshape(*shape)
+            return a_bits
+
+        k = self.options.sec_param
+        r_divl = self._np_randoms(field, n, 1<<(stype.bit_length + k - l))
+        if self.options.no_prss:
+            r_divl = await r_divl
+        r_divl = r_divl.value.reshape(a.shape)
+        a = await self.gather(a)
+        if rshift_f:
+            a = a >> f
+        c = await self.output(a + ((1<<stype.bit_length) + (r_divl << l) - r_modl))
+        c = c.value % (1<<l)
+        c_bits = np.int8(np.right_shift.outer(c, shifts) & 1)
+        if f:
+            r_bits = r_bits.value  # NB: .value required for secfxp
+        r_bits = stype.array(r_bits)
+        a_bits = self.np_add_bits(r_bits, c_bits)
+        if rshift_f:
+            z = field.array(np.zeros(a.shape + (f,), dtype='O'), check=False)
+            a_bits = self.np_concatenate((z, a_bits), axis=-1)
+        return a_bits
 
     @asyncoro.mpc_coro_no_pc
     async def from_bits(self, x):
@@ -4100,7 +4178,11 @@ class Runtime:
         """
         if bits:
             if not isinstance(a, int):
-                x = self.vector_add([a] * len(x), self.scalar_mul(1 - 2*a, x))
+                if isinstance(x, self.SecureArray):  # TODO: document use of NumPy arrays for find()
+                    x = a + (1 - 2*a) * x
+                    x = self.np_fromlist(x)
+                else:
+                    x = self.vector_add([a] * len(x), self.scalar_mul(1 - 2*a, x))
             elif a == 1:
                 x = [1-b for b in x]
         else:
@@ -4181,19 +4263,27 @@ class Runtime:
         return ix
 
     def _norm(self, a):  # signed normalization factor
+        f = type(a).frac_length
         if isinstance(a, self.SecureArray):
-            # TODO: vectorized version of _norm()
-            v = list(map(self._norm, self.np_tolist(a.flatten())))
-            return mpc.np_fromlist(v).reshape(*a.shape)
+            l = type(a).sectype.bit_length
+            x = self.np_to_bits(a)  # low to high bits
+            s = 1 - x[..., -1]  # inverted sign bits
+            x = x[..., :-1]
+            x = x.reshape(-1, l-1)
+            x = np.flip(x, axis=-1)
+            cs_f = lambda b, i: (b+1) << i
+            nf = [self.find(x, s, cs_f=cs_f) for x, s in zip(x, s.flatten())]
+            nf = self.np_fromlist(nf)
+            nf = nf.reshape(*a.shape)
+            return (s*2 - 1) * nf * (2**(f - (l-1)))  # NB: f <= l
 
         l = type(a).bit_length
-        f = type(a).frac_length
         x = self.to_bits(a)  # low to high bits
-        b = x[-1]  # sign bit
+        s = 1 - x[-1]  # inverted sign bit
         del x[-1]
         x.reverse()
-        nf = self.find(x, 1-b, cs_f=lambda b, i: (b+1) << i)
-        return (1 - b*2) * nf * (2**(f - (l-1)))  # NB: f <= l
+        nf = self.find(x, s, cs_f=lambda b, i: (b+1) << i)
+        return (s*2 - 1) * nf * (2**(f - (l-1)))  # NB: f <= l
 
     def _rec(self, a):  # enhance performance by reducing no. of truncs
         f = type(a).frac_length
@@ -4290,7 +4380,7 @@ class Runtime:
         a = self.convert(a, secfxp2)
         a = (a / (2*math.pi)) * n
         a = self.trunc(a) << k
-        chi = await mpc.output(a + psi + R * n, raw=True)
+        chi = await self.output(a + psi + R * n, raw=True)
         chi = chi.value >> k
         chi = (chi % n) * 2*math.pi/n
         c, s = math.cos(chi), math.sin(chi)

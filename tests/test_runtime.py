@@ -118,6 +118,10 @@ class Arithmetic(unittest.TestCase):
 
         self.assertEqual(mpc.run(mpc.output(c)).dtype, object)
 
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[...,:2],
+                       [[[[1, 0], [1, 1]], [[1, 1], [1, 0]]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-c)))[...,:2],
+                       [[[[1, 1], [1, 0]], [[1, 0], [1, 1]]]])
         np.assertEqual(mpc.run(mpc.output(c == c)), True)
         np.assertEqual(mpc.run(mpc.output(c != c)), False)
         np.assertEqual(mpc.run(mpc.output(c < c)), False)
@@ -247,8 +251,9 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c.sum(axis=(0, 2), keepdims=True))),
                        a.sum(axis=(0, 2), keepdims=True))
         np.assertEqual(mpc.run(mpc.output(np.cumsum(c))), np.cumsum(a))
-        np.assertEqual(mpc.run(mpc.output(np.cumulative_sum(c, axis=1, include_initial=True))),
-                       np.cumulative_sum(a, axis=1, include_initial=True))
+        if np.lib.NumpyVersion(np.__version__) >= '2.1.0':
+            np.assertEqual(mpc.run(mpc.output(np.cumulative_sum(c, axis=1, include_initial=True))),
+                           np.cumulative_sum(a, axis=1, include_initial=True))
         np.assertEqual(mpc.run(mpc.output(c**254 * c**0 * c**-253)), a)
 
         # TODO: c //= 2 secure int __floordiv__() etc.
@@ -293,6 +298,10 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(np.issubdtype(b.dtype, np.floating))
         np.assertEqual(mpc.run(mpc.output(np.block([[secfxp(9.5)]]))), np.block([[9.5]]))
 
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[...,5:8],
+                       [[[1, 0, 1], [1, 0, 1]], [[1, 0, 0], [1, 1, 1]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-0.25-c)))[...,5:8],
+                       [[[0, 1, 0], [0, 1, 0]], [[0, 1, 1], [0, 0, 0]]])
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
         np.assertEqual(mpc.run(mpc.output(np.all(c == c))), True)
@@ -321,8 +330,9 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.sum(c, axis=(-2, 1)))), np.sum(a, axis=(-2, 1)))
         np.assertEqual(mpc.run(mpc.output(c.sum(axis=1, initial=1.5))), a.sum(axis=1, initial=1.5))
         np.assertEqual(mpc.run(mpc.output(np.cumsum(c, axis=0))), np.cumsum(a, axis=0))
-        np.assertEqual(mpc.run(mpc.output(np.cumulative_sum(c, axis=1, include_initial=True))),
-                       np.cumulative_sum(a, axis=1, include_initial=True))
+        if np.lib.NumpyVersion(np.__version__) >= '2.1.0':
+            np.assertEqual(mpc.run(mpc.output(np.cumulative_sum(c, axis=1, include_initial=True))),
+                           np.cumulative_sum(a, axis=1, include_initial=True))
         self.assertEqual(np.prod(c, axis=(-2, 1)).integral, False)
         np.assertEqual(mpc.run(mpc.output(np.prod(c, axis=(-2, 1)))), np.prod(a, axis=(-2, 1)))
         a = a.flatten()[:3]
@@ -404,10 +414,11 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.cumsum(c1).integral, False)
         self.assertEqual(np.cumsum(c1, axis=0).integral, False)
 
-        self.assertEqual(np.cumulative_sum(c2, axis=1).integral, True)
-        self.assertEqual(np.cumulative_sum(c2, axis=0).integral, True)
-        self.assertEqual(np.cumulative_sum(c1, axis=1).integral, False)
-        self.assertEqual(np.cumulative_sum(c1, axis=0).integral, False)
+        if np.lib.NumpyVersion(np.__version__) >= '2.1.0':
+            self.assertEqual(np.cumulative_sum(c2, axis=1).integral, True)
+            self.assertEqual(np.cumulative_sum(c2, axis=0).integral, True)
+            self.assertEqual(np.cumulative_sum(c1, axis=1).integral, False)
+            self.assertEqual(np.cumulative_sum(c1, axis=0).integral, False)
 
         self.assertEqual(mpc.np_sgn(c1).integral, True)
         self.assertEqual(mpc.np_sgn(c2).integral, True)
@@ -474,6 +485,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.append(c2, c2).integral, True)
         self.assertEqual(np.append(c1, c2).integral, False)
 
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c2)))[...,:6], 0)
+
         c3 = c1.copy()
         c3 = mpc.np_update(c3, (0, 0), secfxp(3))
         self.assertEqual(c3.integral, False)
@@ -509,13 +522,14 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(1/c)), 1/a)
 
         secfld = mpc.SecFld(3**2)
-        self.assertRaises(TypeError, mpc.np_to_bits, mpc.SecFld(3**2).array(np.array(2)))
+        self.assertRaises(TypeError, mpc.np_to_bits, secfld.array(np.array(2)))
         c = mpc.np_random_bits(secfld, 15)
         np.assertEqual(mpc.run(mpc.output(np.equal(c**2, c))), True)
 
         secfld = mpc.SecFld(min_order=2**16)
         a = np.array([[[-1, 0], [0, -1]]])
         c = secfld.array(a)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[...,-1], [[[1, 0], [0, 1]]])
         np.assertEqual(mpc.run(mpc.np_is_zero_public(c)), a == 0)
         self.assertEqual(mpc.run(mpc.output(c.flatten().tolist())), [-1, 0, 0, -1])
         np.assertEqual(mpc.run(mpc.output(np.outer(a, c))), np.outer(a, a))
@@ -523,8 +537,9 @@ class Arithmetic(unittest.TestCase):
                        np.convolve(a[0][0], a[0][0]))
         np.assertEqual(mpc.run(mpc.output(np.sum(c))), np.sum(a))
         np.assertEqual(mpc.run(mpc.output(np.cumsum(c))), np.cumsum(a))
-        np.assertEqual(mpc.run(mpc.output(np.cumulative_sum(c, axis=0, include_initial=True))),
-                       np.cumulative_sum(a, axis=0, include_initial=True))
+        if np.lib.NumpyVersion(np.__version__) >= '2.1.0':
+            np.assertEqual(mpc.run(mpc.output(np.cumulative_sum(c, axis=0, include_initial=True))),
+                           np.cumulative_sum(a, axis=0, include_initial=True))
         np.assertEqual(mpc.run(mpc.output(np.roll(c, 1))), np.roll(a, 1))
         self.assertEqual(len(c), 1)
         self.assertEqual(len(c.T), 2)
@@ -545,7 +560,8 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, np.convolve, c, c)
         self.assertRaises(ValueError, np.convolve, c[0], c[0][:0])
         self.assertRaises(ValueError, np.convolve, c[0][:0], c[0])
-        self.assertRaises(ValueError, np.cumulative_sum, c)
+        if np.lib.NumpyVersion(np.__version__) >= '2.1.0':
+            self.assertRaises(ValueError, np.cumulative_sum, c)
 
     def test_async(self):
         mpc.options.no_async = False

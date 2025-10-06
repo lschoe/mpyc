@@ -90,7 +90,7 @@ The actual code of the 'Hello world!' demo is very simple:
 
    if __name__ == '__main__':
        mpc.run(main())
-	   
+
 There is not much secrecy in this program, as the hello messages are broadcast using ``mpc.transfer()`` such that
 each party gets a hello message from all other parties (including one from itself).
 
@@ -984,6 +984,8 @@ For a properly selected aggregation period, the information leakage on individua
 at the same time ensuring that the plot still gives a useful impression of the situation.
 
 See `kmsurvival.py <https://github.com/lschoe/mpyc/blob/master/demos/kmsurvival.py>`_ for more information.
+Also see the vectorized version `np_kmsurvival.py <https://github.com/lschoe/mpyc/blob/master/demos/np_kmsurvival.py>`_,
+using secure NumPy arrays for more efficient MPyC code.
 
 cnnmnist.py
 -----------
