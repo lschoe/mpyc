@@ -4401,6 +4401,38 @@ class Runtime:
         s, c = self.sincos(a)
         return s / c
 
+    def np_vander(self, a, N=None, increasing=False):
+        """Securely generate Vandermonde matrix for given 1D array a.
+
+        The columns of the output matrix are powers of the input vector a.
+        The order of the powers is determined by the increasing boolean argument.
+        Specifically, when increasing is False, the ith output column is the input vector a
+        raised elementwise to the power of N-i-1.
+        """
+        if N is None:
+            N = len(a)
+        stype = type(a)
+
+        def f(n):
+            if n == 0:
+                b = stype(np.empty((len(a), 0), dtype='O'))
+            elif n == 1:
+                b = a.reshape(len(a), 1)
+            else:
+                b = f((n+1)//2)
+                c = b[:, :-1] if n%2 else b
+                b = np.hstack((b, b[:, -1:] * c))
+            return b
+
+        if N == 0:
+            b = stype(np.empty((len(a), 0), dtype='O'))
+        else:
+            b = stype(np.ones((len(a), 1), dtype='O'))
+            b = np.hstack((b, f(N-1)))
+        if not increasing:
+            b = np.fliplr(b)
+        return b
+
     def unit_vector(self, a, n):
         """Length-n unit vector [0]*a + [1] + [0]*(n-1-a) for secret a, assuming 0 <= a < n.
 

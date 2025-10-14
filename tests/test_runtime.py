@@ -50,6 +50,7 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c @ d)), a @ b)
         np.assertEqual(mpc.run(mpc.output(d @ d)), b @ b)
         np.assertEqual(mpc.run(mpc.output(np.outer(c, a))), np.outer(a, a))
+        np.assertEqual(mpc.run(mpc.output(np.vander(c[0][0] + 5, 6))), np.vander(a[0][0] + 5, 6))
         np.assertEqual(mpc.run(mpc.output(np.convolve(c[0][0], a[0][0]))),
                        np.convolve(a[0][0], a[0][0]))
         np.assertEqual(mpc.run(mpc.output(np.convolve(c[0][0], np.array([1, 2, 3])))),
@@ -118,9 +119,9 @@ class Arithmetic(unittest.TestCase):
 
         self.assertEqual(mpc.run(mpc.output(c)).dtype, object)
 
-        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[...,:2],
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[..., :2],
                        [[[[1, 0], [1, 1]], [[1, 1], [1, 0]]]])
-        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-c)))[...,:2],
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-c)))[..., :2],
                        [[[[1, 1], [1, 0]], [[1, 0], [1, 1]]]])
         np.assertEqual(mpc.run(mpc.output(c == c)), True)
         np.assertEqual(mpc.run(mpc.output(c != c)), False)
@@ -290,6 +291,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(mpc._reshare(c) @ c)), a @ a)
         np.assertEqual(mpc.run(mpc.output(np.outer(secfxp.array(np.array([2, 2])), c))),
                        np.outer([2, 2], a))
+        np.assertEqual(mpc.run(mpc.output(np.vander(c[0], increasing=True))),
+                       np.vander(a[0], increasing=True))
         np.assertEqual(mpc.run(mpc.output(np.convolve(c[0], c[1]))), np.convolve(a[0], a[1]))
         np.assertEqual(mpc.run(mpc.output(np.convolve(np.array([2.5, 2.5, 3]), c[0], mode='same'))),
                        np.convolve([2.5, 2.5, 3], a[0], mode='same'))
@@ -298,9 +301,9 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(np.issubdtype(b.dtype, np.floating))
         np.assertEqual(mpc.run(mpc.output(np.block([[secfxp(9.5)]]))), np.block([[9.5]]))
 
-        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[...,5:8],
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[..., 5:8],
                        [[[1, 0, 1], [1, 0, 1]], [[1, 0, 0], [1, 1, 1]]])
-        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-0.25-c)))[...,5:8],
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-0.25-c)))[..., 5:8],
                        [[[0, 1, 0], [0, 1, 0]], [[0, 1, 1], [0, 0, 0]]])
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
@@ -380,6 +383,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.outer(c1, c1).integral, False)
         self.assertEqual(np.outer(c2, c2).integral, True)
         self.assertEqual(np.outer(c1, c2).integral, False)
+        self.assertEqual(np.vander(c1[0]).integral, False)
+        self.assertEqual(np.vander(c2[0]).integral, True)
         self.assertEqual(np.convolve(c1[0], c1[0]).integral, False)
         self.assertEqual(np.convolve(c2[0], c2[0]).integral, True)
         self.assertEqual(np.convolve(a2[0], c2[0]).integral, True)
@@ -485,7 +490,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.append(c2, c2).integral, True)
         self.assertEqual(np.append(c1, c2).integral, False)
 
-        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c2)))[...,:6], 0)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c2)))[..., :6], 0)
 
         c3 = c1.copy()
         c3 = mpc.np_update(c3, (0, 0), secfxp(3))
@@ -529,10 +534,11 @@ class Arithmetic(unittest.TestCase):
         secfld = mpc.SecFld(min_order=2**16)
         a = np.array([[[-1, 0], [0, -1]]])
         c = secfld.array(a)
-        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[...,-1], [[[1, 0], [0, 1]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[..., -1], [[[1, 0], [0, 1]]])
         np.assertEqual(mpc.run(mpc.np_is_zero_public(c)), a == 0)
         self.assertEqual(mpc.run(mpc.output(c.flatten().tolist())), [-1, 0, 0, -1])
         np.assertEqual(mpc.run(mpc.output(np.outer(a, c))), np.outer(a, a))
+        np.assertEqual(mpc.run(mpc.output(np.vander(c[0][0]))), np.vander(a[0][0]))
         np.assertEqual(mpc.run(mpc.output(np.convolve(a[0][0], c[0][0]))),
                        np.convolve(a[0][0], a[0][0]))
         np.assertEqual(mpc.run(mpc.output(np.sum(c))), np.sum(a))

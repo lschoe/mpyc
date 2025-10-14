@@ -537,6 +537,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(np.diagflat(F_a), np.diagflat(a))
         np.assertEqual(np.diagonal(F_a), np.diagonal(a))
         np.assertEqual(np.vander(F_b[0]), np.vander(b[0]))
+        np.assertEqual(np.vander(F_b[0], 1), np.vander(b[0], 1))
+        np.assertEqual(np.vander(F_b[0], increasing=True), np.vander(b[0], increasing=True))
         np.assertEqual(np.convolve(F_a[0][:-2], F_b[0]), np.convolve(a[0][:-2], b[0]))
         np.assertEqual(np.convolve(F_a[0], [1, 2, 3]), np.convolve(a[0], [1, 2, 3]))
         np.assertEqual(np.convolve(F_a[0], (1, 2, 3)), np.convolve(a[0], (1, 2, 3)))
