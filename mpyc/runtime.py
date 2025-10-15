@@ -2359,6 +2359,7 @@ class Runtime:
         """Secure matrix product of arrays A and B, with broadcast."""
         shA = isinstance(A, self.SecureObject)
         shB = isinstance(B, self.SecureObject)
+        # NB: shA holds or shB holds (or both)
         stype = type(A) if shA else type(B)
         shape = np._matmul_shape(A.shape, B.shape)
         f = stype.frac_length
@@ -2368,13 +2369,31 @@ class Runtime:
             else:
                 rettype = (stype, shape)
         else:
-            A_integral = A.integral
-            B_integral = B.integral
+            rshift = True
+            if shA:
+                A_integral = A.integral
+            elif isinstance(A, np.ndarray):  # see also self.np_multiply()
+                if np.issubdtype(A.dtype, np.integer):
+                    rshift = False
+                    A_integral = True
+                elif np.issubdtype(A.dtype, np.floating):
+                    A = np.vectorize(round, otypes='O')(A * 2**f)
+                    A_integral = False
+                # TODO: handle A.dtype=object, checking if all elts are int
+            if shB:
+                B_integral = B.integral
+            elif isinstance(B, np.ndarray):  # see also self.np_multiply()
+                if np.issubdtype(B.dtype, np.integer):
+                    rshift = False
+                    B_integral = True
+                elif np.issubdtype(B.dtype, np.floating):
+                    B = np.vectorize(round, otypes='O')(B * 2**f)
+                    B_integral = False
+                # TODO: handle B.dtype=object, checking if all elts are int
             if shape is None:
                 rettype = (stype.sectype, A_integral and B_integral)
             else:
                 rettype = (stype, A_integral and B_integral, shape)
-            # TODO: handle A or B public integral value
         await self.returnType(rettype)
 
         if A is B:
@@ -2386,7 +2405,7 @@ class Runtime:
         else:
             B = await self.gather(B)
         C = A @ B
-        if f and (A_integral or B_integral):
+        if f and (A_integral or B_integral) and rshift:
             C >>= f  # NB: in-place rshift
         if shA and shB:
             C = self._reshare(C)

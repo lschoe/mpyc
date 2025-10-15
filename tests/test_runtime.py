@@ -289,6 +289,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(mpc.run(mpc.transfer(c, senders=0)))), a)
         np.assertEqual(mpc.run(mpc.output(mpc.input(c, senders=0))), a)
         np.assertEqual(mpc.run(mpc.output(mpc._reshare(c) @ c)), a @ a)
+        np.assertEqual(mpc.run(mpc.output(c @ a)), a @ a)
+        np.assertEqual(mpc.run(mpc.output(a @ c)), a @ a)
         np.assertEqual(mpc.run(mpc.output(np.outer(secfxp.array(np.array([2, 2])), c))),
                        np.outer([2, 2], a))
         np.assertEqual(mpc.run(mpc.output(np.vander(c[0], increasing=True))),
@@ -380,6 +382,8 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.matmul(c1, c1).integral, False)
         self.assertEqual(np.matmul(c1, c2).integral, False)
         self.assertEqual((c2 @ c2).integral, True)
+        self.assertEqual((c2 @ np.arange(2)).integral, True)
+        self.assertEqual((np.arange(2) @ c2).integral, True)
         self.assertEqual(np.outer(c1, c1).integral, False)
         self.assertEqual(np.outer(c2, c2).integral, True)
         self.assertEqual(np.outer(c1, c2).integral, False)
