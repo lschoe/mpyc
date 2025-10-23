@@ -149,7 +149,7 @@ def _item_shape(shape, key):
     except Exception as exc:  # IndexError, ValueError, or other
         logging.debug(f'Exception "{exc}" in mpyc.numpy._item_shape for {shape=} {key=}')
         # Let Numpy generate error message by calling a[key] for dummy array a of given shape:
-        return np.empty(shape)[key]
+        np.empty(shape)[key]
 
 
 try:

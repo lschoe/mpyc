@@ -2622,6 +2622,72 @@ class Runtime:
         return a.reshape(shape, order=order)
 
     @asyncoro.mpc_coro_no_pc
+    async def np_expand_dims(self, a, axis):
+        """Expand the shape of an array.
+
+        Insert new axis (or, axes) at the given axis position(s) in the expanded array shape.
+        """
+        if isinstance(axis, int):
+            axis = (axis,)
+        n = a.ndim + len(axis)
+        j = -1
+        try:
+            shape = tuple(1 if {i, i-n} & set(axis) else a.shape[j := j+1] for i in range(n))
+        except Exception as exc:  # IndexError
+            logging.debug(f'Exception "{exc}" in Runtime.np_expand_dims for {a.shape=} {axis=}')
+            # Let Numpy generate error message using dummy array:
+            np.expand_dims(np.empty(a.shape), axis)
+        if isinstance(a, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((type(a), a.integral, shape))
+        else:
+            await self.returnType((type(a), shape))
+        a = await self.gather(a)
+        return np.expand_dims(a, axis)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_squeeze(self, a, axis=None):
+        """Remove specified axes of length one from a."""
+        if axis is None:
+            axis = tuple(i for i in range(a.ndim) if a.shape[i] == 1)
+        elif isinstance(axis, int):
+            axis = (axis,)
+        shape = tuple(d for i, d in enumerate(a.shape) if i not in axis)
+        if isinstance(a, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((type(a), a.integral, shape))
+        else:
+            await self.returnType((type(a), shape))
+        a = await self.gather(a)
+        return np.squeeze(a, axis=axis)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_diag(self, a, k=0):
+        """Extract a diagonal or construct a diagonal array.
+
+        If a is a 2D array, return a copy of its kth diagonal.
+        If a is a 1D array, return a square 2D array with a on the kth diagonal.
+
+        Default diagonal is k=0.
+        Use k>0 for diagonals above the main diagonal,
+        and k<0 for diagonals below the main diagonal.
+        """
+        if a.ndim == 2:
+            m, n = a.shape
+            # Count all i, j with 0<=i<m, 0<=j<n, j=i+k, hence -k<=i<n-k.
+            shape = (max(min(m, n-k) - max(0, -k), 0),)
+        else:
+            d = abs(k) + a.size
+            shape = (d, d)
+        if isinstance(a, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((type(a), a.integral, shape))
+        else:
+            await self.returnType((type(a), shape))
+        a = await self.gather(a)
+        return np.diag(a, k=k)
+
+    @asyncoro.mpc_coro_no_pc
     async def np_copy(self, a, order='K'):
         # Note that numpy.copy() puts order='K', but ndarray.copy() puts order='C'.
         # Therefore, we put order='K' here and let SecureArray.copy() call np_copy() with order='C'.
@@ -4146,7 +4212,7 @@ class Runtime:
     def find(self, x, a, bits=True, e='len(x)', f=None, cs_f=None):
         """Return index ix of the first occurrence of a in list x.
 
-        The elements of x and a are assumed to be in {0, 1}, by default.
+        Both a and the elements of x are assumed to be in {0, 1}, by default.
         Set Boolean flag bits=False for arbitrary inputs.
 
         If a is not present in x, then ix=len(x) by default.
@@ -4196,14 +4262,11 @@ class Runtime:
         incurring some overhead.
         """
         if bits:
-            if not isinstance(a, int):
-                if isinstance(x, self.SecureArray):  # TODO: document use of NumPy arrays for find()
-                    x = a + (1 - 2*a) * x
-                    x = self.np_fromlist(x)
-                else:
-                    x = self.vector_add([a] * len(x), self.scalar_mul(1 - 2*a, x))
-            elif a == 1:
-                x = [1-b for b in x]
+            if isinstance(a, int):  # fast path
+                if a == 1:
+                    x = self.vector_sub([type(x[0])(1)] * len(x), x)
+            else:
+                x = self.vector_add([a] * len(x), self.scalar_mul(1 - 2*a, x))
         else:
             x = [b != a for b in x]
         # Problem is now reduced to finding the index of the first 0 in x.
@@ -4263,6 +4326,105 @@ class Runtime:
             y = tuple(y)
         return (nf, y) if e is None else y
 
+    def np_find(self, a, s, axis=-1, bits=True, e='a.shape[axis]', f=None, cs_f=None):
+        """Return index ix of the first occurrences of s in array a, along the given axis of a.
+        The search is done elementwise with broadcast.
+
+        All elements of a and s assumed to be in {0, 1}, by default.
+        Set Boolean flag bits=False for arbitrary inputs.
+
+        If s is not present in a, then ix=a.shape[-1] by default.
+        Set flag e=E to get ix=E instead if s is not present in a.
+        Set e=None to get the "raw" output as a pair (nf, ix), where
+        the indicator bits in nf are 1 if and only if s is not found in a.
+
+        For instance, E=-1 can be used to mimic Python's find() methods.
+        If E is a string, i=eval(E) will be returned where E is an expression
+        in terms of a.shape[axis]. As a simple example, E='a.shape[axis]-1' will enforce
+        that s is considered to be present in any case as the last element
+        of a, if not earlier.
+
+        The shape of ix is controlled by parameter keepdims.
+        If keepdims is not set (default), the shape of the indices is the shape of a
+        with the specified axis removed (converted to a scalar if no dimensions remain).
+        Otherwise, if keepdims is set, the axis along which the search is performed
+        is left in the result as dimension of size 1.
+
+        See self.find() for information on the use of f and cs_f.
+        """  # TODO: add keepdims
+        if bits:
+            if isinstance(a, int):  # fast path
+                if s == 1:
+                    a = 1 - a
+            else:
+                if isinstance(s, self.SecureObject) or np.any(s):
+                    if hasattr(s, 'shape'):
+                        s = np.expand_dims(s, axis)  # add axis for bits
+                    a = s + (1 - 2*s) * a
+        else:
+            a = a != s
+        # Problem is now reduced to finding the indices of the first 0s in a.
+
+        if cs_f is None:
+            if f is None:
+                type_f = int
+                f = lambda i: np.stack((i,))
+                cs_f = lambda b, i: (i + b,)
+            else:
+                type_f = type(f(0))
+                if issubclass(type_f, int):
+                    _f = f
+                    f = lambda i: np.stack((_f(i),)).reshape(-1, *((1,) * (a.ndim - 1)))
+                cs_f = lambda b, i: tuple(b * (f_i1 - f_i) + f_i for f_i, f_i1 in zip(f(i), f(i+1)))
+        else:
+            if f is None:
+                type_f = type(cs_f(0, 0))
+                if issubclass(type_f, int):
+                    _cs_f = cs_f
+                    cs_f = lambda b, i: (_cs_f(b, i),)
+                elif issubclass(type_f, list):
+                    _cs_f = cs_f
+                    cs_f = lambda b, i: tuple(_cs_f(b, i))
+                f = lambda i: np.stack(cs_f(0, i)).reshape(-1, *((1,) * (a.ndim - 1)))
+            else:
+                pass  # TODO: check correctness f vs cs_f
+
+        if isinstance(e, str):
+            e = eval(e)
+
+        axis %= a.ndim
+        if not a.size:
+            if e is None:
+                nf, c = 1, f(0)
+            else:
+                c = f(e)
+        else:
+            if axis != a.ndim - 1:
+                a = np.swapaxes(a, axis, -1)
+
+            def cl(i, j):
+                n = j - i
+                if n == 1:
+                    b = a[..., i]
+                    return self.np_stack((b,) + cs_f(b, i))
+
+                h = i + n//2
+                nf = cl(i, h)  # nf[0] <=> "0 is not found"
+                return self.np_where(nf[0], cl(h, j), nf)
+
+            c = cl(0, a.shape[-1])
+            nf, f_ix = c[0], c[1:]
+            if e is None:
+                c = f_ix
+            else:
+                c = self.np_where(nf, f(e), f_ix)
+
+        if issubclass(type_f, int):
+            c = c[0]
+        elif issubclass(type_f, tuple):
+            c = tuple(c)
+        return (nf, c) if e is None else c
+
     @asyncoro.mpc_coro
     async def indexOf(self, x, a, bits=False):
         """Return index of the first occurrence of a in x.
@@ -4288,12 +4450,8 @@ class Runtime:
             x = self.np_to_bits(a)  # low to high bits
             s = 1 - x[..., -1]  # inverted sign bits
             x = x[..., :-1]
-            x = x.reshape(-1, l-1)
             x = np.flip(x, axis=-1)
-            cs_f = lambda b, i: (b+1) << i
-            nf = [self.find(x, s, cs_f=cs_f) for x, s in zip(x, s.flatten())]
-            nf = self.np_fromlist(nf)
-            nf = nf.reshape(*a.shape)
+            nf = self.np_find(x, s, cs_f=lambda b, i: (b+1) * 2**i)  # TODO: << i for secure arrays
             return (s*2 - 1) * nf * (2**(f - (l-1)))  # NB: f <= l
 
         l = type(a).bit_length

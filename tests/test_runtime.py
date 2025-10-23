@@ -77,6 +77,15 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.vsplit(c, np.array([1]))[0])), np.vsplit(a, [1])[0])
         np.assertEqual(mpc.run(mpc.output(np.reshape(c, (-1,)))), np.reshape(a, (-1,)))
         np.assertEqual(mpc.run(mpc.output(np.reshape(c, -1))), np.reshape(a, -1))
+        np.assertEqual(mpc.run(mpc.output(np.expand_dims(c, -1))), np.expand_dims(a, -1))
+        np.assertEqual(mpc.run(mpc.output(np.expand_dims(c, (2, 0)))), np.expand_dims(a, (2, 0)))
+        np.assertEqual(mpc.run(mpc.output(np.squeeze(c))), np.squeeze(a))
+        np.assertEqual(mpc.run(mpc.output(np.squeeze(c, 0))), np.squeeze(a, 0))
+        np.assertEqual(mpc.run(mpc.output(np.diag(c[0]))), np.diag(a[0]))
+        np.assertEqual(mpc.run(mpc.output(np.diag(c[0], 1))), np.diag(a[0], 1))
+        for k in range(-4, 4):
+            np.assertEqual(mpc.run(mpc.output(np.diag(c[0, :, :1], k))), np.diag(a[0, :, :1], k))
+        np.assertEqual(mpc.run(mpc.output(np.diag(c[0][0], -2))), np.diag(a[0][0], -2))
         np.assertEqual(mpc.run(mpc.output(np.flip(c))), np.flip(a))
         np.assertEqual(mpc.run(mpc.output(np.fliplr(c))), np.fliplr(a))
         np.assertEqual(mpc.run(mpc.output(np.flipud(c))), np.flipud(a))
@@ -123,6 +132,28 @@ class Arithmetic(unittest.TestCase):
                        [[[[1, 0], [1, 1]], [[1, 1], [1, 0]]]])
         np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-c)))[..., :2],
                        [[[[1, 1], [1, 0]], [[1, 0], [1, 1]]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(mpc.np_to_bits(c), np.array([1, 0])))),
+                       [[[0, 2], [0, 1]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(mpc.np_to_bits(c), secint(0)))),
+                       [[[1, 2], [2, 1]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(mpc.np_to_bits(c).swapaxes(1, 3), 0,
+                                                      axis=1))), [[[1, 2], [2, 1]]])
+        np.assertEqual(mpc.np_find(c[1:], 0, bits=False), 2)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c[:, 1:], 1, bits=False))), [[1]])
+        np.assertEqual(mpc.np_find(c[1:], 1, axis=0, bits=False), 0)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 0, bits=False))), 2)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 0, bits=False, e=-1))), -1)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 3, bits=False, e=-1))), [[1, 0]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 3, axis=1, bits=False, e=-1))), [[1, 0]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 3, axis=0, bits=False, e=-1))),
+                       [[-1, 0], [0, -1]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 2, axis=0, bits=False, e=-1))), -1)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 1, axis=0, bits=False, e=-1))),
+                       [[0, -1], [-1, 0]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 3, bits=False, f=lambda i: (i+5)//2))),
+                       [[3, 2]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(mpc.np_to_bits(c), 1, e=None)[0])), 0)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 2, axis=0, bits=False, e=None)[1])), 1)
         np.assertEqual(mpc.run(mpc.output(c == c)), True)
         np.assertEqual(mpc.run(mpc.output(c != c)), False)
         np.assertEqual(mpc.run(mpc.output(c < c)), False)
@@ -307,6 +338,11 @@ class Arithmetic(unittest.TestCase):
                        [[[1, 0, 1], [1, 0, 1]], [[1, 0, 0], [1, 1, 1]]])
         np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(-0.25-c)))[..., 5:8],
                        [[[0, 1, 0], [0, 1, 0]], [[0, 1, 1], [0, 0, 0]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 2.5, bits=False))), [1, 2])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 0, bits=False, e=-1))), -1)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 4.5, bits=False, e=-1))), [-1, 0])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 4.5, bits=False, f=lambda i: (i+5)//2))),
+                       [3, 2])
         np.assertEqual(mpc.run(mpc.output(np.equal(c, c))), True)
         np.assertEqual(mpc.run(mpc.output(np.equal(c, 0))), False)
         np.assertEqual(mpc.run(mpc.output(np.all(c == c))), True)
@@ -467,6 +503,12 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.flipud(c2).integral, True)
         self.assertEqual(np.reshape(c1, -1).integral, False)
         self.assertEqual(np.reshape(c2, -1).integral, True)
+        self.assertEqual(np.expand_dims(c1, -1).integral, False)
+        self.assertEqual(np.expand_dims(c2, -1).integral, True)
+        self.assertEqual(np.squeeze(c1).integral, False)
+        self.assertEqual(np.squeeze(c2).integral, True)
+        self.assertEqual(np.diag(c1).integral, False)
+        self.assertEqual(np.diag(c2).integral, True)
         self.assertEqual(np.roll(c1, -1).integral, False)
         self.assertEqual(np.roll(c2, -1).integral, True)
         self.assertEqual(np.rot90(c1).integral, False)
@@ -539,6 +581,10 @@ class Arithmetic(unittest.TestCase):
         a = np.array([[[-1, 0], [0, -1]]])
         c = secfld.array(a)
         np.assertEqual(mpc.run(mpc.output(mpc.np_to_bits(c)))[..., -1], [[[1, 0], [0, 1]]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 2, bits=False, e=-1))), -1)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, 0, bits=False))), [[1, 0]])
+        np.assertEqual(mpc.run(mpc.output(mpc.np_find(c, -1, bits=False, f=lambda i: i+5))),
+                       [[5, 6]])
         np.assertEqual(mpc.run(mpc.np_is_zero_public(c)), a == 0)
         self.assertEqual(mpc.run(mpc.output(c.flatten().tolist())), [-1, 0, 0, -1])
         np.assertEqual(mpc.run(mpc.output(np.outer(a, c))), np.outer(a, a))
@@ -570,6 +616,10 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, np.convolve, c, c)
         self.assertRaises(ValueError, np.convolve, c[0], c[0][:0])
         self.assertRaises(ValueError, np.convolve, c[0][:0], c[0])
+        self.assertRaises(ValueError, np.expand_dims, c, 3)
+        self.assertRaises(ValueError, np.squeeze, c, 0)
+        self.assertRaises(ValueError, np.diag, np.stack((c, c)))
+
         if np.lib.NumpyVersion(np.__version__) >= '2.1.0':
             self.assertRaises(ValueError, np.cumulative_sum, c)
 

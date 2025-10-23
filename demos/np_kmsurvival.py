@@ -5,7 +5,7 @@ using secure fixed-point arrays for NumPy-based vectorized computation.
 
 The secure fixed-point divisions (reciprocals), which form the bottleneck for
 the logrank test, are now combined in a vectorized manner operating on a single
-secure fixed-point array. This gives a speedup by a factor of 2 roughly,
+secure fixed-point array. This gives a speedup by a factor of 6 to 9 roughly,
 assuming enough memory. With limited memory, the throttled implementation of
 kmsurvival.py may be faster. See function logrank_test() below.
 
