@@ -2637,6 +2637,7 @@ class Runtime:
             logging.debug(f'Exception "{exc}" in Runtime.np_expand_dims for {a.shape=} {axis=}')
             # Let Numpy generate error message using dummy array:
             np.expand_dims(np.empty(a.shape), axis)
+
         if isinstance(a, self.SecureFixedPointArray):
             assert a.integral is not None
             await self.returnType((type(a), a.integral, shape))
@@ -2648,11 +2649,12 @@ class Runtime:
     @asyncoro.mpc_coro_no_pc
     async def np_squeeze(self, a, axis=None):
         """Remove specified axes of length one from a."""
+        n = a.ndim
         if axis is None:
-            axis = tuple(i for i in range(a.ndim) if a.shape[i] == 1)
+            axis = tuple(i for i in range(n) if a.shape[i] == 1)
         elif isinstance(axis, int):
             axis = (axis,)
-        shape = tuple(d for i, d in enumerate(a.shape) if i not in axis)
+        shape = tuple(d for i, d in enumerate(a.shape) if not {i, i-n} & set(axis))
         if isinstance(a, self.SecureFixedPointArray):
             assert a.integral is not None
             await self.returnType((type(a), a.integral, shape))
@@ -2665,8 +2667,8 @@ class Runtime:
     async def np_diag(self, a, k=0):
         """Extract a diagonal or construct a diagonal array.
 
-        If a is a 2D array, return a copy of its kth diagonal.
-        If a is a 1D array, return a square 2D array with a on the kth diagonal.
+        For 2D array a, return its kth diagonal.
+        For 1D array a, return square 2D array with a on the kth diagonal.
 
         Default diagonal is k=0.
         Use k>0 for diagonals above the main diagonal,
@@ -2686,6 +2688,115 @@ class Runtime:
             await self.returnType((type(a), shape))
         a = await self.gather(a)
         return np.diag(a, k=k)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_diagflat(self, a, k=0):
+        """Create 2D array with the (flattened) input as kth diagonal.
+
+        Default diagonal is k=0.
+        Use k>0 for diagonals above the main diagonal,
+        and k<0 for diagonals below the main diagonal.
+        """
+        d = abs(k) + a.size
+        shape = (d, d)
+        if isinstance(a, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((type(a), a.integral, shape))
+        else:
+            await self.returnType((type(a), shape))
+        a = await self.gather(a)
+        return np.diagflat(a, k=k)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_diagonal(self, a, offset=0, axis1=0, axis2=1):
+        """Return specified diagonals.
+
+        For 2D array a, return diagonal of a with the given offset=k,
+        that is, the collection of elements of the form a[i, i+k].
+        For higher dimensional arrays a, axes axis1 and axis2 are used
+        to determine the 2D subarray whose diagonals are returned.
+        The shape of the resulting array is determined by removing
+        axis1 and axis2 and appending the length of the resulting diagonals.
+
+        Default diagonal is offset=0.
+        Use offset>0 for diagonals above the main diagonal,
+        and offset<0 for diagonals below the main diagonal.
+        """
+        shape = list(a.shape)
+        try:
+            ax1 = axis1 % a.ndim
+            ax2 = axis2 % a.ndim
+            # NB: pop rightmost axis first
+            if ax1 > ax2:
+                m, n = shape.pop(ax1), shape.pop(ax2)
+            elif ax1 < ax2:
+                n, m = shape.pop(ax2), shape.pop(ax1)
+            else:
+                raise ValueError()
+        except Exception as exc:  # IndexError, ValueError
+            logging.debug(f'Exception "{exc}" in Runtime.np_diagonal for {a.shape=}'
+                          '{offset=} {axis1=} {axis2=}')
+            # Let Numpy generate error message using dummy array:
+            np.diagonal(np.empty(a.shape), offset=offset, axis1=axis1, axis2=axis2)
+
+        # Count all i, j with 0<=i<m, 0<=j<n, j=i+k, hence -k<=i<n-k with k=offset
+        shape.append(max(min(m, n-offset) - max(0, -offset), 0))
+        shape = tuple(shape)
+        if isinstance(a, self.SecureFixedPointArray):
+            assert a.integral is not None
+            await self.returnType((type(a), a.integral, shape))
+        else:
+            await self.returnType((type(a), shape))
+        a = await self.gather(a)
+        return np.diagonal(a, offset=offset, axis1=axis1, axis2=axis2)
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_trace(self, a, offset=0, axis1=0, axis2=1):
+        """Return the sum along diagonals of the array.
+
+        For 2D array a, return the sum along diagonal of a with the given offset=k,
+        that is, sum of elements of the form a[i, i+k].
+        For higher dimensional arrays a, axes axis1 and axis2 are used
+        to determine the 2D subarray whose traces are returned.
+        The shape of the result array is obtained by removing axis1 and axis2;
+        0D arrays are converted to scalars.
+
+        Default diagonal is offset=0.
+        Use offset>0 for diagonals above the main diagonal,
+        and offset<0 for diagonals below the main diagonal.
+        """
+        shape = list(a.shape)
+        try:
+            ax1 = axis1 % a.ndim
+            ax2 = axis2 % a.ndim
+            # NB: delete rightmost axis first
+            if ax1 > ax2:
+                del shape[ax1], shape[ax2]
+            elif ax1 < ax2:
+                del shape[ax2], shape[ax1]
+            else:
+                raise ValueError()
+        except Exception as exc:  # IndexError, ValueError
+            logging.debug(f'Exception "{exc}" in Runtime.np_diagonal for {a.shape=}'
+                          '{offset=} {axis1=} {axis2=}')
+            # Let Numpy generate error message using dummy array:
+            np.trace(np.empty(a.shape), offset=offset, axis1=axis1, axis2=axis2)
+
+        # Count all i, j with 0<=i<m, 0<=j<n, j=i+k, hence -k<=i<n-k with k=offset
+        shape = tuple(shape)
+        if shape == ():
+            if isinstance(a, self.SecureFixedPointArray):
+                rettype = (type(a).sectype, a.integral)
+            else:
+                rettype = type(a).sectype
+        else:
+            if isinstance(a, self.SecureFixedPointArray):
+                rettype = (type(a), a.integral, shape)
+            else:
+                rettype = (type(a), shape)
+        await self.returnType(rettype)
+        a = await self.gather(a)
+        return np.trace(a, offset=offset, axis1=axis1, axis2=axis2)
 
     @asyncoro.mpc_coro_no_pc
     async def np_copy(self, a, order='K'):
@@ -4392,20 +4503,18 @@ class Runtime:
         if isinstance(e, str):
             e = eval(e)
 
-        axis %= a.ndim
         if not a.size:
             if e is None:
                 nf, c = 1, f(0)
             else:
                 c = f(e)
         else:
-            if axis != a.ndim - 1:
-                a = np.swapaxes(a, axis, -1)
+            a = self.np_swapaxes(a, axis, -1)  # switch to last axis
 
             def cl(i, j):
                 n = j - i
                 if n == 1:
-                    b = a[..., i]
+                    b = a[..., i:i+1]  # NB: keep last dimension
                     return self.np_stack((b,) + cs_f(b, i))
 
                 h = i + n//2
@@ -4413,6 +4522,7 @@ class Runtime:
                 return self.np_where(nf[0], cl(h, j), nf)
 
             c = cl(0, a.shape[-1])
+            c = np.squeeze(c, -1)
             nf, f_ix = c[0], c[1:]
             if e is None:
                 c = f_ix

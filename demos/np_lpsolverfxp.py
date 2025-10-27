@@ -67,8 +67,8 @@ async def main():
 
     await mpc.start()
 
-    cobasis = secfxp.array(np.arange(n))
-    basis = secfxp.array(np.arange(n, n + m))
+    cobasis = np.arange(n)
+    basis = np.arange(n, n + m)
 
     iteration = 0
     while await mpc.output((arg_min := T[0, :-1].argmin())[1] < 0):

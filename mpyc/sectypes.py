@@ -1217,6 +1217,12 @@ class SecureArray(SecureObject):
     def copy(self, order='C'):
         return runtime.np_copy(self, order=order)
 
+    def diagonal(self, offset=0, axis1=0, axis2=1):
+        return runtime.np_diagonal(self, offset=offset, axis1=axis1, axis2=axis2)
+
+    def trace(self, offset=0, axis1=0, axis2=1):
+        return runtime.np_trace(self, offset=offset, axis1=axis1, axis2=axis2)
+
     def transpose(self, *axes):
         if axes == ():
             axes = None
