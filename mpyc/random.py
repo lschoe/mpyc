@@ -22,9 +22,9 @@ when n is equal to the order of sectype's finite field.
 
 import math
 import itertools
+from mpyc.numpy import np
 from mpyc import asyncoro
 from mpyc import sectypes
-from mpyc.numpy import np
 
 runtime = None
 
@@ -104,20 +104,21 @@ async def random_unit_vector(sectype, n):
     u = [x[i], 1 - x[i]]
     while i:
         i -= 1
+        v = runtime.scalar_mul(x[i], u)
         if (b >> i) & 1:
-            v = runtime.scalar_mul(x[i], u)
             v.extend(runtime.vector_sub(u, v))
             u = v
-        elif await runtime.output(u[0] * x[i]):  # TODO: mul_public
+        elif await runtime.output(v[0]):
             # restart, keeping unused secret random bits x[:i]
             x[i:] = runtime.random_bits(sectype, k - i)
             i = k-1
             u = [x[i], 1 - x[i]]
         else:
-            v = runtime.scalar_mul(x[i], u[1:])
+            v = v[1:]
             v.extend(runtime.vector_sub(u[1:], v))
             u[1:] = v
     return u
+
 
 @asyncoro.mpc_coro
 async def np_random_unit_vector(sectype, n):
@@ -137,16 +138,16 @@ async def np_random_unit_vector(sectype, n):
     u = runtime.np_concatenate((x[i:i+1], 1 - x[i:i+1]))
     while i:
         i -= 1
+        v = x[i] * u
         if (b >> i) & 1:
-            v = x[i] * u
             u = runtime.np_concatenate((v, u - v))
-        elif await runtime.output(u[0] * x[i]):  # TODO: mul_public
+        elif await runtime.output(v[0]):
             # restart, keeping unused secret random bits x[:i]
             x = runtime.np_concatenate((x[:i], runtime.np_random_bits(sectype, k - i)))
             i = k-1
             u = runtime.np_concatenate((x[i:i+1], 1 - x[i:i+1]))
         else:
-            v = x[i] * u[1:]
+            v = v[1:]
             u = runtime.np_concatenate((u[:1], v, u[1:] - v))
     return u
 
