@@ -24,6 +24,7 @@ import math
 import itertools
 from mpyc import asyncoro
 from mpyc import sectypes
+from mpyc.numpy import np
 
 runtime = None
 
@@ -116,6 +117,37 @@ async def random_unit_vector(sectype, n):
             v = runtime.scalar_mul(x[i], u[1:])
             v.extend(runtime.vector_sub(u[1:], v))
             u[1:] = v
+    return u
+
+@asyncoro.mpc_coro
+async def np_random_unit_vector(sectype, n):
+    """Uniformly random secret rotation of [1] + [0]*(n-1).
+
+    Expected number of secret random bits needed is ceil(log_2 n) + c,
+    with c a small constant, c < 3.
+    """
+    await runtime.returnType((sectype.array, True, (n,)))
+    if n == 1:
+        return sectype.array(np.array([1]))
+
+    b = n-1
+    k = b.bit_length()
+    x = runtime.np_random_bits(sectype, k)
+    i = k-1
+    u = runtime.np_concatenate((x[i:i+1], 1 - x[i:i+1]))
+    while i:
+        i -= 1
+        if (b >> i) & 1:
+            v = x[i] * u
+            u = runtime.np_concatenate((v, u - v))
+        elif await runtime.output(u[0] * x[i]):  # TODO: mul_public
+            # restart, keeping unused secret random bits x[:i]
+            x = runtime.np_concatenate((x[:i], runtime.np_random_bits(sectype, k - i)))
+            i = k-1
+            u = runtime.np_concatenate((x[i:i+1], 1 - x[i:i+1]))
+        else:
+            v = x[i] * u[1:]
+            u = runtime.np_concatenate((u[:1], v, u[1:] - v))
     return u
 
 

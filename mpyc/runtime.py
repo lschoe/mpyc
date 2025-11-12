@@ -4755,7 +4755,7 @@ class Runtime:
         # TODO: extend to arrays for a
         await self.returnType((type(a).array, True, (n,)))
         # TODO: conversion GF(p) to secint, 0<=a<n, n < p/2 needed? Like for self.unit_vector(a, n).
-        u = self.np_fromlist(self.random.random_unit_vector(type(a), n))
+        u = self.random.np_random_unit_vector(type(a), n)
         u = await self.gather(u)
         r = u @ np.arange(n)
         f = type(a).frac_length
