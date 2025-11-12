@@ -322,3 +322,81 @@ def uniform(sectype, a, b):
 
     s = math.copysign(1, b - a)
     return a + _randbelow(sectype, round(abs(a - b) * 2**f)) * s * 2**-f
+
+
+@asyncoro.mpc_coro
+async def np_random_unit_vector(sectype, n):
+    """Uniformly random secret rotation of [1] + [0]*(n-1).
+
+    Expected number of secret random bits needed is ceil(log_2 n) + c,
+    with c a small constant, c < 3.
+    """
+
+    await runtime.returnType((sectype.array, True, (n,)))
+
+    if n == 1:
+        return runtime.np_fromlist([sectype(1)])
+
+    b = n - 1
+    k = b.bit_length()
+    x = runtime.np_random_bits(sectype, k)
+
+    i = k - 1
+    u = runtime.np_fromlist([x[i], 1 - x[i]])
+    while i:
+        i -= 1
+        if (b >> i) & 1:
+            v = x[i] * u
+            v = runtime.np_hstack((v, u - v))
+            u = v
+        elif await runtime.output(u[0] * x[i]):  # TODO: mul_public
+            # restart, keeping unused secret random bits x[:i]
+            x = runtime.np_hstack((x[:i], runtime.np_random_bits(sectype, k - i)))
+            i = k - 1
+            u = runtime.np_fromlist([x[i], 1 - x[i]])
+        else:
+            v = x[i] * u[1:]
+            v = runtime.np_hstack((v, u[1:] - v))
+            u = runtime.np_hstack((u[:1], v))
+    return u
+
+
+async def np_shuffle(a, axis=None):
+    """Shuffle numpy-like array x secretly in-place, and return None.
+
+    Given array x may contain public or secret elements.
+    """
+    sectype = type(a).sectype
+
+    if len(a.shape) > 2:
+        raise ValueError("Can only shuffle 1D and 2D arrays")
+
+    if axis is None:
+        axis = 0
+
+    if axis not in (0,1,-1):
+        raise ValueError("Invalid axis")
+
+    x = runtime.np_copy(a)
+
+    if axis != 0:
+        x = runtime.np_transpose(x)
+
+    n = x.shape[0]
+
+    for i in range(n - 1):
+        u = runtime.np_transpose(np_random_unit_vector(sectype, n - i))
+        x_u = runtime.np_matmul(u, x[i:])
+        if len(x.shape) > 1:
+            d = runtime.np_outer(u, (x[i] - x_u))
+            x = runtime.np_vstack((x[:i, ...], runtime.np_add(x[i:, ...], d)))
+        else:
+            d = u * (x[i] - x_u)
+            x = runtime.np_hstack((x[:i, ...], runtime.np_add(x[i:, ...], d)))
+        x = runtime.np_update(x, i, x_u)
+
+    if axis != 0:
+        x = runtime.np_transpose(x)
+
+    x = await runtime.gather(x)
+    runtime.np_update(a, range(a.shape[0]), x)

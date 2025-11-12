@@ -1,8 +1,9 @@
 import unittest
 from mpyc.runtime import mpc
-from mpyc.random import (getrandbits, randrange, random_unit_vector, randint,
-                         shuffle, random_permutation, random_derangement,
+from mpyc.random import (getrandbits, randrange, random_unit_vector, np_random_unit_vector, randint,
+                         shuffle, np_shuffle, random_permutation, random_derangement,
                          choice, choices, sample, random, uniform)
+from mpyc.numpy import np
 
 
 class Arithmetic(unittest.TestCase):
@@ -76,6 +77,56 @@ class Arithmetic(unittest.TestCase):
         self.assertGreaterEqual(min(x) // 1000, 1000)
         self.assertLessEqual(max(x) // 1000, 1009)
         self.assertEqual(sum(x) % 1000, 0)
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_np_shuffle(self):
+        secint = mpc.SecInt()
+        x = secint.array(np.arange(8))
+        mpc.run(np_shuffle(x))
+        x = mpc.run(mpc.output(x))
+        self.assertSetEqual(set(x), set(np.arange(8)))
+
+        x = secint.array(np.array([np.arange(8)]))
+        mpc.run(np_shuffle(x))
+        x = mpc.run(mpc.output(x))
+        self.assertTrue((x == np.array([np.arange(8)])).all())
+
+        x_init = np.arange(8).reshape(2,4)
+        x = secint.array(x_init)
+        mpc.run(np_shuffle(x))
+        x = mpc.run(mpc.output(x))
+        self.assertIn(set(x[0,:]), [set(x_init[i,:]) for i in range(x_init.shape[0])])
+
+        x = secint.array(x_init)
+        mpc.run(np_shuffle(x, axis=1))
+        x = mpc.run(mpc.output(x))
+        self.assertIn(set(x[:,0]), [set(x_init[:,j]) for j in range(x_init.shape[1])])
+
+        x = secint.array(x_init)
+        with self.assertRaises(ValueError):
+            mpc.run(np_shuffle(x, 3))
+
+        x = secint.array(np.ones((8,8,8)))
+        with self.assertRaises(ValueError):
+            mpc.run(np_shuffle(x))
+
+    @unittest.skipIf(not np, 'NumPy not available or inside MPyC disabled')
+    def test_np_random_unit_vector(self):
+        secint = mpc.SecInt()
+        x = mpc.run(mpc.output(np_random_unit_vector(secint, 4)))
+        self.assertEqual(sum(x), 1)
+
+        secfxp = mpc.SecFxp()
+        x = mpc.run(mpc.output(np_random_unit_vector(secfxp, 3)))
+        self.assertEqual(int(sum(x)), 1)
+
+        secfld = mpc.SecFld(256)
+        x = mpc.run(mpc.output(np_random_unit_vector(secfld, 2)))
+        self.assertEqual(int(sum(x)), 1)
+
+        secfld = mpc.SecFld(257)
+        x = mpc.run(mpc.output(np_random_unit_vector(secfld, 1)))
+        self.assertEqual(int(sum(x)), 1)
 
     def test_secfxp(self):
         secfxp = mpc.SecFxp()
