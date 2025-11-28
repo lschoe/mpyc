@@ -21,6 +21,7 @@ A simple irreducibility test is provided as well as a basic
 routine to find the next largest irreducible polynomial.
 """
 
+import math
 import functools
 from mpyc import gmpy as gmpy2
 
@@ -164,7 +165,7 @@ class Polynomial:
     def _from_list(a):
         # NB: no copy
         while a and not a[-1]:
-            a.pop()
+            del a[-1]
         return a
 
     @staticmethod
@@ -200,7 +201,7 @@ class Polynomial:
         for i, c in d.items():
             a[i] = c % p
         while a and not a[-1]:
-            a.pop()
+            del a[-1]
         return a
 
     @staticmethod
@@ -249,8 +250,22 @@ class Polynomial:
         a.extend([0] * (d + 1 - len(a)))
         a.reverse()
         while a and not a[-1]:
-            a.pop()
+            del a[-1]
         return a
+
+    @classmethod
+    def _deriv(cls, a, m=1):
+        p = cls.p
+        if m >= p:
+            return []
+
+        b = a.copy()
+        del b[:m]
+        for i in range(len(b)):
+            b[i] = (math.perm(m + i, m) * b[i]) % p
+        while b and not b[-1]:
+            del b[-1]
+        return b
 
     @classmethod
     def _neg(cls, a):
@@ -273,7 +288,7 @@ class Polynomial:
             if c[i] >= p:
                 c[i] -= p
         while c and not c[-1]:
-            c.pop()
+            del c[-1]
         return c
 
     @classmethod
@@ -285,7 +300,7 @@ class Polynomial:
             if c[i] < 0:
                 c[i] += p
         while c and not c[-1]:
-            c.pop()
+            del c[-1]
         return c
 
     @classmethod
@@ -340,7 +355,7 @@ class Polynomial:
                     r[i + j] -= q_i * b[j]
                     r[i + j] %= p
                 while r and not r[-1]:
-                    r.pop()
+                    del r[-1]
         return r
 
     @classmethod
@@ -363,7 +378,7 @@ class Polynomial:
                     r[i + j] -= q_i * b[j]
                     r[i + j] %= p
                 while r and not r[-1]:
-                    r.pop()
+                    del r[-1]
         return q, r
 
     @classmethod
@@ -510,6 +525,14 @@ class Polynomial:
         """
         cls = type(self)
         return cls(cls._reverse(self.value, d=d), check=False)
+
+    def deriv(self, m=1):
+        """Order-m (formal) derivative of polynomial, for m>=0.
+
+        Default m=1 for first derivative.
+        """
+        cls = type(self)
+        return cls(cls._deriv(self.value, m=m), check=False)
 
     def __neg__(self):
         cls = type(self)
@@ -895,6 +918,18 @@ class BinaryPolynomial(Polynomial):
         a = int(format(a, 'b')[::-1], 2)  # reverse bits in a
         if e > 0:
             a <<= e  # pad with e zeros
+        return a
+
+    @classmethod
+    def _deriv(cls, a, m=1):
+        if m >= 2:
+            return 0
+
+        if m == 0:
+            return a
+
+        a >>= 1
+        a &= int('01' * (a.bit_length()//2 + 1), 2)
         return a
 
     @staticmethod
