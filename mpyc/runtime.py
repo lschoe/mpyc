@@ -1052,6 +1052,73 @@ class Runtime:
         a, b = await self.gather(a, b)
         return a - b
 
+    """Combined multiplication-and-truncation for 3PC threshold-one setting"""
+    async def mul_trunc_threshold_one(self, a, b, *, stype, f):
+        # This protocol uses two worker parties (pid 1, 2) and one opener (pid 0). The core idea
+        # is to additively share the product as x = (x+r) - r, where (x+r) is opened to the opener
+        # (by each worker party sending one field element to the opener) and r is known to the two
+        # worker parties. The opener locally truncates (x+r) and inputs it to the MPC (costing one
+        # field element of communication); the worker parties locally truncate r and input it into
+        # the MPC (costing zero communication). Total cost is three field elements of communication
+        # in two rounds.
+
+        field = stype.field                  # field used for computations
+        lmbda = self.options.sec_param       # statistical security parameter
+        kappa = stype.bit_length + f         # bit length of untruncated product
+        uci1 = self._prss_uci()              # PRSS nonce #1
+        uci2 = self._prss_uci()              # PRSS nonce #2
+
+
+        # Compute product sharing x = a*b, and convert to additive 3PC sharing x=x0+x1+x2 over
+        # the field by applying Lagrange interpolation
+
+        vector = thresha._recombination_vector(field, (1, 2, 3), 0)
+        x = field(vector[self.pid]) * (a * b)
+
+        # Convert additive 3PC sharing to sharing x=o1-o2=(x+r)-r over the integers, with o1:=(x+r)
+        # known by party 0 and o2:=r known by parties 1, 2. Parties 1, 2 generate r using PRSS. The
+        # value r is selected such that (x+r) is guaranteed to be positive (by adding 2**(kappa - 1)
+        # and statistically hides x (by adding a uniform random value in [0, 2**(kappa + lambda)).
+        # To open (x+r) to party 0, parties 1, 2 generate rp using PRSS; party 1 sends x1-rp and
+        # party 2 sends sends x2+r+rp. Party 0 computes (x+r)=x0+(x1-rp)+(x2+rp+r).
+
+        if self.pid == 0:
+            shares = await self.transfer(None, senders=[1, 2], receivers=[0])
+            o1 = int(x + shares[0] + shares[1])
+        else:
+            assert self.pid in [1, 2]
+            r = field(thresha.PRF(self._prss_keys[1,2], 2**(lmbda + kappa))(uci1) + 2**(kappa - 1))
+            rp = field(thresha.PRF(self._prss_keys[1,2], field.order)(uci2))
+            val = x-rp if self.pid == 1 else x+r+rp
+            await self.transfer(val, senders=[1, 2], receivers=[0])
+            o2 = int(r)
+
+        # Party 0 locally truncates o1=(x-r) and parties 1, 2 locally truncate o2=r
+        # Truncation is here done deterministically, but it is also possible to truncate
+        # probabilistically, i.e., to round (2**f)*a + b to (2**f)*a with probability (2**f-b)/2**f
+        # and to (2**f)*(a+1) with probability b/2**f.
+        if self.pid == 0:
+            o1 = o1 // (2**f)
+        else:
+            o1 = 0
+            o2 = o2 // (2**f)
+
+        # Party 0 inputs trunced o1 into multi-party computation (one message of communication)
+        o1 = (await self.input(field(o1), senders=[0]))[0][0]
+
+        # Party 1 inputs trunced o2 into multi-party computation (zero messages by defining the
+        # sharing of o2 to be the unique sharing for which the share of party 0 is zero)
+
+        if self.pid == 0:
+            o2 = stype(0)
+        else:
+            o2 = field(o2)
+            coef = field(thresha._f_S_i(field, 3, self.pid, (1, 2)))
+            o2 = o2 * coef
+
+        # Return truncated result: trunc(o1) - trunc(o2) = trunc(x+r) - trunc(r) = trunc(x)
+        return o1 - o2
+
     @asyncoro.mpc_coro
     async def mul(self, a, b):
         """Secure multiplication of a and b."""
@@ -1079,12 +1146,19 @@ class Runtime:
             a = b = await self.gather(a)
         else:
             a, b = await self.gather(a, b)
+
+        do_trunc = f and not (a_integral or b_integral) and z != f
+
+        if do_trunc and len(self.parties) == 3 and self.threshold == 1 and not self.options.no_prss:
+            # Use combined multiplication-and-truncation for the 3PC threshold-one setting
+            return await self.mul_trunc_threshold_one(a, b, stype=stype, f=f-z)
+
         c = a * b
         if f and (a_integral or b_integral) and z != f:
             c >>= f - z  # NB: in-place rshift
         if shb:
             c = self._reshare(c)
-        if f and not (a_integral or b_integral) and z != f:
+        if do_trunc:
             c = self.trunc(stype(c), f=f - z)
         return c
 
