@@ -44,6 +44,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(S3.order, 6)
         self.assertEqual(S3.identity, S3([0, 1, 2]))
         p = S3([1, 2, 0])
+        self.assertEqual(p^0, S3.identity)
         self.assertEqual(p^3, S3.identity)
         q = S3([1, 0, 2])
         self.assertEqual(q @ q, S3.identity)
@@ -119,6 +120,17 @@ class Arithmetic(unittest.TestCase):
 
         self.assertRaises(ValueError, fg.EllipticCurve, 'Ed25519', 'jacobian')
         self.assertRaises(ValueError, fg.EllipticCurve, 'BN256', 'extended')
+
+    def test_HC(self):
+        curves = (fg.HyperellipticCurve(p=3, genus=0),
+                  fg.HyperellipticCurve(p=7, genus=1),
+                  fg.HyperellipticCurve(curvename='kummer1271'),
+                  fg.HyperellipticCurve(l=640))
+        for group in curves:
+            self.assertEqual(5*group.identity, group.identity^-1)
+            self.assertEqual(group.generator + (group.generator^-1), group.identity)
+        for group in curves[:-1]:
+            self.assertEqual(group.generator^group.order, group.identity)
 
     def test_Cl(self):
         Cl3 = fg.ClassGroup()  # trivial class group D=-3 with 1 elt

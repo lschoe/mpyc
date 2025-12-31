@@ -513,7 +513,7 @@ def xGF(modulus):
     if not poly.is_irreducible(modulus):
         raise ValueError('modulus is not irreducible')
 
-    d = poly.deg(modulus)
+    d = modulus.degree()
     BaseFieldElement = BinaryFieldElement if p == 2 else ExtensionFieldElement
     GFq = type(f'GF({p}^{d})', (BaseFieldElement,), {'__slots__': ()})
     GFq.__doc__ = f'Class of {"binary" if p == 2 else "extension"} field elements.'

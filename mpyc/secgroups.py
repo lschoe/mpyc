@@ -13,6 +13,7 @@ import mpyc.fingroups as fg
 from mpyc.thresha import _recombination_vector
 from mpyc import asyncoro
 from mpyc.sectypes import SecureObject, SecureFiniteField, SecureInteger
+from mpyc.secpols import secpoly
 from mpyc.seclists import seclist
 import mpyc.mpctools
 
@@ -498,6 +499,161 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
         return (M.normalize()[0] - Z.normalize()[0]) / gap
 
 
+class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
+    """Common base class for secure (secret-shared) hyperelliptic curve divisors."""
+
+    __slots__ = ()
+
+    def __init__(self, value=None):
+        """Ensure all coefficients are secure polynomials.
+
+        Enforce value is a tuple.
+        """
+        n = len(self.group.identity.value)
+        if value is None:
+            pass
+        elif isinstance(value, self.group):
+            value = value.value
+        else:
+            if not (isinstance(value, (tuple, list)) and len(value) == n):
+                raise ValueError(f'tuple/list of length {n} required')
+
+        if value is None:
+            sectype = runtime.SecFld(self.group.field.modulus)
+            value = (secpoly(None, shape=(self.group.genus+1,), sectype=sectype),
+                     secpoly(None, shape=(self.group.genus,), sectype=sectype))
+        else:
+            value = tuple(secpoly(a) if not isinstance(a, secpoly) else a for a in value)
+
+        super().__init__(value)
+
+    def set_share(self, value):
+        for a, b in zip(self.share, value):
+            a.set_share(b.share)
+
+    def __getitem__(self, key):  # NB: no set_item to prevent mutability
+        return self.share[key]
+
+    @classmethod
+    def _reduce(cls, D):
+        """Secure reduction of given semi-reduced divisor."""
+        u, v = D
+        from mpyc.numpy import np  # TODO: clean this up
+        assert len(u.share) >= cls.group.genus+1
+        c = np.all(u.share[cls.group.genus+1:] == 0)
+        _u = u
+        _v = v
+
+        if cls.group.genus <= 2:
+            u_ = (cls.group.f - v**2) // u
+            u, v = u_, (-v) % u_
+            u.share = secpoly._add(c * secpoly._sub(_u.share, u.share), u.share)
+            # u = secpoly(secpoly._add(c * secpoly._sub(_u.share, u.share), u.share))
+            v.share = secpoly._add(c * secpoly._sub(_v.share, v.share), v.share)
+            # v = secpoly(secpoly._add(c * secpoly._sub(_v.share, v.share), v.share))
+        else:
+            u_ = (cls.group.f - v**2) // u
+            z = np.all(u_.share == 0)
+            u_.share = np.where(z, u_.share + 1, u_.share)
+            # u_ = secpoly(np.where(z, u_.share + 1, u_.share))
+            u, v = u_, (-v) % u_
+            e = c + z - c*z
+            u.share = secpoly._add(e * secpoly._sub(_u.share, u.share), u.share)
+            # u = secpoly(secpoly._add(e * secpoly._sub(_u.share, u.share), u.share))
+            v.share = secpoly._add(e * secpoly._sub(_v.share, v.share), v.share)
+            # v = secpoly(secpoly._add(e * secpoly._sub(_v.share, v.share), v.share))
+
+            u = u.truncate(cls.group.genus + 3)
+            v = v.truncate(cls.group.genus + 2)
+
+            c = np.all(u.share[cls.group.genus+1:] == 0)
+            _u = u
+            _v = v
+            u_ = (cls.group.f - v**2) // u
+            z = np.all(u_.share == 0)
+            u_.share = np.where(z, u_.share + 1, u_.share)
+            # u_ = secpoly(np.where(z, u_.share + 1, u_.share))
+            u, v = u_, (-v) % u_
+            e = c + z - c*z
+            u.share = secpoly._add(e * secpoly._sub(_u.share, u.share), u.share)
+            # u = secpoly(secpoly._add(e * secpoly._sub(_u.share, u.share), u.share))
+            v.share = secpoly._add(e * secpoly._sub(_v.share, v.share), v.share)
+            # v = secpoly(secpoly._add(e * secpoly._sub(_v.share, v.share), v.share))
+
+        u = u.truncate(cls.group.genus + 1)
+        v = v.truncate(cls.group.genus)
+        u = u.monic()
+        return u, v
+
+    @classmethod
+    def operation(cls, D1, D2, /):
+        u1, v1 = D1
+        u2, v2 = D2
+
+        if len(u1.share) == 1:
+            return D2
+        elif len(u2.share) == 1:
+            return D1
+
+        if cls.group.genus == 2 and cls.group.field.modulus == 2**127 - 1:
+            # use Costello--Lauter formula for adding distinct divisors
+            # TODO: refactor properly
+            u1 = u1.share
+            v1 = v1.share
+            u2 = u2.share
+            v2 = v2.share
+            u1X, u0, v1X, v0, _, _ = cls.group._AffADD(u1[1], u1[0], v1[1], v1[0],
+                                                       u1[1]**2, u1[1]*u1[0],
+                                                       u2[1], u2[0], v2[1], v2[0],
+                                                       u2[1]**2, u2[1]*u2[0])
+            U = secpoly(runtime.np_fromlist([u0, u1X, runtime.SecFld(cls.group.field.modulus)(1)]))
+            V = secpoly(runtime.np_fromlist([v0, v1X]))
+            return cls((U, V))
+
+        d, _, h2 = secpoly.gcdext(u1, u2)
+        d, h, h3 = secpoly.gcdext(d, v1 + v2)
+        h2 *= h
+        u = u1 * u2 // d**2
+        v = (v2 + (h2 * u2 * (v1 - v2) + h3 * (cls.group.f - v2**2)) // d) % u
+        return cls(cls._reduce((u, v)))
+
+    @classmethod
+    def operation2(cls, D, /):
+        u, v = D
+
+        if cls.group.genus == 2 and cls.group.field.modulus == 2**127 - 1:
+            # use Costello--Lauter formula for adding distinct divisors
+            # TODO: refactor properly
+            u = u.share
+            v = v.share
+            u1, u0, v1, v0, _, _ = cls.group._AffDBL(u[1], u[0], v[1], v[0], u[1]**2, u[1]*u[0],
+                                                     cls.group.f[2], cls.group.f[3])
+            U = secpoly(runtime.np_fromlist([u0, u1, runtime.SecFld(cls.group.field.modulus)(1)]))
+            V = secpoly(runtime.np_fromlist([v0, v1]))
+            return cls((U, V))
+
+        d, _, h3 = secpoly.gcdext(u, v + v)  # TODO: support 2*v to use instead of v + v
+        u = (u // d)**2
+        v = (v + h3 * ((cls.group.f - v**2) // d)) % u
+        return cls(cls._reduce((u, v)))
+
+    @classmethod
+    def inversion(cls, D, /):
+        u, v = D
+        return cls((u, -v))
+
+    @classmethod
+    def equality(cls, D1, D2, /):
+        v0 = D1.share[0] == D2.share[0]
+        v1 = D1.share[1] == D2.share[1]
+        return v0 * v1  # TODO: optimize batch test eq. with random r in field
+
+    @classmethod
+    def decode(cls, M, Z):
+        gap = cls.group.gap
+        return (M.share[0][0] - Z.share[0][0]) / gap
+
+
 @asyncoro.mpc_coro
 async def _divmod(a, b):  # TODO: cleanup and integrate this function in mpyc.runtime
     """Secure integer division divmod(a, b) via NR."""
@@ -696,6 +852,10 @@ def SecGrp(group):
         base = SecureEllipticCurvePoint
         sectype = runtime.SecFld(group.field.order)
         assert group.oblivious
+    elif issubclass(group, fg.HyperellipticCurveDivisor):
+        base = SecureHyperellipticCurveDivisor
+        sectype = runtime.SecFld(group.field.order)
+#        assert group.oblivious
     elif issubclass(group, fg.ClassGroupForm):
         base = SecureClassGroupForm
         sectype = runtime.SecInt(group.bit_length + 3)  # TODO: check bit length (+2 is not enough)
@@ -737,9 +897,11 @@ SecSymmetricGroup: type
 SecQuadraticResidues: type
 SecSchnorrGroup: type
 SecEllipticCurve: type
+SecHyperellipticCurve: type
 SecClassGroup: type
-_toSecGrpFunc(fg.SymmetricGroup)     # make SecSymmetricGroup as secure SymmetricGroup version
-_toSecGrpFunc(fg.QuadraticResidues)  # make SecQuadraticResidues as secure QuadraticResidues version
-_toSecGrpFunc(fg.SchnorrGroup)       # make SecSchnorrGroup as secure SchnorrGroup version
-_toSecGrpFunc(fg.EllipticCurve)      # make SecEllipticCurve as secure EllipticCurve version
-_toSecGrpFunc(fg.ClassGroup)         # make SecClassGroup as secure ClassGroup version
+_toSecGrpFunc(fg.SymmetricGroup)      # create SecSymmetricGroup as secure SymmetricGroup
+_toSecGrpFunc(fg.QuadraticResidues)   # create SecQuadraticResidues as secure QuadraticResidues
+_toSecGrpFunc(fg.SchnorrGroup)        # create SecSchnorrGroup as secure SchnorrGroup
+_toSecGrpFunc(fg.EllipticCurve)       # create SecEllipticCurve as secure EllipticCurve
+_toSecGrpFunc(fg.HyperellipticCurve)  # create SecHyperellipticCurve as secure HyperellipticCurve
+_toSecGrpFunc(fg.ClassGroup)          # create SecClassGroup as secure ClassGroup

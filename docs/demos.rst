@@ -670,7 +670,7 @@ appropriate secret-shared finite groups, or "secure groups" for short.
 A sample run between 5 parties with the default elliptic curve group gives::
 
    $ python elgamal.py -M5 --ssl
-   Using secure group: SecGrp(E(GF(115792089237316195423570985008687907853269984665640564039457584007908834671663))secp256k1projective)
+   Using secure group: SecGrp(E(GF(11579208923731619542357098500868790785326998_4665640564039457584007908834671663))secp256k1projective)
    2022-06-18 11:42:14,713 Start MPyC runtime v0.8.4
    2022-06-18 11:42:15,416 All 5 parties connected via SSL.
    Boardroom election
@@ -719,7 +719,7 @@ The original elliptic curve group is then available as class attribute:
 .. code-block:: python
 
    >>> secgrp.group
-   <class 'mpyc.fingroups.E(GF(115792089237316195423570985008687907853269984665640564039457584007908834671663))secp256k1projective'>
+   <class 'mpyc.fingroups.E(GF(11579208923731619542357098500868790785326998_4665640564039457584007908834671663))secp256k1projective'>
 
 With this setup a threshold version of the ElGamal cryptosystem can be implemented in a few lines of code.
 
@@ -734,12 +734,11 @@ please note that these curves should not be used for ordinary public key cryptog
 and :code:`'BN256_twist'` are included for the implementation of
 pairing-based `verifiable MPC <https://github.com/toonsegers/verifiable_mpc>`_.
 
-The demo also covers the use of three more groups:
+The demo also covers the use of four more groups:
 
-    - `quadratic residue <https://en.wikipedia.org/wiki/Quadratic_residue>`_ groups modulo a safe prime
-
+    - `hyperelliptic curve <https://en.wikipedia.org/wiki/Hyperelliptic_curve_cryptography>`_ Jacobians
     - `Schnorr groups <https://en.wikipedia.org/wiki/Schnorr_group>`_ (prime-order subgroups of :math:`\mathbb{F}_q^*`)
-
+    - `quadratic residue <https://en.wikipedia.org/wiki/Quadratic_residue>`_ groups modulo a safe prime
     - `class groups <https://en.wikipedia.org/wiki/Ideal_class_group>`_ of imaginary quadratic (number) fields
 
 For all these groups, mappings for encoding and decoding messages are included for use with ElGamal encryption and
@@ -750,7 +749,7 @@ pretty hard actually (e.g., for Schnorr groups): in particular, when secure vers
 The command line switch ``--no-public-output`` lets the demo run a scenario in which a given ElGamal
 ciphertext :math:`(g^u, h^u M)` is decrypted (and decoded) securely, such that message :math:`M` will only ever exist
 as a secret-shared value. This takes threshold decryption to the next level: apart from using the private key
-:math:`x=\log_g h` in secret-shared form only between the parties performing the joint decryption, also the resulting
+:math:`x=\log_g h` in secret-shared form between the parties performing the joint decryption, also the resulting
 message :math:`M` will *not ever* be exposed in the clear!
 
 To support the ``--no-public-output`` switch, secure versions of the group operations are implemented in the
@@ -758,7 +757,13 @@ To support the ``--no-public-output`` switch, secure versions of the group opera
 the secure group operations are quite efficient, taking advantage of efficient secure arithmetic over
 prime-order fields.
 
-For class groups, however, efficient implementation of the group operations in the clear is already quite challenging,
+For hyperelliptic curves, the protocols are more involved, relying on secure arithmetic with
+polynomials over prime-order fields---with the additional complication of keeping the degrees of these (Mumford)
+polynomials secret as well. The MPyC module `secpols.py <https://github.com/lschoe/mpyc/blob/master/mpyc/secpols.py>`_ 
+has been developed to efficiently support all required secure operations, from basic arithmetic operations +,-,*,//,%
+to more advanced operations such as (extended) GCDs.
+
+For class groups, efficient implementation of the group operations in the clear is already quite challenging,
 let alone for secret-shared group elements. The class group operations in the clear are implemented in
 ``mpyc.fingroups.ClassGroupForm`` following Cohen's presentation of Atkin's variants of the NUDUPL and
 NUCOMP algorithms due to Shanks (see Algorithms 5.4.8-9 in Henri Cohen's book `"A Course in Computational Algebraic
@@ -785,22 +790,40 @@ We run the demo with :math:`m=23` parties and threshold :math:`t=5` to get a not
    $ python dsa.py -M23 -T5 --no-log
    Sign/verify tests
    -----------------
-   E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519affine
+   E(GF(57896044618658097711785492504343953926634992_332820282019728792003956564819949))Ed25519affine
    3.359375 seconds for DSA signature
    0.625 seconds for Schnorr signature
-   E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519projective
+   E(GF(57896044618658097711785492504343953926634992_332820282019728792003956564819949))Ed25519projective
    1.015625 seconds for DSA signature
    0.65625 seconds for Schnorr signature
-   E(GF(57896044618658097711785492504343953926634992332820282019728792003956564819949))Ed25519extended
+   E(GF(57896044618658097711785492504343953926634992_332820282019728792003956564819949))Ed25519extended
    1.0 seconds for DSA signature
    0.625 seconds for Schnorr signature
-   E(GF(115792089237316195423570985008687907853269984665640564039457584007908834671663))secp256k1projective
+   E(GF(11579208923731619542357098500868790785326998_4665640564039457584007908834671663))secp256k1projective
    3.953125 seconds for DSA signature
    0.6875 seconds for Schnorr signature
 
 Elliptic curves are used as the default group for the demo. As expected, the best performance
-is attained for Edwards curves with :code:`'extended'` coordinates. Also, threshold Schnorr signatures turn out to be faster
-than threshold DSA signatures. The demo can also be run with Schnorr groups, in which case the lead of
+is attained for Edwards curves with :code:`'extended'` coordinates. Note that threshold Schnorr signatures
+are faster than threshold DSA signatures. 
+
+Similarly, the demo can be run with the genus-2 hyperelliptic curve :code:`'kummer1271'` over 
+:math:`\mathbb{F}_p` with :math:`p=2^{127}-1`, the twelfth Mersenne prime::
+
+   $ python dsa.py -M23 -T5 -g2 --mix
+   2025-12-05 11:25:53,708 Mix of parties on 32-bit and 64-bit platforms enabled.
+   2025-12-05 11:25:53,932 Start MPyC runtime v0.10.8
+   2025-12-05 11:25:56,350 All 23 parties connected.
+   Sign/verify tests
+   -----------------
+   HC(GF(170141183460469231731687303715884105727))kummer1271
+   2.53125 seconds for DSA signature
+   2025-12-05 11:26:02,247 Barrier 0 0
+   0.5625 seconds for Schnorr signature
+   2025-12-05 11:26:03,289 Barrier 0 0
+   2025-12-05 11:26:03,289 Stop MPyC -- elapsed time: 0:00:06.885|bytes sent: 27698
+
+The demo can also be run with Schnorr groups, in which case the lead of
 Schnorr signatures over DSA gets even larger.
 
 See `dsa.py <https://github.com/lschoe/mpyc/blob/master/demos/dsa.py>`_ for more information.

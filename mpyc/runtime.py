@@ -30,6 +30,7 @@ import mpyc.secgroups
 import mpyc.random
 import mpyc.statistics
 import mpyc.seclists
+import mpyc.secpols
 
 Future = asyncio.Future
 
@@ -70,6 +71,7 @@ class Runtime:
     SecQuadraticResidues = staticmethod(mpyc.secgroups.SecQuadraticResidues)
     SecSchnorrGroup = staticmethod(mpyc.secgroups.SecSchnorrGroup)
     SecEllipticCurve = staticmethod(mpyc.secgroups.SecEllipticCurve)
+    SecHyperellipticCurve = staticmethod(mpyc.secgroups.SecHyperellipticCurve)
     SecClassGroup = staticmethod(mpyc.secgroups.SecClassGroup)
     random = mpyc.random
     statistics = mpyc.statistics
@@ -3151,6 +3153,9 @@ class Runtime:
 
         If axis is None (default), array is flattened before cyclic shift,
         and original shape is restored afterwards.
+
+        In the special case that shift is a secure number, it is
+        required that array a is 1D and that 0 <= shift <= len(a).
         """
         stype = type(a)
         if issubclass(stype, self.SecureFixedPointArray):
@@ -3158,6 +3163,23 @@ class Runtime:
         else:
             rettype = (stype, a.shape)
         await self.returnType(rettype)
+
+        if not isinstance(shift, int):
+            assert isinstance(shift, stype.sectype)
+            assert a.ndim == 1
+
+            @asyncoro.mpc_coro  # NB: with pc for _reshare() call
+            async def f(a, shift) -> Future:
+                u = self.unit_vector(shift, len(a) + 1)  # NB: shift=len(a) allowed
+                u = self.np_fromlist(u)  # TODO: np_unit_vector() for GF(p)
+                a, u = await self.gather(a, u)
+                b = np.convolve(a, u)
+                b = b[:len(a)] + b[len(a):]
+                b = self._reshare(b)
+                return b
+
+            return await f(a, shift)
+
         a = await self.gather(a)
         return np.roll(a, shift, axis=axis)
 
@@ -4464,14 +4486,13 @@ class Runtime:
         See self.find() for information on the use of f and cs_f.
         """  # TODO: add keepdims
         if bits:
-            if isinstance(a, int):  # fast path
+            if isinstance(s, int):  # fast path
                 if s == 1:
                     a = 1 - a
-            else:
-                if isinstance(s, self.SecureObject) or np.any(s):
-                    if hasattr(s, 'shape'):
-                        s = np.expand_dims(s, axis)  # add axis for bits
-                    a = s + (1 - 2*s) * a
+            elif isinstance(s, self.SecureObject) or np.any(s):
+                if hasattr(s, 'shape'):
+                    s = np.expand_dims(s, axis)  # add axis for bits
+                a = s + (1 - 2*s) * a
         else:
             a = a != s
         # Problem is now reduced to finding the indices of the first 0s in a.
@@ -4947,6 +4968,7 @@ def setup():
     asyncoro.runtime = rt
     mpyc.mpctools.runtime = rt
     mpyc.seclists.runtime = rt
+    mpyc.secpols.runtime = rt
     mpyc.secgroups.runtime = rt
     mpyc.random.runtime = rt
     mpyc.statistics.runtime = rt

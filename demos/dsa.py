@@ -24,7 +24,8 @@ import argparse
 from hashlib import sha1, sha224, sha256, sha384, sha512
 from elgamal import keygen  # reuse key generation from threshold ElGamal cryptosystem
 from mpyc.gmpy import invert
-from mpyc.fingroups import SchnorrGroup, EllipticCurve, EllipticCurvePoint
+from mpyc.fingroups import (SchnorrGroup, EllipticCurve, HyperellipticCurve,
+                            EllipticCurvePoint, HyperellipticCurveDivisor)
 from mpyc.runtime import mpc
 
 
@@ -93,6 +94,8 @@ class DSA:
         """Map group element a to an integer value."""
         if isinstance(a, EllipticCurvePoint):  # cf. ECDSA
             z = int(a.normalize().x)           # x-coordinate of point a on elliptic curve
+        elif isinstance(a, HyperellipticCurveDivisor):
+            z = int(a.u[0])  # constant term of polynomial u of divisor a in Jacobian
         else:           # cf. DSA
             z = int(a)  # Schnorr group element a
         return z
@@ -146,10 +149,7 @@ class Schnorr:
     @staticmethod
     def to_bytes(a):
         """Map group element a to fixed-length byte string."""
-        if isinstance(a, EllipticCurvePoint):  # cf. ECDSA
-            z = int(a.normalize().x)           # x-coordinate of point a on elliptic curve
-        else:           # cf. DSA
-            z = int(a)  # Schnorr group element a
+        z = DSA.to_int(a)
         N = (a.field.order.bit_length() + 7) // 8
         return z.to_bytes(length=N, byteorder='big')
 
@@ -166,7 +166,7 @@ async def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--group', type=int, metavar='G',
-                        help=('1=EC (default), 2=SG'))
+                        help=('1=EC (default), 2=HC, 3=SG'))
     parser.set_defaults(group=1)
     args = parser.parse_args()
 
@@ -175,6 +175,8 @@ async def main():
                   EllipticCurve('Ed25519', 'projective'),
                   EllipticCurve('Ed25519', 'extended'),
                   EllipticCurve('secp256k1', 'projective'))
+    elif args.group == 2:
+        groups = (HyperellipticCurve('kummer1271'),)
     else:
         groups = (SchnorrGroup(p=9739, q=541),
                   SchnorrGroup(n=160),

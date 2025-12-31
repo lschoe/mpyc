@@ -52,6 +52,12 @@ mpyc.sectypes
 .. automodule:: mpyc.sectypes
     :members:
 
+mpyc.secpols
+-------------
+
+.. automodule:: mpyc.secpols
+    :members:
+
 mpyc.runtime
 ------------
 

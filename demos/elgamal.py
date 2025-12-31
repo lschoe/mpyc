@@ -1,10 +1,10 @@
 """Demo Threshold ElGamal Cryptosystem.
 
-This demo shows the use of secure groups in MPyC. Four types of groups are used:
-quadratic residue groups, Schnorr groups, elliptic curve groups, and class groups.
+This demo shows the use of secure groups in MPyC. Five types of groups are used:
+elliptic/hyperelliptic curves, Schnorr groups, quadratic residues, and class groups.
 
 The parties jointly generate a key pair for the ElGamal cryptosystem, consisting
-of a private key x and a public key h=g^x, where g is a generator of the group.
+of a private key x and a public key h=g^x, where g is a generator of the (sub)group.
 Throughout the entire protocol, private key x will only exist in secret-shared form.
 
 The demo runs a boardroom election, where each party will enter a (random) bit v
@@ -34,7 +34,10 @@ async def keygen(g):
     if n is not None and is_prime(n):
         secnum = mpc.SecFld(n)
     else:
-        l = isqrt(-group.discriminant).bit_length()
+        if hasattr(group, 'discriminant'):
+            l = isqrt(-group.discriminant).bit_length()
+        else:
+            l = group.genus * group.field.modulus.bit_length()
         secnum = mpc.SecInt(l)
 
     while True:
@@ -50,7 +53,10 @@ def encrypt(g, h, M):
     group = type(g)
     n = group.order
     if n is None:
-        n = isqrt(-group.discriminant)
+        if hasattr(group, 'discriminant'):
+            n = isqrt(-group.discriminant)
+        else:
+            n = group.field.modulus**group.genus
     u = random.randrange(n)
     c = (g^u, (h^u) @ M)
     return c
@@ -134,7 +140,7 @@ async def crypt_cycle(secgrp, M, public_out=True):
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--group', type=int, metavar='G',
-                        help=('1=EC (default), 2=QR, 3=SG, 4=Cl'))
+                        help=('1=EC (default), 2=HC, 3=SG, 4=QR, 5=Cl'))
     parser.add_argument('-b', '--batch-size', type=int, metavar='B',
                         help='number of messages B in batch, B>=1')
     parser.add_argument('-o', '--offset', type=int, metavar='O',
@@ -147,10 +153,16 @@ async def main():
     if args.group == 1:
         secgrp = mpc.SecEllipticCurve('secp256k1', 'projective')
     elif args.group == 2:
-        secgrp = mpc.SecQuadraticResidues(l=2048)
+        if args.no_public_output:
+            random.seed(a=1234, version=2)
+            secgrp = mpc.SecHyperellipticCurve('DGS', l=32)
+        else:
+            secgrp = mpc.SecHyperellipticCurve('kummer1271')
     elif args.group == 3:
         secgrp = mpc.SecSchnorrGroup(l=1024)
     elif args.group == 4:
+        secgrp = mpc.SecQuadraticResidues(l=2048)
+    elif args.group == 5:
         if args.no_public_output:
             secgrp = mpc.SecClassGroup(l=32)
         else:
@@ -170,7 +182,7 @@ async def main():
         print(f'Plaintext sent: {m}')
         p = await crypt_cycle(secgrp, m, not args.no_public_output)
         if args.no_public_output:
-            # p is a secure
+            # p is a secret-shared value
             p = await mpc.output(p)
         print(f'Plaintext received: {p}')
         assert m == p, (m, p)

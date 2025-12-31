@@ -36,9 +36,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly.to_terms(poly(1)), '1')
         self.assertEqual(poly.to_terms(poly(p)), f'{X}')
         self.assertEqual(poly.to_terms(poly(p + p**2)), f'{X}^2+{X}')
-        self.assertEqual(poly.deg(poly(0)), -1)
-        self.assertEqual(poly.deg(poly(1)), 0)
-        self.assertEqual(poly.deg(poly(p)), 1)
+        self.assertEqual(poly(0).degree(), -1)
+        self.assertEqual(poly(1).degree(), 0)
+        self.assertEqual(poly(p).degree(), 1)
         self.assertEqual(poly(0)[-1], 0)
         self.assertEqual(poly(1)[0], 1)
         self.assertEqual(poly(1)[1], 0)
@@ -49,6 +49,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly.from_terms(f'{X}+{X}^3').reverse(-1), 0)
         self.assertEqual(poly.from_terms(f'{X}+{X}^3').reverse(1), 1)
         self.assertEqual(poly.from_terms(f'1+{X}').reverse(3), f'{X}^3+{X}^2')
+        self.assertEqual(poly.from_terms(f'1+{X}^3').truncate(1), f'{1}')
         self.assertEqual(poly(f'1').deriv(), 0)
         self.assertEqual(poly(f'1').deriv(0), 1)
         self.assertEqual(poly(f'{X}^5+{X}^4+{X}^2+{X}+1').deriv(), (5%p)*p**4+(4%p)*p**3+(2%p)*p+1)
@@ -107,9 +108,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly.to_terms(poly(2)), f'{X}')
         self.assertEqual(poly.to_terms(poly(3)), f'{X}+1')
         self.assertEqual(poly.to_terms(poly(6)), f'{X}^2+{X}')
-        self.assertEqual(poly.deg(poly(2)), 1)
-        self.assertEqual(poly.deg(poly(3)), 1)
-        self.assertEqual(poly.deg(poly(7)), 2)
+        self.assertEqual(poly(2).degree(), 1)
+        self.assertEqual(poly(3).degree(), 1)
+        self.assertEqual(poly(7).degree(), 2)
         self.assertEqual(poly(6)(1), 0)
         self.assertEqual(poly(7)(0), 0)
         self.assertEqual(poly(7)(1), 1)
@@ -131,7 +132,7 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(poly(31) // 5, poly(6))
         self.assertEqual(poly(31) % 5, 1)
         self.assertEqual(divmod(poly(31), 5), (poly(6), 1))
-        self.assertEqual(poly(3) ** 16, 2**16 + 1)
+        self.assertEqual(poly(3)**16, 2**16 + 1)
         self.assertEqual(bool(poly(0)), False)
         self.assertEqual(bool(poly(1)), True)
 
@@ -181,9 +182,9 @@ class Arithmetic(unittest.TestCase):
         self.assertFalse(poly.is_irreducible(621))
         self.assertFalse(poly.is_irreducible(1905))
 
-        self.assertTrue(poly(7) < poly(8))
-        self.assertTrue(poly(7) <= poly(8))
-        self.assertTrue(poly(7) >= poly(5))
+        self.assertTrue(poly(7) < poly(11))
+        self.assertTrue(poly(7) <= poly(7))
+        self.assertTrue(poly(7) >= poly(7))
         self.assertTrue(poly(7) > poly(5))
 
     def test_mod3(self):
@@ -208,9 +209,9 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(poly.is_irreducible(99986))
         self.assertEqual(poly.next_irreducible(53), 86)
 
-        self.assertTrue(poly(7) < poly(8))
-        self.assertTrue(poly(7) <= poly(8))
-        self.assertTrue(poly(7) >= poly(5))
+        self.assertTrue(poly(7) < poly(11))
+        self.assertTrue(poly(7) <= poly(7))
+        self.assertTrue(poly(7) >= poly(7))
         self.assertTrue(poly(7) > poly(5))
 
     def test_mod11(self):
@@ -261,9 +262,9 @@ class Arithmetic(unittest.TestCase):
         self.assertTrue(poly.is_irreducible(19488))
         self.assertEqual(poly.next_irreducible(53), 122)
 
-        self.assertTrue(poly(17) < poly(18))
-        self.assertTrue(poly(17) <= poly(18))
-        self.assertTrue(poly(17) >= poly(15))
+        self.assertTrue(poly(17) < poly(128))
+        self.assertTrue(poly(17) <= poly(17))
+        self.assertTrue(poly(17) >= poly(17))
         self.assertTrue(poly(17) > poly(15))
 
 

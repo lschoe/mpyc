@@ -1,6 +1,6 @@
 ## Synopsis
 
-[MPyC](https://lschoe.github.io/mpyc) currently consists of 14 modules (all in pure Python):
+[MPyC](https://lschoe.github.io/mpyc) currently consists of 15 modules (all in pure Python):
 
 1. [numpy](https://lschoe.github.io/mpyc/mpyc.numpy.html): stub to avoid dependency on NumPy package (also handling version issues, etc.)
 2. [gmpy](https://lschoe.github.io/mpyc/mpyc.gmpy.html): some basic number theoretic algorithms (using GMP via Python package gmpy2, if installed)
@@ -10,16 +10,17 @@
 6. [thresha](https://lschoe.github.io/mpyc/mpyc.thresha.html): threshold Shamir (and also pseudorandom) secret sharing
 7. [asyncoro](https://lschoe.github.io/mpyc/mpyc.asyncoro.html): asynchronous communication and computation of secret-shared values
 8. [sectypes](https://lschoe.github.io/mpyc/mpyc.sectypes.html): SecInt/Fld/Fxp/Flt types for secure (secret-shared) integer/finite-field/fixed-/floating-point values
-9. [runtime](https://lschoe.github.io/mpyc/mpyc.runtime.html): core MPC protocols (many hidden by Python's operator overloading)
-10. [mpctools](https://lschoe.github.io/mpyc/mpyc.mpctools.html): reduce and accumulate with log round complexity
-11. [random](https://lschoe.github.io/mpyc/mpyc.random.html): securely mimicking Python’s [random](https://docs.python.org/3/library/random.html) module
-12. [seclists](https://lschoe.github.io/mpyc/mpyc.seclists.html): secure lists with oblivious access and updates
-13. [secgroups](https://lschoe.github.io/mpyc/mpyc.secgroups.html): SecGrp types for secure (secret-shared) finite group elements
-14. [statistics](https://lschoe.github.io/mpyc/mpyc.statistics.html): securely mimicking Python’s [statistics](https://docs.python.org/3/library/statistics.html) module
+9. [secpols](https://lschoe.github.io/mpyc/mpyc.secpols.html): secure (secret-shared) polynomials of secret degree, currently over sufficiently large prime fields only
+10. [runtime](https://lschoe.github.io/mpyc/mpyc.runtime.html): core MPC protocols (many hidden by Python's operator overloading)
+11. [mpctools](https://lschoe.github.io/mpyc/mpyc.mpctools.html): reduce and accumulate with log round complexity
+12. [random](https://lschoe.github.io/mpyc/mpyc.random.html): securely mimicking Python’s [random](https://docs.python.org/3/library/random.html) module
+13. [seclists](https://lschoe.github.io/mpyc/mpyc.seclists.html): secure lists with oblivious access and updates
+14. [secgroups](https://lschoe.github.io/mpyc/mpyc.secgroups.html): SecGrp types for secure (secret-shared) finite group elements
+15. [statistics](https://lschoe.github.io/mpyc/mpyc.statistics.html): securely mimicking Python’s [statistics](https://docs.python.org/3/library/statistics.html) module
 
 The modules are listed in topological order w.r.t. internal dependencies:
 
 - Modules 1-5 are basic modules which can also be used outside an MPC context
-- Modules 6-9 form the core of MPyC
-- Modules 10-13 form the extended core of MPyC
-- Module 14 is a small library on top of the (extended) core
+- Modules 6-10 form the core of MPyC
+- Modules 11-14 form the extended core of MPyC
+- Module 15 is a small library on top of the (extended) core

@@ -10,7 +10,7 @@ The polynomial a_0 + a_1 X + ... + a_n X^n corresponds
 to the integer a_0 + a_1 2 + ... + a_n 2^n.
 Leading coefficient a_n is 1, using 0 for the zero polynomial.
 
-The operators +,-,*,<<,//,%, and function divmod are overloaded.
+The operators +,-,*,<<,>>,**,//,%, and function divmod are overloaded.
 The operators <,<=,>,>=,==,!= are overloaded as well, using the
 lexicographic order for polynomials (zero polynomial is the smallest).
 Plus some SageMath-style functionality, for instance, to access
@@ -222,7 +222,7 @@ class Polynomial:
         return s[1:]
 
     @staticmethod
-    def _deg(a):
+    def _degree(a):
         return len(a) - 1
 
     @classmethod
@@ -252,6 +252,10 @@ class Polynomial:
         while a and not a[-1]:
             del a[-1]
         return a
+
+    @classmethod
+    def _truncate(cls, a, n):
+        return cls._from_list(a[:n])
 
     @classmethod
     def _deriv(cls, a, m=1):
@@ -305,6 +309,9 @@ class Polynomial:
 
     @classmethod
     def _mul(cls, a, b):
+        if a is b:
+            return cls._sq(a)
+
         p = cls.p
         if len(a) > len(b):
             a, b = b, a
@@ -317,6 +324,25 @@ class Polynomial:
             if a_i:
                 for j, b_j in enumerate(b):
                     c[i + j] += a_i * b_j
+        for i in range(len(c)):
+            c[i] %= p
+        return c
+
+    @classmethod
+    def _sq(cls, a):
+        p = cls.p
+        if not a:
+            return []
+
+        c = [0] * (2*len(a) - 1)
+        for i, a_i in enumerate(a):
+            if a_i:
+                h = i << 1  # h = 2i
+                c[h] += a_i**2
+                h += 1      # h = 2i+1
+                a_i_2 = a_i * 2
+                for j, a_j in enumerate(a[i+1:]):
+                    c[h + j] += a_i_2 * a_j
         for i in range(len(c)):
             c[i] %= p
         return c
@@ -394,7 +420,7 @@ class Polynomial:
             n = -n
         b = a
         for i in range(n.bit_length()-2, -1, -1):
-            b = cls._mul(b, b)
+            b = cls._sq(b)
             b = cls._mod(b, modulus)
             if (n >> i) & 1:
                 b = cls._mul(b, a)
@@ -450,12 +476,13 @@ class Polynomial:
 
     @classmethod
     def _is_irreducible(cls, a):
+        # NB: constant polynomials are not irreducible
         p = cls.p
-        if cls._deg(a) <= 0:
+        if cls._degree(a) <= 0:
             return False
 
         b = [0, 1]
-        for _ in range(cls._deg(a) // 2):
+        for _ in range(cls._degree(a) // 2):
             b = cls._powmod(b, p, modulus=a)
             if cls._gcd(cls._sub(b, [0, 1]), a) != [1]:
                 return False
@@ -481,6 +508,16 @@ class Polynomial:
         return _a
 
     @classmethod
+    def _lt(cls, a, b):
+        if d := len(a) - len(b):
+            return d < 0
+
+        n = len(a)
+        while n and not (d := a[n-1] - b[n-1]):
+            n -= 1
+        return n and d < 0
+
+    @classmethod
     def from_terms(cls, s, x=X):
         """Convert string s with sum of powers of x to a polynomial."""
         return cls(cls._from_terms(s, x), check=False)
@@ -491,15 +528,9 @@ class Polynomial:
         a = cls._intern(a)
         return cls._to_terms(a, x)
 
-    @classmethod
-    def deg(cls, a):
-        """Degree of polynomial a (-1 if a is zero polynomial)."""
-        a = cls._intern(a)
-        return cls._deg(a)
-
     def degree(self):
         """Degree of polynomial (-1 for zero polynomial)."""
-        return self._deg(self.value)
+        return self._degree(self.value)
 
     def monic(self, lc_pinv=False):
         """Monic version of polynomial.
@@ -525,6 +556,10 @@ class Polynomial:
         """
         cls = type(self)
         return cls(cls._reverse(self.value, d=d), check=False)
+
+    def truncate(self, n):
+        cls = type(self)
+        return cls(cls._truncate(self.value, n), check=False)
 
     def deriv(self, m=1):
         """Order-m (formal) derivative of polynomial, for m>=0.
@@ -617,7 +652,7 @@ class Polynomial:
 
     @classmethod
     def rshift(cls, a, n):
-        """Quotient for polynomial a divided by X^n, assuming a is multiple of X^n."""
+        """Quotient for polynomial a divided by X^n."""
         a = cls._intern(a)
         return cls(cls._rshift(a, n), check=False)
 
@@ -756,7 +791,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return self._to_int(self.value) <= self._to_int(other)
+        return self._lt(self.value, other)
 
     def __le__(self, other):
         """Less-than or equal comparison."""
@@ -764,7 +799,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return self._to_int(self.value) < self._to_int(other)
+        return 1 - self._lt(other, self.value)
 
     def __eq__(self, other):
         """Equality test."""
@@ -780,7 +815,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return self._to_int(self.value) >= self._to_int(other)
+        return 1 - self._lt(self.value, other)
 
     def __gt__(self, other):
         """Strictly greater-than comparison."""
@@ -788,7 +823,7 @@ class Polynomial:
         if other is NotImplemented:
             return NotImplemented
 
-        return self._to_int(self.value) > self._to_int(other)
+        return self._lt(other, self.value)
 
     def __ne__(self, other):
         """Negated equality test."""
@@ -900,7 +935,7 @@ class BinaryPolynomial(Polynomial):
         return s[1:]
 
     @staticmethod
-    def _deg(a):
+    def _degree(a):
         return a.bit_length() - 1
 
     @staticmethod
@@ -919,6 +954,10 @@ class BinaryPolynomial(Polynomial):
         if e > 0:
             a <<= e  # pad with e zeros
         return a
+
+    @staticmethod
+    def _truncate(a, n):
+        return a & ((1 << n) - 1)
 
     @classmethod
     def _deriv(cls, a, m=1):
@@ -949,6 +988,9 @@ class BinaryPolynomial(Polynomial):
     @staticmethod
 #    @functools.cache
     def _mul(a, b):
+        if a is b or a == b:
+            return BinaryPolynomial._sq(a)
+
         if a < b:
             a, b = b, a
         # a >= b
@@ -958,6 +1000,18 @@ class BinaryPolynomial(Polynomial):
                 c ^= a
             a <<= 1
             b >>= 1
+        return c
+
+    @staticmethod
+#    @functools.cache
+    def _sq(a):
+        d = 1
+        c = 0
+        while a:
+            if a & 1:
+                c |= d
+            d <<= 2
+            a >>= 1
         return c
 
     @staticmethod
@@ -1043,11 +1097,12 @@ class BinaryPolynomial(Polynomial):
 
     @staticmethod
     def _is_irreducible(a):
+        # NB: constant polynomials are not irreducible
         if a <= 1:
             return False
 
         b = 2
-        for _ in range(BinaryPolynomial._deg(a) // 2):
+        for _ in range(BinaryPolynomial._degree(a) // 2):
             b = BinaryPolynomial._mul(b, b)
             b = BinaryPolynomial._mod(b, a)
             if BinaryPolynomial._gcd(b^2, a) != 1:
@@ -1064,3 +1119,7 @@ class BinaryPolynomial(Polynomial):
             while not BinaryPolynomial._is_irreducible(a):
                 a += 2
         return a
+
+    @staticmethod
+    def _lt(a, b):
+        return a < b

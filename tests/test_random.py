@@ -1,4 +1,5 @@
 import unittest
+from mpyc.numpy import np
 from mpyc.runtime import mpc
 from mpyc.random import (getrandbits, randrange, random_unit_vector, np_random_unit_vector,
                          randint, shuffle, random_permutation, random_derangement,
@@ -19,7 +20,8 @@ class Arithmetic(unittest.TestCase):
 
         x = mpc.run(mpc.output(random_unit_vector(secint, 4)))
         self.assertEqual(sum(x), 1)
-        x = mpc.run(mpc.output(np_random_unit_vector(secint, 4)))
+        if np:
+            x = mpc.run(mpc.output(np_random_unit_vector(secint, 4)))
         self.assertEqual(sum(x), 1)
 
         a = mpc.run(mpc.output(randrange(secint, 37)))  # French roulette
@@ -89,7 +91,8 @@ class Arithmetic(unittest.TestCase):
 
         x = mpc.run(mpc.output(random_unit_vector(secfxp, 3)))
         self.assertEqual(int(sum(x)), 1)
-        x = mpc.run(mpc.output(np_random_unit_vector(secfxp, 3)))
+        if np:
+            x = mpc.run(mpc.output(np_random_unit_vector(secfxp, 3)))
         self.assertEqual(int(sum(x)), 1)
 
         x = mpc.run(mpc.output(random_permutation(secfxp, range(1, 9))))
@@ -138,7 +141,8 @@ class Arithmetic(unittest.TestCase):
         self.assertIn(a, [0, 1, 2])
         x = mpc.run(mpc.output(random_unit_vector(secfld, 2)))
         self.assertEqual(int(sum(x)), 1)
-        x = mpc.run(mpc.output(np_random_unit_vector(secfld, 2)))
+        if np:
+            x = mpc.run(mpc.output(np_random_unit_vector(secfld, 2)))
         self.assertEqual(int(sum(x)), 1)
         x = mpc.run(mpc.output(random_permutation(secfld, range(1, 9))))
         self.assertSetEqual(set(map(int, x)), set(range(1, 9)))
@@ -157,7 +161,8 @@ class Arithmetic(unittest.TestCase):
         self.assertIn(a, [-1, 0, 1])
         x = mpc.run(mpc.output(random_unit_vector(secfld, 1)))
         self.assertEqual(int(sum(x)), 1)
-        x = mpc.run(mpc.output(np_random_unit_vector(secfld, 1)))
+        if np:
+            x = mpc.run(mpc.output(np_random_unit_vector(secfld, 1)))
         self.assertEqual(int(sum(x)), 1)
         x = mpc.run(mpc.output(random_permutation(secfld, range(1, 9))))
         self.assertSetEqual(set(map(int, x)), set(range(1, 9)))
