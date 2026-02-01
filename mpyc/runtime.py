@@ -1699,6 +1699,35 @@ class Runtime:
             x <<= f
         return x
 
+    @asyncoro.mpc_coro
+    async def np_lsb(self, a):
+        """Compute least significant bits of values in array a""" # a la [ST06]
+        await self.returnType((type(a), True, a.shape))
+        stype = a.sectype
+        Zp = stype.field
+        l = stype.bit_length
+        k = self.options.sec_param
+        f = stype.frac_length
+
+        b = self.np_random_bits(stype, len(a))
+        a, b = await self.gather(a, b)
+        if f:
+            b >>= f
+
+        rs = self._np_randoms(Zp, len(a), bound = 1 << (l + k - 1))
+        if self.options.no_prss:
+            rs = (await rs)[0]
+
+        r = b + 2 * rs
+        c = await self.output(a + r + 2**l)  # denoted by 'y' in [ST06]
+
+        c0 = (c.value & 1)
+        x = (c0 + b) - 2 * (c0 * b) # xor
+
+        if f:
+            x <<= f
+        return x
+
     @asyncoro.mpc_coro_no_pc
     async def mod(self, a, b):
         """Secure modulo reduction."""
