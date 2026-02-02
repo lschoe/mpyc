@@ -813,22 +813,23 @@ class Runtime:
 
         k = self.options.sec_param
         r_bits = await self.random_bits(Zp, f * n)
-        r_modf = [None] * n
+        xr_modf = [None] * n
         for j in range(n):
             s = 0
             for i in range(f-1, -1, -1):
                 s <<= 1
                 s += r_bits[f * j + i].value
-            r_modf[j] = Zp(s)
+            xr_modf[j] = s
         r_divf = self._randoms(Zp, n, 1 << k + l - f)
         if self.options.no_prss:
             r_divf = await r_divf
         if issubclass(sftype, self.SecureObject):
             x = await self.gather(x)
-        c = await self.output([a + ((1 << l-1) + (q.value << f) + r.value)
-                               for a, q, r in zip(x, r_divf, r_modf)])
+        xr_modf = [a + r for a, r in zip(x, xr_modf)]
+        c = await self.output([ar + ((1 << l-1) + (q.value << f))
+                               for ar, q in zip(xr_modf, r_divf)])
         c = [c.value % (1<<f) for c in c]
-        y = [(a - c + r.value) >> f for a, c, r in zip(x, c, r_modf)]
+        y = [(ar - c) >> f for ar, c in zip(xr_modf, c)]
         if not x_is_list:
             y = y[0]
         return y
@@ -855,8 +856,8 @@ class Runtime:
 
         k = self.options.sec_param
         r_bits = await self.np_random_bits(Zp, f * n)
-        r_modf = np.sum(r_bits.value.reshape((n, f)) << np.arange(f), axis=1)
-        r_modf = r_modf.reshape(a.shape)
+        ar_modf = np.sum(r_bits.value.reshape((n, f)) << np.arange(f), axis=1)
+        ar_modf = ar_modf.reshape(a.shape)
         r_divf = self._np_randoms(Zp, n, 1 << k + l - f)
         if self.options.no_prss:
             r_divf = await r_divf
@@ -864,9 +865,10 @@ class Runtime:
         r_divf = r_divf.reshape(a.shape)
         if issubclass(sftype, self.SecureObject):
             a = await self.gather(a)
-        c = await self.output(Zp.array(a.value + (1 << l-1) + (r_divf << f) + r_modf))
+        ar_modf += a.value
+        c = await self.output(Zp.array(ar_modf + (1 << l-1) + (r_divf << f)))
         c = c.value & ((1<<f) - 1)
-        y = Zp.array(a.value + r_modf - c) >> f
+        y = Zp.array(ar_modf - c) >> f
         return y
 
     def eq_public(self, a, b):

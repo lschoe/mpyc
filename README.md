@@ -57,4 +57,4 @@ By running `python -m mpyc` instead you even get this REPL with the MPyC runtime
 The file `gen.bat` shows how to generate fresh key material for SSL. To generate SSL key material of your own, first run
 `pip install cryptography`.
 
-Copyright &copy; 2018-2025 Berry Schoenmakers
+Copyright &copy; 2018-2026 Berry Schoenmakers

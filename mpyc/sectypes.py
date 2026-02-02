@@ -962,7 +962,7 @@ def SecFlt(l=None, s=None, e=None):
     if s is None:
         if e is None:
             s = round(6.2 + 0.99*l - 4.1*math.log(l))  # yields IEEE 754 precisions
-            # 1-bit float -> s-bit significand: 16->11, 32->24, 64->53, 128->113, 256->237
+            # l-bit float -> s-bit significand: 16->11, 32->24, 64->53, 128->113, 256->237
         else:
             s = l - e
     if e is None:

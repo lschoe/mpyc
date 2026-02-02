@@ -87,14 +87,16 @@ class Arithmetic(unittest.TestCase):
                   fg.EllipticCurve('Ed448', coordinates='projective'),
                   fg.EllipticCurve('secp256k1', coordinates='projective'),
                   fg.EllipticCurve('BN256', coordinates='projective'),
-                  fg.EllipticCurve('BN256_twist', coordinates='projective'))
+                  fg.EllipticCurve('BN256_twist', coordinates='projective'),
+                  fg.HyperellipticCurve('kummer1271'))
         for group in curves:
             secgrp = mpc.SecGrp(group)
             secfld = mpc.SecFld(modulus=secgrp.group.order)
             g = group.generator
             self.assertFalse(mpc.run(mpc.output(secgrp(g) != g)))
             b = secgrp(g.value)
-            self.assertEqual(mpc.run(mpc.output(b - b)), group.identity)
+            if group.curvename != 'kummer1271':
+                self.assertEqual(mpc.run(mpc.output(b - b)), group.identity)
             c = secgrp(g)
             self.assertEqual(mpc.run(mpc.output(b)), mpc.run(mpc.output(c)))
             self.assertEqual(mpc.run(secgrp.repeat_public(g, -secfld(2))), g^-2)
@@ -103,12 +105,14 @@ class Arithmetic(unittest.TestCase):
             bp4 = 4*g
             sec_bp4 = 4*secgrp(g) + secgrp.identity
             mpc.peek([sec_bp4, sec_bp4])
-            self.assertEqual(mpc.run(mpc.output(-sec_bp4)), -bp4)
+            if group.curvename != 'kummer1271':
+                self.assertEqual(mpc.run(mpc.output(-sec_bp4)), -bp4)
             sec_bp8 = secgrp.repeat(bp4, secfld(2))
             self.assertEqual(mpc.run(mpc.output(sec_bp8)), bp4 + bp4)
             self.assertEqual(mpc.run(mpc.output(secgrp.repeat(bp4, secfld(3)))), 3*bp4)
-            self.assertEqual(mpc.run(mpc.output(group.identity + b)), g)
-            self.assertEqual(mpc.run(mpc.output(g - b)), group.identity)
+            if group.curvename != 'kummer1271':
+                self.assertEqual(mpc.run(mpc.output(group.identity + b)), g)
+                self.assertEqual(mpc.run(mpc.output(g - b)), group.identity)
             if group.curvename != 'BN256_twist':
                 m, z = group.encode(42)
                 self.assertEqual(mpc.run(mpc.output(secgrp.decode(secgrp(m), secgrp(z)))), 42)

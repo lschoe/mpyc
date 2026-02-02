@@ -10,7 +10,7 @@
 6. [thresha](https://lschoe.github.io/mpyc/mpyc.thresha.html): threshold Shamir (and also pseudorandom) secret sharing
 7. [asyncoro](https://lschoe.github.io/mpyc/mpyc.asyncoro.html): asynchronous communication and computation of secret-shared values
 8. [sectypes](https://lschoe.github.io/mpyc/mpyc.sectypes.html): SecInt/Fld/Fxp/Flt types for secure (secret-shared) integer/finite-field/fixed-/floating-point values
-9. [secpols](https://lschoe.github.io/mpyc/mpyc.secpols.html): secure (secret-shared) polynomials of secret degree, currently over sufficiently large prime fields only
+9. [secpols](https://lschoe.github.io/mpyc/mpyc.secpols.html): secure polynomials (of secret degree) currently over sufficiently large prime fields only
 10. [runtime](https://lschoe.github.io/mpyc/mpyc.runtime.html): core MPC protocols (many hidden by Python's operator overloading)
 11. [mpctools](https://lschoe.github.io/mpyc/mpyc.mpctools.html): reduce and accumulate with log round complexity
 12. [random](https://lschoe.github.io/mpyc/mpyc.random.html): securely mimicking Python’s [random](https://docs.python.org/3/library/random.html) module

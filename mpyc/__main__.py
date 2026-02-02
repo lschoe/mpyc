@@ -21,6 +21,7 @@ Besides setting mpc as a handle for the MPyC runtime, also several secure
     secqr = mpc.SecQuadraticResidues(11)
     secsg = mpc.SecSchnorrGroup(l=1024)
     secec = mpc.SecEllipticCurve('Ed25519')
+    sechc = mpc.SecHyperellipticCurve('kummer1271')
     seccl = mpc.SecClassGroup(-23)
 
 Type secint represents secure integers and types secfxp and secflt represent
@@ -199,5 +200,6 @@ if __name__ == '__main__':
                 'secqr = mpc.SecQuadraticResidues(11)',
                 'secsg = mpc.SecSchnorrGroup(l=1024)',
                 "secec = mpc.SecEllipticCurve('Ed25519')",
+                "sechc = mpc.SecHyperellipticCurve('kummer1271')",
                 'seccl = mpc.SecClassGroup(-23)')
     main(preamble)

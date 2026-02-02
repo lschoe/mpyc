@@ -37,8 +37,8 @@ import decimal
 import random
 import functools
 from mpyc.gmpy import powmod, gcdext, is_prime, next_prime, prev_prime, legendre, isqrt, iroot
-from mpyc.gfpx import GFpX
-from mpyc.finfields import GF
+from mpyc.gfpx import GFpX, Polynomial
+from mpyc.finfields import GF, find_prime_root
 
 
 class FiniteGroupElement:
@@ -73,13 +73,11 @@ class FiniteGroupElement:
         return NotImplemented
 
     def __invert__(self):  # overload ~
-        group = type(self)
-        return group.inversion(self)
+        return self.inversion(self)
 
     def __xor__(self, other):  # overload ^
         if isinstance(other, int):
-            group = type(self)
-            return group.repeat(self, other)
+            return self.repeat(self, other)
 
         return NotImplemented
 
@@ -180,9 +178,9 @@ class FiniteGroupElement:
         """Return @-inverse of a (written ~a)."""
         raise NotImplementedError
 
-    def inverse(self):  # TODO: reconsider use of instance methods
+    def inverse(self):
         """For convenience."""
-        return type(self).inversion(self)
+        return self.inversion(self)
 
     @classmethod
     def equality(cls, a, b, /):
@@ -326,6 +324,7 @@ class QuadraticResidue(FiniteGroupElement):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         gap = cls.gap
         return int((M.value - Z.value) / gap)
 
@@ -460,6 +459,7 @@ class SchnorrGroupElement(FiniteGroupElement):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group element."""
         g = cls.generator
         h = cls.identity
         for m in range(1024):  # TODO: get rid of hard-coded 1024 bound (also in secgroups module)
@@ -596,6 +596,7 @@ class EllipticCurvePoint(FiniteGroupElement):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         gap = cls.gap
         return int((M.normalize()[0] - Z.normalize()[0]) / gap)
 
@@ -1165,17 +1166,39 @@ def _EllipticCurve(curvename, coordinates):
 
 
 class HyperellipticCurveDivisor(FiniteGroupElement):
-    """Common base class for divisors in Jacobian of a hyperelliptic curve."""
+    """Common base class for divisors in Jacobian of a hyperelliptic curve.
+
+    Arbitrary genus, using (affine) Mumford representation.and algorithms from Cantor's 1987 paper.
+    """
 
     __slots__ = ()
 
     is_additive = True
     is_multiplicative = False
     is_abelian = True
-    is_cyclic = True  # Nb: we use a cyclic (sub)group.
+    is_cyclic = True  # NB: we use a cyclic (sub)group.
+    genus = None
     field: type  # curve is defined over this field
-    _identity = None
+    _identity = (1, 0)  # Mumford representation (u,v)
     gap = None
+    f: Polynomial
+
+    def __init__(self, value=None, check=True):
+        field = self.field
+        poly = GFpX(field.modulus)
+        if value is None:
+            value = map(poly, self._identity)
+        if check:
+            u, v = value
+            if not isinstance(u, poly):
+                u = poly(u)
+            if not isinstance(v, poly):
+                v = poly(v)
+            value = (u, v)
+            if (self.f - v**2) % u:
+                raise ValueError('value not in Jacobian')
+
+        self.value = tuple(value)
 
     def __getitem__(self, key):  # NB: no __setitem__ to prevent mutability
         return self.value[key]
@@ -1189,11 +1212,15 @@ class HyperellipticCurveDivisor(FiniteGroupElement):
         return self.value[1]
 
     @classmethod
+    def ysquared(cls, x):
+        return cls.field(cls.f(x.value))
+
+    @classmethod
     def encode(cls, m):
         """Encode message m in constant term of monic polynomial of divisor.
 
-        Divisor (u,v) with deg u=1, u(x)=0 and deg v=0, v(x)=y, where x=m and y^2=f(x).
-        Hence, u[0] = -m = -x, and v[0] = y for rational point (x,y).
+        Divisor (u,v) with deg u=1, u(x)=0 and deg v=0, v(x)=y, where x=-m and y^2=f(x).
+        Hence, u[0]=m=-x, u[1]=1, and v[0]=y for rational point (x,y).
         """
         field = cls.field  # TODO: extend this to non-prime fields
         gap = cls.gap
@@ -1213,209 +1240,22 @@ class HyperellipticCurveDivisor(FiniteGroupElement):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         gap = cls.gap
         return int((M.u[0] - Z.u[0]) / gap)
 
-
-class DGSCurveDivisor(HyperellipticCurveDivisor):
-    """Common base class for DGS hyperelliptic curves.
-
-    DGS stands for Dobson, Galbraith and Smith.
-    """
-    # pylint: disable=W0223 (abstract-method)
-
-    __slots__ = ()
-
-    _identity = (1, 0)  # Mumford representation (u,v)
-    f = None
-
     @classmethod
-    def ysquared(cls, x):
-        return cls.field(cls.f(x.value))
-
-    def __init__(self, value=None, check=True):
-        field = self.field
-        poly = GFpX(field.modulus)
-        if value is None:
-            value = map(poly, self._identity)
-        elif 2 == len(value) < len(self._identity):  # convert affine to target
-            value = list(value) + [field(1)]  # z = 1
-            if len(value) < len(self._identity):
-                value += [value[0] * value[1]]  # t = x * y
-        if check:
-            value = list(value)
-            for i in range(len(value)):
-                if not isinstance(value[i], poly):
-                    value[i] = poly(value[i])
-
-        self.value = tuple(value)
-
-    @classmethod
-    def _Jac(cls, u1, u0, v1, v0):
-        if not hasattr(u0, 'value'):
-            return True
-
-        poly = type(cls.f)
-        u = poly([u0.value, u1.value, 1])
-        v = poly([v0.value, v1.value])
-        return (cls.f - v**2) % u == 0
-
-    @classmethod
-    def _AffADD(cls, u1, u0, v1, v0, u1s, u01, u1d, u0d, v1d, v0d, u1ds, u01d):
-        uS = u1 + u1d
-        v0D = v0 - v0d
-        v1D = v1 - v1d
-        M1 = u1s - u0 - u1ds + u0d
-        M2 = u01d - u01
-        M3 = u1 - u1d
-        M4 = u0d - u0
-        t1 = (M2-v0D) * (v1D-M1)
-        t2 = (-v0D-M2) * (v1D+M1)  # 2M
-        t3 = (-v0D+M4) * (v1D-M3)
-        t4 = (-v0D-M4) * (v1D+M3)  # 2M
-        l2 = t1-t2
-        l3 = t3-t4
-        d = t3 + t4 - t1 - t2 - 2*(M2-M4)*(M1+M3)  # 1M
-        A = 1/(d*l3)
-        B = d*A
-        C = d*B
-        D = l2*B  # I + 4M
-        E = l3**2 * A
-        Cs = C**2
-        u1dd = 2*D-Cs-uS  # 1M+ 2S
-        u0dd = D**2 + C*(v1+v1d) - ((u1dd-Cs)*uS+(u1s+u1ds))/2  # 2M+ 1S
-        uu1dd = u1dd**2
-        uu0dd = u1dd*u0dd
-        v1dd = D*(u1-u1dd) + uu1dd-u0dd-u1s+u0  # 2M+ 1S
-        v0dd = D*(u0-u0dd) + uu0dd - u01
-        v1dd = -(E*v1dd + v1)
-        v0dd = -(E*v0dd + v0)  # 3M
-        assert cls._Jac(u1dd, u0dd, v1dd, v0dd), "Jac"
-        return u1dd, u0dd, v1dd, v0dd, uu1dd, uu0dd  # total I + 17M+ 4S
-
-    @classmethod
-    def _AffDBL(cls, u1, u0, v1, v0, uu1, uu0, f2, f3):
-        vv = v1**2
-        valpha = (v1+u1)**2 - vv - uu1  # 2 u1 v1
-        M1 = 2*v0-2*valpha
-        M2 = 2*v1*(u0+2*uu1)  # 1M+ 2S
-        M3 = -2*v1
-        M4 = valpha+2*v0
-        z1 = f2+2*uu1*u1+2*uu0-vv  # 1M
-        z2 = f3-2*u0+3*uu1
-        t1 = (M2-z1)*(z2-M1)
-        t2 = (-z1-M2)*(z2+M1)  # 2M
-        t3 = (-z1+M4)*(z2-M3)
-        t4 = (-z1-M4)*(z2+M3)
-        l2 = t1-t2
-        l3 = t3-t4  # 2M
-        d = t3+t4-t1-t2-2*(M2-M4)*(M1+M3)
-        A = 1/(d*l3)  # I + 2M
-        B = d*A
-        C = d*B
-        D = l2*B
-        E = l3**2 * A
-        # u1dd = -(1 - 2*l2*l3) / l3**2 -2*u1 = -(1 - 2*(l2/d)*(l3/d)) / (l3/d)**2 -2*u1
-        u1dd = 2*D-C**2 - 2*u1  # 4M+ 2S
-        u0dd = (D-u1)**2 + 2*C*(v1 + C*u1)
-        uu1dd = u1dd**2
-        uu0dd = u1dd*u0dd  # 3M+ 2S
-        v1dd = D*(u1-u1dd) + uu1dd - uu1 - u0dd + u0
-        v0dd = D*(u0-u0dd) + (uu0dd-uu0)  # 2M
-        v1dd = -(E*v1dd + v1)
-        v0dd = -(E*v0dd + v0)  # 2M
-        assert cls._Jac(u1dd, u0dd, v1dd, v0dd)
-        return u1dd, u0dd, v1dd, v0dd, uu1dd, uu0dd  # total I + 19M+ 6S
-
-    @classmethod
-    def _reduce(cls, D):
-        u, v = D
-        while u.degree() > cls.genus:
-            u = (cls.f - v**2) // u
-            v = (-v) % u
-        u = u.monic()
-        return u, v
-
-    @classmethod
-    def operation(cls, D1, D2, /):
-        poly = type(cls.f)
-        u1, v1 = D1
-        u2, v2 = D2
-
-        if u1 != 1 and poly.p in {37, 2**127 - 1}:
-            # use Costello--Lauter formula for adding distinct divisors
-            F = cls.field
-            try:
-                u1X, u0, v1X, v0, _, _ = cls._AffADD(F(u1[1]), F(u1[0]), F(v1[1]), F(v1[0]),
-                                                     F(u1[1])**2, F(u1[1])*F(u1[0]),
-                                                     F(u2[1]), F(u2[0]), F(v2[1]), F(v2[0]),
-                                                     F(u2[1])**2, F(u2[1])*F(u2[0]))
-                U, V = poly([u0.value, u1X.value, 1]), poly([v0.value, v1X.value])
-                return cls((U, V), check=False)
-
-            except Exception as e:
-                pass  # default to general approach below
-
-        # formula (C3a) from Cantor's 1987 paper
-        d, _, h2 = poly.gcdext(u1, u2)
-        if d == 1:
-            u = u1 * u2
-            v = (v2 + h2 * u2 * (v1 - v2)) % u
-        else:
-            d, h, h3 = poly.gcdext(d, v1 + v2)
-            h2 *= h
-            u = u1 * u2 // d**2
-            v = (v2 + (h2 * u2 * (v1 - v2) + h3 * (cls.f - v2**2)) // d) % u
-        return cls(cls._reduce((u, v)), check=False)
-
-    @classmethod
-    def operation2(cls, D, /):
-        poly = type(cls.f)
-        u, v = D
-
-        if poly.p in {37, 2**127 - 1}:
-            F = cls.field
-            try:
-                u1, u0, v1, v0, _, _ = cls._AffDBL(F(u[1]), F(u[0]), F(v[1]), F(v[0]), F(u[1])**2,
-                                                   F(u[1])*F(u[0]), F(cls.f[2]), F(cls.f[3]))
-                U, V = poly([u0.value, u1.value, 1]), poly([v0.value, v1.value])
-                return cls((U, V), check=False)
-
-            except Exception:
-                pass  # default to general approach below
-
-        # formula (C5a) from Cantor's 1987 paper
-        d, _, h3 = poly.gcdext(u, 2*v)
-        if d == 1:  # TODO: check if d=1 can be assumed if cls.f is irreducible
-            u = u**2
-            v = (v + h3 * (cls.f - v**2)) % u
-        else:
-            u = (u // d)**2
-            v = (v + h3 * ((cls.f - v**2) // d)) % u
-        return cls(cls._reduce((u, v)), check=False)
-
-    @classmethod
-    def inversion(cls, D, /):
-        u, v = D
-        return cls((u, -v), check=False)  # (-v) % u = -v because deg v < deg u
-
-    @classmethod
-    def equality(cls, D1, D2, /):
-        return D1.value == D2.value
-
-    @classmethod
-    def _class_number(cls):
+    def class_number(cls):
         """Count elements of Jacobian by counting unique Mumford representations (u,v)."""
+        assert cls.genus <= 3
         h = 1  # deg u = 0, hence (u,v)=(1,0), deg v = -1
         if cls.genus == 0:
             return h
 
-        assert cls.genus <= 3
-        f = cls.f
-        poly = type(f)
+        poly = type(cls.f)
         p = poly.p
         p2 = (p+1) // 2
-        f = f.value
+        f = cls.f.value
         mod = poly._mod
         sq = poly._sq
         v = []  # keep same list for v throughout
@@ -1480,96 +1320,309 @@ class DGSCurveDivisor(HyperellipticCurveDivisor):
                     del v[-1]
         return h
 
+    @staticmethod
+    def _reduce(f, genus, D):
+        u, v = D
+        while u.degree() > genus:
+            u = (f - v**2) // u
+            v = (-v) % u
+        u = u.monic()
+        return u, v
 
-def HyperellipticCurve(curvename='DGS', coordinates=None, p=None, l=None, genus=None):
-    """Create hyperelliptic curve group from given parameters.
-    Either randomly given (bit length l of) p for the underlying prime field and
-    Or by selection of a built-in curve.
+    @staticmethod
+    def _operation(f, genus, D1, D2):
+        # formula (C3a) from Cantor's 1987 paper
+        poly = type(f)
+        u1, v1 = D1
+        u2, v2 = D2
+        d, _, h2 = poly.gcdext(u1, u2)
+        if d == 1:
+            u = u1 * u2
+            v = (v2 + h2 * u2 * (v1 - v2)) % u
+        else:
+            d, h, h3 = poly.gcdext(d, v1 + v2)
+            h2 *= h
+            u = u1 * u2 // d**2
+            v = (v2 + (h2 * u2 * (v1 - v2) + h3 * (f - v2**2)) // d) % u
+        return HyperellipticCurveDivisor._reduce(f, genus, (u, v))
 
-    The default coordinates used with these curves are 'affine'.
+    @classmethod
+    def operation(cls, D1, D2, /):
+        return cls(HyperellipticCurveDivisor._operation(cls.f, cls.genus, D1, D2), check=False)
 
-    The following curves are built-in:
+    @staticmethod
+    def _operation2(f, genus, D):
+        # formula (C5a) from Cantor's 1987 paper
+        poly = type(f)
+        u, v = D
+        d, _, h3 = poly.gcdext(u, 2*v)
+        if d == 1:  # TODO: check if d=1 can be assumed if f is irreducible
+            u = u**2
+            v = (v + h3 * (f - v**2)) % u
+        else:
+            u = (u // d)**2
+            v = (v + h3 * ((f - v**2) // d)) % u
+        return HyperellipticCurveDivisor._reduce(f, genus, (u, v))
 
-        - 'DGS': see https://eprint.iacr.org/2020/196 - Algorithm 4.
+    @classmethod
+    def operation2(cls, D, /):
+        # formula (C5a) from Cantor's 1987 paper
+        return cls(HyperellipticCurveDivisor._operation2(cls.f, cls.genus, D), check=False)
+
+    @classmethod
+    def inversion(cls, D, /):
+        u, v = D
+        return cls((u, -v), check=False)  # (-v) % u = -v because deg v < deg u
+
+    @classmethod
+    def equality(cls, D1, D2, /):
+        return D1.value == D2.value
+
+
+class HCDivisorCL(HyperellipticCurveDivisor):
+    """Costello-Lauter formulas for genus 2.
+
+    With one exception, only divisors (u,v) with u of full degree 2 are assumed.
+    Such divisors are represented as a 6-tuple (u1, u0, v1, v0, u1u1, u1u0),
+    where u(x)=x^2+u1x+u0 and v(x)=v1x+v0.
+
+    The only exception is that the identity (1,0) is also considered,
+    represented by the 6-tuple (0,0,0,0,0,0).
+
+    See "Group Law Computations on Jacobians of Hyperelliptic Curves" by Costello and Lauter.
     """
-    # TODO: clean up _HyperellipticCurve()
-    return _HyperellipticCurve(p, l, genus, curvename, coordinates)
+
+    genus = 2
+    _identity = (0,) * 6  # (u1, u0, v1, v0, u1u1, u1u0)
+
+    def __init__(self, value=None, check=True):
+        if value is None:
+            value = map(self.field, self._identity)
+        elif len(value) == 4:
+            u1, u0, v1, v0 = value
+            value = (u1, u0, v1, v0, u1**2, u1 * u0)
+        if check:
+            field = self.field
+            value = list(value)
+            for i in range(len(value)):
+                if not isinstance(value[i], field):
+                    value[i] = field(value[i])
+            if value[0]**2 != value[4] or value[0] * value[1] != value[5]:
+                raise ValueError('incorrect extended coordinates')
+
+            if (self.f - self.v**2) % self.u:
+                raise ValueError('value not in Jacobian')
+
+        self.value = tuple(value)
+
+    @property
+    def u(self):
+        poly = GFpX(self.field.modulus)
+        if self.value == self._identity:
+            a = [1]
+        else:
+            a = [self.value[1].value, self.value[0].value, 1]
+        return poly(a, check=False)
+
+    @property
+    def v(self):
+        poly = GFpX(self.field.modulus)
+        if self.value == self._identity:
+            a = []
+        else:
+            a = [self.value[3].value, self.value[2].value]
+        return poly(a, check=False)
+
+    def __repr__(self):
+        return str((self.u, self.v))
+
+    @classmethod
+    def encode(cls, m):
+        """Encode message m in terms of monic polynomial of divisor.
+
+        Divisor (u,v) with deg u=2, u(x)=(x+m)^2=x^2+2mx+m^2=0
+        and deg v=0, v(x)=y, where x=-m and y^2=f(x).
+        Hence, u[2]=1, u[1]=2m=-2x, u[0]=m^2, v[0]=yfor rational point (x,y).
+        """
+        field = cls.field  # TODO: extend this to non-prime fields
+        gap = cls.gap
+        modulus = field.modulus
+        for i in range(gap):
+            x_0 = field(i)
+            ysquared_0 = cls.ysquared(-x_0)
+            if legendre(int(ysquared_0), modulus) == 1:
+                x_m = field(m * gap + i)
+                ysquared_m = cls.ysquared(-x_m)
+                if legendre(int(ysquared_m), modulus) == 1:
+                    M = cls((2*x_m, x_m**2, field(0), ysquared_m.sqrt()), check=False)
+                    Z = cls((2*x_0, x_0**2, field(0), ysquared_0.sqrt()), check=False)
+                    return M, Z
+
+    @classmethod
+    def decode(cls, M, Z):
+        """Decode message from given group elements."""
+        gap = cls.gap
+        return int((M.u[1] - Z.u[1]) / (2*gap))
+
+    @classmethod
+    def operation(cls, D1, D2, /):
+        if D1.value == cls._identity:
+            return D2
+
+        if D2.value == cls._identity:
+            return D1
+
+        u11, u10, v11, v10, u11u11, u11u10 = D1
+        u21, u20, v21, v20, u21u21, u21u20 = D2
+        try:
+            uv = cls._AffADD(u11, u10, v11, v10, u11u11, u11u10,
+                             u21, u20, v21, v20, u21u21, u21u20)
+        except Exception as e:
+            # fall back to general addition
+            poly = type(cls.f)
+            D1 = (poly([u10.value, u11.value, 1]), poly([v10.value, v11.value]))
+            D2 = (poly([u20.value, u21.value, 1]), poly([v20.value, v21.value]))
+            u, v = HyperellipticCurveDivisor._operation(cls.f, cls.genus, D1, D2)
+            if (u, v) == (1, 0):
+                uv = None
+            else:
+                F = cls.field
+                uv = F(u[1]), F(u[0]), F(v[1]), F(v[0])
+        return cls(uv, check=False)
+
+    @classmethod
+    def operation2(cls, D, /):
+        if D.value == cls._identity:
+            return D
+
+        u1, u0, v1, v0, u1u1, u1u0 = D
+        F = cls.field
+        try:
+            uv = cls._AffDBL(u1, u0, v1, v0, u1u1, u1u0, F(cls.f[2]), F(cls.f[3]))
+        except Exception as e:
+            # fall back to general doubling
+            poly = type(cls.f)
+            D = (poly([u0.value, u1.value, 1]), poly([v0.value, v1.value]))
+            u, v = HyperellipticCurveDivisor._operation2(cls.f, cls.genus, D)
+            uv = F(u[1]), F(u[0]), F(v[1]), F(v[0])
+        return cls(uv, check=False)
+
+    @classmethod
+    def inversion(cls, D, /):
+        if D.value == cls._identity:
+            return D
+
+        u1, u0, v1, v0, u1u1, u1u0 = D
+        v1 = -v1
+        v0 = -v0
+        uv = u1, u0, v1, v0, u1u1, u1u0
+        return cls(uv, check=False)
+
+    @classmethod
+    def _AffADD(cls, u1, u0, v1, v0, u1s, u1u0, u1d, u0d, v1d, v0d, u1ds, u1du0d):
+        # cf. Costello--Lauter Table 1
+        M1 = u0 - u0d
+        M2 = u1du0d - u1u0
+        M3 = u1 - u1d
+        M4 = u1ds - u1s + M1
+        z1 = v0d - v0
+        z2 = v1d - v1
+        return cls._fin(M1, M2, M3, M4, z1, z2, u1, u0, v1, v0, u1s, u1u0, u1 + u1d, v1d, u1ds)
+
+    @classmethod
+    def _AffDBL(cls, u1, u0, v1, v0, u1s, u1u0, f2, f3):
+        # cf. Costello--Lauter Table 1
+        v1s = v1**2  # 1S
+        tu1v1 = (u1 + v1)**2 - u1s - v1s  # 1S
+        M1 = 2*v0 + tu1v1
+        M2 = -2*v1 * (u0 + 2*u1s)  # 1M
+        M3 = 2*v1
+        M4 = 2*(v0 - tu1v1)
+        z1 = f2 + + 2*u1u0 + 2*u1s * u1 - v1s  # 1M
+        z2 = f3 - 2*u0 + 3*u1s
+        return cls._fin(M1, M2, M3, M4, z1, z2, u1, u0, v1, v0, u1s, u1u0, 2*u1, v1, u1s)  # 2M + 2S
+
+    @classmethod
+    def _fin(cls, M1, M2, M3, M4, z1, z2, u1, u0, v1, v0, u1s, u1u0, uS, v1d, u1ds):
+        t1 = (M2 - z1) * (M4 + z2)  # M
+        t2 = (M2 + z1) * (M4 - z2)  # M
+        t3 = (M1 + z1) * (M3 - z2)  # M
+        t4 = (M1 - z1) * (M3 + z2)  # M
+        l2 = t2 - t1
+        l3 = t4 - t3
+        d = t1 + t2 - t3 - t4 + 2*(M1 - M2) * (M3 + M4)  # M
+        A = 1/(d * l3)  # M + I
+        B = d * A  # M
+        C = d * B  # M
+        D = l2 * B  # M
+        E = l3**2 * A  # S + M
+        Cs = C**2  # S
+        u1dd = 2*D - Cs - uS
+        u0dd = D**2 + C * (v1 + v1d) - ((u1dd - Cs) * uS + u1s + u1ds)/2  # S + 2M
+        uu1dd = u1dd**2  # S
+        uu0dd = u1dd * u0dd  # M
+        v1dd = D * (u1 - u1dd) + uu1dd - u0dd - u1s + u0  # M
+        v0dd = D * (u0 - u0dd) + uu0dd - u1u0  # M
+        v1dd = -(E * v1dd + v1)  # M
+        v0dd = -(E * v0dd + v0)  # M
+        return u1dd, u0dd, v1dd, v0dd, uu1dd, uu0dd  # total I + 17M + 4S
+
+
+def HyperellipticCurve(curvename=None, coordinates=None, p=None, l=None, genus=None):
+    """Create type for hyperelliptic curve group with given parameters.
+
+    With curvename='kummer1271' the genus-2 curve due to Gaudry and Schost is obtained,
+    which is defined modulo p=2^127-1, the twelfth Mersenne prime.
+
+    By default, curvename='DGS', which stands for Dobson, Galbraith, and Smith, who
+    specified a way to generate random Jacobians together with a ...
+
+    Alternatively, given p or its bit length l as modulus for the underlying prime field,
+    a random curve of the specified genus (default 3) will be generated, using the method
+    of Dobson, Galbraith and Smith (Algorithm 4 from https://eprint.iacr.org/2020/196).
+    The randomness is seeded with the prime number p.
+
+    The coordinates used with these curves are 'affine', by default.
+    Currently, the only alternative coordinates are the Costello--Lauter 'extended' coordinates.
+    """
+    if curvename is None:
+        curvename = 'DGS'
+    if curvename == 'DGS':
+        if genus is None:
+            genus = 3
+        # e.g., l = 5 gives order 29389 which is approx p^3 = 31**3 = 29791
+        if p is None:
+            p = find_prime_root(l)[0]  # l-bit Blum prime p (p mod 4 = 3)
+    elif curvename == 'kummer1271':
+        p = 2**127 - 1
+        genus = 2
+        coordinates = 'extended'
+    else:
+        raise ValueError('curve not supported')
+
+    if coordinates is None:
+        coordinates = 'affine'
+
+    return _HyperellipticCurve(p, genus, curvename, coordinates)
 
 
 @functools.cache
-def _HyperellipticCurve(p, l, genus, curvename, coordinates):
-    def pick(p, l, genus):
-        # e.g., l = 5 gives order 29389 which is approx p^3 = 31**3 = 29791
-        if p is None:
-            p = int(prev_prime(1 << l))  # l-bit prime p
-        rnd = random.Random(p)
-        u = [rnd.randrange(p) for _ in range(genus)]
-        u.append(1)
-        u = GFpX(p)(u)
-        v = [rnd.randrange(p) for _ in range(genus)]
-        v = GFpX(p)(v)
+def _HyperellipticCurve(p, genus, curvename, coordinates):
+    gf = GF(p)
+    poly = GFpX(p)
+    name = f'HC({gf.__name__}){curvename}'
+    if curvename == 'DGS':
+        # Generate random (u,v) and irreducible f such that u | f - v^2:
+        rnd = random.Random(p)  # randomness seeded with p
+        u = poly([rnd.randrange(p) for _ in range(genus)] + [1])
+        v = poly([rnd.randrange(p) for _ in range(genus)])
         while True:
-            w = [rnd.randrange(p) for _ in range(genus+1)]
-            w.append(1)
-            w = GFpX(p)(w)
-            f = v**2 + u * w
-            if type(f).gcd(f, type(f).deriv(f)) == 1 and type(f).is_irreducible(f):
+            w = poly([rnd.randrange(p) for _ in range(genus+1)] + [1])
+            f = v**2 + u * w  # monic of degree 2*genus+1
+            if poly.gcd(f, f.deriv()) == 1 and poly.is_irreducible(f):
                 break
-        P = (u, v)
-        return p, f, P
-
-    if curvename.startswith('D'):
-        if curvename == 'DGS':
-            if genus is None:
-                genus = 3
-            p, f, P = pick(p, l, genus)
-            gf = GF(p)
-
-            if genus == 2:
-                f45 = gf(f[4])/5
-                f5 = 1
-                f4 = 0
-                f3 = 10*f45**2 - 4*f[4]*f45 + f[3]
-                f2 = -10*f45**3 + 6*f[4]*f45**2 - 3*f[3]*f45 + f[2]
-                f1 = 5*f45**4 - 4*f[4]*f45**3 + 3*f[3]*f45**2 - 2*f[2]*f45 + f[1]
-                f0 = -f45**5 + f[4]*f45**4 - f[3]*f45**3 + f[2]*f45**2 - f[1]*f45 + f[0]
-
-                u, v = P
-
-                u1 = u[1] - 2*f45
-                u0 = u[0] - u[1]*f45 + f45**2
-                v1 = v[1]
-                v0 = v[0] - v[1]*f45
-                f = [f0.value, f1.value, f2.value, f3.value, f4, f5]
-                u = [u0.value, u1.value, 1]
-                v = [v0.value, v1]
-                f = GFpX(p)(f)
-                u = GFpX(p)(u)
-                v = GFpX(p)(v)
-
-                P = (u, v)
-
-        else:
-            raise ValueError('invalid curvename')
-
-        name = f'HC({gf.__name__}){curvename}'
-        base = DGSCurveDivisor
-        HC = type(name, (base,), {'__slots__': ()})
-        HC.field = gf
-
-        if curvename == 'DGS':
-            HC.genus = genus
-            HC.f = f
-            base_pt = P
-        if p.bit_length() <= 3:
-            HC.order = HC._class_number()
-            HC.identity = HC(check=False)
-            assert HC(P, check=False)^HC.order == HC.identity
-        else:
-            HC.order = None  # NB: leave order as "unknown"
-    elif curvename == 'kummer1271':  # Gaudry-Schost curve aka kummer1271
-        base = DGSCurveDivisor
-        p = 2**127 - 1
+        n = None
+    elif curvename == 'kummer1271':  # Gaudry & Schost curve
         f = [81689052950067229064357938692912969725,   # x^0
              9855732443590990513334918966847277222,    # x^1
              154735094972565041023366918099598639851,  # x^2
@@ -1577,66 +1630,49 @@ def _HyperellipticCurve(p, l, genus, curvename, coordinates):
              64408548613810695909971240431892164827,   # x^4
              1]                                        # x^5
         # NB: f has 5 linear factors
-        assert type(GFpX(p)(f)).gcd(GFpX(p)(f), type(GFpX(p)(f)).deriv(GFpX(p)(f))) == 1
-        gf = GF(p)
+        assert poly.gcd(poly(f), poly(f).deriv()) == 1
+        n = 1809251394333065553571917326471206521441306174399683558571672623546356726339
+        # n is prime and order of Jacobian is 16 * n
+        u = poly('x^2+53887750494529953094583234541973147544x+'
+                 '152781149156717595995762065350002864540')
+        v = poly('117497929065723271999297121045670554255x+'
+                 '93722789515836547535106638431311448542')
+        # subgroup <(u,v)> of prime order n
+    else:
+        raise ValueError('curve not supported')
 
+    if genus == 2 and coordinates == 'extended':
+        base = HCDivisorCL
+        # ensure f[4]=0, by switching to isomorphic curve x:=x-f[4]/5
         f45 = gf(f[4])/5
-        f5 = 1
-        f4 = 0
         f3 = 10*f45**2 - 4*f[4]*f45 + f[3]
         f2 = -10*f45**3 + 6*f[4]*f45**2 - 3*f[3]*f45 + f[2]
         f1 = 5*f45**4 - 4*f[4]*f45**3 + 3*f[3]*f45**2 - 2*f[2]*f45 + f[1]
         f0 = -f45**5 + f[4]*f45**4 - f[3]*f45**3 + f[2]*f45**2 - f[1]*f45 + f[0]
-
-        name = f'HC({gf.__name__}){curvename}'
-        n = 2**4 * 1809251394333065553571917326471206521441306174399683558571672623546356726339
-        u = GFpX(p)('x^2+53887750494529953094583234541973147544x+'
-                    '152781149156717595995762065350002864540')
-        v = GFpX(p)('117497929065723271999297121045670554255x+'
-                    '93722789515836547535106638431311448542')
-
+        f = poly([f0.value, f1.value, f2.value, f3.value, 0, 1])
         u1 = u[1] - 2*f45
         u0 = u[0] - u[1]*f45 + f45**2
-        v1 = v[1]
+        v1 = gf(v[1])
         v0 = v[0] - v[1]*f45
-        f = [f0.value, f1.value, f2.value, f3.value, f4, f5]
-        u = [u0.value, u1.value, 1]
-        v = [v0.value, v1]
-        f = GFpX(p)(f)
-        u = GFpX(p)(u)
-        v = GFpX(p)(v)
-
-        base_pt = (u, v)  # order n // 16
-        HC = type(name, (base,), {'__slots__': ()})
-        HC.genus = 2
-        HC.field = gf
-        HC.f = f
-        HC.order = n // 16
-    elif curvename == 'costellolauter37':  # ad hoc curve
-        base = DGSCurveDivisor
-        p = 37
-        f = [1, 5, 30, 2, 0, 1]  # NB: f[4] = 0
-        f = GFpX(p)(f)  # has 5 linear factors?
-        gf = GF(p)
-        name = f'HC({gf.__name__}){curvename}'
-        n = 1412  # 1412 = 4 * 353
-        u = GFpX(p)('x^2+12x+26')
-        v = GFpX(p)('36x+14')
-        base_pt = (u, v)
-        HC = type(name, (base,), {'__slots__': ()})
-        HC.genus = 2
-        HC.field = gf
-        HC.f = f
-        HC.order = n
+        base_pt = (u1, u0, v1, v0, u1**2, u1 * u0)
     else:
-        raise ValueError('curve not supported')
+        base = HyperellipticCurveDivisor
+        base_pt = (u, v)
 
+    HC = type(name, (base,), {'__slots__': ()})
+    HC.field = gf
+    HC.genus = genus
     HC.curvename = curvename
+    HC.f = f
     HC.field.is_signed = False  # for consistency between sectypes and regular types
     HC.is_cyclic = True  # NB: these HC subgroups are cyclic by definition
     HC.gap = 256  # TODO: optimize gap value
     HC.identity = HC(check=False)
     HC.generator = HC(base_pt, check=False)
+    if n is None and genus <= 3 and genus * p.bit_length() <= 3:
+        n = HC.class_number()
+    HC.order = n
+    assert HC.order is None or HC.generator^HC.order == HC.identity
     globals()[name] = HC  # NB: exploit (almost?) unique name dynamic HC type
     return HC
 
@@ -1841,6 +1877,7 @@ class ClassGroupForm(FiniteGroupElement):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         gap = cls.gap
         return (M[0] - Z[0]) // gap
 
@@ -1920,7 +1957,7 @@ def _ClassGroup(Delta):
         # Use the following generator from the Chia VDF competition,
         # see https://www.chia.net/2018/11/07/chia-vdf-competition-guide.en.html:
         g = Cl((2, 1, (1 - Delta) // 8))  # order of g around sqrt(-D/4)
-    elif Delta%4 == 1:
+    else:
         g = Cl.identity  # trivial generator
     Cl.generator = g
     Cl.is_cyclic = True  # We use the (sub)group generated by g.

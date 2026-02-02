@@ -22,7 +22,6 @@ If these functions are called with plain data, the call is relayed to the corres
 function in Python's statistics module.
 """
 
-from math import fsum, sqrt
 import statistics
 from mpyc import asyncoro
 from mpyc.sectypes import SecureObject, SecureInteger, SecureFixedPoint

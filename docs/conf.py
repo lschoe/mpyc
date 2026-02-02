@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'MPyC'
-copyright = '2018 - 2025, Berry Schoenmakers'
+copyright = '2018 - 2026, Berry Schoenmakers'
 author = 'Berry Schoenmakers'
 
 # The short X.Y version

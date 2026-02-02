@@ -8,6 +8,7 @@ import itertools
 import functools
 import inspect
 import asyncio
+from mpyc.gfpx import GFpX
 from mpyc.finfields import FiniteFieldElement
 import mpyc.fingroups as fg
 from mpyc.thresha import _recombination_vector
@@ -169,7 +170,7 @@ class SecureFiniteGroup(SecureObject):
 
     def inverse(self):
         """For ease of use."""  # instance method a.inverse()
-        return type(self).inversion(self)
+        return self.inversion(self)
 
     @classmethod
     def _input(cls, x, senders):
@@ -500,7 +501,12 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
 
 
 class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
-    """Common base class for secure (secret-shared) hyperelliptic curve divisors."""
+    """Common base class for secure (secret-shared) hyperelliptic curve divisors.
+
+    Next to the general implementation based on Cantor's algorithms, specialized
+    for genus <= 3, an implementation based on Costello--Lauter is also included
+    (genus 2 over large prime field).
+    """
 
     __slots__ = ()
 
@@ -509,22 +515,20 @@ class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
 
         Enforce value is a tuple.
         """
-        n = len(self.group.identity.value)
         if value is None:
             pass
         elif isinstance(value, self.group):
             value = value.value
         else:
-            if not (isinstance(value, (tuple, list)) and len(value) == n):
-                raise ValueError(f'tuple/list of length {n} required')
+            if not (isinstance(value, (tuple, list)) and len(value) == 2):
+                raise ValueError(f'tuple/list of length 2 required')
 
+        secfld = runtime.SecFld(self.group.field.modulus)
         if value is None:
-            sectype = runtime.SecFld(self.group.field.modulus)
-            value = (secpoly(None, shape=(self.group.genus+1,), sectype=sectype),
-                     secpoly(None, shape=(self.group.genus,), sectype=sectype))
+            value = (secpoly(None, shape=(self.group.genus+1,), sectype=secfld),
+                     secpoly(None, shape=(self.group.genus,), sectype=secfld))
         else:
             value = tuple(secpoly(a) if not isinstance(a, secpoly) else a for a in value)
-
         super().__init__(value)
 
     def set_share(self, value):
@@ -538,47 +542,38 @@ class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
     def _reduce(cls, D):
         """Secure reduction of given semi-reduced divisor."""
         u, v = D
-        from mpyc.numpy import np  # TODO: clean this up
-        assert len(u.share) >= cls.group.genus+1
-        c = np.all(u.share[cls.group.genus+1:] == 0)
+        poly = GFpX(cls.sectype.field.modulus)
+        c = u >> cls.group.genus+1 == poly(0)
         _u = u
         _v = v
 
         if cls.group.genus <= 2:
             u_ = (cls.group.f - v**2) // u
             u, v = u_, (-v) % u_
-            u.share = secpoly._add(c * secpoly._sub(_u.share, u.share), u.share)
-            # u = secpoly(secpoly._add(c * secpoly._sub(_u.share, u.share), u.share))
-            v.share = secpoly._add(c * secpoly._sub(_v.share, v.share), v.share)
-            # v = secpoly(secpoly._add(c * secpoly._sub(_v.share, v.share), v.share))
+            u = secpoly.if_else(c, _u, u)
+            v = secpoly.if_else(c, _v, v)
         else:
             u_ = (cls.group.f - v**2) // u
-            z = np.all(u_.share == 0)
-            u_.share = np.where(z, u_.share + 1, u_.share)
-            # u_ = secpoly(np.where(z, u_.share + 1, u_.share))
+            z = u_ == poly(0)
+            u_ = secpoly.if_else(z, u_ + poly(1), u_)  # NB: avoid division by zero
             u, v = u_, (-v) % u_
-            e = c + z - c*z
-            u.share = secpoly._add(e * secpoly._sub(_u.share, u.share), u.share)
-            # u = secpoly(secpoly._add(e * secpoly._sub(_u.share, u.share), u.share))
-            v.share = secpoly._add(e * secpoly._sub(_v.share, v.share), v.share)
-            # v = secpoly(secpoly._add(e * secpoly._sub(_v.share, v.share), v.share))
+            c = c + z - c*z
+            u = secpoly.if_else(c, _u, u)
+            v = secpoly.if_else(c, _v, v)
 
             u = u.truncate(cls.group.genus + 3)
             v = v.truncate(cls.group.genus + 2)
 
-            c = np.all(u.share[cls.group.genus+1:] == 0)
+            c = u >> cls.group.genus+1 == poly(0)
             _u = u
             _v = v
             u_ = (cls.group.f - v**2) // u
-            z = np.all(u_.share == 0)
-            u_.share = np.where(z, u_.share + 1, u_.share)
-            # u_ = secpoly(np.where(z, u_.share + 1, u_.share))
+            z = u_ == poly(0)
+            u_ = secpoly.if_else(z, u_ + poly(1), u_)  # NB: avoid division by zero
             u, v = u_, (-v) % u_
-            e = c + z - c*z
-            u.share = secpoly._add(e * secpoly._sub(_u.share, u.share), u.share)
-            # u = secpoly(secpoly._add(e * secpoly._sub(_u.share, u.share), u.share))
-            v.share = secpoly._add(e * secpoly._sub(_v.share, v.share), v.share)
-            # v = secpoly(secpoly._add(e * secpoly._sub(_v.share, v.share), v.share))
+            c = c + z - c*z
+            u = secpoly.if_else(c, _u, u)
+            v = secpoly.if_else(c, _v, v)
 
         u = u.truncate(cls.group.genus + 1)
         v = v.truncate(cls.group.genus)
@@ -589,27 +584,6 @@ class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
     def operation(cls, D1, D2, /):
         u1, v1 = D1
         u2, v2 = D2
-
-        if len(u1.share) == 1:
-            return D2
-        elif len(u2.share) == 1:
-            return D1
-
-        if cls.group.genus == 2 and cls.group.field.modulus == 2**127 - 1:
-            # use Costello--Lauter formula for adding distinct divisors
-            # TODO: refactor properly
-            u1 = u1.share
-            v1 = v1.share
-            u2 = u2.share
-            v2 = v2.share
-            u1X, u0, v1X, v0, _, _ = cls.group._AffADD(u1[1], u1[0], v1[1], v1[0],
-                                                       u1[1]**2, u1[1]*u1[0],
-                                                       u2[1], u2[0], v2[1], v2[0],
-                                                       u2[1]**2, u2[1]*u2[0])
-            U = secpoly(runtime.np_fromlist([u0, u1X, runtime.SecFld(cls.group.field.modulus)(1)]))
-            V = secpoly(runtime.np_fromlist([v0, v1X]))
-            return cls((U, V))
-
         d, _, h2 = secpoly.gcdext(u1, u2)
         d, h, h3 = secpoly.gcdext(d, v1 + v2)
         h2 *= h
@@ -620,18 +594,6 @@ class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
     @classmethod
     def operation2(cls, D, /):
         u, v = D
-
-        if cls.group.genus == 2 and cls.group.field.modulus == 2**127 - 1:
-            # use Costello--Lauter formula for adding distinct divisors
-            # TODO: refactor properly
-            u = u.share
-            v = v.share
-            u1, u0, v1, v0, _, _ = cls.group._AffDBL(u[1], u[0], v[1], v[0], u[1]**2, u[1]*u[0],
-                                                     cls.group.f[2], cls.group.f[3])
-            U = secpoly(runtime.np_fromlist([u0, u1, runtime.SecFld(cls.group.field.modulus)(1)]))
-            V = secpoly(runtime.np_fromlist([v0, v1]))
-            return cls((U, V))
-
         d, _, h3 = secpoly.gcdext(u, v + v)  # TODO: support 2*v to use instead of v + v
         u = (u // d)**2
         v = (v + h3 * ((cls.group.f - v**2) // d)) % u
@@ -639,19 +601,86 @@ class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
 
     @classmethod
     def inversion(cls, D, /):
-        u, v = D
-        return cls((u, -v))
+        try:
+            u, v = D
+            return cls((u, -v))
+        except Exception:
+            u1, u0, v1, v0, u1u1, u1u0 = D
+            v1 = -v1
+            v0 = -v0
+            uv = u1, u0, v1, v0, u1u1, u1u0
+            return cls(uv)
 
     @classmethod
     def equality(cls, D1, D2, /):
-        v0 = D1.share[0] == D2.share[0]
-        v1 = D1.share[1] == D2.share[1]
-        return v0 * v1  # TODO: optimize batch test eq. with random r in field
+        e0 = D1.share[0] == D2.share[0]
+        e1 = D1.share[1] == D2.share[1]
+        return e0 * e1  # TODO: optimize batch test eq. with random r in field
 
     @classmethod
     def decode(cls, M, Z):
         gap = cls.group.gap
         return (M.share[0][0] - Z.share[0][0]) / gap
+
+
+class SecureHCDivisorCL(SecureFiniteGroup):
+    """Common base class for secure (secret-shared) hyperelliptic curve divisors.
+
+    Next to the general implementation based on Cantor's algorithms, specialized
+    for genus <= 3, an implementation based on Costello--Lauter is also included
+    (genus 2 over large prime field).
+    """
+
+    __slots__ = ()
+
+    def __init__(self, value=None):
+        """Ensure all coefficients are secure polynomials.
+
+        Enforce value is a tuple.
+        """
+        if value is None:
+            value = (None,) * 6
+        elif isinstance(value, self.group):
+            value = value.value
+        else:
+            if not (isinstance(value, (tuple, list)) and len(value) == 6):
+                raise ValueError(f'tuple/list of length {6} required')
+
+        secfld = runtime.SecFld(self.group.field.modulus)
+        value = tuple(secfld(a) if not isinstance(a, secfld) else a for a in value)
+        super().__init__(value)
+
+    def set_share(self, value):
+        for a, b in zip(self.share, value):
+            a.set_share(b.share)
+
+    def __getitem__(self, key):  # NB: no set_item to prevent mutability
+        return self.share[key]
+
+    @classmethod
+    def operation(cls, D1, D2, /):
+        # TODO: consider testing for D1 == -D2
+        return cls(cls.group._AffADD(*D1, *D2))
+
+    @classmethod
+    def operation2(cls, D, /):
+        return cls(cls.group._AffDBL(*D, cls.group.f[2], cls.group.f[3]))
+
+    @classmethod
+    def inversion(cls, D, /):
+        D = list(D)
+        D[2] = -D[2]  # v0 = -v0
+        D[3] = -D[3]  # v1 = -v1
+        return cls(D)
+
+    @classmethod
+    def equality(cls, D1, D2, /):
+        return runtime.all(a == b for a, b in zip(D1[:4], D2[:4]))
+
+    @classmethod
+    def decode(cls, M, Z):
+        gap = cls.group.gap
+        return (M[0] - Z[0]) / (2*gap)
 
 
 @asyncoro.mpc_coro
@@ -852,10 +881,12 @@ def SecGrp(group):
         base = SecureEllipticCurvePoint
         sectype = runtime.SecFld(group.field.order)
         assert group.oblivious
+    elif issubclass(group, fg.HCDivisorCL):
+        base = SecureHCDivisorCL
+        sectype = runtime.SecFld(group.field.order)
     elif issubclass(group, fg.HyperellipticCurveDivisor):
         base = SecureHyperellipticCurveDivisor
         sectype = runtime.SecFld(group.field.order)
-#        assert group.oblivious
     elif issubclass(group, fg.ClassGroupForm):
         base = SecureClassGroupForm
         sectype = runtime.SecInt(group.bit_length + 3)  # TODO: check bit length (+2 is not enough)
@@ -878,11 +909,11 @@ def _toSecGrpFunc(GroupFunc):
     sig = inspect.signature(GroupFunc)
     # docstring based on GroupFunc's signature and docstring
     doc = f'''Call {name}(...) is equivalent to SecGrp({GroupFunc.__name__}(...)),
-    returning secure version of {GroupFunc.__name__} from mpyc.fingroups.
+returning secure version of {GroupFunc.__name__} from mpyc.fingroups.
 
-    {GroupFunc.__name__}{sig}:
+{GroupFunc.__name__}{sig}:
 
-    {GroupFunc.__doc__}
+{GroupFunc.__doc__}
 '''
 
     def SecGrpFunc(*args, **kwargs):

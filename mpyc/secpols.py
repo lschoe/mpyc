@@ -66,6 +66,7 @@ class secpoly(SecureObject):
 
     @property
     def sectype(self):
+        """Secure type of coefficients."""
         return self.share.sectype
 
     def set_share(self, value):
@@ -151,6 +152,23 @@ class secpoly(SecureObject):
         return secpoly(secpoly._mul(a.share, b.share))
 
     @staticmethod
+    def if_else(c, a, b):
+        """Secure selection based on binary condition c between polynomials a and b.
+
+        Condition c must be of a secure number type compatible with a and b
+        and its value should be 0 or 1.
+        """
+        # TODO: make this general
+        a = a.share
+        b = b.share
+        if len(a) == len(b):
+            # fast path
+            d = np.where(c, a, b)
+        else:
+            d = secpoly._add(c * secpoly._sub(a, b), b)
+        return secpoly(d)
+
+    @staticmethod
     def _powmod(a, n, modulus=None):
         if n == 0:
             return a.sectype.array(np.array([1]))
@@ -212,7 +230,7 @@ class secpoly(SecureObject):
 
     @staticmethod
     def _degree(a):
-        if not len(a):  # TODO: fix np_find (and find) for empty a, using secure type of a
+        if not a:  # TODO: fix np_find (and find) for empty a, using secure type of a
             return type(a).sectype(-1)
 
         assert len(a) <= type(a).sectype.field.modulus  # NB: len(a) assumed sufficiently small
@@ -233,7 +251,7 @@ class secpoly(SecureObject):
 
         If lc_pinv is set, inverse of leading coefficient is also returned (0 for zero polynomial).
         """
-        if not len(a):  # TODO: fix np_find (and find) for empty a, using secure type of a
+        if not a:  # TODO: fix np_find (and find) for empty a, using secure type of a
             return a
 
         d = secpoly._degree(a)  # set degree obliviously
@@ -402,7 +420,7 @@ class secpoly(SecureObject):
 
     @staticmethod
     def _lshift(a, n):
-        if not len(a):
+        if not a:
             a = np.copy(a)
         else:
             a = np.concatenate((np.zeros(n, dtype=int), a))

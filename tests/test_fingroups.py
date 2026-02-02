@@ -125,11 +125,14 @@ class Arithmetic(unittest.TestCase):
         curves = (fg.HyperellipticCurve(p=3, genus=0),
                   fg.HyperellipticCurve(p=7, genus=1),
                   fg.HyperellipticCurve(curvename='kummer1271'),
+                  fg.HyperellipticCurve(l=96, genus=2, coordinates='extended'),
                   fg.HyperellipticCurve(l=640))
         for group in curves:
             self.assertEqual(5*group.identity, group.identity^-1)
             self.assertEqual(group.generator + (group.generator^-1), group.identity)
-        for group in curves[:-1]:
+            if group.field.modulus > group.gap:
+                self.assertEqual(group.decode(*group.encode(42)), 42)
+        for group in curves[:-2]:
             self.assertEqual(group.generator^group.order, group.identity)
 
     def test_Cl(self):
