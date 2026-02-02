@@ -1701,7 +1701,7 @@ class Runtime:
 
     @asyncoro.mpc_coro
     async def np_lsb(self, a):
-        """Compute least significant bits of values in array a""" # a la [ST06]
+        """Compute least significant bits of (elements of) a."""  # a la [ST06]
         await self.returnType((type(a), True, a.shape))
         stype = a.sectype
         Zp = stype.field
@@ -1709,21 +1709,16 @@ class Runtime:
         k = self.options.sec_param
         f = stype.frac_length
 
-        b = self.np_random_bits(stype, len(a))
+        b = self.np_random_bits(stype, a.size).reshape(*a.shape)
         a, b = await self.gather(a, b)
         if f:
             b >>= f
-
-        rs = self._np_randoms(Zp, len(a), bound = 1 << (l + k - 1))
+        r = self._np_randoms(Zp, a.size, 1 << (l + k - 1)).reshape(*a.shape)
         if self.options.no_prss:
-            rs = (await rs)[0]
-
-        r = b + 2 * rs
-        c = await self.output(a + r + 2**l)  # denoted by 'y' in [ST06]
-
-        c0 = (c.value & 1)
-        x = (c0 + b) - 2 * (c0 * b) # xor
-
+            r = (await r)[0]
+        r = r.value
+        c = await self.output(a + ((1<<l) + (r << 1) + b.value))
+        x = np.where(c.value & 1, 1 - b, b)  # xor
         if f:
             x <<= f
         return x
