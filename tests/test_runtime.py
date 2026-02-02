@@ -129,6 +129,7 @@ class Arithmetic(unittest.TestCase):
         a *= 2
         c *= 2
         np.assertEqual(mpc.run(mpc.output(c)), a)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_lsb(c))), a.value % 2)
         a /= 2
         c /= 2
         np.assertEqual(mpc.run(mpc.output(c)), a)
@@ -327,6 +328,7 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c * 2.5)), a * 2.5)
         np.assertEqual(mpc.run(mpc.output(c / secfxp.field(2))), a / 2)
         np.assertEqual(mpc.run(mpc.output(c / secfxp.field.array([2]))), a / 2)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_lsb(c))), a % 2**-(secfxp.frac_length-1))
 
         # NB: NumPy dispatcher converts np.int8 to int
         np.assertEqual(mpc.run(mpc.output(c * np.int8(2))), a * 2)
@@ -481,6 +483,8 @@ class Arithmetic(unittest.TestCase):
 
         self.assertEqual(mpc.np_sgn(c1).integral, True)
         self.assertEqual(mpc.np_sgn(c2).integral, True)
+        self.assertEqual(mpc.np_lsb(c1).integral, True)
+        self.assertEqual(mpc.np_lsb(c2).integral, True)
         self.assertEqual(np.absolute(c1).integral, False)
         self.assertEqual(np.absolute(c2).integral, True)
 
