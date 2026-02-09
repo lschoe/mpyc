@@ -233,7 +233,7 @@ def _get_results(obj):
         if isinstance(obj.share, Future):
             return obj.share.result()
 
-        elif isinstance(obj.share, tuple):
+        if isinstance(obj.share, tuple):
             return tuple(map(_get_results, obj.share))
 
         return obj.share
@@ -261,7 +261,7 @@ def gather_shares(rt, *obj):
         if isinstance(obj.share, Future):
             return obj.share
 
-        elif isinstance(obj.share, tuple):
+        if isinstance(obj.share, tuple):
             return gather_shares(rt, obj.share)
 
         return _AwaitableFuture(obj.share)
@@ -409,6 +409,7 @@ def _ncopy(nested_list):
 
 
 def mpc_coro_no_pc(func):
+    """Decorator turning coroutine func into an MPyC coroutine, but without program counter."""
     return mpc_coro(func, pc=False)
 
 

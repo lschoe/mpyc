@@ -189,6 +189,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.where(c[0] < 0, -c, c))), a)
         np.assertEqual(mpc.run(mpc.output(np.where(True, c, 10))), a)
         np.assertEqual(mpc.run(mpc.output(np.where(False, 10, c))), a)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_if_swap(True, c, 10)[1])), a)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_if_swap(False, c, 10)[0])), a)
         a_ = a.signed_()
         np.assertEqual(mpc.run(mpc.output(np.amin(c))), np.amin(a_))
         np.assertEqual(mpc.run(mpc.output(np.amin(c, keepdims=True))), np.amin(a_, keepdims=True))
@@ -406,6 +408,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.where(c[0] < 0, -c, c))), -a)
         np.assertEqual(mpc.run(mpc.output(np.where(True, c, 10))), a)
         np.assertEqual(mpc.run(mpc.output(np.where(False, 10, c))), a)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_if_swap(True, c, 10)[1])), a)
+        np.assertEqual(mpc.run(mpc.output(mpc.np_if_swap(False, c, 10)[0])), a)
 
         u = mpc.np_unit_vector(secfxp(3), 7)
         self.assertEqual(mpc.run(mpc.output(np.argmax(u))), 3)

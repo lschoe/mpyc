@@ -1,15 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mpyc.statistics</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mpyc.statistics</title>
+<link rel="stylesheet" type="text/css" href="pydoc.css">
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.statistics</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/statistics.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/statistics.py</a></font></td></tr></table>
-    <p><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;common&nbsp;mathematical&nbsp;statistics&nbsp;functions.<br>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mpyc.html" class="white">mpyc</a>.statistics</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.11/mpyc/statistics.py">github.com/lschoe/mpyc/blob/v0.11/mpyc/statistics.py</a></td></tr></table>
+    <p><span class="code">This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;common&nbsp;mathematical&nbsp;statistics&nbsp;functions.<br>
 The&nbsp;module&nbsp;is&nbsp;modeled&nbsp;after&nbsp;the&nbsp;statistics&nbsp;module&nbsp;in&nbsp;the&nbsp;Python&nbsp;standard&nbsp;library,&nbsp;and<br>
 as&nbsp;such&nbsp;aimed&nbsp;at&nbsp;small&nbsp;scale&nbsp;use&nbsp;("at&nbsp;the&nbsp;level&nbsp;of&nbsp;graphing&nbsp;and&nbsp;scientific&nbsp;calculators").<br>
 &nbsp;<br>
@@ -30,36 +31,30 @@ current&nbsp;implementations&nbsp;of&nbsp;mode,&nbsp;median,&nbsp;and&nbsp;quant
 a&nbsp;strict&nbsp;but&nbsp;less&nbsp;efficient&nbsp;approach.<br>
 &nbsp;<br>
 If&nbsp;these&nbsp;functions&nbsp;are&nbsp;called&nbsp;with&nbsp;plain&nbsp;data,&nbsp;the&nbsp;call&nbsp;is&nbsp;relayed&nbsp;to&nbsp;the&nbsp;corresponding<br>
-function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</tt></p>
+function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</span></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="mpyc.asyncoro.html">mpyc.asyncoro</a><br>
-</td><td width="25%" valign=top><a href="mpyc.random.html">mpyc.random</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/statistics.html">statistics</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/sys.html">sys</a><br>
-</td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="mpyc.asyncoro.html">mpyc.asyncoro</a><br>
+</td><td class="multicolumn"><a href="mpyc.random.html">mpyc.random</a><br>
+</td><td class="multicolumn"><a href="https://docs.python.org/3/library/statistics.html">statistics</a><br>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-correlation"><strong>correlation</strong></a>(x, y)</dt><dd><tt>Return&nbsp;Pearson's&nbsp;correlation&nbsp;coefficient&nbsp;for&nbsp;x&nbsp;and&nbsp;y.<br>
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-correlation"><strong>correlation</strong></a>(x, y)</dt><dd><span class="code">Return&nbsp;Pearson's&nbsp;correlation&nbsp;coefficient&nbsp;for&nbsp;x&nbsp;and&nbsp;y.<br>
 &nbsp;<br>
 Pearson's&nbsp;correlation&nbsp;coefficient&nbsp;takes&nbsp;values&nbsp;between&nbsp;-1&nbsp;and&nbsp;+1.<br>
 It&nbsp;measures&nbsp;the&nbsp;strength&nbsp;and&nbsp;direction&nbsp;of&nbsp;the&nbsp;linear&nbsp;relationship<br>
 between&nbsp;x&nbsp;and&nbsp;y,&nbsp;where&nbsp;+1&nbsp;means&nbsp;very&nbsp;strong,&nbsp;positive&nbsp;linear&nbsp;relationship,<br>
--1&nbsp;very&nbsp;strong,&nbsp;negative&nbsp;linear&nbsp;relationship,&nbsp;and&nbsp;0&nbsp;no&nbsp;linear&nbsp;relationship.</tt></dd></dl>
- <dl><dt><a name="-covariance"><strong>covariance</strong></a>(x, y)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;covariance&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
- <dl><dt><a name="-fsum"><strong>fsum</strong></a>(seq, /)</dt><dd><tt>Return&nbsp;an&nbsp;accurate&nbsp;floating&nbsp;point&nbsp;sum&nbsp;of&nbsp;values&nbsp;in&nbsp;the&nbsp;iterable&nbsp;seq.<br>
-&nbsp;<br>
-Assumes&nbsp;IEEE-754&nbsp;floating&nbsp;point&nbsp;arithmetic.</tt></dd></dl>
- <dl><dt><a name="-linear_regression"><strong>linear_regression</strong></a>(x, y)</dt><dd><tt>Return&nbsp;a&nbsp;(simple)&nbsp;linear&nbsp;regression&nbsp;model&nbsp;for&nbsp;x&nbsp;and&nbsp;y.<br>
+-1&nbsp;very&nbsp;strong,&nbsp;negative&nbsp;linear&nbsp;relationship,&nbsp;and&nbsp;0&nbsp;no&nbsp;linear&nbsp;relationship.</span></dd></dl>
+ <dl><dt><a name="-covariance"><strong>covariance</strong></a>(x, y)</dt><dd><span class="code">Return&nbsp;the&nbsp;sample&nbsp;covariance&nbsp;of&nbsp;x&nbsp;and&nbsp;y.</span></dd></dl>
+ <dl><dt><a name="-linear_regression"><strong>linear_regression</strong></a>(x, y)</dt><dd><span class="code">Return&nbsp;a&nbsp;(simple)&nbsp;linear&nbsp;regression&nbsp;model&nbsp;for&nbsp;x&nbsp;and&nbsp;y.<br>
 &nbsp;<br>
 The&nbsp;parameters&nbsp;of&nbsp;the&nbsp;model&nbsp;are&nbsp;returned&nbsp;as&nbsp;a&nbsp;named&nbsp;LinearRegression&nbsp;tuple,<br>
 with&nbsp;two&nbsp;fields&nbsp;called&nbsp;"slope"&nbsp;and&nbsp;"intercept",&nbsp;respectively.<br>
@@ -72,32 +67,32 @@ variable&nbsp;x&nbsp;and&nbsp;dependent&nbsp;variable&nbsp;y&nbsp;in&nbsp;terms&
 Here,&nbsp;slope&nbsp;and&nbsp;intercept&nbsp;are&nbsp;the&nbsp;regression&nbsp;parameters&nbsp;estimated&nbsp;using<br>
 ordinary&nbsp;least&nbsp;squares,&nbsp;and&nbsp;noise&nbsp;represents&nbsp;the&nbsp;variability&nbsp;of&nbsp;the&nbsp;data<br>
 not&nbsp;explained&nbsp;by&nbsp;the&nbsp;linear&nbsp;regression&nbsp;(it&nbsp;is&nbsp;equal&nbsp;to&nbsp;the&nbsp;difference<br>
-between&nbsp;predicted&nbsp;and&nbsp;actual&nbsp;values&nbsp;of&nbsp;the&nbsp;dependent&nbsp;variable).</tt></dd></dl>
- <dl><dt><a name="-mean"><strong>mean</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;mean&nbsp;(average)&nbsp;of&nbsp;data&nbsp;which&nbsp;can&nbsp;be&nbsp;a&nbsp;sequence&nbsp;or&nbsp;an&nbsp;iterable.<br>
+between&nbsp;predicted&nbsp;and&nbsp;actual&nbsp;values&nbsp;of&nbsp;the&nbsp;dependent&nbsp;variable).</span></dd></dl>
+ <dl><dt><a name="-mean"><strong>mean</strong></a>(data)</dt><dd><span class="code">Return&nbsp;the&nbsp;sample&nbsp;mean&nbsp;(average)&nbsp;of&nbsp;data&nbsp;which&nbsp;can&nbsp;be&nbsp;a&nbsp;sequence&nbsp;or&nbsp;an&nbsp;iterable.<br>
 &nbsp;<br>
 If&nbsp;the&nbsp;data&nbsp;points&nbsp;are&nbsp;secure&nbsp;integers&nbsp;or&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;the&nbsp;mean<br>
 value&nbsp;returned&nbsp;is&nbsp;of&nbsp;the&nbsp;same&nbsp;secure&nbsp;type,&nbsp;rounded&nbsp;to&nbsp;the&nbsp;nearest&nbsp;number.<br>
 &nbsp;<br>
-If&nbsp;data&nbsp;is&nbsp;empty,&nbsp;StatisticsError&nbsp;will&nbsp;be&nbsp;raised.</tt></dd></dl>
- <dl><dt><a name="-median"><strong>median</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;median&nbsp;of&nbsp;numeric&nbsp;data,&nbsp;using&nbsp;the&nbsp;common&nbsp;“mean&nbsp;of&nbsp;middle&nbsp;two”&nbsp;method.<br>
+If&nbsp;data&nbsp;is&nbsp;empty,&nbsp;StatisticsError&nbsp;will&nbsp;be&nbsp;raised.</span></dd></dl>
+ <dl><dt><a name="-median"><strong>median</strong></a>(data)</dt><dd><span class="code">Return&nbsp;the&nbsp;median&nbsp;of&nbsp;numeric&nbsp;data,&nbsp;using&nbsp;the&nbsp;common&nbsp;“mean&nbsp;of&nbsp;middle&nbsp;two”&nbsp;method.<br>
 &nbsp;<br>
 If&nbsp;data&nbsp;is&nbsp;empty,&nbsp;StatisticsError&nbsp;is&nbsp;raised.&nbsp;data&nbsp;can&nbsp;be&nbsp;a&nbsp;sequence&nbsp;or&nbsp;iterable.<br>
 &nbsp;<br>
 When&nbsp;the&nbsp;number&nbsp;of&nbsp;data&nbsp;points&nbsp;is&nbsp;even,&nbsp;the&nbsp;median&nbsp;is&nbsp;interpolated&nbsp;by&nbsp;taking&nbsp;the&nbsp;average&nbsp;of<br>
-the&nbsp;two&nbsp;middle&nbsp;values.</tt></dd></dl>
- <dl><dt><a name="-median_high"><strong>median_high</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;high&nbsp;median&nbsp;of&nbsp;numeric&nbsp;data.<br>
+the&nbsp;two&nbsp;middle&nbsp;values.</span></dd></dl>
+ <dl><dt><a name="-median_high"><strong>median_high</strong></a>(data)</dt><dd><span class="code">Return&nbsp;the&nbsp;high&nbsp;median&nbsp;of&nbsp;numeric&nbsp;data.<br>
 &nbsp;<br>
 If&nbsp;data&nbsp;is&nbsp;empty,&nbsp;StatisticsError&nbsp;is&nbsp;raised.&nbsp;data&nbsp;can&nbsp;be&nbsp;a&nbsp;sequence&nbsp;or&nbsp;iterable.<br>
 &nbsp;<br>
 The&nbsp;high&nbsp;median&nbsp;is&nbsp;always&nbsp;a&nbsp;member&nbsp;of&nbsp;the&nbsp;data&nbsp;set.&nbsp;When&nbsp;the&nbsp;number&nbsp;of&nbsp;data&nbsp;points&nbsp;is&nbsp;odd,&nbsp;the<br>
-middle&nbsp;value&nbsp;is&nbsp;returned.&nbsp;When&nbsp;it&nbsp;is&nbsp;even,&nbsp;the&nbsp;larger&nbsp;of&nbsp;the&nbsp;two&nbsp;middle&nbsp;values&nbsp;is&nbsp;returned.</tt></dd></dl>
- <dl><dt><a name="-median_low"><strong>median_low</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;low&nbsp;median&nbsp;of&nbsp;numeric&nbsp;data.<br>
+middle&nbsp;value&nbsp;is&nbsp;returned.&nbsp;When&nbsp;it&nbsp;is&nbsp;even,&nbsp;the&nbsp;larger&nbsp;of&nbsp;the&nbsp;two&nbsp;middle&nbsp;values&nbsp;is&nbsp;returned.</span></dd></dl>
+ <dl><dt><a name="-median_low"><strong>median_low</strong></a>(data)</dt><dd><span class="code">Return&nbsp;the&nbsp;low&nbsp;median&nbsp;of&nbsp;numeric&nbsp;data.<br>
 &nbsp;<br>
 If&nbsp;data&nbsp;is&nbsp;empty,&nbsp;StatisticsError&nbsp;is&nbsp;raised.&nbsp;data&nbsp;can&nbsp;be&nbsp;a&nbsp;sequence&nbsp;or&nbsp;iterable.<br>
 &nbsp;<br>
 The&nbsp;low&nbsp;median&nbsp;is&nbsp;always&nbsp;a&nbsp;member&nbsp;of&nbsp;the&nbsp;data&nbsp;set.&nbsp;When&nbsp;the&nbsp;number&nbsp;of&nbsp;data&nbsp;points&nbsp;is&nbsp;odd,&nbsp;the<br>
-middle&nbsp;value&nbsp;is&nbsp;returned.&nbsp;When&nbsp;it&nbsp;is&nbsp;even,&nbsp;the&nbsp;smaller&nbsp;of&nbsp;the&nbsp;two&nbsp;middle&nbsp;values&nbsp;is&nbsp;returned.</tt></dd></dl>
- <dl><dt><a name="-mode"><strong>mode</strong></a>(data)</dt><dd><tt>Return&nbsp;the&nbsp;mode,&nbsp;the&nbsp;most&nbsp;common&nbsp;data&nbsp;point&nbsp;from&nbsp;discrete&nbsp;or&nbsp;nominal&nbsp;data.<br>
+middle&nbsp;value&nbsp;is&nbsp;returned.&nbsp;When&nbsp;it&nbsp;is&nbsp;even,&nbsp;the&nbsp;smaller&nbsp;of&nbsp;the&nbsp;two&nbsp;middle&nbsp;values&nbsp;is&nbsp;returned.</span></dd></dl>
+ <dl><dt><a name="-mode"><strong>mode</strong></a>(data)</dt><dd><span class="code">Return&nbsp;the&nbsp;mode,&nbsp;the&nbsp;most&nbsp;common&nbsp;data&nbsp;point&nbsp;from&nbsp;discrete&nbsp;or&nbsp;nominal&nbsp;data.<br>
 &nbsp;<br>
 If&nbsp;there&nbsp;are&nbsp;multiple&nbsp;modes&nbsp;with&nbsp;the&nbsp;same&nbsp;frequency,&nbsp;the&nbsp;first&nbsp;one&nbsp;encountered<br>
 in&nbsp;data&nbsp;is&nbsp;returned.<br>
@@ -105,11 +100,11 @@ in&nbsp;data&nbsp;is&nbsp;returned.<br>
 If&nbsp;data&nbsp;is&nbsp;empty,&nbsp;StatisticsError&nbsp;is&nbsp;raised.<br>
 &nbsp;<br>
 To&nbsp;speed&nbsp;up&nbsp;the&nbsp;computation,&nbsp;the&nbsp;bit&nbsp;length&nbsp;of&nbsp;the&nbsp;sample&nbsp;range&nbsp;max(data)&nbsp;-&nbsp;min(data)<br>
-is&nbsp;revealed,&nbsp;provided&nbsp;this&nbsp;range&nbsp;is&nbsp;not&nbsp;too&nbsp;small.</tt></dd></dl>
- <dl><dt><a name="-pstdev"><strong>pstdev</strong></a>(data, mu=None)</dt><dd><tt>Return&nbsp;the&nbsp;population&nbsp;standard&nbsp;deviation&nbsp;(square&nbsp;root&nbsp;of&nbsp;the&nbsp;population&nbsp;variance).<br>
+is&nbsp;revealed,&nbsp;provided&nbsp;this&nbsp;range&nbsp;is&nbsp;not&nbsp;too&nbsp;small.</span></dd></dl>
+ <dl><dt><a name="-pstdev"><strong>pstdev</strong></a>(data, mu=None)</dt><dd><span class="code">Return&nbsp;the&nbsp;population&nbsp;standard&nbsp;deviation&nbsp;(square&nbsp;root&nbsp;of&nbsp;the&nbsp;population&nbsp;variance).<br>
 &nbsp;<br>
-See&nbsp;<a href="#-pvariance">pvariance</a>()&nbsp;for&nbsp;arguments&nbsp;and&nbsp;other&nbsp;details.</tt></dd></dl>
- <dl><dt><a name="-pvariance"><strong>pvariance</strong></a>(data, mu=None)</dt><dd><tt>Return&nbsp;the&nbsp;population&nbsp;variance&nbsp;of&nbsp;data,&nbsp;an&nbsp;iterable&nbsp;of&nbsp;at&nbsp;least&nbsp;two&nbsp;numbers.<br>
+See&nbsp;<a href="#-pvariance">pvariance</a>()&nbsp;for&nbsp;arguments&nbsp;and&nbsp;other&nbsp;details.</span></dd></dl>
+ <dl><dt><a name="-pvariance"><strong>pvariance</strong></a>(data, mu=None)</dt><dd><span class="code">Return&nbsp;the&nbsp;population&nbsp;variance&nbsp;of&nbsp;data,&nbsp;an&nbsp;iterable&nbsp;of&nbsp;at&nbsp;least&nbsp;two&nbsp;numbers.<br>
 &nbsp;<br>
 If&nbsp;the&nbsp;optional&nbsp;second&nbsp;argument&nbsp;mu&nbsp;is&nbsp;given,&nbsp;it&nbsp;is&nbsp;typically&nbsp;the&nbsp;mean&nbsp;of&nbsp;the&nbsp;data.<br>
 It&nbsp;can&nbsp;also&nbsp;be&nbsp;used&nbsp;to&nbsp;compute&nbsp;the&nbsp;second&nbsp;moment&nbsp;around&nbsp;a&nbsp;point&nbsp;that&nbsp;is&nbsp;not&nbsp;the&nbsp;mean.<br>
@@ -118,8 +113,8 @@ If&nbsp;it&nbsp;is&nbsp;missing&nbsp;or&nbsp;None&nbsp;(the&nbsp;default),&nbsp;
 Use&nbsp;this&nbsp;function&nbsp;to&nbsp;calculate&nbsp;the&nbsp;variance&nbsp;from&nbsp;the&nbsp;entire&nbsp;population.&nbsp;To&nbsp;estimate<br>
 the&nbsp;variance&nbsp;from&nbsp;a&nbsp;sample,&nbsp;the&nbsp;<a href="#-variance">variance</a>()&nbsp;function&nbsp;is&nbsp;usually&nbsp;a&nbsp;better&nbsp;choice.<br>
 &nbsp;<br>
-Raises&nbsp;StatisticsError&nbsp;if&nbsp;data&nbsp;is&nbsp;empty.</tt></dd></dl>
- <dl><dt><a name="-quantiles"><strong>quantiles</strong></a>(data, *, n=4, method='exclusive')</dt><dd><tt>Divide&nbsp;data&nbsp;into&nbsp;n&nbsp;continuous&nbsp;intervals&nbsp;with&nbsp;equal&nbsp;probability.<br>
+Raises&nbsp;StatisticsError&nbsp;if&nbsp;data&nbsp;is&nbsp;empty.</span></dd></dl>
+ <dl><dt><a name="-quantiles"><strong>quantiles</strong></a>(data, *, n=4, method='exclusive')</dt><dd><span class="code">Divide&nbsp;data&nbsp;into&nbsp;n&nbsp;continuous&nbsp;intervals&nbsp;with&nbsp;equal&nbsp;probability.<br>
 &nbsp;<br>
 Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;n-1&nbsp;cut&nbsp;points&nbsp;separating&nbsp;the&nbsp;intervals.<br>
 &nbsp;<br>
@@ -132,12 +127,11 @@ The&nbsp;cut&nbsp;points&nbsp;are&nbsp;linearly&nbsp;interpolated&nbsp;between&n
 &nbsp;<br>
 If&nbsp;method&nbsp;is&nbsp;set&nbsp;to&nbsp;'inclusive',&nbsp;data&nbsp;is&nbsp;treated&nbsp;as&nbsp;population&nbsp;data.<br>
 The&nbsp;minimum&nbsp;value&nbsp;is&nbsp;treated&nbsp;as&nbsp;the&nbsp;0th&nbsp;percentile&nbsp;(lowest&nbsp;quantile)&nbsp;and<br>
-the&nbsp;maximum&nbsp;value&nbsp;is&nbsp;treated&nbsp;as&nbsp;the&nbsp;100th&nbsp;percentile&nbsp;(highest&nbsp;quantile).</tt></dd></dl>
- <dl><dt><a name="-sqrt"><strong>sqrt</strong></a>(x, /)</dt><dd><tt>Return&nbsp;the&nbsp;square&nbsp;root&nbsp;of&nbsp;x.</tt></dd></dl>
- <dl><dt><a name="-stdev"><strong>stdev</strong></a>(data, xbar=None)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;standard&nbsp;deviation&nbsp;(square&nbsp;root&nbsp;of&nbsp;the&nbsp;sample&nbsp;variance).<br>
+the&nbsp;maximum&nbsp;value&nbsp;is&nbsp;treated&nbsp;as&nbsp;the&nbsp;100th&nbsp;percentile&nbsp;(highest&nbsp;quantile).</span></dd></dl>
+ <dl><dt><a name="-stdev"><strong>stdev</strong></a>(data, xbar=None)</dt><dd><span class="code">Return&nbsp;the&nbsp;sample&nbsp;standard&nbsp;deviation&nbsp;(square&nbsp;root&nbsp;of&nbsp;the&nbsp;sample&nbsp;variance).<br>
 &nbsp;<br>
-See&nbsp;<a href="#-variance">variance</a>()&nbsp;for&nbsp;arguments&nbsp;and&nbsp;other&nbsp;details.</tt></dd></dl>
- <dl><dt><a name="-variance"><strong>variance</strong></a>(data, xbar=None)</dt><dd><tt>Return&nbsp;the&nbsp;sample&nbsp;variance&nbsp;of&nbsp;data,&nbsp;an&nbsp;iterable&nbsp;of&nbsp;at&nbsp;least&nbsp;two&nbsp;numbers.<br>
+See&nbsp;<a href="#-variance">variance</a>()&nbsp;for&nbsp;arguments&nbsp;and&nbsp;other&nbsp;details.</span></dd></dl>
+ <dl><dt><a name="-variance"><strong>variance</strong></a>(data, xbar=None)</dt><dd><span class="code">Return&nbsp;the&nbsp;sample&nbsp;variance&nbsp;of&nbsp;data,&nbsp;an&nbsp;iterable&nbsp;of&nbsp;at&nbsp;least&nbsp;two&nbsp;numbers.<br>
 &nbsp;<br>
 If&nbsp;the&nbsp;optional&nbsp;second&nbsp;argument&nbsp;xbar&nbsp;is&nbsp;given,&nbsp;it&nbsp;should&nbsp;be&nbsp;the&nbsp;mean&nbsp;of&nbsp;data.<br>
 If&nbsp;it&nbsp;is&nbsp;missing&nbsp;or&nbsp;None&nbsp;(the&nbsp;default),&nbsp;the&nbsp;mean&nbsp;is&nbsp;automatically&nbsp;calculated.<br>
@@ -145,13 +139,12 @@ If&nbsp;it&nbsp;is&nbsp;missing&nbsp;or&nbsp;None&nbsp;(the&nbsp;default),&nbsp;
 Use&nbsp;this&nbsp;function&nbsp;when&nbsp;your&nbsp;data&nbsp;is&nbsp;a&nbsp;sample&nbsp;from&nbsp;a&nbsp;population.&nbsp;To&nbsp;calculate<br>
 the&nbsp;variance&nbsp;from&nbsp;the&nbsp;entire&nbsp;population,&nbsp;see&nbsp;<a href="#-pvariance">pvariance</a>().<br>
 &nbsp;<br>
-Raises&nbsp;StatisticsError&nbsp;if&nbsp;data&nbsp;has&nbsp;fewer&nbsp;than&nbsp;two&nbsp;values.</tt></dd></dl>
+Raises&nbsp;StatisticsError&nbsp;if&nbsp;data&nbsp;has&nbsp;fewer&nbsp;than&nbsp;two&nbsp;values.</span></dd></dl>
 </td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#55aa55">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
     
-<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>runtime</strong> = None</td></tr></table>
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>runtime</strong> = None</td></tr></table>
 </body></html>

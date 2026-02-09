@@ -1,96 +1,94 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mpyc.runtime</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mpyc.runtime</title>
+<link rel="stylesheet" type="text/css" href="pydoc.css">
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.runtime</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/runtime.py</a></font></td></tr></table>
-    <p><tt>The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mpyc.html" class="white">mpyc</a>.runtime</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.11/mpyc/runtime.py">github.com/lschoe/mpyc/blob/v0.11/mpyc/runtime.py</a></td></tr></table>
+    <p><span class="code">The&nbsp;MPyC&nbsp;runtime&nbsp;module&nbsp;is&nbsp;used&nbsp;to&nbsp;execute&nbsp;secure&nbsp;multiparty&nbsp;computations.<br>
 &nbsp;<br>
 Parties&nbsp;perform&nbsp;computations&nbsp;on&nbsp;secret-shared&nbsp;values&nbsp;by&nbsp;exchanging&nbsp;messages.<br>
 Shamir's&nbsp;threshold&nbsp;secret&nbsp;sharing&nbsp;scheme&nbsp;is&nbsp;used&nbsp;for&nbsp;finite&nbsp;fields&nbsp;of&nbsp;any&nbsp;order<br>
 exceeding&nbsp;the&nbsp;number&nbsp;of&nbsp;parties.&nbsp;MPyC&nbsp;provides&nbsp;many&nbsp;secure&nbsp;data&nbsp;types,&nbsp;ranging<br>
 from&nbsp;numeric&nbsp;types&nbsp;to&nbsp;more&nbsp;advanced&nbsp;types,&nbsp;for&nbsp;which&nbsp;the&nbsp;corresponding&nbsp;operations<br>
-are&nbsp;made&nbsp;available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&nbsp;operator&nbsp;overloading.</tt></p>
+are&nbsp;made&nbsp;available&nbsp;through&nbsp;Python's&nbsp;mechanism&nbsp;for&nbsp;operator&nbsp;overloading.</span></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/asyncio.html">asyncio</a><br>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="https://docs.python.org/3/library/asyncio.html">asyncio</a><br>
 <a href="mpyc.asyncoro.html">mpyc.asyncoro</a><br>
 <a href="https://docs.python.org/3/library/configparser.html">configparser</a><br>
 <a href="https://docs.python.org/3/library/datetime.html">datetime</a><br>
 <a href="mpyc.finfields.html">mpyc.finfields</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/functools.html">functools</a><br>
+</td><td class="multicolumn"><a href="https://docs.python.org/3/library/functools.html">functools</a><br>
 <a href="https://docs.python.org/3/library/itertools.html">itertools</a><br>
 <a href="https://docs.python.org/3/library/logging.html">logging</a><br>
 <a href="https://docs.python.org/3/library/math.html">math</a><br>
 <a href="mpyc.mpctools.html">mpyc.mpctools</a><br>
-</td><td width="25%" valign=top><a href="mpyc.html">mpyc</a><br>
+</td><td class="multicolumn"><a href="mpyc.html">mpyc</a><br>
 <a href="mpyc.numpy.html">mpyc.numpy</a><br>
 <a href="https://docs.python.org/3/library/os.html">os</a><br>
 <a href="https://docs.python.org/3/library/pickle.html">pickle</a><br>
 <a href="https://docs.python.org/3/library/secrets.html">secrets</a><br>
-</td><td width="25%" valign=top><a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
+</td><td class="multicolumn"><a href="mpyc.sectypes.html">mpyc.sectypes</a><br>
 <a href="https://docs.python.org/3/library/sys.html">sys</a><br>
 <a href="mpyc.thresha.html">mpyc.thresha</a><br>
 <a href="https://docs.python.org/3/library/time.html">time</a><br>
 </td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ee77aa">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
     
-<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>
-</font></dt><dd>
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>
+</dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mpyc.runtime.html#Party">Party</a>
-</font></dt><dt><font face="helvetica, arial"><a href="mpyc.runtime.html#Runtime">Runtime</a>
-</font></dt></dl>
+<dt class="heading-text"><a href="mpyc.runtime.html#Party">Party</a>
+</dt><dt class="heading-text"><a href="mpyc.runtime.html#Runtime">Runtime</a>
+</dt></dl>
 </dd>
 </dl>
  <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Party">class <strong>Party</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</font></td></tr>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Party">class <strong>Party</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Party">Party</a>(pid:&nbsp;int,&nbsp;host:&nbsp;str&nbsp;=&nbsp;None,&nbsp;port:&nbsp;int&nbsp;=&nbsp;None)&nbsp;-&amp;gt;&nbsp;None<br>
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Party">Party</a>(pid:&nbsp;int,&nbsp;host:&nbsp;str&nbsp;=&nbsp;None,&nbsp;port:&nbsp;int&nbsp;=&nbsp;None)&nbsp;-&amp;gt;&nbsp;None<br>
 &nbsp;<br>
-Information&nbsp;about&nbsp;party&nbsp;with&nbsp;identity&nbsp;pid&nbsp;in&nbsp;the&nbsp;MPC&nbsp;protocol.<br>&nbsp;</tt></td></tr>
+Information&nbsp;about&nbsp;party&nbsp;with&nbsp;identity&nbsp;pid&nbsp;in&nbsp;the&nbsp;MPC&nbsp;protocol.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
-<dl><dt><a name="Party-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Return&nbsp;self==value.</tt></dd></dl>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Party-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><span class="code">Return&nbsp;self==value.</span></dd></dl>
 
-<dl><dt><a name="Party-__init__"><strong>__init__</strong></a>(self, pid: int, host: str = None, port: int = None) -&gt; None</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+<dl><dt><a name="Party-__init__"><strong>__init__</strong></a>(self, pid: int, host: str = None, port: int = None) -&gt; None</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
 
-<dl><dt><a name="Party-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>String&nbsp;representation&nbsp;of&nbsp;the&nbsp;party.</tt></dd></dl>
+<dl><dt><a name="Party-__replace__"><strong>__replace__</strong></a> = _replace(self, /, **changes)<span class="grey"><span class="heading-text"> from <a href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a></span></span></dt></dl>
+
+<dl><dt><a name="Party-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><span class="code">String&nbsp;representation&nbsp;of&nbsp;the&nbsp;party.</span></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
 </dl>
 <dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>__annotations__</strong> = {'host': &lt;class 'str'&gt;, 'pid': &lt;class 'int'&gt;, 'port': &lt;class 'int'&gt;}</dl>
+<dl><dt><strong>__dataclass_fields__</strong> = {'host': Field(name='host',type=&lt;class 'str'&gt;,default=Non...xy({}),kw_only=False,doc=None,_field_type=_FIELD), 'pid': Field(name='pid',type=&lt;class 'int'&gt;,default=&lt;dat...xy({}),kw_only=False,doc=None,_field_type=_FIELD), 'port': Field(name='port',type=&lt;class 'int'&gt;,default=Non...xy({}),kw_only=False,doc=None,_field_type=_FIELD)}</dl>
 
-<dl><dt><strong>__dataclass_fields__</strong> = {'host': Field(name='host',type=&lt;class 'str'&gt;,default=Non...appingproxy({}),kw_only=False,_field_type=_FIELD), 'pid': Field(name='pid',type=&lt;class 'int'&gt;,default=&lt;dat...appingproxy({}),kw_only=False,_field_type=_FIELD), 'port': Field(name='port',type=&lt;class 'int'&gt;,default=Non...appingproxy({}),kw_only=False,_field_type=_FIELD)}</dl>
-
-<dl><dt><strong>__dataclass_params__</strong> = _DataclassParams(init=True,repr=True,eq=True,order=False,unsafe_hash=False,frozen=False)</dl>
+<dl><dt><strong>__dataclass_params__</strong> = _DataclassParams(init=True,repr=True,eq=True,ord...rue,kw_only=False,slots=False,weakref_slot=False)</dl>
 
 <dl><dt><strong>__hash__</strong> = None</dl>
 
@@ -103,13 +101,12 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>protocol</strong> = None</dl>
 
 </td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Runtime">class <strong>Runtime</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</font></td></tr>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Runtime">class <strong>Runtime</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Runtime">Runtime</a>(pid,&nbsp;parties,&nbsp;options)<br>
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Runtime">Runtime</a>(pid,&nbsp;parties,&nbsp;options)<br>
 &nbsp;<br>
 MPyC&nbsp;runtime&nbsp;secure&nbsp;against&nbsp;passive&nbsp;attacks.<br>
 &nbsp;<br>
@@ -118,63 +115,63 @@ of&nbsp;parties,&nbsp;etc.,&nbsp;and&nbsp;handles&nbsp;secret-shared&nbsp;object
 &nbsp;<br>
 1-party&nbsp;case&nbsp;is&nbsp;supported&nbsp;(with&nbsp;option&nbsp;to&nbsp;disable&nbsp;asynchronous&nbsp;evaluation).<br>
 Threshold&nbsp;0&nbsp;(no&nbsp;corrupted&nbsp;parties)&nbsp;is&nbsp;supported&nbsp;for&nbsp;m-party&nbsp;case&nbsp;as&nbsp;well<br>
-to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;sharing).<br>&nbsp;</tt></td></tr>
+to&nbsp;enable&nbsp;distributed&nbsp;computation&nbsp;(without&nbsp;secret&nbsp;sharing).<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
-<dl><dt>async <a name="Runtime-__aenter__"><strong>__aenter__</strong></a>(self)</dt><dd><tt>Start&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;entering&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt>async <a name="Runtime-__aenter__"><strong>__aenter__</strong></a>(self)</dt><dd><span class="code">Start&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;entering&nbsp;async&nbsp;with&nbsp;context.</span></dd></dl>
 
-<dl><dt>async <a name="Runtime-__aexit__"><strong>__aexit__</strong></a>(self, exc_type, exc, tb)</dt><dd><tt>Shutdown&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;exiting&nbsp;async&nbsp;with&nbsp;context.</tt></dd></dl>
+<dl><dt>async <a name="Runtime-__aexit__"><strong>__aexit__</strong></a>(self, exc_type, exc, tb)</dt><dd><span class="code">Shutdown&nbsp;MPyC&nbsp;runtime&nbsp;when&nbsp;exiting&nbsp;async&nbsp;with&nbsp;context.</span></dd></dl>
 
-<dl><dt><a name="Runtime-__init__"><strong>__init__</strong></a>(self, pid, parties, options)</dt><dd><tt>Initialize&nbsp;runtime.</tt></dd></dl>
+<dl><dt><a name="Runtime-__init__"><strong>__init__</strong></a>(self, pid, parties, options)</dt><dd><span class="code">Initialize&nbsp;runtime.</span></dd></dl>
 
-<dl><dt><a name="Runtime-abs"><strong>abs</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;absolute&nbsp;value&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-abs"><strong>abs</strong></a>(self, a, l=None)</dt><dd><span class="code">Secure&nbsp;absolute&nbsp;value&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-add"><strong>add</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-add"><strong>add</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;addition&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-add_bits"><strong>add_bits</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;binary&nbsp;addition&nbsp;of&nbsp;bit&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+<dl><dt><a name="Runtime-add_bits"><strong>add_bits</strong></a>(self, x, y)</dt><dd><span class="code">Secure&nbsp;binary&nbsp;addition&nbsp;of&nbsp;bit&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</span></dd></dl>
 
-<dl><dt><a name="Runtime-all"><strong>all</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;all&nbsp;of&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-all">all</a>().<br>
+<dl><dt><a name="Runtime-all"><strong>all</strong></a>(self, x)</dt><dd><span class="code">Secure&nbsp;all&nbsp;of&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-all">all</a>().<br>
 &nbsp;<br>
 Elements&nbsp;of&nbsp;x&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;either&nbsp;0&nbsp;or&nbsp;1&nbsp;(Boolean).<br>
-Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds.</tt></dd></dl>
+Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds.</span></dd></dl>
 
-<dl><dt><a name="Runtime-and_"><strong>and_</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;bitwise&nbsp;and&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-and_"><strong>and_</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;bitwise&nbsp;and&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-any"><strong>any</strong></a>(self, x)</dt><dd><tt>Secure&nbsp;any&nbsp;of&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-any">any</a>().<br>
+<dl><dt><a name="Runtime-any"><strong>any</strong></a>(self, x)</dt><dd><span class="code">Secure&nbsp;any&nbsp;of&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-any">any</a>().<br>
 &nbsp;<br>
 Elements&nbsp;of&nbsp;x&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;either&nbsp;0&nbsp;or&nbsp;1&nbsp;(Boolean).<br>
-Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds.</tt></dd></dl>
+Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds.</span></dd></dl>
 
-<dl><dt><a name="Runtime-argmax"><strong>argmax</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;argmax&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+<dl><dt><a name="Runtime-argmax"><strong>argmax</strong></a>(self, *x, key=None)</dt><dd><span class="code">Secure&nbsp;argmax&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
 &nbsp;<br>
 See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.<br>
 In&nbsp;case&nbsp;of&nbsp;multiple&nbsp;occurrences&nbsp;of&nbsp;the&nbsp;maximum&nbsp;values,<br>
-the&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;is&nbsp;returned.</tt></dd></dl>
+the&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;is&nbsp;returned.</span></dd></dl>
 
-<dl><dt><a name="Runtime-argmin"><strong>argmin</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;argmin&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+<dl><dt><a name="Runtime-argmin"><strong>argmin</strong></a>(self, *x, key=None)</dt><dd><span class="code">Secure&nbsp;argmin&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
 &nbsp;<br>
 See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.<br>
 In&nbsp;case&nbsp;of&nbsp;multiple&nbsp;occurrences&nbsp;of&nbsp;the&nbsp;minimum&nbsp;values,<br>
-the&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;is&nbsp;returned.</tt></dd></dl>
+the&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;is&nbsp;returned.</span></dd></dl>
 
-<dl><dt>async <a name="Runtime-barrier"><strong>barrier</strong></a>(self, name=None)</dt><dd><tt>Barrier&nbsp;for&nbsp;runtime,&nbsp;using&nbsp;optional&nbsp;string&nbsp;name&nbsp;for&nbsp;easy&nbsp;identification.</tt></dd></dl>
+<dl><dt>async <a name="Runtime-barrier"><strong>barrier</strong></a>(self, name=None)</dt><dd><span class="code">Barrier&nbsp;for&nbsp;runtime,&nbsp;using&nbsp;optional&nbsp;string&nbsp;name&nbsp;for&nbsp;easy&nbsp;identification.</span></dd></dl>
 
-<dl><dt><a name="Runtime-convert"><strong>convert</strong></a>(self, x, t_type)</dt><dd><tt>Secure&nbsp;conversion&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x&nbsp;to&nbsp;given&nbsp;t_type.<br>
+<dl><dt><a name="Runtime-convert"><strong>convert</strong></a>(self, x, t_type)</dt><dd><span class="code">Secure&nbsp;conversion&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x&nbsp;to&nbsp;given&nbsp;t_type.<br>
 &nbsp;<br>
 Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;numbers.<br>
-Converted&nbsp;values&nbsp;assumed&nbsp;to&nbsp;fit&nbsp;in&nbsp;target&nbsp;type.</tt></dd></dl>
+Converted&nbsp;values&nbsp;assumed&nbsp;to&nbsp;fit&nbsp;in&nbsp;target&nbsp;type.</span></dd></dl>
 
-<dl><dt><a name="Runtime-cos"><strong>cos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;cosine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-cos"><strong>cos</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;cosine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-div"><strong>div</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;division&nbsp;of&nbsp;a&nbsp;by&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-div"><strong>div</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;division&nbsp;of&nbsp;a&nbsp;by&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-eq"><strong>eq</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;==&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-eq"><strong>eq</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;comparison&nbsp;a&nbsp;==&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-eq_public"><strong>eq_public</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;public&nbsp;equality&nbsp;test&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-eq_public"><strong>eq_public</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;public&nbsp;equality&nbsp;test&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-find"><strong>find</strong></a>(self, x, a, bits=True, e='len(x)', f=None, cs_f=None)</dt><dd><tt>Return&nbsp;index&nbsp;ix&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;a&nbsp;in&nbsp;list&nbsp;x.<br>
+<dl><dt><a name="Runtime-find"><strong>find</strong></a>(self, x, a, bits=True, e='len(x)', f=None, cs_f=None)</dt><dd><span class="code">Return&nbsp;index&nbsp;ix&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;a&nbsp;in&nbsp;list&nbsp;x.<br>
 &nbsp;<br>
-The&nbsp;elements&nbsp;of&nbsp;x&nbsp;and&nbsp;a&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;{0,&nbsp;1},&nbsp;by&nbsp;default.<br>
+Both&nbsp;a&nbsp;and&nbsp;the&nbsp;elements&nbsp;of&nbsp;x&nbsp;are&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;{0,&nbsp;1},&nbsp;by&nbsp;default.<br>
 Set&nbsp;Boolean&nbsp;flag&nbsp;bits=False&nbsp;for&nbsp;arbitrary&nbsp;inputs.<br>
 &nbsp;<br>
 If&nbsp;a&nbsp;is&nbsp;not&nbsp;present&nbsp;in&nbsp;x,&nbsp;then&nbsp;ix=len(x)&nbsp;by&nbsp;default.<br>
@@ -221,38 +218,38 @@ can&nbsp;be&nbsp;a&nbsp;single&nbsp;number&nbsp;or&nbsp;a&nbsp;tuple/list&nbsp;o
 &nbsp;<br>
 Note&nbsp;that&nbsp;it&nbsp;suffices&nbsp;to&nbsp;specify&nbsp;either&nbsp;f&nbsp;or&nbsp;cs_f,&nbsp;as&nbsp;(*)&nbsp;implies&nbsp;that<br>
 f(i)&nbsp;=&nbsp;cs_f(0,&nbsp;i).&nbsp;If&nbsp;cs_f&nbsp;is&nbsp;not&nbsp;set,&nbsp;it&nbsp;will&nbsp;be&nbsp;computed&nbsp;from&nbsp;f&nbsp;using&nbsp;(**),<br>
-incurring&nbsp;some&nbsp;overhead.</tt></dd></dl>
+incurring&nbsp;some&nbsp;overhead.</span></dd></dl>
 
-<dl><dt><a name="Runtime-from_bits"><strong>from_bits</strong></a>(self, x)</dt><dd><tt>Recover&nbsp;secure&nbsp;number&nbsp;from&nbsp;its&nbsp;binary&nbsp;representation&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="Runtime-from_bits"><strong>from_bits</strong></a>(self, x)</dt><dd><span class="code">Recover&nbsp;secure&nbsp;number&nbsp;from&nbsp;its&nbsp;binary&nbsp;representation&nbsp;x.</span></dd></dl>
 
-<dl><dt><a name="Runtime-gather"><strong>gather</strong></a> = gather_shares(rt, *obj)</dt><dd><tt>Gather&nbsp;all&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shares).</tt></dd></dl>
+<dl><dt><a name="Runtime-gather"><strong>gather</strong></a> = gather_shares(rt, *obj)<span class="grey"><span class="heading-text"> from <a href="mpyc.asyncoro.html">mpyc.asyncoro</a></span></span></dt><dd><span class="code">Gather&nbsp;all&nbsp;results&nbsp;for&nbsp;the&nbsp;given&nbsp;futures&nbsp;(shares).</span></dd></dl>
 
-<dl><dt><a name="Runtime-gauss"><strong>gauss</strong></a>(self, A, d, b, c)</dt><dd><tt>Secure&nbsp;Gaussian&nbsp;elimination&nbsp;A&nbsp;d&nbsp;-&nbsp;b&nbsp;c.</tt></dd></dl>
+<dl><dt><a name="Runtime-gauss"><strong>gauss</strong></a>(self, A, d, b, c)</dt><dd><span class="code">Secure&nbsp;Gaussian&nbsp;elimination&nbsp;A&nbsp;d&nbsp;-&nbsp;b&nbsp;c.</span></dd></dl>
 
-<dl><dt><a name="Runtime-gcd"><strong>gcd</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="Runtime-gcd"><strong>gcd</strong></a>(self, a, b, l=None)</dt><dd><span class="code">Secure&nbsp;greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
-If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-gcdext"><strong>gcdext</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;extended&nbsp;GCD&nbsp;of&nbsp;secure&nbsp;integers&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="Runtime-gcdext"><strong>gcdext</strong></a>(self, a, b, l=None)</dt><dd><span class="code">Secure&nbsp;extended&nbsp;GCD&nbsp;of&nbsp;secure&nbsp;integers&nbsp;a&nbsp;and&nbsp;b.<br>
 Return&nbsp;triple&nbsp;(g,&nbsp;s,&nbsp;t)&nbsp;such&nbsp;that&nbsp;g&nbsp;=&nbsp;<a href="#Runtime-gcd">gcd</a>(a,b)&nbsp;=&nbsp;s*a&nbsp;+&nbsp;t*b.<br>
 &nbsp;<br>
-If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-gcp2"><strong>gcp2</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;greatest&nbsp;common&nbsp;power&nbsp;of&nbsp;2&nbsp;dividing&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-gcp2"><strong>gcp2</strong></a>(self, a, b, l=None)</dt><dd><span class="code">Secure&nbsp;greatest&nbsp;common&nbsp;power&nbsp;of&nbsp;2&nbsp;dividing&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-ge"><strong>ge</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;&gt;=&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-ge"><strong>ge</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;comparison&nbsp;a&nbsp;&gt;=&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-if_else"><strong>if_else</strong></a>(self, c, x, y)</dt><dd><tt>Secure&nbsp;selection&nbsp;between&nbsp;x&nbsp;and&nbsp;y&nbsp;based&nbsp;on&nbsp;condition&nbsp;c.</tt></dd></dl>
+<dl><dt><a name="Runtime-if_else"><strong>if_else</strong></a>(self, c, x, y)</dt><dd><span class="code">Secure&nbsp;selection&nbsp;between&nbsp;x&nbsp;and&nbsp;y&nbsp;based&nbsp;on&nbsp;condition&nbsp;c.</span></dd></dl>
 
-<dl><dt><a name="Runtime-if_swap"><strong>if_swap</strong></a>(self, c, x, y)</dt><dd><tt>Secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;based&nbsp;on&nbsp;condition&nbsp;c.</tt></dd></dl>
+<dl><dt><a name="Runtime-if_swap"><strong>if_swap</strong></a>(self, c, x, y)</dt><dd><span class="code">Secure&nbsp;swap&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;based&nbsp;on&nbsp;condition&nbsp;c.</span></dd></dl>
 
-<dl><dt><a name="Runtime-in_prod"><strong>in_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;dot&nbsp;product&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;(one&nbsp;resharing).</tt></dd></dl>
+<dl><dt><a name="Runtime-in_prod"><strong>in_prod</strong></a>(self, x, y)</dt><dd><span class="code">Secure&nbsp;dot&nbsp;product&nbsp;of&nbsp;x&nbsp;and&nbsp;y&nbsp;(one&nbsp;resharing).</span></dd></dl>
 
-<dl><dt><a name="Runtime-indexOf"><strong>indexOf</strong></a>(self, x, a, bits=False)</dt><dd><tt>Return&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;a&nbsp;in&nbsp;x.<br>
+<dl><dt><a name="Runtime-indexOf"><strong>indexOf</strong></a>(self, x, a, bits=False)</dt><dd><span class="code">Return&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;a&nbsp;in&nbsp;x.<br>
 &nbsp;<br>
-Raise&nbsp;ValueError&nbsp;if&nbsp;a&nbsp;is&nbsp;not&nbsp;present.</tt></dd></dl>
+Raise&nbsp;ValueError&nbsp;if&nbsp;a&nbsp;is&nbsp;not&nbsp;present.</span></dd></dl>
 
-<dl><dt><a name="Runtime-input"><strong>input</strong></a>(self, x, senders=None)</dt><dd><tt>Input&nbsp;x&nbsp;to&nbsp;the&nbsp;computation.<br>
+<dl><dt><a name="Runtime-input"><strong>input</strong></a>(self, x, senders=None)</dt><dd><span class="code">Input&nbsp;x&nbsp;to&nbsp;the&nbsp;computation.<br>
 &nbsp;<br>
 Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;objects.<br>
 The&nbsp;senders&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;provide&nbsp;an&nbsp;input.<br>
@@ -262,71 +259,73 @@ Except&nbsp;for&nbsp;secure&nbsp;integers,&nbsp;secure&nbsp;fixed-point&nbsp;num
 secure&nbsp;finite&nbsp;field&nbsp;elements,&nbsp;which&nbsp;are&nbsp;handled&nbsp;directly,&nbsp;the<br>
 input&nbsp;of&nbsp;secure&nbsp;objects&nbsp;is&nbsp;controlled&nbsp;by&nbsp;their&nbsp;_input()&nbsp;method.<br>
 For&nbsp;instance,&nbsp;mpyc.sectypes.SecureFloat._input()&nbsp;does&nbsp;this&nbsp;for<br>
-secure&nbsp;floating-point&nbsp;numbers.</tt></dd></dl>
+secure&nbsp;floating-point&nbsp;numbers.</span></dd></dl>
 
-<dl><dt><a name="Runtime-inverse"><strong>inverse</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;inverse&nbsp;of&nbsp;a&nbsp;modulo&nbsp;b,&nbsp;assuming&nbsp;a&gt;=0,&nbsp;b&gt;0,&nbsp;and&nbsp;<a href="#Runtime-gcd">gcd</a>(a,b)=1.<br>
+<dl><dt><a name="Runtime-inverse"><strong>inverse</strong></a>(self, a, b, l=None)</dt><dd><span class="code">Secure&nbsp;inverse&nbsp;of&nbsp;a&nbsp;modulo&nbsp;b,&nbsp;assuming&nbsp;a&gt;=0,&nbsp;b&gt;0,&nbsp;and&nbsp;<a href="#Runtime-gcd">gcd</a>(a,b)=1.<br>
 The&nbsp;result&nbsp;is&nbsp;nonnegative&nbsp;and&nbsp;less&nbsp;than&nbsp;b&nbsp;(inverse&nbsp;is&nbsp;0&nbsp;only&nbsp;when&nbsp;b=1).<br>
 &nbsp;<br>
 If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
 To&nbsp;compute&nbsp;inverses&nbsp;for&nbsp;negative&nbsp;b,&nbsp;use&nbsp;-b&nbsp;instead&nbsp;of&nbsp;b,&nbsp;and<br>
-to&nbsp;compute&nbsp;inverses&nbsp;for&nbsp;arbitrary&nbsp;nonzero&nbsp;b,&nbsp;use&nbsp;<a href="#Runtime-abs">abs</a>(b)&nbsp;instead&nbsp;of&nbsp;b.</tt></dd></dl>
+to&nbsp;compute&nbsp;inverses&nbsp;for&nbsp;arbitrary&nbsp;nonzero&nbsp;b,&nbsp;use&nbsp;<a href="#Runtime-abs">abs</a>(b)&nbsp;instead&nbsp;of&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-invert"><strong>invert</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;bitwise&nbsp;inverse&nbsp;(not)&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-invert"><strong>invert</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;bitwise&nbsp;inverse&nbsp;(not)&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-is_zero"><strong>is_zero</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;zero&nbsp;test&nbsp;a&nbsp;==&nbsp;0.</tt></dd></dl>
+<dl><dt><a name="Runtime-is_zero"><strong>is_zero</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;zero&nbsp;test&nbsp;a&nbsp;==&nbsp;0.</span></dd></dl>
 
-<dl><dt><a name="Runtime-is_zero_public"><strong>is_zero_public</strong></a>(self, a) -&gt; _asyncio.Future</dt><dd><tt>Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-is_zero_public"><strong>is_zero_public</strong></a>(self, a) -&gt; Future</dt><dd><span class="code">Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-lcm"><strong>lcm</strong></a>(self, a, b, l=None)</dt><dd><tt>Secure&nbsp;least&nbsp;common&nbsp;multiple&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="Runtime-lcm"><strong>lcm</strong></a>(self, a, b, l=None)</dt><dd><span class="code">Secure&nbsp;least&nbsp;common&nbsp;multiple&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
-If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+If&nbsp;provided,&nbsp;l&nbsp;should&nbsp;be&nbsp;an&nbsp;upper&nbsp;bound&nbsp;on&nbsp;the&nbsp;bit&nbsp;lengths&nbsp;of&nbsp;both&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-logging"><strong>logging</strong></a>(self, enable=None)</dt><dd><tt>Toggle/enable/disable&nbsp;logging.</tt></dd></dl>
+<dl><dt><a name="Runtime-logging"><strong>logging</strong></a>(self, enable=None)</dt><dd><span class="code">Toggle/enable/disable&nbsp;logging.</span></dd></dl>
 
-<dl><dt><a name="Runtime-lsb"><strong>lsb</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;least&nbsp;significant&nbsp;bit&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-lsb"><strong>lsb</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;least&nbsp;significant&nbsp;bit&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-lt"><strong>lt</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;&lt;&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-lt"><strong>lt</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;comparison&nbsp;a&nbsp;&lt;&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-matrix_add"><strong>matrix_add</strong></a>(self, A, B, tr=False)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;(transposed)&nbsp;B.</tt></dd></dl>
+<dl><dt><a name="Runtime-matrix_add"><strong>matrix_add</strong></a>(self, A, B, tr=False)</dt><dd><span class="code">Secure&nbsp;addition&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;(transposed)&nbsp;B.</span></dd></dl>
 
-<dl><dt><a name="Runtime-matrix_prod"><strong>matrix_prod</strong></a>(self, A, B, tr=False)</dt><dd><tt>Secure&nbsp;matrix&nbsp;product&nbsp;of&nbsp;A&nbsp;with&nbsp;(transposed)&nbsp;B.</tt></dd></dl>
+<dl><dt><a name="Runtime-matrix_prod"><strong>matrix_prod</strong></a>(self, A, B, tr=False)</dt><dd><span class="code">Secure&nbsp;matrix&nbsp;product&nbsp;of&nbsp;A&nbsp;with&nbsp;(transposed)&nbsp;B.</span></dd></dl>
 
-<dl><dt><a name="Runtime-matrix_sub"><strong>matrix_sub</strong></a>(self, A, B, tr=False)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;(transposed)&nbsp;B.</tt></dd></dl>
+<dl><dt><a name="Runtime-matrix_sub"><strong>matrix_sub</strong></a>(self, A, B, tr=False)</dt><dd><span class="code">Secure&nbsp;subtraction&nbsp;of&nbsp;matrices&nbsp;A&nbsp;and&nbsp;(transposed)&nbsp;B.</span></dd></dl>
 
-<dl><dt><a name="Runtime-max"><strong>max</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-max">max</a>().<br>
+<dl><dt><a name="Runtime-max"><strong>max</strong></a>(self, *x, key=None)</dt><dd><span class="code">Secure&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-max">max</a>().<br>
 &nbsp;<br>
-See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</tt></dd></dl>
+See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</span></dd></dl>
 
-<dl><dt><a name="Runtime-min"><strong>min</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-min">min</a>().<br>
+<dl><dt><a name="Runtime-min"><strong>min</strong></a>(self, *x, key=None)</dt><dd><span class="code">Secure&nbsp;minimum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-min">min</a>().<br>
 &nbsp;<br>
-See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</tt></dd></dl>
+See&nbsp;runtime.<a href="#Runtime-sorted">sorted</a>()&nbsp;for&nbsp;details&nbsp;on&nbsp;key&nbsp;etc.</span></dd></dl>
 
-<dl><dt><a name="Runtime-min_max"><strong>min_max</strong></a>(self, *x, key=None)</dt><dd><tt>Secure&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
+<dl><dt><a name="Runtime-min_max"><strong>min_max</strong></a>(self, *x, key=None)</dt><dd><span class="code">Secure&nbsp;minimum&nbsp;and&nbsp;maximum&nbsp;of&nbsp;all&nbsp;given&nbsp;elements&nbsp;in&nbsp;x.<br>
 &nbsp;<br>
 Saves&nbsp;25%&nbsp;compared&nbsp;to&nbsp;calling&nbsp;<a href="#Runtime-min">min</a>(x)&nbsp;and&nbsp;<a href="#Runtime-max">max</a>(x)&nbsp;separately.<br>
 Total&nbsp;number&nbsp;of&nbsp;comparisons&nbsp;is&nbsp;only&nbsp;(3n-3)//2,&nbsp;compared&nbsp;to&nbsp;2n-2&nbsp;for&nbsp;the&nbsp;obvious&nbsp;approach.<br>
 This&nbsp;is&nbsp;optimal&nbsp;as&nbsp;shown&nbsp;by&nbsp;Ira&nbsp;Pohl&nbsp;in&nbsp;"A&nbsp;sorting&nbsp;problem&nbsp;and&nbsp;its&nbsp;complexity",<br>
-Communications&nbsp;of&nbsp;the&nbsp;ACM&nbsp;15(6),&nbsp;pp.&nbsp;462-464,&nbsp;1972.</tt></dd></dl>
+Communications&nbsp;of&nbsp;the&nbsp;ACM&nbsp;15(6),&nbsp;pp.&nbsp;462-464,&nbsp;1972.</span></dd></dl>
 
-<dl><dt><a name="Runtime-mod"><strong>mod</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;modulo&nbsp;reduction.</tt></dd></dl>
+<dl><dt><a name="Runtime-mod"><strong>mod</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;modulo&nbsp;reduction.</span></dd></dl>
 
-<dl><dt><a name="Runtime-mul"><strong>mul</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;multiplication&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-mul"><strong>mul</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;multiplication&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-neg"><strong>neg</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;negation&nbsp;(additive&nbsp;inverse)&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-neg"><strong>neg</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;negation&nbsp;(additive&nbsp;inverse)&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_absolute"><strong>np_absolute</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;absolute&nbsp;value&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_absolute"><strong>np_absolute</strong></a>(self, a, l=None)</dt><dd><span class="code">Secure&nbsp;elementwise&nbsp;absolute&nbsp;value&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_add"><strong>np_add</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_add"><strong>np_add</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;addition&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_all"><strong>np_all</strong></a>(self, a, axis=None)</dt><dd><tt>Secure&nbsp;all-predicate&nbsp;for&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
+<dl><dt><a name="Runtime-np_add_bits"><strong>np_add_bits</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;binary&nbsp;addition&nbsp;of&nbsp;arrays&nbsp;of&nbsp;bit&nbsp;vectors&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_all"><strong>np_all</strong></a>(self, a, axis=None)</dt><dd><span class="code">Secure&nbsp;all-predicate&nbsp;for&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
 &nbsp;<br>
 If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;all&nbsp;is&nbsp;evaluated&nbsp;over&nbsp;the&nbsp;entire&nbsp;array&nbsp;(returning&nbsp;a&nbsp;scalar).<br>
 If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;all&nbsp;is&nbsp;evaluated&nbsp;along&nbsp;all&nbsp;specified&nbsp;axes.<br>
 The&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all&nbsp;specified&nbsp;axes&nbsp;removed<br>
-(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).</tt></dd></dl>
+(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_amax"><strong>np_amax</strong></a>(self, a, axis=None, keepdims=False)</dt><dd><tt>Secure&nbsp;maximum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
+<dl><dt><a name="Runtime-np_amax"><strong>np_amax</strong></a>(self, a, axis=None, keepdims=False)</dt><dd><span class="code">Secure&nbsp;maximum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
 &nbsp;<br>
 If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;the&nbsp;maximum&nbsp;of&nbsp;the&nbsp;array&nbsp;is&nbsp;returned.<br>
 If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;the&nbsp;minimum&nbsp;along&nbsp;all&nbsp;specified&nbsp;axes&nbsp;is&nbsp;returned.<br>
@@ -334,9 +333,9 @@ If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;int
 If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all<br>
 specified&nbsp;axes&nbsp;removed&nbsp;(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).<br>
 Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;axes&nbsp;along&nbsp;which&nbsp;the&nbsp;maximum&nbsp;is&nbsp;taken<br>
-are&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
+are&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_amin"><strong>np_amin</strong></a>(self, a, axis=None, keepdims=False)</dt><dd><tt>Secure&nbsp;minimum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
+<dl><dt><a name="Runtime-np_amin"><strong>np_amin</strong></a>(self, a, axis=None, keepdims=False)</dt><dd><span class="code">Secure&nbsp;minimum&nbsp;of&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
 &nbsp;<br>
 If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;the&nbsp;minimum&nbsp;of&nbsp;the&nbsp;array&nbsp;is&nbsp;returned.<br>
 If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;the&nbsp;minimum&nbsp;along&nbsp;all&nbsp;specified&nbsp;axes&nbsp;is&nbsp;returned.<br>
@@ -344,21 +343,29 @@ If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;int
 If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all<br>
 specified&nbsp;axes&nbsp;removed&nbsp;(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).<br>
 Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;axes&nbsp;along&nbsp;which&nbsp;the&nbsp;minimum&nbsp;is&nbsp;taken<br>
-are&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
+are&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_any"><strong>np_any</strong></a>(self, a, axis=None)</dt><dd><tt>Secure&nbsp;any-predicate&nbsp;for&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
+<dl><dt><a name="Runtime-np_any"><strong>np_any</strong></a>(self, a, axis=None)</dt><dd><span class="code">Secure&nbsp;any-predicate&nbsp;for&nbsp;array&nbsp;a,&nbsp;entirely&nbsp;or&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).<br>
 &nbsp;<br>
 If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default)&nbsp;any&nbsp;is&nbsp;evaluated&nbsp;over&nbsp;the&nbsp;entire&nbsp;array&nbsp;(returning&nbsp;a&nbsp;scalar).<br>
 If&nbsp;axis&nbsp;is&nbsp;an&nbsp;int&nbsp;or&nbsp;a&nbsp;tuple&nbsp;of&nbsp;ints,&nbsp;any&nbsp;is&nbsp;evaluated&nbsp;along&nbsp;all&nbsp;specified&nbsp;axes.<br>
 The&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a&nbsp;with&nbsp;all&nbsp;specified&nbsp;axes&nbsp;removed<br>
-(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).</tt></dd></dl>
+(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_append"><strong>np_append</strong></a>(self, arr, values, axis=None)</dt><dd><tt>Append&nbsp;values&nbsp;to&nbsp;the&nbsp;end&nbsp;of&nbsp;array&nbsp;arr.<br>
+<dl><dt><a name="Runtime-np_append"><strong>np_append</strong></a>(self, arr, values, axis=None)</dt><dd><span class="code">Append&nbsp;values&nbsp;to&nbsp;the&nbsp;end&nbsp;of&nbsp;array&nbsp;arr.<br>
 &nbsp;<br>
 If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default),&nbsp;arr&nbsp;and&nbsp;values&nbsp;are&nbsp;flattened&nbsp;first.<br>
-Otherwise,&nbsp;arr&nbsp;and&nbsp;values&nbsp;must&nbsp;all&nbsp;be&nbsp;of&nbsp;the&nbsp;same&nbsp;shape,&nbsp;except&nbsp;along&nbsp;the&nbsp;given&nbsp;axis.</tt></dd></dl>
+Otherwise,&nbsp;arr&nbsp;and&nbsp;values&nbsp;must&nbsp;all&nbsp;be&nbsp;of&nbsp;the&nbsp;same&nbsp;shape,&nbsp;except&nbsp;along&nbsp;the&nbsp;given&nbsp;axis.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_argmax"><strong>np_argmax</strong></a>(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True)</dt><dd><tt>Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;maximum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_argmax"><strong>np_argmax</strong></a>(
+    self,
+    a,
+    axis=None,
+    keepdims=False,
+    key=None,
+    arg_unary=False,
+    arg_only=True
+)</dt><dd><span class="code">Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;maximum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
 &nbsp;<br>
 Default&nbsp;behavior&nbsp;similar&nbsp;to&nbsp;np.<a href="#Runtime-argmax">argmax</a>()&nbsp;for&nbsp;NumPy&nbsp;arrays:<br>
 &nbsp;<br>
@@ -385,9 +392,17 @@ of&nbsp;maximum&nbsp;values&nbsp;is&nbsp;returned&nbsp;with&nbsp;one&nbsp;entry&
 the&nbsp;given&nbsp;axis&nbsp;removed;&nbsp;if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;the&nbsp;maximum&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;scalar.<br>
 Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;array&nbsp;of&nbsp;maximum&nbsp;values&nbsp;is&nbsp;of&nbsp;the&nbsp;same&nbsp;shape<br>
 as&nbsp;the&nbsp;given&nbsp;array&nbsp;a&nbsp;except&nbsp;that&nbsp;the&nbsp;dimension&nbsp;of&nbsp;the&nbsp;given&nbsp;axis&nbsp;is&nbsp;reduced&nbsp;to&nbsp;1;<br>
-if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;all&nbsp;axes&nbsp;are&nbsp;present&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
+if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;all&nbsp;axes&nbsp;are&nbsp;present&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_argmin"><strong>np_argmin</strong></a>(self, a, axis=None, keepdims=False, key=None, arg_unary=False, arg_only=True)</dt><dd><tt>Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;minimum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_argmin"><strong>np_argmin</strong></a>(
+    self,
+    a,
+    axis=None,
+    keepdims=False,
+    key=None,
+    arg_unary=False,
+    arg_only=True
+)</dt><dd><span class="code">Returns&nbsp;the&nbsp;indices&nbsp;of&nbsp;the&nbsp;minimum&nbsp;values&nbsp;along&nbsp;an&nbsp;axis.<br>
 &nbsp;<br>
 Default&nbsp;behavior&nbsp;similar&nbsp;to&nbsp;np.<a href="#Runtime-argmin">argmin</a>()&nbsp;for&nbsp;NumPy&nbsp;arrays:<br>
 &nbsp;<br>
@@ -414,104 +429,196 @@ of&nbsp;minimum&nbsp;values&nbsp;is&nbsp;returned&nbsp;with&nbsp;one&nbsp;entry&
 the&nbsp;given&nbsp;axis&nbsp;removed;&nbsp;if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;the&nbsp;minimum&nbsp;is&nbsp;returned&nbsp;as&nbsp;a&nbsp;scalar.<br>
 Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;array&nbsp;of&nbsp;minimum&nbsp;values&nbsp;is&nbsp;of&nbsp;the&nbsp;same&nbsp;shape<br>
 as&nbsp;the&nbsp;given&nbsp;array&nbsp;a&nbsp;except&nbsp;that&nbsp;the&nbsp;dimension&nbsp;of&nbsp;the&nbsp;given&nbsp;axis&nbsp;is&nbsp;reduced&nbsp;to&nbsp;1;<br>
-if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;all&nbsp;axes&nbsp;are&nbsp;present&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</tt></dd></dl>
+if&nbsp;axis&nbsp;is&nbsp;None,&nbsp;all&nbsp;axes&nbsp;are&nbsp;present&nbsp;as&nbsp;dimensions&nbsp;of&nbsp;size&nbsp;1.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_block"><strong>np_block</strong></a>(self, arrays)</dt><dd><tt>Assemble&nbsp;an&nbsp;array&nbsp;from&nbsp;nested&nbsp;lists&nbsp;of&nbsp;blocks&nbsp;given&nbsp;by&nbsp;arrays.<br>
+<dl><dt><a name="Runtime-np_block"><strong>np_block</strong></a>(self, arrays)</dt><dd><span class="code">Assemble&nbsp;an&nbsp;array&nbsp;from&nbsp;nested&nbsp;lists&nbsp;of&nbsp;blocks&nbsp;given&nbsp;by&nbsp;arrays.<br>
 &nbsp;<br>
 Blocks&nbsp;in&nbsp;the&nbsp;innermost&nbsp;lists&nbsp;are&nbsp;concatenated&nbsp;along&nbsp;the&nbsp;last&nbsp;axis,<br>
 then&nbsp;these&nbsp;are&nbsp;concatenated&nbsp;along&nbsp;the&nbsp;second&nbsp;to&nbsp;last&nbsp;axis,<br>
-and&nbsp;so&nbsp;on&nbsp;until&nbsp;the&nbsp;outermost&nbsp;list&nbsp;is&nbsp;reached.</tt></dd></dl>
+and&nbsp;so&nbsp;on&nbsp;until&nbsp;the&nbsp;outermost&nbsp;list&nbsp;is&nbsp;reached.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_column_stack"><strong>np_column_stack</strong></a>(self, tup)</dt></dl>
+<dl><dt><a name="Runtime-np_column_stack"><strong>np_column_stack</strong></a>(self, tup)</dt><dd><span class="code">Stack&nbsp;1D&nbsp;arrays&nbsp;as&nbsp;columns&nbsp;into&nbsp;a&nbsp;2D&nbsp;array.<br>
+&nbsp;<br>
+2D&nbsp;arrays&nbsp;are&nbsp;stacked&nbsp;as-is,&nbsp;just&nbsp;like&nbsp;with&nbsp;hstack.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_concatenate"><strong>np_concatenate</strong></a>(self, arrays, axis=0)</dt><dd><tt>Join&nbsp;a&nbsp;sequence&nbsp;of&nbsp;arrays&nbsp;along&nbsp;an&nbsp;existing&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_concatenate"><strong>np_concatenate</strong></a>(self, arrays, axis=0)</dt><dd><span class="code">Join&nbsp;a&nbsp;sequence&nbsp;of&nbsp;arrays&nbsp;along&nbsp;an&nbsp;existing&nbsp;axis.<br>
 &nbsp;<br>
 If&nbsp;axis&nbsp;is&nbsp;None,&nbsp;arrays&nbsp;are&nbsp;flattened&nbsp;before&nbsp;use.<br>
-Default&nbsp;axis&nbsp;is&nbsp;0.</tt></dd></dl>
+Default&nbsp;axis&nbsp;is&nbsp;0.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_copy"><strong>np_copy</strong></a>(self, a, order='K')</dt></dl>
+<dl><dt><a name="Runtime-np_convolve"><strong>np_convolve</strong></a>(self, a, b, mode='full')</dt><dd><span class="code">Secure&nbsp;convolution&nbsp;of&nbsp;nonempty&nbsp;1D&nbsp;arrays&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_det"><strong>np_det</strong></a>(self, A)</dt><dd><tt>Secure&nbsp;determinant&nbsp;for&nbsp;nonsingular&nbsp;matrices.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_copy"><strong>np_copy</strong></a>(self, a, order='K')</dt><dd><span class="code">Return&nbsp;copy&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_divide"><strong>np_divide</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;division&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_cumsum"><strong>np_cumsum</strong></a>(self, a, axis=None)</dt><dd><span class="code">Secure&nbsp;cumulative&nbsp;sum&nbsp;of&nbsp;array&nbsp;a&nbsp;along&nbsp;given&nbsp;axis.<br>
+&nbsp;<br>
+If&nbsp;axis&nbsp;is&nbsp;None,&nbsp;array&nbsp;a&nbsp;is&nbsp;flattened&nbsp;first.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_dsplit"><strong>np_dsplit</strong></a>(self, ary, indices_or_sections)</dt><dd><tt>Split&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;along&nbsp;the&nbsp;3rd&nbsp;axis&nbsp;(depth).</tt></dd></dl>
+<dl><dt><a name="Runtime-np_cumulative_sum"><strong>np_cumulative_sum</strong></a>(self, a, axis=None, include_initial=False)</dt><dd><span class="code">Secure&nbsp;cumulative&nbsp;sum&nbsp;of&nbsp;array&nbsp;a&nbsp;along&nbsp;given&nbsp;axis.<br>
+&nbsp;<br>
+Only&nbsp;for&nbsp;0D&nbsp;and&nbsp;1D&nbsp;arrays,&nbsp;axis&nbsp;is&nbsp;allowed&nbsp;to&nbsp;be&nbsp;None.<br>
+If&nbsp;include_initial&nbsp;holds,&nbsp;the&nbsp;initial&nbsp;zero(s)&nbsp;are&nbsp;included&nbsp;in&nbsp;the&nbsp;output.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_dstack"><strong>np_dstack</strong></a>(self, tup)</dt><dd><tt>Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;depth&nbsp;wise&nbsp;(along&nbsp;third&nbsp;axis).<br>
+<dl><dt><a name="Runtime-np_det"><strong>np_det</strong></a>(self, A)</dt><dd><span class="code">Secure&nbsp;determinant&nbsp;for&nbsp;nonsingular&nbsp;matrices.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_diag"><strong>np_diag</strong></a>(self, a, k=0)</dt><dd><span class="code">Extract&nbsp;a&nbsp;diagonal&nbsp;or&nbsp;construct&nbsp;a&nbsp;diagonal&nbsp;array.<br>
+&nbsp;<br>
+For&nbsp;2D&nbsp;array&nbsp;a,&nbsp;return&nbsp;its&nbsp;kth&nbsp;diagonal.<br>
+For&nbsp;1D&nbsp;array&nbsp;a,&nbsp;return&nbsp;square&nbsp;2D&nbsp;array&nbsp;with&nbsp;a&nbsp;on&nbsp;the&nbsp;kth&nbsp;diagonal.<br>
+&nbsp;<br>
+Default&nbsp;diagonal&nbsp;is&nbsp;k=0.<br>
+Use&nbsp;k&gt;0&nbsp;for&nbsp;diagonals&nbsp;above&nbsp;the&nbsp;main&nbsp;diagonal,<br>
+and&nbsp;k&lt;0&nbsp;for&nbsp;diagonals&nbsp;below&nbsp;the&nbsp;main&nbsp;diagonal.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_diagflat"><strong>np_diagflat</strong></a>(self, a, k=0)</dt><dd><span class="code">Create&nbsp;2D&nbsp;array&nbsp;with&nbsp;the&nbsp;(flattened)&nbsp;input&nbsp;as&nbsp;kth&nbsp;diagonal.<br>
+&nbsp;<br>
+Default&nbsp;diagonal&nbsp;is&nbsp;k=0.<br>
+Use&nbsp;k&gt;0&nbsp;for&nbsp;diagonals&nbsp;above&nbsp;the&nbsp;main&nbsp;diagonal,<br>
+and&nbsp;k&lt;0&nbsp;for&nbsp;diagonals&nbsp;below&nbsp;the&nbsp;main&nbsp;diagonal.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_diagonal"><strong>np_diagonal</strong></a>(self, a, offset=0, axis1=0, axis2=1)</dt><dd><span class="code">Return&nbsp;specified&nbsp;diagonals.<br>
+&nbsp;<br>
+For&nbsp;2D&nbsp;array&nbsp;a,&nbsp;return&nbsp;diagonal&nbsp;of&nbsp;a&nbsp;with&nbsp;the&nbsp;given&nbsp;offset=k,<br>
+that&nbsp;is,&nbsp;the&nbsp;collection&nbsp;of&nbsp;elements&nbsp;of&nbsp;the&nbsp;form&nbsp;a[i,&nbsp;i+k].<br>
+For&nbsp;higher&nbsp;dimensional&nbsp;arrays&nbsp;a,&nbsp;axes&nbsp;axis1&nbsp;and&nbsp;axis2&nbsp;are&nbsp;used<br>
+to&nbsp;determine&nbsp;the&nbsp;2D&nbsp;subarray&nbsp;whose&nbsp;diagonals&nbsp;are&nbsp;returned.<br>
+The&nbsp;shape&nbsp;of&nbsp;the&nbsp;resulting&nbsp;array&nbsp;is&nbsp;determined&nbsp;by&nbsp;removing<br>
+axis1&nbsp;and&nbsp;axis2&nbsp;and&nbsp;appending&nbsp;the&nbsp;length&nbsp;of&nbsp;the&nbsp;resulting&nbsp;diagonals.<br>
+&nbsp;<br>
+Default&nbsp;diagonal&nbsp;is&nbsp;offset=0.<br>
+Use&nbsp;offset&gt;0&nbsp;for&nbsp;diagonals&nbsp;above&nbsp;the&nbsp;main&nbsp;diagonal,<br>
+and&nbsp;offset&lt;0&nbsp;for&nbsp;diagonals&nbsp;below&nbsp;the&nbsp;main&nbsp;diagonal.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_divide"><strong>np_divide</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;division&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_dsplit"><strong>np_dsplit</strong></a>(self, ary, indices_or_sections)</dt><dd><span class="code">Split&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;along&nbsp;the&nbsp;3rd&nbsp;axis&nbsp;(depth).</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_dstack"><strong>np_dstack</strong></a>(self, tup)</dt><dd><span class="code">Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;depth&nbsp;wise&nbsp;(along&nbsp;third&nbsp;axis).<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;concatenation&nbsp;along&nbsp;the&nbsp;third&nbsp;axis<br>
 after&nbsp;2D&nbsp;arrays&nbsp;of&nbsp;shape&nbsp;(M,N)&nbsp;have&nbsp;been&nbsp;reshaped&nbsp;to<br>
 (M,N,1)&nbsp;and&nbsp;1D&nbsp;arrays&nbsp;of&nbsp;shape&nbsp;(N,)&nbsp;have&nbsp;been&nbsp;reshaped<br>
-to&nbsp;(1,N,1).&nbsp;Rebuilds&nbsp;arrays&nbsp;divided&nbsp;by&nbsp;dsplit.</tt></dd></dl>
+to&nbsp;(1,N,1).&nbsp;Rebuilds&nbsp;arrays&nbsp;divided&nbsp;by&nbsp;dsplit.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_equal"><strong>np_equal</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;==&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_equal"><strong>np_equal</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;comparison&nbsp;a&nbsp;==&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_flatten"><strong>np_flatten</strong></a>(self, a, order='C')</dt><dd><tt>Return&nbsp;1D&nbsp;copy&nbsp;of&nbsp;a.<br>
+<dl><dt><a name="Runtime-np_expand_dims"><strong>np_expand_dims</strong></a>(self, a, axis)</dt><dd><span class="code">Expand&nbsp;the&nbsp;shape&nbsp;of&nbsp;an&nbsp;array.<br>
+&nbsp;<br>
+Insert&nbsp;new&nbsp;axis&nbsp;(or,&nbsp;axes)&nbsp;at&nbsp;the&nbsp;given&nbsp;axis&nbsp;position(s)&nbsp;in&nbsp;the&nbsp;expanded&nbsp;array&nbsp;shape.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_find"><strong>np_find</strong></a>(self, a, s, axis=-1, bits=True, e='a.shape[axis]', f=None, cs_f=None)</dt><dd><span class="code">Return&nbsp;index&nbsp;ix&nbsp;of&nbsp;the&nbsp;first&nbsp;occurrences&nbsp;of&nbsp;s&nbsp;in&nbsp;array&nbsp;a,&nbsp;along&nbsp;the&nbsp;given&nbsp;axis&nbsp;of&nbsp;a.<br>
+The&nbsp;search&nbsp;is&nbsp;done&nbsp;elementwise&nbsp;with&nbsp;broadcast.<br>
+&nbsp;<br>
+All&nbsp;elements&nbsp;of&nbsp;a&nbsp;and&nbsp;s&nbsp;assumed&nbsp;to&nbsp;be&nbsp;in&nbsp;{0,&nbsp;1},&nbsp;by&nbsp;default.<br>
+Set&nbsp;Boolean&nbsp;flag&nbsp;bits=False&nbsp;for&nbsp;arbitrary&nbsp;inputs.<br>
+&nbsp;<br>
+If&nbsp;s&nbsp;is&nbsp;not&nbsp;present&nbsp;in&nbsp;a,&nbsp;then&nbsp;ix=a.shape[-1]&nbsp;by&nbsp;default.<br>
+Set&nbsp;flag&nbsp;e=E&nbsp;to&nbsp;get&nbsp;ix=E&nbsp;instead&nbsp;if&nbsp;s&nbsp;is&nbsp;not&nbsp;present&nbsp;in&nbsp;a.<br>
+Set&nbsp;e=None&nbsp;to&nbsp;get&nbsp;the&nbsp;"raw"&nbsp;output&nbsp;as&nbsp;a&nbsp;pair&nbsp;(nf,&nbsp;ix),&nbsp;where<br>
+the&nbsp;indicator&nbsp;bits&nbsp;in&nbsp;nf&nbsp;are&nbsp;1&nbsp;if&nbsp;and&nbsp;only&nbsp;if&nbsp;s&nbsp;is&nbsp;not&nbsp;found&nbsp;in&nbsp;a.<br>
+&nbsp;<br>
+For&nbsp;instance,&nbsp;E=-1&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;mimic&nbsp;Python's&nbsp;<a href="#Runtime-find">find</a>()&nbsp;methods.<br>
+If&nbsp;E&nbsp;is&nbsp;a&nbsp;string,&nbsp;i=eval(E)&nbsp;will&nbsp;be&nbsp;returned&nbsp;where&nbsp;E&nbsp;is&nbsp;an&nbsp;expression<br>
+in&nbsp;terms&nbsp;of&nbsp;a.shape[axis].&nbsp;As&nbsp;a&nbsp;simple&nbsp;example,&nbsp;E='a.shape[axis]-1'&nbsp;will&nbsp;enforce<br>
+that&nbsp;s&nbsp;is&nbsp;considered&nbsp;to&nbsp;be&nbsp;present&nbsp;in&nbsp;any&nbsp;case&nbsp;as&nbsp;the&nbsp;last&nbsp;element<br>
+of&nbsp;a,&nbsp;if&nbsp;not&nbsp;earlier.<br>
+&nbsp;<br>
+The&nbsp;shape&nbsp;of&nbsp;ix&nbsp;is&nbsp;controlled&nbsp;by&nbsp;parameter&nbsp;keepdims.<br>
+If&nbsp;keepdims&nbsp;is&nbsp;not&nbsp;set&nbsp;(default),&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;indices&nbsp;is&nbsp;the&nbsp;shape&nbsp;of&nbsp;a<br>
+with&nbsp;the&nbsp;specified&nbsp;axis&nbsp;removed&nbsp;(converted&nbsp;to&nbsp;a&nbsp;scalar&nbsp;if&nbsp;no&nbsp;dimensions&nbsp;remain).<br>
+Otherwise,&nbsp;if&nbsp;keepdims&nbsp;is&nbsp;set,&nbsp;the&nbsp;axis&nbsp;along&nbsp;which&nbsp;the&nbsp;search&nbsp;is&nbsp;performed<br>
+is&nbsp;left&nbsp;in&nbsp;the&nbsp;result&nbsp;as&nbsp;dimension&nbsp;of&nbsp;size&nbsp;1.<br>
+&nbsp;<br>
+See&nbsp;self.<a href="#Runtime-find">find</a>()&nbsp;for&nbsp;information&nbsp;on&nbsp;the&nbsp;use&nbsp;of&nbsp;f&nbsp;and&nbsp;cs_f.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_flatten"><strong>np_flatten</strong></a>(self, a, order='C')</dt><dd><span class="code">Return&nbsp;1D&nbsp;copy&nbsp;of&nbsp;a.<br>
 &nbsp;<br>
 Default&nbsp;'C'&nbsp;for&nbsp;row-major&nbsp;order&nbsp;(C&nbsp;style).<br>
-Alternative&nbsp;'F'&nbsp;for&nbsp;column-major&nbsp;order&nbsp;(Fortran&nbsp;style).</tt></dd></dl>
+Alternative&nbsp;'F'&nbsp;for&nbsp;column-major&nbsp;order&nbsp;(Fortran&nbsp;style).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_fliplr"><strong>np_fliplr</strong></a>(self, a)</dt><dd><tt>Reverse&nbsp;the&nbsp;order&nbsp;of&nbsp;elements&nbsp;along&nbsp;axis&nbsp;1&nbsp;(left/right).<br>
+<dl><dt><a name="Runtime-np_flip"><strong>np_flip</strong></a>(self, a, axis=None)</dt><dd><span class="code">Reverse&nbsp;the&nbsp;order&nbsp;of&nbsp;elements&nbsp;in&nbsp;an&nbsp;array&nbsp;along&nbsp;the&nbsp;given&nbsp;axis.<br>
+&nbsp;<br>
+The&nbsp;shape&nbsp;of&nbsp;the&nbsp;array&nbsp;is&nbsp;preserved,&nbsp;but&nbsp;the&nbsp;elements&nbsp;are&nbsp;reordered.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_fliplr"><strong>np_fliplr</strong></a>(self, a)</dt><dd><span class="code">Reverse&nbsp;the&nbsp;order&nbsp;of&nbsp;elements&nbsp;along&nbsp;axis&nbsp;1&nbsp;(left/right).<br>
 &nbsp;<br>
 For&nbsp;a&nbsp;2D&nbsp;array,&nbsp;this&nbsp;flips&nbsp;the&nbsp;entries&nbsp;in&nbsp;each&nbsp;row&nbsp;in&nbsp;the&nbsp;left/right&nbsp;direction.<br>
-Columns&nbsp;are&nbsp;preserved,&nbsp;but&nbsp;appear&nbsp;in&nbsp;a&nbsp;different&nbsp;order&nbsp;than&nbsp;before.</tt></dd></dl>
+Columns&nbsp;are&nbsp;preserved,&nbsp;but&nbsp;appear&nbsp;in&nbsp;a&nbsp;different&nbsp;order&nbsp;than&nbsp;before.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_from_bits"><strong>np_from_bits</strong></a>(self, x)</dt><dd><tt>Recover&nbsp;secure&nbsp;numbers&nbsp;from&nbsp;their&nbsp;binary&nbsp;representations&nbsp;in&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_flipud"><strong>np_flipud</strong></a>(self, a)</dt><dd><span class="code">Reverse&nbsp;the&nbsp;order&nbsp;of&nbsp;elements&nbsp;along&nbsp;axis&nbsp;0&nbsp;(up/down).<br>
+&nbsp;<br>
+For&nbsp;a&nbsp;2D&nbsp;array,&nbsp;this&nbsp;flips&nbsp;the&nbsp;entries&nbsp;in&nbsp;each&nbsp;column&nbsp;in&nbsp;the&nbsp;up/down&nbsp;direction.<br>
+Rows&nbsp;are&nbsp;preserved,&nbsp;but&nbsp;appear&nbsp;in&nbsp;a&nbsp;different&nbsp;order&nbsp;than&nbsp;before.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_fromlist"><strong>np_fromlist</strong></a>(self, x)</dt><dd><tt>List&nbsp;of&nbsp;secure&nbsp;numbers&nbsp;to&nbsp;1D&nbsp;array.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_from_bits"><strong>np_from_bits</strong></a>(self, x)</dt><dd><span class="code">Recover&nbsp;secure&nbsp;numbers&nbsp;from&nbsp;their&nbsp;binary&nbsp;representations&nbsp;in&nbsp;x.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_getitem"><strong>np_getitem</strong></a>(self, a, key)</dt><dd><tt>Secure&nbsp;array&nbsp;a,&nbsp;index/slice&nbsp;key.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_fromlist"><strong>np_fromlist</strong></a>(self, x)</dt><dd><span class="code">List&nbsp;of&nbsp;secure&nbsp;numbers&nbsp;to&nbsp;1D&nbsp;array.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_hsplit"><strong>np_hsplit</strong></a>(self, ary, indices_or_sections)</dt><dd><tt>Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;horizontally&nbsp;(column-wise).</tt></dd></dl>
+<dl><dt><a name="Runtime-np_getitem"><strong>np_getitem</strong></a>(self, a, key)</dt><dd><span class="code">Secure&nbsp;array&nbsp;a,&nbsp;index/slice&nbsp;key.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_hstack"><strong>np_hstack</strong></a>(self, tup)</dt><dd><tt>Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;horizontally&nbsp;(column&nbsp;wise).<br>
+<dl><dt><a name="Runtime-np_hsplit"><strong>np_hsplit</strong></a>(self, ary, indices_or_sections)</dt><dd><span class="code">Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;horizontally&nbsp;(column-wise).</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_hstack"><strong>np_hstack</strong></a>(self, tup)</dt><dd><span class="code">Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;horizontally&nbsp;(as&nbsp;columns).<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;concatenation&nbsp;along&nbsp;the&nbsp;second&nbsp;axis,<br>
-except&nbsp;for&nbsp;1D&nbsp;arrays&nbsp;where&nbsp;it&nbsp;concatenates&nbsp;along&nbsp;the&nbsp;first<br>
-axis.&nbsp;Rebuilds&nbsp;arrays&nbsp;divided&nbsp;by&nbsp;hsplit.</tt></dd></dl>
+except&nbsp;for&nbsp;1D&nbsp;arrays&nbsp;where&nbsp;it&nbsp;concatenates&nbsp;along&nbsp;the&nbsp;first&nbsp;axis.<br>
+Rebuilds&nbsp;arrays&nbsp;divided&nbsp;by&nbsp;hsplit.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_is_zero_public"><strong>np_is_zero_public</strong></a>(self, a) -&gt; _asyncio.Future</dt><dd><tt>Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a,&nbsp;elementwise.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_if_swap"><strong>np_if_swap</strong></a>(self, c, a, b)</dt><dd><span class="code">Conditional&nbsp;swap&nbsp;of&nbsp;elements&nbsp;in&nbsp;a&nbsp;and&nbsp;b&nbsp;depending&nbsp;on&nbsp;condition&nbsp;c.<br>
+&nbsp;<br>
+The&nbsp;shapes&nbsp;of&nbsp;a,&nbsp;b,&nbsp;and&nbsp;c&nbsp;are&nbsp;broadcast&nbsp;together.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_less"><strong>np_less</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;comparison&nbsp;a&nbsp;&lt;&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_is_zero_public"><strong>np_is_zero_public</strong></a>(self, a) -&gt; Future</dt><dd><span class="code">Secure&nbsp;public&nbsp;zero&nbsp;test&nbsp;of&nbsp;a,&nbsp;elementwise.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_matmul"><strong>np_matmul</strong></a>(self, A, B)</dt><dd><tt>Secure&nbsp;matrix&nbsp;product&nbsp;of&nbsp;arrays&nbsp;A&nbsp;and&nbsp;B,&nbsp;with&nbsp;broadcast.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_less"><strong>np_less</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;comparison&nbsp;a&nbsp;&lt;&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_maximum"><strong>np_maximum</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;maximum&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="Runtime-np_lsb"><strong>np_lsb</strong></a>(self, a)</dt><dd><span class="code">Compute&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;a.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_matmul"><strong>np_matmul</strong></a>(self, A, B)</dt><dd><span class="code">Secure&nbsp;matrix&nbsp;product&nbsp;of&nbsp;arrays&nbsp;A&nbsp;and&nbsp;B,&nbsp;with&nbsp;broadcast.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_maximum"><strong>np_maximum</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;elementwise&nbsp;maximum&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
 If&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;of&nbsp;different&nbsp;shapes,&nbsp;they&nbsp;must&nbsp;be&nbsp;broadcastable&nbsp;to&nbsp;a&nbsp;common&nbsp;shape<br>
-(which&nbsp;is&nbsp;scalar&nbsp;if&nbsp;both&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;scalars).</tt></dd></dl>
+(which&nbsp;is&nbsp;scalar&nbsp;if&nbsp;both&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;scalars).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_minimum"><strong>np_minimum</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;minimum&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="Runtime-np_minimum"><strong>np_minimum</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;elementwise&nbsp;minimum&nbsp;of&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
 If&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;of&nbsp;different&nbsp;shapes,&nbsp;they&nbsp;must&nbsp;be&nbsp;broadcastable&nbsp;to&nbsp;a&nbsp;common&nbsp;shape<br>
-(which&nbsp;is&nbsp;scalar&nbsp;if&nbsp;both&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;scalars).</tt></dd></dl>
+(which&nbsp;is&nbsp;scalar&nbsp;if&nbsp;both&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;scalars).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_multiply"><strong>np_multiply</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;multiplication&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_multiply"><strong>np_multiply</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;multiplication&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_negative"><strong>np_negative</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;negation&nbsp;-a&nbsp;(additive&nbsp;inverse)&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_negative"><strong>np_negative</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;elementwise&nbsp;negation&nbsp;-a&nbsp;(additive&nbsp;inverse)&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_outer"><strong>np_outer</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;outer&nbsp;product&nbsp;of&nbsp;vectors&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="Runtime-np_outer"><strong>np_outer</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;outer&nbsp;product&nbsp;of&nbsp;vectors&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
-Input&nbsp;arrays&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;flattened&nbsp;if&nbsp;not&nbsp;already&nbsp;1D.</tt></dd></dl>
+Input&nbsp;arrays&nbsp;a&nbsp;and&nbsp;b&nbsp;are&nbsp;flattened&nbsp;if&nbsp;not&nbsp;already&nbsp;1D.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_pow"><strong>np_pow</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;exponentiation&nbsp;a&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;b,&nbsp;for&nbsp;public&nbsp;integer&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_pow"><strong>np_pow</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;elementwise&nbsp;exponentiation&nbsp;a&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;b,&nbsp;for&nbsp;public&nbsp;integer&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_prod"><strong>np_prod</strong></a>(self, a, axis=None)</dt><dd><tt>Secure&nbsp;product&nbsp;of&nbsp;array&nbsp;elements&nbsp;over&nbsp;a&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).</tt></dd></dl>
+<dl><dt><a name="Runtime-np_prod"><strong>np_prod</strong></a>(self, a, axis=None)</dt><dd><span class="code">Secure&nbsp;product&nbsp;of&nbsp;array&nbsp;elements&nbsp;over&nbsp;a&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_random_bits"><strong>np_random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><tt>Return&nbsp;shape-(n,)&nbsp;secure&nbsp;array&nbsp;with&nbsp;uniformly&nbsp;random&nbsp;bits&nbsp;of&nbsp;given&nbsp;type.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_random_bits"><strong>np_random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><span class="code">Return&nbsp;shape-(n,)&nbsp;secure&nbsp;array&nbsp;with&nbsp;uniformly&nbsp;random&nbsp;bits&nbsp;of&nbsp;given&nbsp;type.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_reciprocal"><strong>np_reciprocal</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;reciprocal&nbsp;(multiplicative&nbsp;field&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;nonzero&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_reciprocal"><strong>np_reciprocal</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;elementwise&nbsp;reciprocal&nbsp;(multiplicative&nbsp;field&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;nonzero&nbsp;a.</span></dd></dl>
 
 <dl><dt><a name="Runtime-np_reshape"><strong>np_reshape</strong></a>(self, a, shape, order='C')</dt></dl>
 
-<dl><dt><a name="Runtime-np_roll"><strong>np_roll</strong></a>(self, a, shift, axis=None)</dt><dd><tt>Roll&nbsp;array&nbsp;elements&nbsp;(cyclically)&nbsp;along&nbsp;a&nbsp;given&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_roll"><strong>np_roll</strong></a>(self, a, shift, axis=None)</dt><dd><span class="code">Roll&nbsp;array&nbsp;elements&nbsp;(cyclically)&nbsp;along&nbsp;a&nbsp;given&nbsp;axis.<br>
 &nbsp;<br>
 If&nbsp;axis&nbsp;is&nbsp;None&nbsp;(default),&nbsp;array&nbsp;is&nbsp;flattened&nbsp;before&nbsp;cyclic&nbsp;shift,<br>
-and&nbsp;original&nbsp;shape&nbsp;is&nbsp;restored&nbsp;afterwards.</tt></dd></dl>
+and&nbsp;original&nbsp;shape&nbsp;is&nbsp;restored&nbsp;afterwards.<br>
+&nbsp;<br>
+In&nbsp;the&nbsp;special&nbsp;case&nbsp;that&nbsp;shift&nbsp;is&nbsp;a&nbsp;secure&nbsp;number,&nbsp;it&nbsp;is<br>
+required&nbsp;that&nbsp;array&nbsp;a&nbsp;is&nbsp;1D&nbsp;and&nbsp;that&nbsp;0&nbsp;&lt;=&nbsp;shift&nbsp;&lt;=&nbsp;len(a).</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_rot90"><strong>np_rot90</strong></a>(self, a, k=1, axes=(0, 1))</dt><dd><span class="code">Rotate&nbsp;an&nbsp;array&nbsp;k&nbsp;times&nbsp;by&nbsp;90&nbsp;degrees&nbsp;in&nbsp;the&nbsp;plane&nbsp;specified&nbsp;by&nbsp;axes.<br>
+&nbsp;<br>
+Rotation&nbsp;direction&nbsp;is&nbsp;from&nbsp;the&nbsp;first&nbsp;towards&nbsp;the&nbsp;second&nbsp;axis.</span></dd></dl>
 
 <dl><dt><a name="Runtime-np_row_stack"><strong>np_row_stack</strong></a> = <a href="#Runtime-np_vstack">np_vstack</a>(self, tup)</dt></dl>
 
-<dl><dt><a name="Runtime-np_sgn"><strong>np_sgn</strong></a>(self, a, l=None, LT=False, EQ=False)</dt><dd><tt>Secure&nbsp;elementwise&nbsp;sign(um)&nbsp;of&nbsp;array&nbsp;a.<br>
+<dl><dt><a name="Runtime-np_sgn"><strong>np_sgn</strong></a>(self, a, l=None, LT=False, EQ=False)</dt><dd><span class="code">Secure&nbsp;elementwise&nbsp;sign(um)&nbsp;of&nbsp;array&nbsp;a.<br>
 &nbsp;<br>
 Return&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.<br>
 &nbsp;<br>
@@ -521,71 +628,97 @@ to&nbsp;save&nbsp;work&nbsp;(compared&nbsp;to&nbsp;the&nbsp;default&nbsp;l=type(
 If&nbsp;Boolean&nbsp;flag&nbsp;LT&nbsp;is&nbsp;set,&nbsp;perform&nbsp;a&nbsp;secure&nbsp;less&nbsp;than&nbsp;zero&nbsp;test&nbsp;instead,&nbsp;and<br>
 return&nbsp;1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;equality&nbsp;test.<br>
 If&nbsp;Boolean&nbsp;flag&nbsp;EQ&nbsp;is&nbsp;set,&nbsp;perform&nbsp;a&nbsp;secure&nbsp;equal&nbsp;to&nbsp;zero&nbsp;test&nbsp;instead,&nbsp;and<br>
-return&nbsp;1&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;comparison.</tt></dd></dl>
+return&nbsp;1&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;comparison.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_sort"><strong>np_sort</strong></a>(self, a, axis=-1, key=None)</dt><dd><tt>"Returns&nbsp;new&nbsp;array&nbsp;sorted&nbsp;along&nbsp;given&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_sort"><strong>np_sort</strong></a>(self, a, axis=-1, key=None)</dt><dd><span class="code">"Returns&nbsp;new&nbsp;array&nbsp;sorted&nbsp;along&nbsp;given&nbsp;axis.<br>
 &nbsp;<br>
 By&nbsp;default,&nbsp;axis=-1.<br>
 If&nbsp;axis&nbsp;is&nbsp;None,&nbsp;the&nbsp;array&nbsp;is&nbsp;flattened.<br>
 &nbsp;<br>
-Same&nbsp;sorting&nbsp;network&nbsp;as&nbsp;in&nbsp;self._sort().</tt></dd></dl>
+Same&nbsp;sorting&nbsp;network&nbsp;as&nbsp;in&nbsp;self._sort().</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_split"><strong>np_split</strong></a>(self, ary, indices_or_sections, axis=0)</dt><dd><tt>Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;as&nbsp;views&nbsp;into&nbsp;ary.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_split"><strong>np_split</strong></a>(self, ary, indices_or_sections, axis=0)</dt><dd><span class="code">Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;as&nbsp;views&nbsp;into&nbsp;ary.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_stack"><strong>np_stack</strong></a>(self, arrays, axis=0)</dt><dd><tt>Join&nbsp;a&nbsp;sequence&nbsp;of&nbsp;arrays&nbsp;along&nbsp;a&nbsp;new&nbsp;axis.<br>
+<dl><dt><a name="Runtime-np_squeeze"><strong>np_squeeze</strong></a>(self, a, axis=None)</dt><dd><span class="code">Remove&nbsp;specified&nbsp;axes&nbsp;of&nbsp;length&nbsp;one&nbsp;from&nbsp;a.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_stack"><strong>np_stack</strong></a>(self, arrays, axis=0)</dt><dd><span class="code">Join&nbsp;a&nbsp;sequence&nbsp;of&nbsp;arrays&nbsp;along&nbsp;a&nbsp;new&nbsp;axis.<br>
 &nbsp;<br>
 The&nbsp;axis&nbsp;parameter&nbsp;specifies&nbsp;the&nbsp;index&nbsp;of&nbsp;the&nbsp;new&nbsp;axis&nbsp;in&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;result.<br>
 For&nbsp;example,&nbsp;if&nbsp;axis=0&nbsp;it&nbsp;will&nbsp;be&nbsp;the&nbsp;first&nbsp;dimension&nbsp;and&nbsp;if&nbsp;axis=-1&nbsp;it&nbsp;will&nbsp;be<br>
-the&nbsp;last&nbsp;dimension.</tt></dd></dl>
+the&nbsp;last&nbsp;dimension.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_subtract"><strong>np_subtract</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_subtract"><strong>np_subtract</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;subtraction&nbsp;of&nbsp;a&nbsp;and&nbsp;b,&nbsp;elementwise&nbsp;with&nbsp;broadcast.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_sum"><strong>np_sum</strong></a>(self, a, axis=None, keepdims=False, initial=0)</dt><dd><tt>Secure&nbsp;sum&nbsp;of&nbsp;array&nbsp;elements&nbsp;over&nbsp;a&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).</tt></dd></dl>
+<dl><dt><a name="Runtime-np_sum"><strong>np_sum</strong></a>(self, a, axis=None, keepdims=False, initial=0)</dt><dd><span class="code">Secure&nbsp;sum&nbsp;of&nbsp;array&nbsp;elements&nbsp;over&nbsp;a&nbsp;given&nbsp;axis&nbsp;(or&nbsp;axes).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_swapaxes"><strong>np_swapaxes</strong></a>(self, a, axis1, axis2)</dt><dd><tt>Interchange&nbsp;two&nbsp;given&nbsp;axes&nbsp;of&nbsp;array&nbsp;a.<br>
+<dl><dt><a name="Runtime-np_swapaxes"><strong>np_swapaxes</strong></a>(self, a, axis1, axis2)</dt><dd><span class="code">Interchange&nbsp;two&nbsp;given&nbsp;axes&nbsp;of&nbsp;array&nbsp;a.<br>
 &nbsp;<br>
-For&nbsp;2D&nbsp;arrays,&nbsp;same&nbsp;as&nbsp;the&nbsp;usual&nbsp;matrix&nbsp;transpose.</tt></dd></dl>
+For&nbsp;2D&nbsp;arrays,&nbsp;same&nbsp;as&nbsp;the&nbsp;usual&nbsp;matrix&nbsp;transpose.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_to_bits"><strong>np_to_bits</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;(or&nbsp;all)&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_to_bits"><strong>np_to_bits</strong></a>(self, a, l=None)</dt><dd><span class="code">Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;(or&nbsp;all)&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_tolist"><strong>np_tolist</strong></a>(self, a)</dt><dd><tt>Return&nbsp;array&nbsp;a&nbsp;as&nbsp;an&nbsp;nested&nbsp;list&nbsp;of&nbsp;Python&nbsp;scalars.<br>
+<dl><dt><a name="Runtime-np_tolist"><strong>np_tolist</strong></a>(self, a)</dt><dd><span class="code">Return&nbsp;array&nbsp;a&nbsp;as&nbsp;(nested)&nbsp;list&nbsp;of&nbsp;Python&nbsp;scalars.<br>
 &nbsp;<br>
-The&nbsp;nested&nbsp;list&nbsp;is&nbsp;a.ndim&nbsp;levels&nbsp;deep&nbsp;(scalar&nbsp;if&nbsp;a.ndim&nbsp;is&nbsp;zero).</tt></dd></dl>
+Nested&nbsp;list&nbsp;is&nbsp;a.ndim&nbsp;levels&nbsp;deep&nbsp;(scalar&nbsp;if&nbsp;a.ndim&nbsp;is&nbsp;zero).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_transpose"><strong>np_transpose</strong></a>(self, a, axes=None)</dt><dd><tt>Reverse&nbsp;(default)&nbsp;or&nbsp;permute&nbsp;the&nbsp;axes&nbsp;of&nbsp;array&nbsp;a.<br>
+<dl><dt><a name="Runtime-np_trace"><strong>np_trace</strong></a>(self, a, offset=0, axis1=0, axis2=1)</dt><dd><span class="code">Return&nbsp;the&nbsp;sum&nbsp;along&nbsp;diagonals&nbsp;of&nbsp;the&nbsp;array.<br>
+&nbsp;<br>
+For&nbsp;2D&nbsp;array&nbsp;a,&nbsp;return&nbsp;the&nbsp;sum&nbsp;along&nbsp;diagonal&nbsp;of&nbsp;a&nbsp;with&nbsp;the&nbsp;given&nbsp;offset=k,<br>
+that&nbsp;is,&nbsp;sum&nbsp;of&nbsp;elements&nbsp;of&nbsp;the&nbsp;form&nbsp;a[i,&nbsp;i+k].<br>
+For&nbsp;higher&nbsp;dimensional&nbsp;arrays&nbsp;a,&nbsp;axes&nbsp;axis1&nbsp;and&nbsp;axis2&nbsp;are&nbsp;used<br>
+to&nbsp;determine&nbsp;the&nbsp;2D&nbsp;subarray&nbsp;whose&nbsp;traces&nbsp;are&nbsp;returned.<br>
+The&nbsp;shape&nbsp;of&nbsp;the&nbsp;result&nbsp;array&nbsp;is&nbsp;obtained&nbsp;by&nbsp;removing&nbsp;axis1&nbsp;and&nbsp;axis2;<br>
+0D&nbsp;arrays&nbsp;are&nbsp;converted&nbsp;to&nbsp;scalars.<br>
+&nbsp;<br>
+Default&nbsp;diagonal&nbsp;is&nbsp;offset=0.<br>
+Use&nbsp;offset&gt;0&nbsp;for&nbsp;diagonals&nbsp;above&nbsp;the&nbsp;main&nbsp;diagonal,<br>
+and&nbsp;offset&lt;0&nbsp;for&nbsp;diagonals&nbsp;below&nbsp;the&nbsp;main&nbsp;diagonal.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_transpose"><strong>np_transpose</strong></a>(self, a, axes=None)</dt><dd><span class="code">Reverse&nbsp;(default)&nbsp;or&nbsp;permute&nbsp;the&nbsp;axes&nbsp;of&nbsp;array&nbsp;a.<br>
 &nbsp;<br>
 For&nbsp;2D&nbsp;arrays,&nbsp;default&nbsp;result&nbsp;is&nbsp;the&nbsp;usual&nbsp;matrix&nbsp;transpose.<br>
-Parameter&nbsp;axes&nbsp;can&nbsp;be&nbsp;any&nbsp;permutation&nbsp;of&nbsp;0,...,n-1&nbsp;for&nbsp;n-dimensional&nbsp;array&nbsp;a.</tt></dd></dl>
+Parameter&nbsp;axes&nbsp;can&nbsp;be&nbsp;any&nbsp;permutation&nbsp;of&nbsp;0,...,n-1&nbsp;for&nbsp;n-dimensional&nbsp;array&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_trunc"><strong>np_trunc</strong></a>(self, a, f=None, l=None)</dt><dd><tt>Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;a.<br>
+<dl><dt><a name="Runtime-np_trunc"><strong>np_trunc</strong></a>(self, a, f=None, l=None)</dt><dd><span class="code">Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;a.<br>
 &nbsp;<br>
-Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f&nbsp;(elementwise).</tt></dd></dl>
+Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f&nbsp;(elementwise).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_unit_vector"><strong>np_unit_vector</strong></a>(self, a, n)</dt><dd><tt>Length-n&nbsp;unit&nbsp;vector&nbsp;[0]*a&nbsp;+&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1-a)&nbsp;for&nbsp;secret&nbsp;a,&nbsp;assuming&nbsp;0&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;n.<br>
+<dl><dt><a name="Runtime-np_unit_vector"><strong>np_unit_vector</strong></a>(self, a, n)</dt><dd><span class="code">Length-n&nbsp;unit&nbsp;vector&nbsp;[0]*a&nbsp;+&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1-a)&nbsp;for&nbsp;secret&nbsp;a,&nbsp;assuming&nbsp;0&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;n.<br>
 &nbsp;<br>
 Unit&nbsp;vector&nbsp;returned&nbsp;as&nbsp;secure&nbsp;NumPy&nbsp;array.<br>
 &nbsp;<br>
-NB:&nbsp;Value&nbsp;of&nbsp;a&nbsp;is&nbsp;reduced&nbsp;modulo&nbsp;n&nbsp;(almost&nbsp;for&nbsp;free).</tt></dd></dl>
+NB:&nbsp;Value&nbsp;of&nbsp;a&nbsp;is&nbsp;reduced&nbsp;modulo&nbsp;n&nbsp;(almost&nbsp;for&nbsp;free).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_update"><strong>np_update</strong></a>(self, a, key, value)</dt><dd><tt>Return&nbsp;secure&nbsp;array&nbsp;modified&nbsp;by&nbsp;update&nbsp;a[key]=value.<br>
+<dl><dt><a name="Runtime-np_update"><strong>np_update</strong></a>(self, a, key, value)</dt><dd><span class="code">Return&nbsp;secure&nbsp;array&nbsp;modified&nbsp;by&nbsp;update&nbsp;a[key]=value.<br>
 &nbsp;<br>
 Also&nbsp;value&nbsp;can&nbsp;be&nbsp;a&nbsp;secure&nbsp;array&nbsp;or&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
 But&nbsp;key&nbsp;is&nbsp;in&nbsp;the&nbsp;clear.<br>
 &nbsp;<br>
 Differs&nbsp;from&nbsp;__setitem__()&nbsp;which&nbsp;works&nbsp;in-place,&nbsp;returning&nbsp;None.<br>
-MUST&nbsp;be&nbsp;used&nbsp;as&nbsp;follows:&nbsp;a&nbsp;=&nbsp;<a href="#Runtime-np_update">np_update</a>(a,&nbsp;key,&nbsp;value).</tt></dd></dl>
+MUST&nbsp;be&nbsp;used&nbsp;as&nbsp;follows:&nbsp;a&nbsp;=&nbsp;<a href="#Runtime-np_update">np_update</a>(a,&nbsp;key,&nbsp;value).</span></dd></dl>
 
-<dl><dt><a name="Runtime-np_vsplit"><strong>np_vsplit</strong></a>(self, ary, indices_or_sections)</dt><dd><tt>Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;vertically&nbsp;(row-wise).</tt></dd></dl>
-
-<dl><dt><a name="Runtime-np_vstack"><strong>np_vstack</strong></a>(self, tup)</dt></dl>
-
-<dl><dt><a name="Runtime-np_where"><strong>np_where</strong></a>(self, c, a, b)</dt><dd><tt>Return&nbsp;elements&nbsp;chosen&nbsp;from&nbsp;a&nbsp;or&nbsp;b&nbsp;depending&nbsp;on&nbsp;condition&nbsp;c.<br>
+<dl><dt><a name="Runtime-np_vander"><strong>np_vander</strong></a>(self, a, N=None, increasing=False)</dt><dd><span class="code">Securely&nbsp;generate&nbsp;Vandermonde&nbsp;matrix&nbsp;for&nbsp;given&nbsp;1D&nbsp;array&nbsp;a.<br>
 &nbsp;<br>
-The&nbsp;shapes&nbsp;of&nbsp;a,&nbsp;b,&nbsp;and&nbsp;c&nbsp;are&nbsp;broadcast&nbsp;together.</tt></dd></dl>
+The&nbsp;columns&nbsp;of&nbsp;the&nbsp;output&nbsp;matrix&nbsp;are&nbsp;powers&nbsp;of&nbsp;the&nbsp;input&nbsp;vector&nbsp;a.<br>
+The&nbsp;order&nbsp;of&nbsp;the&nbsp;powers&nbsp;is&nbsp;determined&nbsp;by&nbsp;the&nbsp;increasing&nbsp;boolean&nbsp;argument.<br>
+Specifically,&nbsp;when&nbsp;increasing&nbsp;is&nbsp;False,&nbsp;the&nbsp;ith&nbsp;output&nbsp;column&nbsp;is&nbsp;the&nbsp;input&nbsp;vector&nbsp;a<br>
+raised&nbsp;elementwise&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;N-i-1.</span></dd></dl>
 
-<dl><dt><a name="Runtime-or_"><strong>or_</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;bitwise&nbsp;or&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-np_vsplit"><strong>np_vsplit</strong></a>(self, ary, indices_or_sections)</dt><dd><span class="code">Split&nbsp;an&nbsp;array&nbsp;into&nbsp;multiple&nbsp;sub-arrays&nbsp;vertically&nbsp;(row-wise).</span></dd></dl>
 
-<dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, x, receivers=None, threshold=None, raw=False)</dt><dd><tt>Output&nbsp;the&nbsp;value&nbsp;of&nbsp;x&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.<br>
+<dl><dt><a name="Runtime-np_vstack"><strong>np_vstack</strong></a>(self, tup)</dt><dd><span class="code">Stack&nbsp;arrays&nbsp;in&nbsp;sequence&nbsp;vertically&nbsp;(as&nbsp;rows).<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;concatenation&nbsp;along&nbsp;the&nbsp;first&nbsp;axis<br>
+after&nbsp;1D&nbsp;arrays&nbsp;of&nbsp;shape&nbsp;(N,)&nbsp;have&nbsp;been&nbsp;reshaped&nbsp;to&nbsp;(1,N).<br>
+Rebuilds&nbsp;arrays&nbsp;divided&nbsp;by&nbsp;vsplit.</span></dd></dl>
+
+<dl><dt><a name="Runtime-np_where"><strong>np_where</strong></a>(self, c, a, b)</dt><dd><span class="code">Return&nbsp;elements&nbsp;chosen&nbsp;from&nbsp;a&nbsp;or&nbsp;b&nbsp;depending&nbsp;on&nbsp;condition&nbsp;c.<br>
+&nbsp;<br>
+The&nbsp;shapes&nbsp;of&nbsp;a,&nbsp;b,&nbsp;and&nbsp;c&nbsp;are&nbsp;broadcast&nbsp;together.</span></dd></dl>
+
+<dl><dt><a name="Runtime-or_"><strong>or_</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;bitwise&nbsp;or&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
+
+<dl><dt><a name="Runtime-output"><strong>output</strong></a>(self, x, receivers=None, threshold=None, raw=False)</dt><dd><span class="code">Output&nbsp;the&nbsp;value&nbsp;of&nbsp;x&nbsp;to&nbsp;the&nbsp;receivers&nbsp;specified.<br>
 &nbsp;<br>
 Value&nbsp;x&nbsp;is&nbsp;a&nbsp;secure&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>,&nbsp;or&nbsp;a&nbsp;list&nbsp;of&nbsp;secure&nbsp;objects.<br>
 The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;the&nbsp;output.<br>
@@ -599,35 +732,48 @@ Set&nbsp;flag&nbsp;raw=True&nbsp;to&nbsp;suppress&nbsp;output&nbsp;conversion.<b
 For&nbsp;all&nbsp;other&nbsp;types&nbsp;of&nbsp;secure&nbsp;objects&nbsp;their&nbsp;_output()&nbsp;method&nbsp;controls<br>
 what&nbsp;is&nbsp;output.&nbsp;For&nbsp;instance,&nbsp;mpyc.sectypes.SecureFloat._output()<br>
 outputs&nbsp;secure&nbsp;floating-point&nbsp;numbers&nbsp;as&nbsp;Python&nbsp;floats.<br>
-The&nbsp;flag&nbsp;raw&nbsp;is&nbsp;ignored&nbsp;for&nbsp;these&nbsp;types.</tt></dd></dl>
+The&nbsp;flag&nbsp;raw&nbsp;is&nbsp;ignored&nbsp;for&nbsp;these&nbsp;types.</span></dd></dl>
 
-<dl><dt><a name="Runtime-pos"><strong>pos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;unary&nbsp;+&nbsp;applied&nbsp;to&nbsp;a.</tt></dd></dl>
-
-<dl><dt><a name="Runtime-pow"><strong>pow</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;exponentiation&nbsp;a&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;b,&nbsp;for&nbsp;public&nbsp;integer&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Runtime-prfs"><strong>prfs</strong></a>(self, bound)</dt><dd><tt>PRFs&nbsp;with&nbsp;codomain&nbsp;range(bound)&nbsp;for&nbsp;pseudorandom&nbsp;secret&nbsp;sharing.<br>
+<dl><dt><a name="Runtime-peek"><strong>peek</strong></a>(self, x, label='') -&gt; None</dt><dd><span class="code">Peek&nbsp;at&nbsp;the&nbsp;value&nbsp;of&nbsp;secret-shared&nbsp;x,<br>
+for&nbsp;"informational"&nbsp;and&nbsp;debugging&nbsp;purposes&nbsp;only.<br>
 &nbsp;<br>
-Return&nbsp;a&nbsp;mapping&nbsp;from&nbsp;sets&nbsp;of&nbsp;parties&nbsp;to&nbsp;PRFs.</tt></dd></dl>
-
-<dl><dt><a name="Runtime-prod"><strong>prod</strong></a>(self, x, start=1)</dt><dd><tt>Secure&nbsp;product&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;math.<a href="#Runtime-prod">prod</a>().<br>
+For&nbsp;secure&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;x&nbsp;(or&nbsp;list&nbsp;of&nbsp;secure&nbsp;objects&nbsp;compatible&nbsp;with<br>
+runtime.<a href="#Runtime-output">output</a>()),&nbsp;the&nbsp;value&nbsp;is&nbsp;logged&nbsp;once&nbsp;its&nbsp;computation&nbsp;is&nbsp;done.<br>
 &nbsp;<br>
-Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</tt></dd></dl>
+In&nbsp;debug&nbsp;mode,&nbsp;the&nbsp;moment&nbsp;at&nbsp;which&nbsp;the&nbsp;task&nbsp;for&nbsp;the&nbsp;computation&nbsp;of&nbsp;x&nbsp;is<br>
+scheduled&nbsp;is&nbsp;logged,&nbsp;and&nbsp;the&nbsp;value&nbsp;of&nbsp;this&nbsp;party's&nbsp;secret&nbsp;share&nbsp;of&nbsp;x&nbsp;is<br>
+logged&nbsp;once&nbsp;the&nbsp;task&nbsp;for&nbsp;the&nbsp;computation&nbsp;of&nbsp;x&nbsp;has&nbsp;completed.<br>
+&nbsp;<br>
+To&nbsp;facilitate&nbsp;matching&nbsp;of&nbsp;scheduled&nbsp;with&nbsp;completed&nbsp;tasks,&nbsp;an&nbsp;"address"<br>
+based&nbsp;on&nbsp;the&nbsp;program&nbsp;counter&nbsp;is&nbsp;included&nbsp;as&nbsp;well&nbsp;the&nbsp;given&nbsp;label,&nbsp;if&nbsp;any.</span></dd></dl>
 
-<dl><dt><a name="Runtime-random_bit"><strong>random_bit</strong></a>(self, stype, signed=False)</dt><dd><tt>Secure&nbsp;uniformly&nbsp;random&nbsp;bit&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
+<dl><dt><a name="Runtime-pos"><strong>pos</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;unary&nbsp;+&nbsp;applied&nbsp;to&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-random_bits"><strong>random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><tt>Return&nbsp;n&nbsp;secure&nbsp;uniformly&nbsp;random&nbsp;bits&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</tt></dd></dl>
+<dl><dt><a name="Runtime-pow"><strong>pow</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;exponentiation&nbsp;a&nbsp;raised&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;b,&nbsp;for&nbsp;public&nbsp;integer&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-reciprocal"><strong>reciprocal</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;reciprocal&nbsp;(multiplicative&nbsp;field&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;nonzero&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-prfs"><strong>prfs</strong></a>(self, bound)</dt><dd><span class="code">PRFs&nbsp;with&nbsp;codomain&nbsp;range(bound)&nbsp;for&nbsp;pseudorandom&nbsp;secret&nbsp;sharing.<br>
+&nbsp;<br>
+Return&nbsp;a&nbsp;mapping&nbsp;from&nbsp;sets&nbsp;of&nbsp;parties&nbsp;to&nbsp;PRFs.</span></dd></dl>
 
-<dl><dt><a name="Runtime-run"><strong>run</strong></a>(self, f)</dt><dd><tt>Run&nbsp;the&nbsp;given&nbsp;coroutine&nbsp;or&nbsp;future&nbsp;until&nbsp;it&nbsp;is&nbsp;done.</tt></dd></dl>
+<dl><dt><a name="Runtime-prod"><strong>prod</strong></a>(self, x, start=1)</dt><dd><span class="code">Secure&nbsp;product&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;math.<a href="#Runtime-prod">prod</a>().<br>
+&nbsp;<br>
+Runs&nbsp;in&nbsp;log_2&nbsp;len(x)&nbsp;rounds).</span></dd></dl>
 
-<dl><dt><a name="Runtime-scalar_mul"><strong>scalar_mul</strong></a>(self, a, x)</dt><dd><tt>Secure&nbsp;scalar&nbsp;multiplication&nbsp;of&nbsp;scalar&nbsp;a&nbsp;with&nbsp;vector&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="Runtime-random_bit"><strong>random_bit</strong></a>(self, stype, signed=False)</dt><dd><span class="code">Secure&nbsp;uniformly&nbsp;random&nbsp;bit&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</span></dd></dl>
 
-<dl><dt><a name="Runtime-schur_prod"><strong>schur_prod</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;entrywise&nbsp;multiplication&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+<dl><dt><a name="Runtime-random_bits"><strong>random_bits</strong></a>(self, sftype, n, signed=False)</dt><dd><span class="code">Return&nbsp;n&nbsp;secure&nbsp;uniformly&nbsp;random&nbsp;bits&nbsp;of&nbsp;the&nbsp;given&nbsp;type.</span></dd></dl>
 
-<dl><dt><a name="Runtime-set_protocol"><strong>set_protocol</strong></a>(self, peer_pid, protocol)</dt></dl>
+<dl><dt><a name="Runtime-reciprocal"><strong>reciprocal</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;reciprocal&nbsp;(multiplicative&nbsp;field&nbsp;inverse)&nbsp;of&nbsp;a,&nbsp;for&nbsp;nonzero&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, l=None, LT=False, EQ=False)</dt><dd><tt>Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;return&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.<br>
+<dl><dt><a name="Runtime-run"><strong>run</strong></a>(self, f)</dt><dd><span class="code">Run&nbsp;the&nbsp;given&nbsp;coroutine&nbsp;or&nbsp;future&nbsp;until&nbsp;it&nbsp;is&nbsp;done.</span></dd></dl>
+
+<dl><dt><a name="Runtime-scalar_mul"><strong>scalar_mul</strong></a>(self, a, x)</dt><dd><span class="code">Secure&nbsp;scalar&nbsp;multiplication&nbsp;of&nbsp;scalar&nbsp;a&nbsp;with&nbsp;vector&nbsp;x.</span></dd></dl>
+
+<dl><dt><a name="Runtime-schur_prod"><strong>schur_prod</strong></a>(self, x, y)</dt><dd><span class="code">Secure&nbsp;entrywise&nbsp;multiplication&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</span></dd></dl>
+
+<dl><dt><a name="Runtime-set_protocol"><strong>set_protocol</strong></a>(self, peer_pid, protocol)</dt><dd><span class="code">Register&nbsp;connection&nbsp;with&nbsp;given&nbsp;peer.</span></dd></dl>
+
+<dl><dt><a name="Runtime-sgn"><strong>sgn</strong></a>(self, a, l=None, LT=False, EQ=False)</dt><dd><span class="code">Secure&nbsp;sign(um)&nbsp;of&nbsp;a,&nbsp;return&nbsp;-1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;1.<br>
 &nbsp;<br>
 If&nbsp;integer&nbsp;flag&nbsp;l=L&nbsp;is&nbsp;set,&nbsp;it&nbsp;is&nbsp;assumed&nbsp;that&nbsp;-2^(L-1)&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;2^(L-1)<br>
 to&nbsp;save&nbsp;work&nbsp;(compared&nbsp;to&nbsp;the&nbsp;default&nbsp;l=type(a).bit_length).<br>
@@ -635,23 +781,23 @@ to&nbsp;save&nbsp;work&nbsp;(compared&nbsp;to&nbsp;the&nbsp;default&nbsp;l=type(
 If&nbsp;Boolean&nbsp;flag&nbsp;LT&nbsp;is&nbsp;set,&nbsp;perform&nbsp;a&nbsp;secure&nbsp;less&nbsp;than&nbsp;zero&nbsp;test&nbsp;instead,&nbsp;and<br>
 return&nbsp;1&nbsp;if&nbsp;a&nbsp;&lt;&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;equality&nbsp;test.<br>
 If&nbsp;Boolean&nbsp;flag&nbsp;EQ&nbsp;is&nbsp;set,&nbsp;perform&nbsp;a&nbsp;secure&nbsp;equal&nbsp;to&nbsp;zero&nbsp;test&nbsp;instead,&nbsp;and<br>
-return&nbsp;1&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;comparison.</tt></dd></dl>
+return&nbsp;1&nbsp;if&nbsp;a&nbsp;==&nbsp;0&nbsp;else&nbsp;0,&nbsp;saving&nbsp;the&nbsp;work&nbsp;for&nbsp;a&nbsp;secure&nbsp;comparison.</span></dd></dl>
 
-<dl><dt>async <a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><tt>Shutdown&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
+<dl><dt>async <a name="Runtime-shutdown"><strong>shutdown</strong></a>(self)</dt><dd><span class="code">Shutdown&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
 &nbsp;<br>
-Close&nbsp;all&nbsp;connections,&nbsp;if&nbsp;any.</tt></dd></dl>
+Close&nbsp;all&nbsp;connections,&nbsp;if&nbsp;any.</span></dd></dl>
 
-<dl><dt><a name="Runtime-sin"><strong>sin</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;sine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-sin"><strong>sin</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;sine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-sincos"><strong>sincos</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;sine&nbsp;and&nbsp;cosine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.<br>
+<dl><dt><a name="Runtime-sincos"><strong>sincos</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;sine&nbsp;and&nbsp;cosine&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.<br>
 &nbsp;<br>
 See&nbsp;"New&nbsp;Approach&nbsp;for&nbsp;Sine&nbsp;and&nbsp;Cosine&nbsp;in&nbsp;Secure&nbsp;Fixed-Point&nbsp;Arithmetic"<br>
 by&nbsp;Stan&nbsp;Korzilius&nbsp;and&nbsp;Berry&nbsp;Schoenmakers,&nbsp;which&nbsp;appeared&nbsp;in&nbsp;the&nbsp;proceedings<br>
 of&nbsp;CSCML&nbsp;2023,&nbsp;7th&nbsp;International&nbsp;Symposium&nbsp;on&nbsp;Cyber&nbsp;Security,&nbsp;Cryptology<br>
 and&nbsp;Machine&nbsp;Learning,&nbsp;LNCS&nbsp;13914,&nbsp;pp.&nbsp;307-319,&nbsp;Springer&nbsp;(see<br>
-<a href="https://doi.org/10.1007/978-3-031-34671-2">https://doi.org/10.1007/978-3-031-34671-2</a>).</tt></dd></dl>
+<a href="https://doi.org/10.1007/978-3-031-34671-2">https://doi.org/10.1007/978-3-031-34671-2</a>).</span></dd></dl>
 
-<dl><dt><a name="Runtime-sorted"><strong>sorted</strong></a>(self, x, key=None, reverse=False)</dt><dd><tt>Return&nbsp;a&nbsp;new&nbsp;securely&nbsp;sorted&nbsp;list&nbsp;with&nbsp;elements&nbsp;from&nbsp;x&nbsp;in&nbsp;ascending&nbsp;order.<br>
+<dl><dt><a name="Runtime-sorted"><strong>sorted</strong></a>(self, x, key=None, reverse=False)</dt><dd><span class="code">Return&nbsp;a&nbsp;new&nbsp;securely&nbsp;sorted&nbsp;list&nbsp;with&nbsp;elements&nbsp;from&nbsp;x&nbsp;in&nbsp;ascending&nbsp;order.<br>
 &nbsp;<br>
 Similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-sorted">sorted</a>(),&nbsp;but&nbsp;not&nbsp;stable.<br>
 &nbsp;<br>
@@ -659,26 +805,26 @@ Elements&nbsp;of&nbsp;x&nbsp;are&nbsp;either&nbsp;secure&nbsp;numbers&nbsp;or&nb
 &nbsp;<br>
 Argument&nbsp;key&nbsp;specifies&nbsp;a&nbsp;function&nbsp;applied&nbsp;to&nbsp;all&nbsp;elements&nbsp;of&nbsp;x&nbsp;before&nbsp;comparing&nbsp;them,&nbsp;using<br>
 only&nbsp;&lt;&nbsp;comparisons&nbsp;(that&nbsp;is,&nbsp;using&nbsp;only&nbsp;the&nbsp;<a href="#Runtime-__lt__">__lt__</a>()&nbsp;method,&nbsp;as&nbsp;for&nbsp;Python's&nbsp;list.sort()).<br>
-Default&nbsp;key&nbsp;compares&nbsp;elements&nbsp;of&nbsp;x&nbsp;directly&nbsp;(using&nbsp;identity&nbsp;function&nbsp;'lambda&nbsp;a:&nbsp;a').</tt></dd></dl>
+Default&nbsp;key&nbsp;compares&nbsp;elements&nbsp;of&nbsp;x&nbsp;directly&nbsp;(using&nbsp;identity&nbsp;function&nbsp;'lambda&nbsp;a:&nbsp;a').</span></dd></dl>
 
-<dl><dt>async <a name="Runtime-start"><strong>start</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
+<dl><dt>async <a name="Runtime-start"><strong>start</strong></a>(self)</dt><dd><span class="code">Start&nbsp;the&nbsp;MPyC&nbsp;runtime.<br>
 &nbsp;<br>
-Open&nbsp;connections&nbsp;with&nbsp;other&nbsp;parties,&nbsp;if&nbsp;any.</tt></dd></dl>
+Open&nbsp;connections&nbsp;with&nbsp;other&nbsp;parties,&nbsp;if&nbsp;any.</span></dd></dl>
 
-<dl><dt><a name="Runtime-sub"><strong>sub</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-sub"><strong>sub</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;subtraction&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Runtime-sum"><strong>sum</strong></a>(self, x, start=0)</dt><dd><tt>Secure&nbsp;sum&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-sum">sum</a>().</tt></dd></dl>
+<dl><dt><a name="Runtime-sum"><strong>sum</strong></a>(self, x, start=0)</dt><dd><span class="code">Secure&nbsp;sum&nbsp;of&nbsp;all&nbsp;elements&nbsp;in&nbsp;x,&nbsp;similar&nbsp;to&nbsp;Python's&nbsp;built-in&nbsp;<a href="#Runtime-sum">sum</a>().</span></dd></dl>
 
-<dl><dt><a name="Runtime-tan"><strong>tan</strong></a>(self, a)</dt><dd><tt>Secure&nbsp;tangent&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-tan"><strong>tan</strong></a>(self, a)</dt><dd><span class="code">Secure&nbsp;tangent&nbsp;of&nbsp;fixed-point&nbsp;number&nbsp;a.</span></dd></dl>
 
-<dl><dt>async <a name="Runtime-throttler"><strong>throttler</strong></a>(self, load_percentage=1.0, name=None)</dt><dd><tt>Throttle&nbsp;runtime&nbsp;by&nbsp;given&nbsp;percentage&nbsp;(default&nbsp;1.0),&nbsp;using&nbsp;optional&nbsp;name&nbsp;for&nbsp;barrier.</tt></dd></dl>
+<dl><dt>async <a name="Runtime-throttler"><strong>throttler</strong></a>(self, load_percentage=1.0, name=None)</dt><dd><span class="code">Throttle&nbsp;runtime&nbsp;by&nbsp;given&nbsp;percentage&nbsp;(default&nbsp;1.0),&nbsp;using&nbsp;optional&nbsp;name&nbsp;for&nbsp;barrier.</span></dd></dl>
 
-<dl><dt><a name="Runtime-to_bits"><strong>to_bits</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;(or&nbsp;all)&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.</tt></dd></dl>
+<dl><dt><a name="Runtime-to_bits"><strong>to_bits</strong></a>(self, a, l=None)</dt><dd><span class="code">Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;(or&nbsp;all)&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;a.</span></dd></dl>
 
-<dl><dt><a name="Runtime-trailing_zeros"><strong>trailing_zeros</strong></a>(self, a, l=None)</dt><dd><tt>Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;least&nbsp;significant&nbsp;(or&nbsp;all)&nbsp;bits&nbsp;of&nbsp;a,<br>
-only&nbsp;correct&nbsp;up&nbsp;to&nbsp;and&nbsp;including&nbsp;the&nbsp;least&nbsp;significant&nbsp;1&nbsp;(if&nbsp;any).</tt></dd></dl>
+<dl><dt><a name="Runtime-trailing_zeros"><strong>trailing_zeros</strong></a>(self, a, l=None)</dt><dd><span class="code">Secure&nbsp;extraction&nbsp;of&nbsp;l&nbsp;least&nbsp;significant&nbsp;(or&nbsp;all)&nbsp;bits&nbsp;of&nbsp;a,<br>
+only&nbsp;correct&nbsp;up&nbsp;to&nbsp;and&nbsp;including&nbsp;the&nbsp;least&nbsp;significant&nbsp;1&nbsp;(if&nbsp;any).</span></dd></dl>
 
-<dl><dt><a name="Runtime-transfer"><strong>transfer</strong></a>(self, obj, senders=None, receivers=None, sender_receivers=None) -&gt; _asyncio.Future</dt><dd><tt>Transfer&nbsp;pickable&nbsp;Python&nbsp;objects&nbsp;between&nbsp;specified&nbsp;parties.<br>
+<dl><dt><a name="Runtime-transfer"><strong>transfer</strong></a>(self, obj, senders=None, receivers=None, sender_receivers=None) -&gt; Future</dt><dd><span class="code">Transfer&nbsp;pickable&nbsp;Python&nbsp;objects&nbsp;between&nbsp;specified&nbsp;parties.<br>
 &nbsp;<br>
 The&nbsp;senders&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;provide&nbsp;input.<br>
 The&nbsp;receivers&nbsp;are&nbsp;the&nbsp;parties&nbsp;that&nbsp;will&nbsp;obtain&nbsp;output.<br>
@@ -694,27 +840,27 @@ Each&nbsp;party&nbsp;i&nbsp;corresponds&nbsp;to&nbsp;a&nbsp;node&nbsp;in&nbsp;th
 The&nbsp;senders/receivers&nbsp;arguments&nbsp;represent&nbsp;subsets&nbsp;of&nbsp;nodes,&nbsp;in&nbsp;the&nbsp;form<br>
 of&nbsp;a&nbsp;list,&nbsp;a&nbsp;Python&nbsp;range&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>,&nbsp;or&nbsp;a&nbsp;Python&nbsp;int.<br>
 The&nbsp;sender_receivers&nbsp;argument&nbsp;represents&nbsp;a&nbsp;set&nbsp;of&nbsp;arcs,&nbsp;in&nbsp;the&nbsp;form&nbsp;of&nbsp;a<br>
-list&nbsp;of&nbsp;node&nbsp;pairs&nbsp;or&nbsp;as&nbsp;a&nbsp;Python&nbsp;dict&nbsp;mapping&nbsp;nodes&nbsp;to&nbsp;subsets&nbsp;of&nbsp;nodes.</tt></dd></dl>
+list&nbsp;of&nbsp;node&nbsp;pairs&nbsp;or&nbsp;as&nbsp;a&nbsp;Python&nbsp;dict&nbsp;mapping&nbsp;nodes&nbsp;to&nbsp;subsets&nbsp;of&nbsp;nodes.</span></dd></dl>
 
-<dl><dt><a name="Runtime-trunc"><strong>trunc</strong></a>(self, x, f=None, l=None)</dt><dd><tt>Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x.<br>
+<dl><dt><a name="Runtime-trunc"><strong>trunc</strong></a>(self, x, f=None, l=None)</dt><dd><span class="code">Secure&nbsp;truncation&nbsp;of&nbsp;f&nbsp;least&nbsp;significant&nbsp;bits&nbsp;of&nbsp;(elements&nbsp;of)&nbsp;x.<br>
 &nbsp;<br>
-Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f&nbsp;for&nbsp;a&nbsp;in&nbsp;x.</tt></dd></dl>
+Probabilistic&nbsp;rounding&nbsp;of&nbsp;a&nbsp;/&nbsp;2**f&nbsp;for&nbsp;a&nbsp;in&nbsp;x.</span></dd></dl>
 
-<dl><dt><a name="Runtime-unit_vector"><strong>unit_vector</strong></a>(self, a, n)</dt><dd><tt>Length-n&nbsp;unit&nbsp;vector&nbsp;[0]*a&nbsp;+&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1-a)&nbsp;for&nbsp;secret&nbsp;a,&nbsp;assuming&nbsp;0&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;n.<br>
+<dl><dt><a name="Runtime-unit_vector"><strong>unit_vector</strong></a>(self, a, n)</dt><dd><span class="code">Length-n&nbsp;unit&nbsp;vector&nbsp;[0]*a&nbsp;+&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1-a)&nbsp;for&nbsp;secret&nbsp;a,&nbsp;assuming&nbsp;0&nbsp;&lt;=&nbsp;a&nbsp;&lt;&nbsp;n.<br>
 &nbsp;<br>
-NB:&nbsp;If&nbsp;a&nbsp;=&nbsp;n,&nbsp;unit&nbsp;vector&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1)&nbsp;is&nbsp;returned.&nbsp;See&nbsp;mpyc.statistics.</tt></dd></dl>
+NB:&nbsp;If&nbsp;a&nbsp;=&nbsp;n,&nbsp;unit&nbsp;vector&nbsp;[1]&nbsp;+&nbsp;[0]*(n-1)&nbsp;is&nbsp;returned.&nbsp;See&nbsp;mpyc.statistics.</span></dd></dl>
 
-<dl><dt><a name="Runtime-unset_protocol"><strong>unset_protocol</strong></a>(self, peer_pid)</dt></dl>
+<dl><dt><a name="Runtime-unset_protocol"><strong>unset_protocol</strong></a>(self, peer_pid)</dt><dd><span class="code">Deregister&nbsp;connection&nbsp;with&nbsp;given&nbsp;peer.</span></dd></dl>
 
-<dl><dt><a name="Runtime-vector_add"><strong>vector_add</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;addition&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+<dl><dt><a name="Runtime-vector_add"><strong>vector_add</strong></a>(self, x, y)</dt><dd><span class="code">Secure&nbsp;addition&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</span></dd></dl>
 
-<dl><dt><a name="Runtime-vector_sub"><strong>vector_sub</strong></a>(self, x, y)</dt><dd><tt>Secure&nbsp;subtraction&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</tt></dd></dl>
+<dl><dt><a name="Runtime-vector_sub"><strong>vector_sub</strong></a>(self, x, y)</dt><dd><span class="code">Secure&nbsp;subtraction&nbsp;of&nbsp;vectors&nbsp;x&nbsp;and&nbsp;y.</span></dd></dl>
 
-<dl><dt><a name="Runtime-xor"><strong>xor</strong></a>(self, a, b)</dt><dd><tt>Secure&nbsp;bitwise&nbsp;xor&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Runtime-xor"><strong>xor</strong></a>(self, a, b)</dt><dd><span class="code">Secure&nbsp;bitwise&nbsp;xor&nbsp;of&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="Runtime-SecClassGroup"><strong>SecClassGroup</strong></a>(Delta=None, l=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecClassGroup">SecClassGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(ClassGroup(...)),<br>
+<dl><dt><a name="Runtime-SecClassGroup"><strong>SecClassGroup</strong></a>(Delta=None, l=None)<span class="grey"><span class="heading-text"> from <a href="mpyc.secgroups.html#_toSecGrpFunc.<locals>">mpyc.secgroups._toSecGrpFunc.<locals></a></span></span></dt><dd><span class="code">Call&nbsp;<a href="#Runtime-SecClassGroup">SecClassGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(ClassGroup(...)),<br>
 returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;ClassGroup&nbsp;from&nbsp;mpyc.fingroups.<br>
 &nbsp;<br>
 ClassGroup(Delta=None,&nbsp;l=None):<br>
@@ -727,9 +873,9 @@ The&nbsp;following&nbsp;conditions&nbsp;are&nbsp;imposed&nbsp;on&nbsp;discrimina
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Delta&nbsp;=&nbsp;1&nbsp;(mod&nbsp;4),&nbsp;preferably&nbsp;Delta&nbsp;=&nbsp;1&nbsp;(mod&nbsp;8)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;-Delta&nbsp;is&nbsp;prime<br>
 &nbsp;<br>
-This&nbsp;implies&nbsp;that&nbsp;Delta&nbsp;is&nbsp;a&nbsp;fundamental&nbsp;discriminant.</tt></dd></dl>
+This&nbsp;implies&nbsp;that&nbsp;Delta&nbsp;is&nbsp;a&nbsp;fundamental&nbsp;discriminant.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecEllipticCurve"><strong>SecEllipticCurve</strong></a>(curvename='Ed25519', coordinates=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecEllipticCurve">SecEllipticCurve</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(EllipticCurve(...)),<br>
+<dl><dt><a name="Runtime-SecEllipticCurve"><strong>SecEllipticCurve</strong></a>(curvename='Ed25519', coordinates=None)<span class="grey"><span class="heading-text"> from <a href="mpyc.secgroups.html#_toSecGrpFunc.<locals>">mpyc.secgroups._toSecGrpFunc.<locals></a></span></span></dt><dd><span class="code">Call&nbsp;<a href="#Runtime-SecEllipticCurve">SecEllipticCurve</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(EllipticCurve(...)),<br>
 returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;EllipticCurve&nbsp;from&nbsp;mpyc.fingroups.<br>
 &nbsp;<br>
 EllipticCurve(curvename='Ed25519',&nbsp;coordinates=None):<br>
@@ -747,32 +893,66 @@ The&nbsp;following&nbsp;Edwards&nbsp;curves&nbsp;and&nbsp;Weierstrass&nbsp;curve
 &nbsp;<br>
 These&nbsp;curves&nbsp;can&nbsp;be&nbsp;used&nbsp;with&nbsp;'affine'&nbsp;(default)&nbsp;and&nbsp;'projective'&nbsp;coordinates.<br>
 The&nbsp;Edwards&nbsp;curves&nbsp;can&nbsp;also&nbsp;be&nbsp;used&nbsp;with&nbsp;'extended'&nbsp;coordinates,&nbsp;and&nbsp;the<br>
-Weierstrass&nbsp;curves&nbsp;with&nbsp;'jacobian'&nbsp;coordinates.</tt></dd></dl>
+Weierstrass&nbsp;curves&nbsp;with&nbsp;'jacobian'&nbsp;coordinates.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecFld"><strong>SecFld</strong></a>(order=None, modulus=None, char=None, ext_deg=None, min_order=None, signed=False)</dt><dd><tt>Secure&nbsp;finite&nbsp;field&nbsp;of&nbsp;order&nbsp;q&nbsp;=&nbsp;p**d.<br>
+<dl><dt><a name="Runtime-SecFld"><strong>SecFld</strong></a>(
+    order=None,
+    modulus=None,
+    char=None,
+    ext_deg=None,
+    min_order=None,
+    signed=False
+)<span class="grey"><span class="heading-text"> from <a href="mpyc.sectypes.html">mpyc.sectypes</a></span></span></dt><dd><span class="code">Secure&nbsp;finite&nbsp;field&nbsp;of&nbsp;order&nbsp;q&nbsp;=&nbsp;p**d.<br>
 &nbsp;<br>
 Order&nbsp;q&nbsp;&gt;=&nbsp;min_order.<br>
 Field&nbsp;is&nbsp;prime&nbsp;(d&nbsp;=&nbsp;1)&nbsp;by&nbsp;default&nbsp;and&nbsp;if&nbsp;modulus&nbsp;is&nbsp;prime.<br>
 Extension&nbsp;degree&nbsp;d&nbsp;&gt;&nbsp;1&nbsp;if&nbsp;order&nbsp;is&nbsp;a&nbsp;prime&nbsp;power&nbsp;p**d&nbsp;with&nbsp;d&nbsp;&gt;&nbsp;1,<br>
 if&nbsp;modulus&nbsp;is&nbsp;a&nbsp;polynomial&nbsp;or&nbsp;a&nbsp;string&nbsp;or&nbsp;an&nbsp;integer&nbsp;&gt;&nbsp;char,<br>
-or&nbsp;if&nbsp;ext_deg&nbsp;is&nbsp;an&nbsp;integer&nbsp;&gt;&nbsp;1,&nbsp;or&nbsp;if&nbsp;min_order&nbsp;&gt;&nbsp;char.</tt></dd></dl>
+or&nbsp;if&nbsp;ext_deg&nbsp;is&nbsp;an&nbsp;integer&nbsp;&gt;&nbsp;1,&nbsp;or&nbsp;if&nbsp;min_order&nbsp;&gt;&nbsp;char.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecFlt"><strong>SecFlt</strong></a>(l=None, s=None, e=None)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;floating-point&nbsp;number&nbsp;with&nbsp;s-bit&nbsp;significand&nbsp;and&nbsp;e-bit&nbsp;exponent,&nbsp;where&nbsp;l=s+e.<br>
+<dl><dt><a name="Runtime-SecFlt"><strong>SecFlt</strong></a>(l=None, s=None, e=None)<span class="grey"><span class="heading-text"> from <a href="mpyc.sectypes.html">mpyc.sectypes</a></span></span></dt><dd><span class="code">Secure&nbsp;l-bit&nbsp;floating-point&nbsp;number&nbsp;with&nbsp;s-bit&nbsp;significand&nbsp;and&nbsp;e-bit&nbsp;exponent,&nbsp;where&nbsp;l=s+e.<br>
 &nbsp;<br>
 The&nbsp;significand&nbsp;is&nbsp;an&nbsp;(s+1)-bit&nbsp;secure&nbsp;(signed)&nbsp;fixed-point&nbsp;number.&nbsp;The&nbsp;absolute&nbsp;value<br>
 of&nbsp;a&nbsp;nonzero&nbsp;significand&nbsp;is&nbsp;normalized&nbsp;between&nbsp;0.5&nbsp;and&nbsp;1.0.&nbsp;Here,&nbsp;both&nbsp;0.5&nbsp;and&nbsp;1.0&nbsp;are<br>
 included&nbsp;and&nbsp;therefore&nbsp;one&nbsp;extra&nbsp;bit&nbsp;is&nbsp;used.<br>
-The&nbsp;exponent&nbsp;is&nbsp;an&nbsp;e-bit&nbsp;secure&nbsp;(signed)&nbsp;integer.</tt></dd></dl>
+The&nbsp;exponent&nbsp;is&nbsp;an&nbsp;e-bit&nbsp;secure&nbsp;(signed)&nbsp;integer.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecFxp"><strong>SecFxp</strong></a>(l=None, f=None, p=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;fixed-point&nbsp;numbers&nbsp;with&nbsp;f-bit&nbsp;fractional&nbsp;part.<br>
+<dl><dt><a name="Runtime-SecFxp"><strong>SecFxp</strong></a>(l=None, f=None, p=None, n=2)<span class="grey"><span class="heading-text"> from <a href="mpyc.sectypes.html">mpyc.sectypes</a></span></span></dt><dd><span class="code">Secure&nbsp;l-bit&nbsp;fixed-point&nbsp;numbers&nbsp;with&nbsp;f-bit&nbsp;fractional&nbsp;part.<br>
 &nbsp;<br>
-NB:&nbsp;if&nbsp;dividing&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;make&nbsp;sure&nbsp;that&nbsp;l&nbsp;=~&nbsp;2f.</tt></dd></dl>
+NB:&nbsp;if&nbsp;dividing&nbsp;secure&nbsp;fixed-point&nbsp;numbers,&nbsp;make&nbsp;sure&nbsp;that&nbsp;l&nbsp;=~&nbsp;2f.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecGrp"><strong>SecGrp</strong></a>(group)</dt><dd><tt>Secure&nbsp;version&nbsp;of&nbsp;given&nbsp;finite&nbsp;group.</tt></dd></dl>
+<dl><dt><a name="Runtime-SecGrp"><strong>SecGrp</strong></a>(group)</dt><dd><span class="code">Secure&nbsp;version&nbsp;of&nbsp;given&nbsp;finite&nbsp;group.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecInt"><strong>SecInt</strong></a>(l=None, p=None, n=2)</dt><dd><tt>Secure&nbsp;l-bit&nbsp;integers.</tt></dd></dl>
+<dl><dt><a name="Runtime-SecHyperellipticCurve"><strong>SecHyperellipticCurve</strong></a>(
+    curvename=None,
+    coordinates=None,
+    p=None,
+    l=None,
+    genus=None
+)<span class="grey"><span class="heading-text"> from <a href="mpyc.secgroups.html#_toSecGrpFunc.<locals>">mpyc.secgroups._toSecGrpFunc.<locals></a></span></span></dt><dd><span class="code">Call&nbsp;<a href="#Runtime-SecHyperellipticCurve">SecHyperellipticCurve</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(HyperellipticCurve(...)),<br>
+returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;HyperellipticCurve&nbsp;from&nbsp;mpyc.fingroups.<br>
+&nbsp;<br>
+HyperellipticCurve(curvename=None,&nbsp;coordinates=None,&nbsp;p=None,&nbsp;l=None,&nbsp;genus=None):<br>
+&nbsp;<br>
+Create&nbsp;type&nbsp;for&nbsp;hyperelliptic&nbsp;curve&nbsp;group&nbsp;with&nbsp;given&nbsp;parameters.<br>
+&nbsp;<br>
+With&nbsp;curvename='kummer1271'&nbsp;the&nbsp;genus-2&nbsp;curve&nbsp;due&nbsp;to&nbsp;Gaudry&nbsp;and&nbsp;Schost&nbsp;is&nbsp;obtained,<br>
+which&nbsp;is&nbsp;defined&nbsp;modulo&nbsp;p=2^127-1,&nbsp;the&nbsp;twelfth&nbsp;Mersenne&nbsp;prime.<br>
+&nbsp;<br>
+By&nbsp;default,&nbsp;curvename='DGS',&nbsp;which&nbsp;stands&nbsp;for&nbsp;Dobson,&nbsp;Galbraith,&nbsp;and&nbsp;Smith,&nbsp;who<br>
+specified&nbsp;a&nbsp;way&nbsp;to&nbsp;generate&nbsp;random&nbsp;Jacobians&nbsp;together&nbsp;with&nbsp;a&nbsp;...<br>
+&nbsp;<br>
+Alternatively,&nbsp;given&nbsp;p&nbsp;or&nbsp;its&nbsp;bit&nbsp;length&nbsp;l&nbsp;as&nbsp;modulus&nbsp;for&nbsp;the&nbsp;underlying&nbsp;prime&nbsp;field,<br>
+a&nbsp;random&nbsp;curve&nbsp;of&nbsp;the&nbsp;specified&nbsp;genus&nbsp;(default&nbsp;3)&nbsp;will&nbsp;be&nbsp;generated,&nbsp;using&nbsp;the&nbsp;method<br>
+of&nbsp;Dobson,&nbsp;Galbraith&nbsp;and&nbsp;Smith&nbsp;(Algorithm&nbsp;4&nbsp;from&nbsp;<a href="https://eprint.iacr.org/2020/196">https://eprint.iacr.org/2020/196</a>).<br>
+The&nbsp;randomness&nbsp;is&nbsp;seeded&nbsp;with&nbsp;the&nbsp;prime&nbsp;number&nbsp;p.<br>
+&nbsp;<br>
+The&nbsp;coordinates&nbsp;used&nbsp;with&nbsp;these&nbsp;curves&nbsp;are&nbsp;'affine',&nbsp;by&nbsp;default.<br>
+Currently,&nbsp;the&nbsp;only&nbsp;alternative&nbsp;coordinates&nbsp;are&nbsp;the&nbsp;Costello--Lauter&nbsp;'extended'&nbsp;coordinates.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecQuadraticResidues"><strong>SecQuadraticResidues</strong></a>(p=None, l=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecQuadraticResidues">SecQuadraticResidues</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(QuadraticResidues(...)),<br>
+<dl><dt><a name="Runtime-SecInt"><strong>SecInt</strong></a>(l=None, p=None, n=2)<span class="grey"><span class="heading-text"> from <a href="mpyc.sectypes.html">mpyc.sectypes</a></span></span></dt><dd><span class="code">Secure&nbsp;l-bit&nbsp;integers.</span></dd></dl>
+
+<dl><dt><a name="Runtime-SecQuadraticResidues"><strong>SecQuadraticResidues</strong></a>(p=None, l=None)<span class="grey"><span class="heading-text"> from <a href="mpyc.secgroups.html#_toSecGrpFunc.<locals>">mpyc.secgroups._toSecGrpFunc.<locals></a></span></span></dt><dd><span class="code">Call&nbsp;<a href="#Runtime-SecQuadraticResidues">SecQuadraticResidues</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(QuadraticResidues(...)),<br>
 returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;QuadraticResidues&nbsp;from&nbsp;mpyc.fingroups.<br>
 &nbsp;<br>
 QuadraticResidues(p=None,&nbsp;l=None):<br>
@@ -781,9 +961,9 @@ Create&nbsp;type&nbsp;for&nbsp;quadratic&nbsp;residues&nbsp;group&nbsp;given&nbs
 &nbsp;<br>
 The&nbsp;group&nbsp;of&nbsp;quadratic&nbsp;residues&nbsp;modulo&nbsp;p&nbsp;is&nbsp;of&nbsp;order&nbsp;n=(p-1)/2.<br>
 Given&nbsp;bit&nbsp;length&nbsp;l&gt;2,&nbsp;p&nbsp;will&nbsp;be&nbsp;chosen&nbsp;such&nbsp;that&nbsp;n&nbsp;is&nbsp;also&nbsp;an&nbsp;odd&nbsp;prime.<br>
-If&nbsp;l=2,&nbsp;the&nbsp;only&nbsp;possibility&nbsp;is&nbsp;p=3,&nbsp;hence&nbsp;n=1.</tt></dd></dl>
+If&nbsp;l=2,&nbsp;the&nbsp;only&nbsp;possibility&nbsp;is&nbsp;p=3,&nbsp;hence&nbsp;n=1.</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecSchnorrGroup"><strong>SecSchnorrGroup</strong></a>(p=None, q=None, g=None, l=None, n=None)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecSchnorrGroup">SecSchnorrGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(SchnorrGroup(...)),<br>
+<dl><dt><a name="Runtime-SecSchnorrGroup"><strong>SecSchnorrGroup</strong></a>(p=None, q=None, g=None, l=None, n=None)<span class="grey"><span class="heading-text"> from <a href="mpyc.secgroups.html#_toSecGrpFunc.<locals>">mpyc.secgroups._toSecGrpFunc.<locals></a></span></span></dt><dd><span class="code">Call&nbsp;<a href="#Runtime-SecSchnorrGroup">SecSchnorrGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(SchnorrGroup(...)),<br>
 returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;SchnorrGroup&nbsp;from&nbsp;mpyc.fingroups.<br>
 &nbsp;<br>
 SchnorrGroup(p=None,&nbsp;q=None,&nbsp;g=None,&nbsp;l=None,&nbsp;n=None):<br>
@@ -793,54 +973,54 @@ Create&nbsp;type&nbsp;for&nbsp;Schnorr&nbsp;group&nbsp;of&nbsp;odd&nbsp;prime&nb
 If&nbsp;q&nbsp;is&nbsp;not&nbsp;given,&nbsp;q&nbsp;will&nbsp;be&nbsp;the&nbsp;largest&nbsp;n-bit&nbsp;prime,&nbsp;n&gt;=2.<br>
 If&nbsp;p&nbsp;is&nbsp;not&nbsp;given,&nbsp;p&nbsp;will&nbsp;be&nbsp;the&nbsp;least&nbsp;l-bit&nbsp;prime,&nbsp;l&gt;n,&nbsp;such&nbsp;that&nbsp;q&nbsp;divides&nbsp;p-1.<br>
 &nbsp;<br>
-If&nbsp;l&nbsp;and/or&nbsp;n&nbsp;are&nbsp;not&nbsp;given,&nbsp;default&nbsp;bit&nbsp;lengths&nbsp;will&nbsp;be&nbsp;set&nbsp;(2&lt;=n&lt;l).</tt></dd></dl>
+If&nbsp;l&nbsp;and/or&nbsp;n&nbsp;are&nbsp;not&nbsp;given,&nbsp;default&nbsp;bit&nbsp;lengths&nbsp;will&nbsp;be&nbsp;set&nbsp;(2&lt;=n&lt;l).</span></dd></dl>
 
-<dl><dt><a name="Runtime-SecSymmetricGroup"><strong>SecSymmetricGroup</strong></a>(n)</dt><dd><tt>Call&nbsp;<a href="#Runtime-SecSymmetricGroup">SecSymmetricGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(SymmetricGroup(...)),<br>
+<dl><dt><a name="Runtime-SecSymmetricGroup"><strong>SecSymmetricGroup</strong></a>(n)<span class="grey"><span class="heading-text"> from <a href="mpyc.secgroups.html#_toSecGrpFunc.<locals>">mpyc.secgroups._toSecGrpFunc.<locals></a></span></span></dt><dd><span class="code">Call&nbsp;<a href="#Runtime-SecSymmetricGroup">SecSymmetricGroup</a>(...)&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<a href="#Runtime-SecGrp">SecGrp</a>(SymmetricGroup(...)),<br>
 returning&nbsp;secure&nbsp;version&nbsp;of&nbsp;SymmetricGroup&nbsp;from&nbsp;mpyc.fingroups.<br>
 &nbsp;<br>
 SymmetricGroup(n):<br>
 &nbsp;<br>
-Create&nbsp;type&nbsp;for&nbsp;symmetric&nbsp;group&nbsp;of&nbsp;degree&nbsp;n,&nbsp;n&gt;=0.</tt></dd></dl>
+Create&nbsp;type&nbsp;for&nbsp;symmetric&nbsp;group&nbsp;of&nbsp;degree&nbsp;n,&nbsp;n&gt;=0.</span></dd></dl>
 
-<dl><dt><a name="Runtime-coroutine"><strong>coroutine</strong></a> = mpc_coro(func, pc=True)</dt><dd><tt>Decorator&nbsp;turning&nbsp;coroutine&nbsp;func&nbsp;into&nbsp;an&nbsp;MPyC&nbsp;coroutine.<br>
+<dl><dt><a name="Runtime-coroutine"><strong>coroutine</strong></a> = mpc_coro(func, pc=True)<span class="grey"><span class="heading-text"> from <a href="mpyc.asyncoro.html">mpyc.asyncoro</a></span></span></dt><dd><span class="code">Decorator&nbsp;turning&nbsp;coroutine&nbsp;func&nbsp;into&nbsp;an&nbsp;MPyC&nbsp;coroutine.<br>
 &nbsp;<br>
 An&nbsp;MPyC&nbsp;coroutine&nbsp;is&nbsp;evaluated&nbsp;asynchronously,&nbsp;returning&nbsp;empty&nbsp;placeholders.<br>
 The&nbsp;type&nbsp;of&nbsp;the&nbsp;placeholders&nbsp;is&nbsp;defined&nbsp;either&nbsp;by&nbsp;a&nbsp;return&nbsp;annotation<br>
 of&nbsp;the&nbsp;form&nbsp;"-&gt;&nbsp;expression"&nbsp;or&nbsp;by&nbsp;the&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;func.<br>
-Return&nbsp;annotations&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;static&nbsp;types.</tt></dd></dl>
+Return&nbsp;annotations&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;for&nbsp;static&nbsp;types.</span></dd></dl>
 
-<dl><dt><a name="Runtime-returnType"><strong>returnType</strong></a>(*args, wrap=True)</dt><dd><tt>Define&nbsp;return&nbsp;type&nbsp;for&nbsp;MPyC&nbsp;coroutines.<br>
+<dl><dt><a name="Runtime-returnType"><strong>returnType</strong></a>(*args, wrap=True)<span class="grey"><span class="heading-text"> from <a href="mpyc.asyncoro.html">mpyc.asyncoro</a></span></span></dt><dd><span class="code">Define&nbsp;return&nbsp;type&nbsp;for&nbsp;MPyC&nbsp;coroutines.<br>
 &nbsp;<br>
-Used&nbsp;in&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;an&nbsp;MPyC&nbsp;coroutine.</tt></dd></dl>
+Used&nbsp;in&nbsp;first&nbsp;await&nbsp;expression&nbsp;in&nbsp;an&nbsp;MPyC&nbsp;coroutine.</span></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
 </dl>
 <dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
 </dl>
 <dl><dt><strong>threshold</strong></dt>
-<dd><tt>Threshold&nbsp;for&nbsp;MPC.</tt></dd>
+<dd><span class="code">Threshold&nbsp;for&nbsp;MPC.</span></dd>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>SecureArray</strong> = &lt;class 'mpyc.sectypes.SecureArray'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;number&nbsp;arrays.</tt></dl>
+<dl><dt><strong>SecureArray</strong> = &lt;class 'mpyc.sectypes.SecureArray'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;number&nbsp;arrays.</span></dl>
 
-<dl><dt><strong>SecureFiniteField</strong> = &lt;class 'mpyc.sectypes.SecureFiniteField'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;field&nbsp;elements.<br>
+<dl><dt><strong>SecureFiniteField</strong> = &lt;class 'mpyc.sectypes.SecureFiniteField'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;field&nbsp;elements.<br>
 &nbsp;<br>
-NB:&nbsp;bit-oriented&nbsp;operations&nbsp;will&nbsp;be&nbsp;supported&nbsp;for&nbsp;prime&nbsp;fields.</tt></dl>
+NB:&nbsp;bit-oriented&nbsp;operations&nbsp;will&nbsp;be&nbsp;supported&nbsp;for&nbsp;prime&nbsp;fields.</span></dl>
 
-<dl><dt><strong>SecureFiniteFieldArray</strong> = &lt;class 'mpyc.sectypes.SecureFiniteFieldArray'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;arrays&nbsp;of&nbsp;finite&nbsp;field&nbsp;elements.</tt></dl>
+<dl><dt><strong>SecureFiniteFieldArray</strong> = &lt;class 'mpyc.sectypes.SecureFiniteFieldArray'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;arrays&nbsp;of&nbsp;finite&nbsp;field&nbsp;elements.</span></dl>
 
-<dl><dt><strong>SecureFiniteGroup</strong> = &lt;class 'mpyc.secgroups.SecureFiniteGroup'&gt;<dd><tt>Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;groups&nbsp;elements.</tt></dl>
+<dl><dt><strong>SecureFiniteGroup</strong> = &lt;class 'mpyc.secgroups.SecureFiniteGroup'&gt;<dd><span class="code">Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;finite&nbsp;groups&nbsp;elements.</span></dl>
 
-<dl><dt><strong>SecureFixedPoint</strong> = &lt;class 'mpyc.sectypes.SecureFixedPoint'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;fixed-point&nbsp;numbers.</tt></dl>
+<dl><dt><strong>SecureFixedPoint</strong> = &lt;class 'mpyc.sectypes.SecureFixedPoint'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;fixed-point&nbsp;numbers.</span></dl>
 
-<dl><dt><strong>SecureFixedPointArray</strong> = &lt;class 'mpyc.sectypes.SecureFixedPointArray'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;arrays&nbsp;of&nbsp;fixed-point&nbsp;numbers.</tt></dl>
+<dl><dt><strong>SecureFixedPointArray</strong> = &lt;class 'mpyc.sectypes.SecureFixedPointArray'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;arrays&nbsp;of&nbsp;fixed-point&nbsp;numbers.</span></dl>
 
-<dl><dt><strong>SecureFloat</strong> = &lt;class 'mpyc.sectypes.SecureFloat'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;floating-point&nbsp;numbers.<br>
+<dl><dt><strong>SecureFloat</strong> = &lt;class 'mpyc.sectypes.SecureFloat'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;floating-point&nbsp;numbers.<br>
 &nbsp;<br>
 Basic&nbsp;arithmetic&nbsp;+,-,*,/&nbsp;and&nbsp;comparisons&nbsp;&lt;,&lt;=,--,&gt;,&gt;=,!=&nbsp;are&nbsp;supported&nbsp;for&nbsp;secure&nbsp;floats,<br>
 as&nbsp;well&nbsp;as&nbsp;<a href="#Runtime-input">input</a>()/<a href="#Runtime-output">output</a>()&nbsp;and&nbsp;sorting&nbsp;operations&nbsp;like&nbsp;<a href="#Runtime-min">min</a>()/<a href="#Runtime-argmax">argmax</a>()/<a href="#Runtime-sorted">sorted</a>().<br>
@@ -850,23 +1030,23 @@ secure&nbsp;floats.<br>
 Implementation&nbsp;is&nbsp;kept&nbsp;simple,&nbsp;representing&nbsp;a&nbsp;secure&nbsp;float&nbsp;as&nbsp;a&nbsp;pair&nbsp;consisting&nbsp;of<br>
 a&nbsp;secure&nbsp;fixed-point&nbsp;number&nbsp;for&nbsp;the&nbsp;significand&nbsp;and&nbsp;a&nbsp;secure&nbsp;integer&nbsp;for&nbsp;the&nbsp;exponent.<br>
 Note,&nbsp;however,&nbsp;that&nbsp;even&nbsp;basic&nbsp;arithmetic&nbsp;+,-,*,/&nbsp;with&nbsp;secure&nbsp;floats&nbsp;is&nbsp;very<br>
-demanding&nbsp;performance-wise&nbsp;(due&nbsp;to&nbsp;dependence&nbsp;on&nbsp;secure&nbsp;bitwise&nbsp;operations).</tt></dl>
+demanding&nbsp;performance-wise&nbsp;(due&nbsp;to&nbsp;dependence&nbsp;on&nbsp;secure&nbsp;bitwise&nbsp;operations).</span></dl>
 
-<dl><dt><strong>SecureInteger</strong> = &lt;class 'mpyc.sectypes.SecureInteger'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;integers.</tt></dl>
+<dl><dt><strong>SecureInteger</strong> = &lt;class 'mpyc.sectypes.SecureInteger'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;integers.</span></dl>
 
-<dl><dt><strong>SecureIntegerArray</strong> = &lt;class 'mpyc.sectypes.SecureIntegerArray'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;integer&nbsp;arrays.</tt></dl>
+<dl><dt><strong>SecureIntegerArray</strong> = &lt;class 'mpyc.sectypes.SecureIntegerArray'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;integer&nbsp;arrays.</span></dl>
 
-<dl><dt><strong>SecureNumber</strong> = &lt;class 'mpyc.sectypes.SecureNumber'&gt;<dd><tt>Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;numbers.</tt></dl>
+<dl><dt><strong>SecureNumber</strong> = &lt;class 'mpyc.sectypes.SecureNumber'&gt;<dd><span class="code">Base&nbsp;class&nbsp;for&nbsp;secure&nbsp;(secret-shared)&nbsp;numbers.</span></dl>
 
-<dl><dt><strong>SecureObject</strong> = &lt;class 'mpyc.asyncoro.SecureObject'&gt;<dd><tt>A&nbsp;secret-shared&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
+<dl><dt><strong>SecureObject</strong> = &lt;class 'mpyc.asyncoro.SecureObject'&gt;<dd><span class="code">A&nbsp;secret-shared&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>.<br>
 &nbsp;<br>
 An&nbsp;MPC&nbsp;protocol&nbsp;operates&nbsp;on&nbsp;secret-shared&nbsp;objects&nbsp;of&nbsp;type&nbsp;SecureObject.<br>
 The&nbsp;basic&nbsp;Python&nbsp;operators&nbsp;are&nbsp;overloaded&nbsp;by&nbsp;SecureObject&nbsp;classes.<br>
 An&nbsp;expression&nbsp;like&nbsp;a&nbsp;*&nbsp;b&nbsp;will&nbsp;create&nbsp;a&nbsp;new&nbsp;SecureObject,&nbsp;which&nbsp;will<br>
 eventually&nbsp;contain&nbsp;the&nbsp;product&nbsp;of&nbsp;a&nbsp;and&nbsp;b.&nbsp;The&nbsp;product&nbsp;is&nbsp;computed<br>
-asynchronously,&nbsp;using&nbsp;an&nbsp;instance&nbsp;of&nbsp;a&nbsp;specific&nbsp;cryptographic&nbsp;protocol.</tt></dl>
+asynchronously,&nbsp;using&nbsp;an&nbsp;instance&nbsp;of&nbsp;a&nbsp;specific&nbsp;cryptographic&nbsp;protocol.</span></dl>
 
-<dl><dt><strong>random</strong> = &lt;module 'mpyc.random'&gt;<dd><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;several&nbsp;functions&nbsp;for<br>
+<dl><dt><strong>random</strong> = &lt;module 'mpyc.random' from 'C:\\Users\\berry\\Documents\\GitHub\\mympyc\\mpyc\\random.py'&gt;<dd><span class="code">This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;several&nbsp;functions&nbsp;for<br>
 generating&nbsp;pseudorandom&nbsp;numbers,&nbsp;cf.&nbsp;the&nbsp;random&nbsp;module&nbsp;of&nbsp;Python's<br>
 standard&nbsp;library.&nbsp;Each&nbsp;function&nbsp;behaves&nbsp;like&nbsp;its&nbsp;Python&nbsp;counterpart,<br>
 except&nbsp;that&nbsp;a&nbsp;secure&nbsp;type&nbsp;is&nbsp;required&nbsp;as&nbsp;additional&nbsp;(first)&nbsp;argument.<br>
@@ -885,11 +1065,11 @@ relatively&nbsp;simple&nbsp;for&nbsp;now.<br>
 &nbsp;<br>
 NB:&nbsp;runtime._random(sectype,&nbsp;n)&nbsp;cannot&nbsp;be&nbsp;used&nbsp;as&nbsp;an&nbsp;alternative&nbsp;to<br>
 _randbelow(sectype,&nbsp;n)&nbsp;as&nbsp;its&nbsp;output&nbsp;is&nbsp;not&nbsp;uniformly&nbsp;random,&nbsp;except<br>
-when&nbsp;n&nbsp;is&nbsp;equal&nbsp;to&nbsp;the&nbsp;order&nbsp;of&nbsp;sectype's&nbsp;finite&nbsp;field.</tt></dl>
+when&nbsp;n&nbsp;is&nbsp;equal&nbsp;to&nbsp;the&nbsp;order&nbsp;of&nbsp;sectype's&nbsp;finite&nbsp;field.</span></dl>
 
-<dl><dt><strong>seclist</strong> = &lt;class 'mpyc.seclists.seclist'&gt;</dl>
+<dl><dt><strong>seclist</strong> = &lt;class 'mpyc.seclists.seclist'&gt;<dd><span class="code">Secure&nbsp;lists&nbsp;with&nbsp;oblivious&nbsp;access&nbsp;and&nbsp;updates&nbsp;(using&nbsp;secret&nbsp;indices)&nbsp;to&nbsp;secret&nbsp;entries.</span></dl>
 
-<dl><dt><strong>statistics</strong> = &lt;module 'mpyc.statistics'&gt;<dd><tt>This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;common&nbsp;mathematical&nbsp;statistics&nbsp;functions.<br>
+<dl><dt><strong>statistics</strong> = &lt;module 'mpyc.statistics' from 'C:\\Users\\berry\\Documents\\GitHub\\mympyc\\mpyc\\statistics.py'&gt;<dd><span class="code">This&nbsp;module&nbsp;provides&nbsp;secure&nbsp;versions&nbsp;of&nbsp;common&nbsp;mathematical&nbsp;statistics&nbsp;functions.<br>
 The&nbsp;module&nbsp;is&nbsp;modeled&nbsp;after&nbsp;the&nbsp;statistics&nbsp;module&nbsp;in&nbsp;the&nbsp;Python&nbsp;standard&nbsp;library,&nbsp;and<br>
 as&nbsp;such&nbsp;aimed&nbsp;at&nbsp;small&nbsp;scale&nbsp;use&nbsp;("at&nbsp;the&nbsp;level&nbsp;of&nbsp;graphing&nbsp;and&nbsp;scientific&nbsp;calculators").<br>
 &nbsp;<br>
@@ -910,18 +1090,17 @@ current&nbsp;implementations&nbsp;of&nbsp;mode,&nbsp;median,&nbsp;and&nbsp;quant
 a&nbsp;strict&nbsp;but&nbsp;less&nbsp;efficient&nbsp;approach.<br>
 &nbsp;<br>
 If&nbsp;these&nbsp;functions&nbsp;are&nbsp;called&nbsp;with&nbsp;plain&nbsp;data,&nbsp;the&nbsp;call&nbsp;is&nbsp;relayed&nbsp;to&nbsp;the&nbsp;corresponding<br>
-function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</tt></dl>
+function&nbsp;in&nbsp;Python's&nbsp;statistics&nbsp;module.</span></dl>
 
-<dl><dt><strong>version</strong> = '0.10'</dl>
+<dl><dt><strong>version</strong> = '0.11 '</dl>
 
 </td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-generate_configs"><strong>generate_configs</strong></a>(m, addresses)</dt><dd><tt>Generate&nbsp;party&nbsp;configurations.<br>
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-generate_configs"><strong>generate_configs</strong></a>(m, addresses)</dt><dd><span class="code">Generate&nbsp;party&nbsp;configurations.<br>
 &nbsp;<br>
 Generates&nbsp;m-party&nbsp;configurations&nbsp;from&nbsp;the&nbsp;addresses&nbsp;given&nbsp;as<br>
 a&nbsp;list&nbsp;of&nbsp;'(host,&nbsp;port)'&nbsp;pairs,&nbsp;specifying&nbsp;the&nbsp;hostnames&nbsp;and<br>
@@ -929,7 +1108,13 @@ port&nbsp;numbers&nbsp;for&nbsp;each&nbsp;party.<br>
 &nbsp;<br>
 Returns&nbsp;a&nbsp;list&nbsp;of&nbsp;ConfigParser&nbsp;instances,&nbsp;which&nbsp;can&nbsp;be&nbsp;saved<br>
 in&nbsp;m&nbsp;separate&nbsp;INI-files.&nbsp;The&nbsp;party&nbsp;owning&nbsp;an&nbsp;INI-file&nbsp;is<br>
-indicated&nbsp;by&nbsp;not&nbsp;specifying&nbsp;its&nbsp;hostname&nbsp;(host='').</tt></dd></dl>
- <dl><dt><a name="-setup"><strong>setup</strong></a>()</dt><dd><tt>Setup&nbsp;a&nbsp;runtime.</tt></dd></dl>
-</td></tr></table>
+indicated&nbsp;by&nbsp;not&nbsp;specifying&nbsp;its&nbsp;hostname&nbsp;(host='').</span></dd></dl>
+ <dl><dt><a name="-setup"><strong>setup</strong></a>()</dt><dd><span class="code">Setup&nbsp;a&nbsp;runtime.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>mpc</strong> = &lt;mpyc.runtime.Runtime object&gt;</td></tr></table>
 </body></html>

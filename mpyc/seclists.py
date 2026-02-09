@@ -37,6 +37,7 @@ runtime = None
 
 
 class seclist(list):
+    """Secure lists with oblivious access and updates (using secret indices) to secret entries."""
 
     sectype = None
 
@@ -55,7 +56,7 @@ class seclist(list):
                 t -= 1
                 if sectype is None:
                     sectype = type(a)
-                elif sectype != type(a):
+                elif not isinstance(a, sectype):
                     raise TypeError('inconsistent sectypes')
 
         if sectype is None:

@@ -10,10 +10,11 @@ number ranges, also including support for comparison and bitwise operations.
 Secure finite field arithmetic is supported for fields of arbitrary order.
 Secure NumPy arrays over these basic types are available as well.
 
-Basic support for secure floating-point arithmetic is provided. Moreover,
-support for secure finite group operations is built-in for a range of groups,
-particularly for use in threshold cryptography (e.g., Schnorr groups and
-elliptic curves).
+Basic support for secure floating-point arithmetic is provided as well as
+basic support for secure polynomial arithmetic (over prime fields).
+Moreover, support for secure finite group operations is built-in for a range of
+groups, particularly for use in threshold cryptography (e.g., Schnorr groups
+and elliptic curves).
 
 The above operations are all available via Python's operator overloading.
 
@@ -29,7 +30,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.10.9'
+__version__ = '0.11 '
 
 import os
 import sys

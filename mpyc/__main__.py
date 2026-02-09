@@ -27,8 +27,8 @@ Besides setting mpc as a handle for the MPyC runtime, also several secure
 Type secint represents secure integers and types secfxp and secflt represent
 secure fixed-point/floating-point numbers, all of default bit lengths. Types
 secfld127 and secfld256 represent secure prime field GF(127)-elements and
-secure binary field GF(2^8)-elements. Types secsym, secqr, secsg, secec, and
-seccl represent secure finite group elements for five particular groups.
+secure binary field GF(2^8)-elements. Types secsym, secqr, secsg, secec, sechc,
+and seccl represent secure finite group elements for six particular groups.
 Other "popular" types etc. can easily be added here in the future.
 """
 

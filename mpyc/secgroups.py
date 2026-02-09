@@ -390,6 +390,7 @@ class SecureQuadraticResidue(SecureFiniteGroup):
 
     @classmethod
     def decode(cls, M, Z, gap=128):
+        """Decode message from given group elements."""
         return (M.share - Z.share) / gap
 
 
@@ -424,6 +425,7 @@ class SecureSchnorrGroupElement(SecureFiniteGroup):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         g = cls.group.generator
         h = cls.group.identity
         x = [h]
@@ -477,6 +479,7 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
         return cls(c)
 
     def normalize(self):
+        """Convert to unique (affine) representation."""
         cls = type(self)
         group = cls.group
         if issubclass(group, fg.WeierstrassProjective):
@@ -497,6 +500,7 @@ class SecureEllipticCurvePoint(SecureFiniteGroup):
 
     @classmethod
     def decode(cls, M, Z, gap=256):
+        """Decode message from given group elements."""
         return (M.normalize()[0] - Z.normalize()[0]) / gap
 
 
@@ -521,7 +525,7 @@ class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
             value = value.value
         else:
             if not (isinstance(value, (tuple, list)) and len(value) == 2):
-                raise ValueError(f'tuple/list of length 2 required')
+                raise ValueError('tuple/list of length 2 required')
 
         secfld = runtime.SecFld(self.group.field.modulus)
         if value is None:
@@ -619,6 +623,7 @@ class SecureHyperellipticCurveDivisor(SecureFiniteGroup):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         gap = cls.group.gap
         return (M.share[0][0] - Z.share[0][0]) / gap
 
@@ -679,6 +684,7 @@ class SecureHCDivisorCL(SecureFiniteGroup):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         gap = cls.group.gap
         return (M[0] - Z[0]) / (2*gap)
 
@@ -861,6 +867,7 @@ class SecureClassGroupForm(SecureFiniteGroup):
 
     @classmethod
     def decode(cls, M, Z):
+        """Decode message from given group elements."""
         gap = cls.group.gap
         return (M.share[0] - Z.share[0]) / gap
 

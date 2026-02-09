@@ -1,83 +1,85 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mpyc.gmpy</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mpyc.gmpy</title>
+<link rel="stylesheet" type="text/css" href="pydoc.css">
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.gmpy</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/gmpy.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/gmpy.py</a></font></td></tr></table>
-    <p><tt>This&nbsp;module&nbsp;collects&nbsp;all&nbsp;gmpy2&nbsp;functions&nbsp;used&nbsp;by&nbsp;MPyC.<br>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mpyc.html" class="white">mpyc</a>.gmpy</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.11/mpyc/gmpy.py">github.com/lschoe/mpyc/blob/v0.11/mpyc/gmpy.py</a></td></tr></table>
+    <p><span class="code">This&nbsp;module&nbsp;collects&nbsp;all&nbsp;gmpy2&nbsp;functions&nbsp;used&nbsp;by&nbsp;MPyC.<br>
 &nbsp;<br>
 Stubs&nbsp;only&nbsp;using&nbsp;Python&nbsp;built-ins&nbsp;are&nbsp;provided&nbsp;in&nbsp;case&nbsp;the&nbsp;gmpy2&nbsp;package&nbsp;is&nbsp;not&nbsp;available.<br>
-Efficient&nbsp;functions&nbsp;for&nbsp;factoring&nbsp;prime&nbsp;powers&nbsp;and&nbsp;rational&nbsp;reconstruction&nbsp;are&nbsp;also&nbsp;provided.</tt></p>
+Efficient&nbsp;functions&nbsp;for&nbsp;factoring&nbsp;prime&nbsp;powers&nbsp;and&nbsp;rational&nbsp;reconstruction&nbsp;are&nbsp;also&nbsp;provided.</span></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/logging.html">logging</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/math.html">math</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/os.html">os</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="https://docs.python.org/3/library/logging.html">logging</a><br>
+</td><td class="multicolumn"><a href="https://docs.python.org/3/library/math.html">math</a><br>
+</td><td class="multicolumn"><a href="https://docs.python.org/3/library/os.html">os</a><br>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-factor_prime_power"><strong>factor_prime_power</strong></a>(x)</dt><dd><tt>Return&nbsp;p&nbsp;and&nbsp;d&nbsp;for&nbsp;a&nbsp;prime&nbsp;power&nbsp;x&nbsp;=&nbsp;p**d.</tt></dd></dl>
- <dl><dt><a name="-gcdext"><strong>gcdext</strong></a>(...)</dt><dd><tt><a href="#-gcdext">gcdext</a>(a,&nbsp;b)&nbsp;-&nbsp;&gt;&nbsp;tuple<br>
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-factor_prime_power"><strong>factor_prime_power</strong></a>(x)</dt><dd><span class="code">Return&nbsp;p&nbsp;and&nbsp;d&nbsp;for&nbsp;a&nbsp;prime&nbsp;power&nbsp;x&nbsp;=&nbsp;p**d.</span></dd></dl>
+ <dl><dt><a name="-gcdext"><strong>gcdext</strong></a>(...)</dt><dd><span class="code"><a href="#-gcdext">gcdext</a>(a,&nbsp;b,&nbsp;/)&nbsp;-&gt;&nbsp;tuple[mpz,&nbsp;mpz,&nbsp;mpz]<br>
 &nbsp;<br>
-Return&nbsp;a&nbsp;3-element&nbsp;tuple&nbsp;(g,s,t)&nbsp;such&nbsp;that<br>
-&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;==&nbsp;gcd(a,b)&nbsp;and&nbsp;g&nbsp;==&nbsp;a*s&nbsp;+&nbsp;b*t</tt></dd></dl>
- <dl><dt><a name="-invert"><strong>invert</strong></a>(...)</dt><dd><tt><a href="#-invert">invert</a>(x,&nbsp;m)&nbsp;-&gt;&nbsp;mpz<br>
+Return&nbsp;a&nbsp;3-element&nbsp;tuple&nbsp;(g,s,t)&nbsp;such&nbsp;that&nbsp;g&nbsp;==&nbsp;gcd(a,b)<br>
+and&nbsp;g&nbsp;==&nbsp;a*s&nbsp;+&nbsp;b*t.</span></dd></dl>
+ <dl><dt><a name="-invert"><strong>invert</strong></a>(...)</dt><dd><span class="code"><a href="#-invert">invert</a>(x,&nbsp;m,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
-Return&nbsp;y&nbsp;such&nbsp;that&nbsp;x*y&nbsp;==&nbsp;1&nbsp;modulo&nbsp;m.&nbsp;Raises&nbsp;ZeroDivisionError&nbsp;if&nbsp;no<br>
-inverse&nbsp;exists.</tt></dd></dl>
- <dl><dt><a name="-iroot"><strong>iroot</strong></a>(...)</dt><dd><tt><a href="#-iroot">iroot</a>(x,n)&nbsp;-&gt;&nbsp;(number,&nbsp;boolean)<br>
+Return&nbsp;y&nbsp;such&nbsp;that&nbsp;x*y&nbsp;==&nbsp;1&nbsp;modulo&nbsp;m.&nbsp;Raises&nbsp;`ZeroDivisionError`&nbsp;if&nbsp;no<br>
+inverse&nbsp;exists.</span></dd></dl>
+ <dl><dt><a name="-iroot"><strong>iroot</strong></a>(...)</dt><dd><span class="code"><a href="#-iroot">iroot</a>(x,n,/)&nbsp;-&gt;&nbsp;tuple[mpz,&nbsp;bool]<br>
 &nbsp;<br>
-Return&nbsp;the&nbsp;integer&nbsp;n-th&nbsp;root&nbsp;of&nbsp;x&nbsp;and&nbsp;boolean&nbsp;value&nbsp;that&nbsp;is&nbsp;True<br>
-iff&nbsp;the&nbsp;root&nbsp;is&nbsp;exact.&nbsp;x&nbsp;&gt;=&nbsp;0.&nbsp;n&nbsp;&gt;&nbsp;0.</tt></dd></dl>
- <dl><dt><a name="-is_prime"><strong>is_prime</strong></a>(...)</dt><dd><tt><a href="#-is_prime">is_prime</a>(x[,&nbsp;n=25])&nbsp;-&gt;&nbsp;bool<br>
+Return&nbsp;the&nbsp;integer&nbsp;n-th&nbsp;root&nbsp;of&nbsp;x&nbsp;and&nbsp;boolean&nbsp;value&nbsp;that&nbsp;is&nbsp;`True`<br>
+iff&nbsp;the&nbsp;root&nbsp;is&nbsp;exact.&nbsp;x&nbsp;&gt;=&nbsp;0.&nbsp;n&nbsp;&gt;&nbsp;0.</span></dd></dl>
+ <dl><dt><a name="-is_prime"><strong>is_prime</strong></a>(...)</dt><dd><span class="code"><a href="#-is_prime">is_prime</a>(x,&nbsp;n=25,&nbsp;/)&nbsp;-&gt;&nbsp;bool<br>
 &nbsp;<br>
-Return&nbsp;True&nbsp;if&nbsp;x&nbsp;is&nbsp;_probably_&nbsp;prime,&nbsp;else&nbsp;False&nbsp;if&nbsp;x&nbsp;is<br>
+Return&nbsp;`True`&nbsp;if&nbsp;x&nbsp;is&nbsp;*probably*&nbsp;prime,&nbsp;else&nbsp;`False`&nbsp;if&nbsp;x&nbsp;is<br>
 definitely&nbsp;composite.&nbsp;x&nbsp;is&nbsp;checked&nbsp;for&nbsp;small&nbsp;divisors&nbsp;and&nbsp;up<br>
-to&nbsp;n&nbsp;Miller-Rabin&nbsp;tests&nbsp;are&nbsp;performed.</tt></dd></dl>
- <dl><dt><a name="-is_square"><strong>is_square</strong></a>(...)</dt><dd><tt><a href="#-is_square">is_square</a>(x)&nbsp;-&gt;&nbsp;bool<br>
+to&nbsp;n&nbsp;Miller-Rabin&nbsp;tests&nbsp;are&nbsp;performed.</span></dd></dl>
+ <dl><dt><a name="-is_square"><strong>is_square</strong></a>(object, /)</dt><dd><span class="code"><a href="#-is_square">is_square</a>(x,&nbsp;/)&nbsp;-&gt;&nbsp;bool<br>
 &nbsp;<br>
-Returns&nbsp;True&nbsp;if&nbsp;x&nbsp;is&nbsp;a&nbsp;perfect&nbsp;square,&nbsp;else&nbsp;return&nbsp;False.</tt></dd></dl>
- <dl><dt><a name="-isqrt"><strong>isqrt</strong></a>(...)</dt><dd><tt><a href="#-isqrt">isqrt</a>(x)&nbsp;-&gt;&nbsp;mpz<br>
+Returns&nbsp;`True`&nbsp;if&nbsp;x&nbsp;is&nbsp;a&nbsp;perfect&nbsp;square,&nbsp;else&nbsp;return&nbsp;`False`.</span></dd></dl>
+ <dl><dt><a name="-isqrt"><strong>isqrt</strong></a>(object, /)</dt><dd><span class="code"><a href="#-isqrt">isqrt</a>(x,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
-Return&nbsp;the&nbsp;integer&nbsp;square&nbsp;root&nbsp;of&nbsp;an&nbsp;integer&nbsp;x.&nbsp;x&nbsp;&gt;=&nbsp;0.</tt></dd></dl>
- <dl><dt><a name="-jacobi"><strong>jacobi</strong></a>(...)</dt><dd><tt><a href="#-jacobi">jacobi</a>(x,&nbsp;y)&nbsp;-&gt;&nbsp;mpz<br>
+Return&nbsp;the&nbsp;integer&nbsp;square&nbsp;root&nbsp;of&nbsp;a&nbsp;non-negative&nbsp;integer&nbsp;x.</span></dd></dl>
+ <dl><dt><a name="-jacobi"><strong>jacobi</strong></a>(...)</dt><dd><span class="code"><a href="#-jacobi">jacobi</a>(x,&nbsp;y,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
-Return&nbsp;the&nbsp;Jacobi&nbsp;symbol&nbsp;(x|y).&nbsp;y&nbsp;must&nbsp;be&nbsp;odd&nbsp;and&nbsp;&gt;0.</tt></dd></dl>
- <dl><dt><a name="-kronecker"><strong>kronecker</strong></a>(...)</dt><dd><tt><a href="#-kronecker">kronecker</a>(x,&nbsp;y)&nbsp;-&gt;&nbsp;mpz<br>
+Return&nbsp;the&nbsp;Jacobi&nbsp;symbol&nbsp;(x|y).&nbsp;y&nbsp;must&nbsp;be&nbsp;odd&nbsp;and&nbsp;&gt;0.</span></dd></dl>
+ <dl><dt><a name="-kronecker"><strong>kronecker</strong></a>(...)</dt><dd><span class="code"><a href="#-kronecker">kronecker</a>(x,&nbsp;y,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
-Return&nbsp;the&nbsp;Kronecker-Jacobi&nbsp;symbol&nbsp;(x|y).</tt></dd></dl>
- <dl><dt><a name="-legendre"><strong>legendre</strong></a>(...)</dt><dd><tt><a href="#-legendre">legendre</a>(x,&nbsp;y)&nbsp;-&gt;&nbsp;mpz<br>
+Return&nbsp;the&nbsp;Kronecker-Jacobi&nbsp;symbol&nbsp;(x|y).</span></dd></dl>
+ <dl><dt><a name="-legendre"><strong>legendre</strong></a>(...)</dt><dd><span class="code"><a href="#-legendre">legendre</a>(x,&nbsp;y,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
-Return&nbsp;the&nbsp;Legendre&nbsp;symbol&nbsp;(x|y).&nbsp;y&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;an&nbsp;odd&nbsp;prime.</tt></dd></dl>
- <dl><dt><a name="-next_prime"><strong>next_prime</strong></a>(...)</dt><dd><tt><a href="#-next_prime">next_prime</a>(x)&nbsp;-&gt;&nbsp;mpz<br>
+Return&nbsp;the&nbsp;Legendre&nbsp;symbol&nbsp;(x|y).&nbsp;y&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;an&nbsp;odd&nbsp;prime.</span></dd></dl>
+ <dl><dt><a name="-next_prime"><strong>next_prime</strong></a>(object, /)</dt><dd><span class="code"><a href="#-next_prime">next_prime</a>(x,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
-Return&nbsp;the&nbsp;next&nbsp;_probable_&nbsp;prime&nbsp;number&nbsp;&gt;&nbsp;x.</tt></dd></dl>
- <dl><dt><a name="-powmod"><strong>powmod</strong></a>(...)</dt><dd><tt><a href="#-powmod">powmod</a>(x,&nbsp;y,&nbsp;m)&nbsp;-&gt;&nbsp;mpz<br>
+Return&nbsp;the&nbsp;next&nbsp;*probable*&nbsp;prime&nbsp;number&nbsp;&gt;&nbsp;x.</span></dd></dl>
+ <dl><dt><a name="-powmod"><strong>powmod</strong></a>(...)</dt><dd><span class="code"><a href="#-powmod">powmod</a>(x,&nbsp;y,&nbsp;m,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
 &nbsp;<br>
 Return&nbsp;(x**y)&nbsp;mod&nbsp;m.&nbsp;Same&nbsp;as&nbsp;the&nbsp;three&nbsp;argument&nbsp;version&nbsp;of&nbsp;Python's<br>
-built-in&nbsp;pow(),&nbsp;but&nbsp;converts&nbsp;all&nbsp;three&nbsp;arguments&nbsp;to&nbsp;mpz.</tt></dd></dl>
- <dl><dt><a name="-prev_prime"><strong>prev_prime</strong></a>(x)</dt><dd><tt>Return&nbsp;the&nbsp;greatest&nbsp;probable&nbsp;prime&nbsp;number&nbsp;&lt;&nbsp;x,&nbsp;if&nbsp;any.</tt></dd></dl>
- <dl><dt><a name="-ratrec"><strong>ratrec</strong></a>(x, y, N=None, D=None)</dt><dd><tt>Return&nbsp;rational&nbsp;reconstruction&nbsp;(n,&nbsp;d)&nbsp;of&nbsp;x&nbsp;modulo&nbsp;y.<br>
+built-in&nbsp;`pow`,&nbsp;but&nbsp;converts&nbsp;all&nbsp;three&nbsp;arguments&nbsp;to&nbsp;`mpz`.</span></dd></dl>
+ <dl><dt><a name="-prev_prime"><strong>prev_prime</strong></a>(object, /)</dt><dd><span class="code"><a href="#-prev_prime">prev_prime</a>(x,&nbsp;/)&nbsp;-&gt;&nbsp;mpz<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;previous&nbsp;*probable*&nbsp;prime&nbsp;number&nbsp;&lt;&nbsp;x.<br>
+Only&nbsp;present&nbsp;when&nbsp;compiled&nbsp;with&nbsp;GMP&nbsp;6.3.0&nbsp;or&nbsp;later.</span></dd></dl>
+ <dl><dt><a name="-ratrec"><strong>ratrec</strong></a>(x, y, N=None, D=None)</dt><dd><span class="code">Return&nbsp;rational&nbsp;reconstruction&nbsp;(n,&nbsp;d)&nbsp;of&nbsp;x&nbsp;modulo&nbsp;y.<br>
 That&nbsp;is,&nbsp;&nbsp;n/d&nbsp;=&nbsp;x&nbsp;(mod&nbsp;y)&nbsp;with&nbsp;-N&nbsp;&lt;=&nbsp;n&nbsp;&lt;=&nbsp;N&nbsp;and&nbsp;0&nbsp;&lt;&nbsp;d&nbsp;&lt;=&nbsp;D,<br>
 provided&nbsp;2*N*D&nbsp;&lt;&nbsp;y.<br>
 &nbsp;<br>
-Default&nbsp;N=D=None&nbsp;will&nbsp;set&nbsp;both&nbsp;N&nbsp;and&nbsp;D&nbsp;to&nbsp;sqrt(y/2)&nbsp;approximately.</tt></dd></dl>
- <dl><dt><a name="-version"><strong>version</strong></a>(...)</dt><dd><tt><a href="#-version">version</a>()&nbsp;-&gt;&nbsp;string<br>
+Default&nbsp;N=D=None&nbsp;will&nbsp;set&nbsp;both&nbsp;N&nbsp;and&nbsp;D&nbsp;to&nbsp;sqrt(y/2)&nbsp;approximately.</span></dd></dl>
+ <dl><dt><a name="-version"><strong>version</strong></a>()</dt><dd><span class="code"><a href="#-version">version</a>()&nbsp;-&gt;&nbsp;str<br>
 &nbsp;<br>
-Return&nbsp;string&nbsp;giving&nbsp;current&nbsp;GMPY2&nbsp;version.</tt></dd></dl>
+Return&nbsp;string&nbsp;giving&nbsp;current&nbsp;GMPY2&nbsp;version.</span></dd></dl>
 </td></tr></table>
 </body></html>

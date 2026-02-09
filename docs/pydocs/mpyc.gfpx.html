@@ -1,15 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mpyc.gfpx</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mpyc.gfpx</title>
+<link rel="stylesheet" type="text/css" href="pydoc.css">
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.gfpx</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/gfpx.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/gfpx.py</a></font></td></tr></table>
-    <p><tt>This&nbsp;module&nbsp;supports&nbsp;arithmetic&nbsp;with&nbsp;polynomials&nbsp;over&nbsp;GF(p).<br>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mpyc.html" class="white">mpyc</a>.gfpx</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.11/mpyc/gfpx.py">github.com/lschoe/mpyc/blob/v0.11/mpyc/gfpx.py</a></td></tr></table>
+    <p><span class="code">This&nbsp;module&nbsp;supports&nbsp;arithmetic&nbsp;with&nbsp;polynomials&nbsp;over&nbsp;GF(p).<br>
 &nbsp;<br>
 Polynomials&nbsp;over&nbsp;GF(p)&nbsp;are&nbsp;represented&nbsp;as&nbsp;coefficient&nbsp;lists.<br>
 The&nbsp;polynomial&nbsp;a_0&nbsp;+&nbsp;a_1&nbsp;X&nbsp;+&nbsp;...&nbsp;+&nbsp;a_n&nbsp;X^n&nbsp;corresponds<br>
@@ -21,7 +22,7 @@ The&nbsp;polynomial&nbsp;a_0&nbsp;+&nbsp;a_1&nbsp;X&nbsp;+&nbsp;...&nbsp;+&nbsp;
 to&nbsp;the&nbsp;integer&nbsp;a_0&nbsp;+&nbsp;a_1&nbsp;2&nbsp;+&nbsp;...&nbsp;+&nbsp;a_n&nbsp;2^n.<br>
 Leading&nbsp;coefficient&nbsp;a_n&nbsp;is&nbsp;1,&nbsp;using&nbsp;0&nbsp;for&nbsp;the&nbsp;zero&nbsp;polynomial.<br>
 &nbsp;<br>
-The&nbsp;operators&nbsp;+,-,*,&lt;&lt;,//,%,&nbsp;and&nbsp;function&nbsp;divmod&nbsp;are&nbsp;overloaded.<br>
+The&nbsp;operators&nbsp;+,-,*,&lt;&lt;,&gt;&gt;,**,//,%,&nbsp;and&nbsp;function&nbsp;divmod&nbsp;are&nbsp;overloaded.<br>
 The&nbsp;operators&nbsp;&lt;,&lt;=,&gt;,&gt;=,==,!=&nbsp;are&nbsp;overloaded&nbsp;as&nbsp;well,&nbsp;using&nbsp;the<br>
 lexicographic&nbsp;order&nbsp;for&nbsp;polynomials&nbsp;(zero&nbsp;polynomial&nbsp;is&nbsp;the&nbsp;smallest).<br>
 Plus&nbsp;some&nbsp;SageMath-style&nbsp;functionality,&nbsp;for&nbsp;instance,&nbsp;to&nbsp;access<br>
@@ -29,63 +30,61 @@ coefficients&nbsp;using&nbsp;Python&nbsp;indexing&nbsp;and&nbsp;to&nbsp;reverse&
 &nbsp;<br>
 GCD,&nbsp;extended&nbsp;GCD,&nbsp;modular&nbsp;inverse&nbsp;and&nbsp;powers&nbsp;are&nbsp;all&nbsp;supported.<br>
 A&nbsp;simple&nbsp;irreducibility&nbsp;test&nbsp;is&nbsp;provided&nbsp;as&nbsp;well&nbsp;as&nbsp;a&nbsp;basic<br>
-routine&nbsp;to&nbsp;find&nbsp;the&nbsp;next&nbsp;largest&nbsp;irreducible&nbsp;polynomial.</tt></p>
+routine&nbsp;to&nbsp;find&nbsp;the&nbsp;next&nbsp;largest&nbsp;irreducible&nbsp;polynomial.</span></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/functools.html">functools</a><br>
-</td><td width="25%" valign=top><a href="mpyc.gmpy.html">mpyc.gmpy</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ee77aa">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="https://docs.python.org/3/library/functools.html">functools</a><br>
+</td><td class="multicolumn"><a href="mpyc.gmpy.html">mpyc.gmpy</a><br>
+</td><td class="multicolumn"><a href="https://docs.python.org/3/library/math.html">math</a><br>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
     
-<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>
-</font></dt><dd>
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>
+</dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mpyc.gfpx.html#Polynomial">Polynomial</a>
-</font></dt><dd>
+<dt class="heading-text"><a href="mpyc.gfpx.html#Polynomial">Polynomial</a>
+</dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mpyc.gfpx.html#BinaryPolynomial">BinaryPolynomial</a>
-</font></dt></dl>
+<dt class="heading-text"><a href="mpyc.gfpx.html#BinaryPolynomial">BinaryPolynomial</a>
+</dt></dl>
 </dd>
 </dl>
 </dd>
 </dl>
  <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="BinaryPolynomial">class <strong>BinaryPolynomial</strong></a>(<a href="mpyc.gfpx.html#Polynomial">Polynomial</a>)</font></td></tr>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="BinaryPolynomial">class <strong>BinaryPolynomial</strong></a>(<a href="mpyc.gfpx.html#Polynomial">Polynomial</a>)</td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#BinaryPolynomial">BinaryPolynomial</a>(value=0,&nbsp;check=True)<br>
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#BinaryPolynomial">BinaryPolynomial</a>(value=0,&nbsp;check=True)<br>
 &nbsp;<br>
-Polynomials&nbsp;over&nbsp;GF(2)&nbsp;represented&nbsp;as&nbsp;nonnegative&nbsp;integers.<br>&nbsp;</tt></td></tr>
+Polynomials&nbsp;over&nbsp;GF(2)&nbsp;represented&nbsp;as&nbsp;nonnegative&nbsp;integers.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"><dl><dt>Method resolution order:</dt>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.gfpx.html#BinaryPolynomial">BinaryPolynomial</a></dd>
 <dd><a href="mpyc.gfpx.html#Polynomial">Polynomial</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="BinaryPolynomial-__call__"><strong>__call__</strong></a>(self, x)</dt><dd><tt>Evaluate&nbsp;polynomial&nbsp;at&nbsp;given&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__call__"><strong>__call__</strong></a>(self, x)</dt><dd><span class="code">Evaluate&nbsp;polynomial&nbsp;at&nbsp;given&nbsp;x.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;polynomials&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><span class="code">Make&nbsp;polynomials&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__int__"><strong>__int__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="BinaryPolynomial-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-to_bytes"><strong>to_bytes</strong></a>(self, length, byteorder)</dt><dd><tt>Return&nbsp;a&nbsp;bytes&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;representing&nbsp;a&nbsp;polynomial.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-to_bytes"><strong>to_bytes</strong></a>(self, length, byteorder)</dt><dd><span class="code">Return&nbsp;a&nbsp;bytes&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;representing&nbsp;a&nbsp;polynomial.</span></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -95,35 +94,35 @@ Data and other attributes defined here:<br>
 Methods inherited from <a href="mpyc.gfpx.html#Polynomial">Polynomial</a>:<br>
 <dl><dt><a name="BinaryPolynomial-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Truth&nbsp;value&nbsp;testing.<br>
+<dl><dt><a name="BinaryPolynomial-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><span class="code">Truth&nbsp;value&nbsp;testing.<br>
 &nbsp;<br>
-Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True&nbsp;otherwise.</tt></dd></dl>
+Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True&nbsp;otherwise.</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__divmod__"><strong>__divmod__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Equality&nbsp;test.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><span class="code">Equality&nbsp;test.</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__floordiv__"><strong>__floordiv__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-__ge__"><strong>__ge__</strong></a>(self, other)</dt><dd><tt>Greater-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__ge__"><strong>__ge__</strong></a>(self, other)</dt><dd><span class="code">Greater-than&nbsp;or&nbsp;equal&nbsp;comparison.</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-__gt__"><strong>__gt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;greater-than&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__gt__"><strong>__gt__</strong></a>(self, other)</dt><dd><span class="code">Strictly&nbsp;greater-than&nbsp;comparison.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-__init__"><strong>__init__</strong></a>(self, value=0, check=True)</dt><dd><tt>Initialize&nbsp;polynomial&nbsp;to&nbsp;given&nbsp;value&nbsp;(zero&nbsp;polynomial,&nbsp;by&nbsp;default).</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__init__"><strong>__init__</strong></a>(self, value=0, check=True)</dt><dd><span class="code">Initialize&nbsp;polynomial&nbsp;to&nbsp;given&nbsp;value&nbsp;(zero&nbsp;polynomial,&nbsp;by&nbsp;default).</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-__le__"><strong>__le__</strong></a>(self, other)</dt><dd><tt>Less-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__le__"><strong>__le__</strong></a>(self, other)</dt><dd><span class="code">Less-than&nbsp;or&nbsp;equal&nbsp;comparison.</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__lshift__"><strong>__lshift__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-__lt__"><strong>__lt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;less-than&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__lt__"><strong>__lt__</strong></a>(self, other)</dt><dd><span class="code">Strictly&nbsp;less-than&nbsp;comparison.</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__mod__"><strong>__mod__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="BinaryPolynomial-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><tt>Negated&nbsp;equality&nbsp;test.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><span class="code">Negated&nbsp;equality&nbsp;test.</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
@@ -135,7 +134,7 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 
 <dl><dt><a name="BinaryPolynomial-__rdivmod__"><strong>__rdivmod__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><span class="code">Return&nbsp;repr(self).</span></dd></dl>
 
 <dl><dt><a name="BinaryPolynomial-__rfloordiv__"><strong>__rfloordiv__</strong></a>(self, other)</dt></dl>
 
@@ -153,115 +152,118 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 
 <dl><dt><a name="BinaryPolynomial-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="BinaryPolynomial-degree"><strong>degree</strong></a>(self)</dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;(-1&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-degree"><strong>degree</strong></a>(self)</dt><dd><span class="code">Degree&nbsp;of&nbsp;polynomial&nbsp;(-1&nbsp;for&nbsp;zero&nbsp;polynomial).</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-monic"><strong>monic</strong></a>(self, lc_pinv=False)</dt><dd><tt>Monic&nbsp;version&nbsp;of&nbsp;polynomial.<br>
+<dl><dt><a name="BinaryPolynomial-deriv"><strong>deriv</strong></a>(self, m=1)</dt><dd><span class="code">Order-m&nbsp;(formal)&nbsp;derivative&nbsp;of&nbsp;polynomial,&nbsp;for&nbsp;m&gt;=0.<br>
+&nbsp;<br>
+Default&nbsp;m=1&nbsp;for&nbsp;first&nbsp;derivative.</span></dd></dl>
+
+<dl><dt><a name="BinaryPolynomial-monic"><strong>monic</strong></a>(self, lc_pinv=False)</dt><dd><span class="code">Monic&nbsp;version&nbsp;of&nbsp;polynomial.<br>
 &nbsp;<br>
 Zero&nbsp;polynomial&nbsp;remains&nbsp;unchanged.<br>
-If&nbsp;lc_pinv&nbsp;is&nbsp;set,&nbsp;inverse&nbsp;of&nbsp;leading&nbsp;coefficient&nbsp;is&nbsp;also&nbsp;returned&nbsp;(0&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+If&nbsp;lc_pinv&nbsp;is&nbsp;set,&nbsp;inverse&nbsp;of&nbsp;leading&nbsp;coefficient&nbsp;is&nbsp;also&nbsp;returned&nbsp;(0&nbsp;for&nbsp;zero&nbsp;polynomial).</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-reverse"><strong>reverse</strong></a>(self, d=None)</dt><dd><tt>Reverse&nbsp;of&nbsp;polynomial&nbsp;(basically,&nbsp;coefficients&nbsp;in&nbsp;reverse&nbsp;order).<br>
+<dl><dt><a name="BinaryPolynomial-reverse"><strong>reverse</strong></a>(self, d=None)</dt><dd><span class="code">Reverse&nbsp;of&nbsp;polynomial&nbsp;(basically,&nbsp;coefficients&nbsp;in&nbsp;reverse&nbsp;order).<br>
 &nbsp;<br>
 For&nbsp;example,&nbsp;reverse&nbsp;of&nbsp;x&nbsp;+&nbsp;2x^2&nbsp;+&nbsp;3x^3&nbsp;is&nbsp;3&nbsp;+&nbsp;2x&nbsp;+&nbsp;x^2.<br>
 If&nbsp;d&nbsp;is&nbsp;None&nbsp;(default),&nbsp;d&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;degree&nbsp;of&nbsp;the&nbsp;given&nbsp;poynomial.<br>
 Otherwise,&nbsp;the&nbsp;given&nbsp;polynomial&nbsp;is&nbsp;first&nbsp;padded&nbsp;with&nbsp;zeros&nbsp;or&nbsp;truncated<br>
-to&nbsp;attain&nbsp;the&nbsp;given&nbsp;degree&nbsp;d,&nbsp;d&gt;=-1,&nbsp;before&nbsp;it&nbsp;is&nbsp;reversed.</tt></dd></dl>
+to&nbsp;attain&nbsp;the&nbsp;given&nbsp;degree&nbsp;d,&nbsp;d&gt;=-1,&nbsp;before&nbsp;it&nbsp;is&nbsp;reversed.</span></dd></dl>
+
+<dl><dt><a name="BinaryPolynomial-truncate"><strong>truncate</strong></a>(self, n)</dt></dl>
 
 <hr>
 Class methods inherited from <a href="mpyc.gfpx.html#Polynomial">Polynomial</a>:<br>
-<dl><dt><a name="BinaryPolynomial-add"><strong>add</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-add"><strong>add</strong></a>(a, b)</dt><dd><span class="code">Add&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-deg"><strong>deg</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;(-1&nbsp;if&nbsp;a&nbsp;is&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-divmod"><strong>divmod</strong></a>(a, b)</dt><dd><span class="code">Divide&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;polynomial&nbsp;b&nbsp;with&nbsp;remainder,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-divmod"><strong>divmod</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Divide&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;polynomial&nbsp;b&nbsp;with&nbsp;remainder,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-from_terms"><strong>from_terms</strong></a>(s, x='x')</dt><dd><span class="code">Convert&nbsp;string&nbsp;s&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x&nbsp;to&nbsp;a&nbsp;polynomial.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-from_terms"><strong>from_terms</strong></a>(s, x='x')<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Convert&nbsp;string&nbsp;s&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x&nbsp;to&nbsp;a&nbsp;polynomial.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-gcd"><strong>gcd</strong></a>(a, b)</dt><dd><span class="code">Greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-gcd"><strong>gcd</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="BinaryPolynomial-gcdext"><strong>gcdext</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Extended&nbsp;GCD&nbsp;for&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="BinaryPolynomial-gcdext"><strong>gcdext</strong></a>(a, b)</dt><dd><span class="code">Extended&nbsp;GCD&nbsp;for&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
-Return&nbsp;d,&nbsp;s,&nbsp;t&nbsp;satisfying&nbsp;s&nbsp;a&nbsp;+&nbsp;t&nbsp;b&nbsp;=&nbsp;d&nbsp;=&nbsp;<a href="#BinaryPolynomial-gcd">gcd</a>(a,b).</tt></dd></dl>
+Return&nbsp;d,&nbsp;s,&nbsp;t&nbsp;satisfying&nbsp;s&nbsp;a&nbsp;+&nbsp;t&nbsp;b&nbsp;=&nbsp;d&nbsp;=&nbsp;<a href="#BinaryPolynomial-gcd">gcd</a>(a,b).</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-invert"><strong>invert</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Inverse&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-invert"><strong>invert</strong></a>(a, b)</dt><dd><span class="code">Inverse&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-is_irreducible"><strong>is_irreducible</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Test&nbsp;polynomial&nbsp;a&nbsp;for&nbsp;irreducibility.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-is_irreducible"><strong>is_irreducible</strong></a>(a)</dt><dd><span class="code">Test&nbsp;polynomial&nbsp;a&nbsp;for&nbsp;irreducibility.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-lshift"><strong>lshift</strong></a>(a, n)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Multiply&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;X^n.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-lshift"><strong>lshift</strong></a>(a, n)</dt><dd><span class="code">Multiply&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;X^n.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-mod"><strong>mod</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Reduce&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-mod"><strong>mod</strong></a>(a, b)</dt><dd><span class="code">Reduce&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-mul"><strong>mul</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Multiply&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-mul"><strong>mul</strong></a>(a, b)</dt><dd><span class="code">Multiply&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-next_irreducible"><strong>next_irreducible</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;lexicographically&nbsp;next&nbsp;monic&nbsp;irreducible&nbsp;polynomial&nbsp;&gt;&nbsp;a.<br>
+<dl><dt><a name="BinaryPolynomial-next_irreducible"><strong>next_irreducible</strong></a>(a)</dt><dd><span class="code">Return&nbsp;lexicographically&nbsp;next&nbsp;monic&nbsp;irreducible&nbsp;polynomial&nbsp;&gt;&nbsp;a.<br>
 &nbsp;<br>
-E.g.,&nbsp;X&nbsp;&lt;&nbsp;X+1&nbsp;&lt;&nbsp;X^2+X+1&nbsp;&lt;&nbsp;X^3+X+1&nbsp;&lt;&nbsp;X^3+X^2+1&nbsp;&lt;&nbsp;...&nbsp;for&nbsp;p=2.</tt></dd></dl>
+E.g.,&nbsp;X&nbsp;&lt;&nbsp;X+1&nbsp;&lt;&nbsp;X^2+X+1&nbsp;&lt;&nbsp;X^3+X+1&nbsp;&lt;&nbsp;X^3+X^2+1&nbsp;&lt;&nbsp;...&nbsp;for&nbsp;p=2.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-powmod"><strong>powmod</strong></a>(a, n, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt><a href="#Polynomial">Polynomial</a>&nbsp;a&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;n&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-powmod"><strong>powmod</strong></a>(a, n, b)</dt><dd><span class="code"><a href="#Polynomial">Polynomial</a>&nbsp;a&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;n&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-rshift"><strong>rshift</strong></a>(a, n)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Quotient&nbsp;for&nbsp;polynomial&nbsp;a&nbsp;divided&nbsp;by&nbsp;X^n,&nbsp;assuming&nbsp;a&nbsp;is&nbsp;multiple&nbsp;of&nbsp;X^n.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-rshift"><strong>rshift</strong></a>(a, n)</dt><dd><span class="code">Quotient&nbsp;for&nbsp;polynomial&nbsp;a&nbsp;divided&nbsp;by&nbsp;X^n.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-sub"><strong>sub</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Subtract&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-sub"><strong>sub</strong></a>(a, b)</dt><dd><span class="code">Subtract&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="BinaryPolynomial-to_terms"><strong>to_terms</strong></a>(a, x='x')<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Convert&nbsp;polynomial&nbsp;a&nbsp;to&nbsp;a&nbsp;string&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="BinaryPolynomial-to_terms"><strong>to_terms</strong></a>(a, x='x')</dt><dd><span class="code">Convert&nbsp;polynomial&nbsp;a&nbsp;to&nbsp;a&nbsp;string&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x.</span></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="mpyc.gfpx.html#Polynomial">Polynomial</a>:<br>
 <dl><dt><strong>value</strong></dt>
 </dl>
 </td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="Polynomial">class <strong>Polynomial</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</font></td></tr>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Polynomial">class <strong>Polynomial</strong></a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)</td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Polynomial">Polynomial</a>(value=0,&nbsp;check=True)<br>
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Polynomial">Polynomial</a>(value=0,&nbsp;check=True)<br>
 &nbsp;<br>
 Polynomials&nbsp;over&nbsp;GF(p)&nbsp;represented&nbsp;as&nbsp;lists&nbsp;of&nbsp;integers&nbsp;in&nbsp;{0,&nbsp;...&nbsp;,&nbsp;p-1}.<br>
 &nbsp;<br>
-Invariant:&nbsp;last&nbsp;element&nbsp;of&nbsp;attribute&nbsp;'value'&nbsp;is&nbsp;a&nbsp;nonzero&nbsp;integer&nbsp;(if&nbsp;'value'&nbsp;nonempty).<br>&nbsp;</tt></td></tr>
+Invariant:&nbsp;last&nbsp;element&nbsp;of&nbsp;attribute&nbsp;'value'&nbsp;is&nbsp;a&nbsp;nonzero&nbsp;integer&nbsp;(if&nbsp;'value'&nbsp;nonempty).<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
+<td class="singlecolumn">Methods defined here:<br>
 <dl><dt><a name="Polynomial-__add__"><strong>__add__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Polynomial-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><tt>Truth&nbsp;value&nbsp;testing.<br>
+<dl><dt><a name="Polynomial-__bool__"><strong>__bool__</strong></a>(self)</dt><dd><span class="code">Truth&nbsp;value&nbsp;testing.<br>
 &nbsp;<br>
-Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True&nbsp;otherwise.</tt></dd></dl>
+Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True&nbsp;otherwise.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-__call__"><strong>__call__</strong></a>(self, x)</dt><dd><tt>Evaluate&nbsp;polynomial&nbsp;at&nbsp;given&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="Polynomial-__call__"><strong>__call__</strong></a>(self, x)</dt><dd><span class="code">Evaluate&nbsp;polynomial&nbsp;at&nbsp;given&nbsp;x.</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__divmod__"><strong>__divmod__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Polynomial-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><tt>Equality&nbsp;test.</tt></dd></dl>
+<dl><dt><a name="Polynomial-__eq__"><strong>__eq__</strong></a>(self, other)</dt><dd><span class="code">Equality&nbsp;test.</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__floordiv__"><strong>__floordiv__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Polynomial-__ge__"><strong>__ge__</strong></a>(self, other)</dt><dd><tt>Greater-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="Polynomial-__ge__"><strong>__ge__</strong></a>(self, other)</dt><dd><span class="code">Greater-than&nbsp;or&nbsp;equal&nbsp;comparison.</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__getitem__"><strong>__getitem__</strong></a>(self, key)</dt></dl>
 
-<dl><dt><a name="Polynomial-__gt__"><strong>__gt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;greater-than&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="Polynomial-__gt__"><strong>__gt__</strong></a>(self, other)</dt><dd><span class="code">Strictly&nbsp;greater-than&nbsp;comparison.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><tt>Make&nbsp;polynomials&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</tt></dd></dl>
+<dl><dt><a name="Polynomial-__hash__"><strong>__hash__</strong></a>(self)</dt><dd><span class="code">Make&nbsp;polynomials&nbsp;hashable&nbsp;(e.g.,&nbsp;for&nbsp;LRU&nbsp;caching).</span></dd></dl>
 
-<dl><dt><a name="Polynomial-__init__"><strong>__init__</strong></a>(self, value=0, check=True)</dt><dd><tt>Initialize&nbsp;polynomial&nbsp;to&nbsp;given&nbsp;value&nbsp;(zero&nbsp;polynomial,&nbsp;by&nbsp;default).</tt></dd></dl>
+<dl><dt><a name="Polynomial-__init__"><strong>__init__</strong></a>(self, value=0, check=True)</dt><dd><span class="code">Initialize&nbsp;polynomial&nbsp;to&nbsp;given&nbsp;value&nbsp;(zero&nbsp;polynomial,&nbsp;by&nbsp;default).</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__int__"><strong>__int__</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="Polynomial-__iter__"><strong>__iter__</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Polynomial-__le__"><strong>__le__</strong></a>(self, other)</dt><dd><tt>Less-than&nbsp;or&nbsp;equal&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="Polynomial-__le__"><strong>__le__</strong></a>(self, other)</dt><dd><span class="code">Less-than&nbsp;or&nbsp;equal&nbsp;comparison.</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__lshift__"><strong>__lshift__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Polynomial-__lt__"><strong>__lt__</strong></a>(self, other)</dt><dd><tt>Strictly&nbsp;less-than&nbsp;comparison.</tt></dd></dl>
+<dl><dt><a name="Polynomial-__lt__"><strong>__lt__</strong></a>(self, other)</dt><dd><span class="code">Strictly&nbsp;less-than&nbsp;comparison.</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__mod__"><strong>__mod__</strong></a>(self, other)</dt></dl>
 
 <dl><dt><a name="Polynomial-__mul__"><strong>__mul__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Polynomial-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><tt>Negated&nbsp;equality&nbsp;test.</tt></dd></dl>
+<dl><dt><a name="Polynomial-__ne__"><strong>__ne__</strong></a>(self, other)</dt><dd><span class="code">Negated&nbsp;equality&nbsp;test.</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__neg__"><strong>__neg__</strong></a>(self)</dt></dl>
 
@@ -273,7 +275,7 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 
 <dl><dt><a name="Polynomial-__rdivmod__"><strong>__rdivmod__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Polynomial-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+<dl><dt><a name="Polynomial-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><span class="code">Return&nbsp;repr(self).</span></dd></dl>
 
 <dl><dt><a name="Polynomial-__rfloordiv__"><strong>__rfloordiv__</strong></a>(self, other)</dt></dl>
 
@@ -291,59 +293,63 @@ Return&nbsp;False&nbsp;if&nbsp;this&nbsp;polynomial&nbsp;is&nbsp;zero,&nbsp;True
 
 <dl><dt><a name="Polynomial-__sub__"><strong>__sub__</strong></a>(self, other)</dt></dl>
 
-<dl><dt><a name="Polynomial-degree"><strong>degree</strong></a>(self)</dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;(-1&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+<dl><dt><a name="Polynomial-degree"><strong>degree</strong></a>(self)</dt><dd><span class="code">Degree&nbsp;of&nbsp;polynomial&nbsp;(-1&nbsp;for&nbsp;zero&nbsp;polynomial).</span></dd></dl>
 
-<dl><dt><a name="Polynomial-monic"><strong>monic</strong></a>(self, lc_pinv=False)</dt><dd><tt>Monic&nbsp;version&nbsp;of&nbsp;polynomial.<br>
+<dl><dt><a name="Polynomial-deriv"><strong>deriv</strong></a>(self, m=1)</dt><dd><span class="code">Order-m&nbsp;(formal)&nbsp;derivative&nbsp;of&nbsp;polynomial,&nbsp;for&nbsp;m&gt;=0.<br>
+&nbsp;<br>
+Default&nbsp;m=1&nbsp;for&nbsp;first&nbsp;derivative.</span></dd></dl>
+
+<dl><dt><a name="Polynomial-monic"><strong>monic</strong></a>(self, lc_pinv=False)</dt><dd><span class="code">Monic&nbsp;version&nbsp;of&nbsp;polynomial.<br>
 &nbsp;<br>
 Zero&nbsp;polynomial&nbsp;remains&nbsp;unchanged.<br>
-If&nbsp;lc_pinv&nbsp;is&nbsp;set,&nbsp;inverse&nbsp;of&nbsp;leading&nbsp;coefficient&nbsp;is&nbsp;also&nbsp;returned&nbsp;(0&nbsp;for&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+If&nbsp;lc_pinv&nbsp;is&nbsp;set,&nbsp;inverse&nbsp;of&nbsp;leading&nbsp;coefficient&nbsp;is&nbsp;also&nbsp;returned&nbsp;(0&nbsp;for&nbsp;zero&nbsp;polynomial).</span></dd></dl>
 
-<dl><dt><a name="Polynomial-reverse"><strong>reverse</strong></a>(self, d=None)</dt><dd><tt>Reverse&nbsp;of&nbsp;polynomial&nbsp;(basically,&nbsp;coefficients&nbsp;in&nbsp;reverse&nbsp;order).<br>
+<dl><dt><a name="Polynomial-reverse"><strong>reverse</strong></a>(self, d=None)</dt><dd><span class="code">Reverse&nbsp;of&nbsp;polynomial&nbsp;(basically,&nbsp;coefficients&nbsp;in&nbsp;reverse&nbsp;order).<br>
 &nbsp;<br>
 For&nbsp;example,&nbsp;reverse&nbsp;of&nbsp;x&nbsp;+&nbsp;2x^2&nbsp;+&nbsp;3x^3&nbsp;is&nbsp;3&nbsp;+&nbsp;2x&nbsp;+&nbsp;x^2.<br>
 If&nbsp;d&nbsp;is&nbsp;None&nbsp;(default),&nbsp;d&nbsp;is&nbsp;set&nbsp;to&nbsp;the&nbsp;degree&nbsp;of&nbsp;the&nbsp;given&nbsp;poynomial.<br>
 Otherwise,&nbsp;the&nbsp;given&nbsp;polynomial&nbsp;is&nbsp;first&nbsp;padded&nbsp;with&nbsp;zeros&nbsp;or&nbsp;truncated<br>
-to&nbsp;attain&nbsp;the&nbsp;given&nbsp;degree&nbsp;d,&nbsp;d&gt;=-1,&nbsp;before&nbsp;it&nbsp;is&nbsp;reversed.</tt></dd></dl>
+to&nbsp;attain&nbsp;the&nbsp;given&nbsp;degree&nbsp;d,&nbsp;d&gt;=-1,&nbsp;before&nbsp;it&nbsp;is&nbsp;reversed.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-to_bytes"><strong>to_bytes</strong></a>(self, length, byteorder)</dt><dd><tt>Return&nbsp;a&nbsp;bytes&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;representing&nbsp;a&nbsp;polynomial.</tt></dd></dl>
+<dl><dt><a name="Polynomial-to_bytes"><strong>to_bytes</strong></a>(self, length, byteorder)</dt><dd><span class="code">Return&nbsp;a&nbsp;bytes&nbsp;<a href="https://docs.python.org/3/library/functions.html#object">object</a>&nbsp;representing&nbsp;a&nbsp;polynomial.</span></dd></dl>
+
+<dl><dt><a name="Polynomial-truncate"><strong>truncate</strong></a>(self, n)</dt></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="Polynomial-add"><strong>add</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Add&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Polynomial-add"><strong>add</strong></a>(a, b)</dt><dd><span class="code">Add&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-deg"><strong>deg</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Degree&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;(-1&nbsp;if&nbsp;a&nbsp;is&nbsp;zero&nbsp;polynomial).</tt></dd></dl>
+<dl><dt><a name="Polynomial-divmod"><strong>divmod</strong></a>(a, b)</dt><dd><span class="code">Divide&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;polynomial&nbsp;b&nbsp;with&nbsp;remainder,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-divmod"><strong>divmod</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Divide&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;polynomial&nbsp;b&nbsp;with&nbsp;remainder,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Polynomial-from_terms"><strong>from_terms</strong></a>(s, x='x')</dt><dd><span class="code">Convert&nbsp;string&nbsp;s&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x&nbsp;to&nbsp;a&nbsp;polynomial.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-from_terms"><strong>from_terms</strong></a>(s, x='x')<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Convert&nbsp;string&nbsp;s&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x&nbsp;to&nbsp;a&nbsp;polynomial.</tt></dd></dl>
+<dl><dt><a name="Polynomial-gcd"><strong>gcd</strong></a>(a, b)</dt><dd><span class="code">Greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-gcd"><strong>gcd</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Greatest&nbsp;common&nbsp;divisor&nbsp;of&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
-
-<dl><dt><a name="Polynomial-gcdext"><strong>gcdext</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Extended&nbsp;GCD&nbsp;for&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.<br>
+<dl><dt><a name="Polynomial-gcdext"><strong>gcdext</strong></a>(a, b)</dt><dd><span class="code">Extended&nbsp;GCD&nbsp;for&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.<br>
 &nbsp;<br>
-Return&nbsp;d,&nbsp;s,&nbsp;t&nbsp;satisfying&nbsp;s&nbsp;a&nbsp;+&nbsp;t&nbsp;b&nbsp;=&nbsp;d&nbsp;=&nbsp;<a href="#Polynomial-gcd">gcd</a>(a,b).</tt></dd></dl>
+Return&nbsp;d,&nbsp;s,&nbsp;t&nbsp;satisfying&nbsp;s&nbsp;a&nbsp;+&nbsp;t&nbsp;b&nbsp;=&nbsp;d&nbsp;=&nbsp;<a href="#Polynomial-gcd">gcd</a>(a,b).</span></dd></dl>
 
-<dl><dt><a name="Polynomial-invert"><strong>invert</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Inverse&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Polynomial-invert"><strong>invert</strong></a>(a, b)</dt><dd><span class="code">Inverse&nbsp;of&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-is_irreducible"><strong>is_irreducible</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Test&nbsp;polynomial&nbsp;a&nbsp;for&nbsp;irreducibility.</tt></dd></dl>
+<dl><dt><a name="Polynomial-is_irreducible"><strong>is_irreducible</strong></a>(a)</dt><dd><span class="code">Test&nbsp;polynomial&nbsp;a&nbsp;for&nbsp;irreducibility.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-lshift"><strong>lshift</strong></a>(a, n)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Multiply&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;X^n.</tt></dd></dl>
+<dl><dt><a name="Polynomial-lshift"><strong>lshift</strong></a>(a, n)</dt><dd><span class="code">Multiply&nbsp;polynomial&nbsp;a&nbsp;by&nbsp;X^n.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-mod"><strong>mod</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Reduce&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Polynomial-mod"><strong>mod</strong></a>(a, b)</dt><dd><span class="code">Reduce&nbsp;polynomial&nbsp;a&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-mul"><strong>mul</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Multiply&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Polynomial-mul"><strong>mul</strong></a>(a, b)</dt><dd><span class="code">Multiply&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-next_irreducible"><strong>next_irreducible</strong></a>(a)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Return&nbsp;lexicographically&nbsp;next&nbsp;monic&nbsp;irreducible&nbsp;polynomial&nbsp;&gt;&nbsp;a.<br>
+<dl><dt><a name="Polynomial-next_irreducible"><strong>next_irreducible</strong></a>(a)</dt><dd><span class="code">Return&nbsp;lexicographically&nbsp;next&nbsp;monic&nbsp;irreducible&nbsp;polynomial&nbsp;&gt;&nbsp;a.<br>
 &nbsp;<br>
-E.g.,&nbsp;X&nbsp;&lt;&nbsp;X+1&nbsp;&lt;&nbsp;X^2+X+1&nbsp;&lt;&nbsp;X^3+X+1&nbsp;&lt;&nbsp;X^3+X^2+1&nbsp;&lt;&nbsp;...&nbsp;for&nbsp;p=2.</tt></dd></dl>
+E.g.,&nbsp;X&nbsp;&lt;&nbsp;X+1&nbsp;&lt;&nbsp;X^2+X+1&nbsp;&lt;&nbsp;X^3+X+1&nbsp;&lt;&nbsp;X^3+X^2+1&nbsp;&lt;&nbsp;...&nbsp;for&nbsp;p=2.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-powmod"><strong>powmod</strong></a>(a, n, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt><a href="#Polynomial">Polynomial</a>&nbsp;a&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;n&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Polynomial-powmod"><strong>powmod</strong></a>(a, n, b)</dt><dd><span class="code"><a href="#Polynomial">Polynomial</a>&nbsp;a&nbsp;to&nbsp;the&nbsp;power&nbsp;of&nbsp;n&nbsp;modulo&nbsp;polynomial&nbsp;b,&nbsp;for&nbsp;nonzero&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-rshift"><strong>rshift</strong></a>(a, n)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Quotient&nbsp;for&nbsp;polynomial&nbsp;a&nbsp;divided&nbsp;by&nbsp;X^n,&nbsp;assuming&nbsp;a&nbsp;is&nbsp;multiple&nbsp;of&nbsp;X^n.</tt></dd></dl>
+<dl><dt><a name="Polynomial-rshift"><strong>rshift</strong></a>(a, n)</dt><dd><span class="code">Quotient&nbsp;for&nbsp;polynomial&nbsp;a&nbsp;divided&nbsp;by&nbsp;X^n.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-sub"><strong>sub</strong></a>(a, b)<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Subtract&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</tt></dd></dl>
+<dl><dt><a name="Polynomial-sub"><strong>sub</strong></a>(a, b)</dt><dd><span class="code">Subtract&nbsp;polynomials&nbsp;a&nbsp;and&nbsp;b.</span></dd></dl>
 
-<dl><dt><a name="Polynomial-to_terms"><strong>to_terms</strong></a>(a, x='x')<font color="#909090"><font face="helvetica, arial"> from <a href="https://docs.python.org/3/library/functions.html#type">builtins.type</a></font></font></dt><dd><tt>Convert&nbsp;polynomial&nbsp;a&nbsp;to&nbsp;a&nbsp;string&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x.</tt></dd></dl>
+<dl><dt><a name="Polynomial-to_terms"><strong>to_terms</strong></a>(a, x='x')</dt><dd><span class="code">Convert&nbsp;polynomial&nbsp;a&nbsp;to&nbsp;a&nbsp;string&nbsp;with&nbsp;sum&nbsp;of&nbsp;powers&nbsp;of&nbsp;x.</span></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -354,19 +360,17 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>p</strong> = None</dl>
 
 </td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-GFpX"><strong>GFpX</strong></a>(p)</dt><dd><tt>Create&nbsp;type&nbsp;for&nbsp;polynomials&nbsp;over&nbsp;GF(p).</tt></dd></dl>
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-GFpX"><strong>GFpX</strong></a>(p)</dt><dd><span class="code">Create&nbsp;type&nbsp;for&nbsp;polynomials&nbsp;over&nbsp;GF(p).</span></dd></dl>
 </td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#55aa55">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
     
-<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>X</strong> = 'x'</td></tr></table>
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>X</strong> = 'x'</td></tr></table>
 </body></html>

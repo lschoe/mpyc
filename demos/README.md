@@ -112,7 +112,7 @@ optional arguments:
 
 `python kmsurvival.py --plot --no-log`
 
-`python kmsurvival.py -M3 -i4 --collapse --plot`
+`python np_kmsurvival.py -M3 -i4 --collapse --plot`
 
 `python -m cProfile -s time bnnmnist.py | more`
 

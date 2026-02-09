@@ -1,15 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mpyc.__main__</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mpyc.__main__</title>
+<link rel="stylesheet" type="text/css" href="pydoc.css">
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.__main__</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/__main__.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/__main__.py</a></font></td></tr></table>
-    <p><tt>Support&nbsp;for&nbsp;natively&nbsp;asynchronous&nbsp;REPL&nbsp;with&nbsp;MPyC&nbsp;preloaded.<br>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mpyc.html" class="white">mpyc</a>.__main__</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.11/mpyc/__main__.py">github.com/lschoe/mpyc/blob/v0.11/mpyc/__main__.py</a></td></tr></table>
+    <p><span class="code">Support&nbsp;for&nbsp;natively&nbsp;asynchronous&nbsp;REPL&nbsp;with&nbsp;MPyC&nbsp;preloaded.<br>
 &nbsp;<br>
 To&nbsp;launch&nbsp;a&nbsp;natively&nbsp;async&nbsp;REPL&nbsp;with&nbsp;MPyC&nbsp;preloaded,&nbsp;run:<br>
 &nbsp;<br>
@@ -32,63 +33,61 @@ Besides&nbsp;setting&nbsp;mpc&nbsp;as&nbsp;a&nbsp;handle&nbsp;for&nbsp;the&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;secqr&nbsp;=&nbsp;mpc.SecQuadraticResidues(11)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;secsg&nbsp;=&nbsp;mpc.SecSchnorrGroup(l=1024)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;secec&nbsp;=&nbsp;mpc.SecEllipticCurve('Ed25519')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sechc&nbsp;=&nbsp;mpc.SecHyperellipticCurve('kummer1271')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;seccl&nbsp;=&nbsp;mpc.SecClassGroup(-23)<br>
 &nbsp;<br>
 Type&nbsp;secint&nbsp;represents&nbsp;secure&nbsp;integers&nbsp;and&nbsp;types&nbsp;secfxp&nbsp;and&nbsp;secflt&nbsp;represent<br>
 secure&nbsp;fixed-point/floating-point&nbsp;numbers,&nbsp;all&nbsp;of&nbsp;default&nbsp;bit&nbsp;lengths.&nbsp;Types<br>
 secfld127&nbsp;and&nbsp;secfld256&nbsp;represent&nbsp;secure&nbsp;prime&nbsp;field&nbsp;GF(127)-elements&nbsp;and<br>
-secure&nbsp;binary&nbsp;field&nbsp;GF(2^8)-elements.&nbsp;Types&nbsp;secsym,&nbsp;secqr,&nbsp;secsg,&nbsp;secec,&nbsp;and<br>
-seccl&nbsp;represent&nbsp;secure&nbsp;finite&nbsp;group&nbsp;elements&nbsp;for&nbsp;five&nbsp;particular&nbsp;groups.<br>
-Other&nbsp;"popular"&nbsp;types&nbsp;etc.&nbsp;can&nbsp;easily&nbsp;be&nbsp;added&nbsp;here&nbsp;in&nbsp;the&nbsp;future.</tt></p>
+secure&nbsp;binary&nbsp;field&nbsp;GF(2^8)-elements.&nbsp;Types&nbsp;secsym,&nbsp;secqr,&nbsp;secsg,&nbsp;secec,&nbsp;sechc,<br>
+and&nbsp;seccl&nbsp;represent&nbsp;secure&nbsp;finite&nbsp;group&nbsp;elements&nbsp;for&nbsp;six&nbsp;particular&nbsp;groups.<br>
+Other&nbsp;"popular"&nbsp;types&nbsp;etc.&nbsp;can&nbsp;easily&nbsp;be&nbsp;added&nbsp;here&nbsp;in&nbsp;the&nbsp;future.</span></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/ast.html">ast</a><br>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="https://docs.python.org/3/library/ast.html">ast</a><br>
 <a href="https://docs.python.org/3/library/asyncio.html">asyncio</a><br>
 <a href="https://docs.python.org/3/library/code.html">code</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/concurrent.html">concurrent</a><br>
+</td><td class="multicolumn"><a href="https://docs.python.org/3/library/concurrent.html">concurrent</a><br>
 <a href="https://docs.python.org/3/library/inspect.html">inspect</a><br>
 <a href="https://docs.python.org/3/library/sys.html">sys</a><br>
-</td><td width="25%" valign=top><a href="https://docs.python.org/3/library/threading.html">threading</a><br>
+</td><td class="multicolumn"><a href="https://docs.python.org/3/library/threading.html">threading</a><br>
 <a href="https://docs.python.org/3/library/types.html">types</a><br>
 <a href="https://docs.python.org/3/library/warnings.html">warnings</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ee77aa">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
     
-<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="https://docs.python.org/3/library/code.html#InteractiveConsole">code.InteractiveConsole</a>(<a href="https://docs.python.org/3/library/code.html#InteractiveInterpreter">code.InteractiveInterpreter</a>)
-</font></dt><dd>
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="https://docs.python.org/3/library/code.html#InteractiveConsole">code.InteractiveConsole</a>(<a href="https://docs.python.org/3/library/code.html#InteractiveInterpreter">code.InteractiveInterpreter</a>)
+</dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mpyc.__main__.html#AsyncIOInteractiveConsole">AsyncIOInteractiveConsole</a>
-</font></dt></dl>
+<dt class="heading-text"><a href="mpyc.__main__.html#AsyncIOInteractiveConsole">AsyncIOInteractiveConsole</a>
+</dt></dl>
 </dd>
-<dt><font face="helvetica, arial"><a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)
-</font></dt><dd>
+<dt class="heading-text"><a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a>(<a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a>)
+</dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mpyc.__main__.html#REPLThread">REPLThread</a>
-</font></dt></dl>
+<dt class="heading-text"><a href="mpyc.__main__.html#REPLThread">REPLThread</a>
+</dt></dl>
 </dd>
 </dl>
  <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="AsyncIOInteractiveConsole">class <strong>AsyncIOInteractiveConsole</strong></a>(<a href="https://docs.python.org/3/library/code.html#InteractiveConsole">code.InteractiveConsole</a>)</font></td></tr>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="AsyncIOInteractiveConsole">class <strong>AsyncIOInteractiveConsole</strong></a>(<a href="https://docs.python.org/3/library/code.html#InteractiveConsole">code.InteractiveConsole</a>)</td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#AsyncIOInteractiveConsole">AsyncIOInteractiveConsole</a>(locals,&nbsp;loop=None)<br>
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#AsyncIOInteractiveConsole">AsyncIOInteractiveConsole</a>(locals,&nbsp;loop=None)<br>
 &nbsp;<br>
-Adapted&nbsp;from&nbsp;asyncio.__main__.<a href="#AsyncIOInteractiveConsole">AsyncIOInteractiveConsole</a>&nbsp;with&nbsp;minor&nbsp;changes&nbsp;only.<br>&nbsp;</tt></td></tr>
+Adapted&nbsp;from&nbsp;asyncio.__main__.<a href="#AsyncIOInteractiveConsole">AsyncIOInteractiveConsole</a>&nbsp;with&nbsp;minor&nbsp;changes&nbsp;only.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"><dl><dt>Method resolution order:</dt>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.__main__.html#AsyncIOInteractiveConsole">AsyncIOInteractiveConsole</a></dd>
 <dd><a href="https://docs.python.org/3/library/code.html#InteractiveConsole">code.InteractiveConsole</a></dd>
 <dd><a href="https://docs.python.org/3/library/code.html#InteractiveInterpreter">code.InteractiveInterpreter</a></dd>
@@ -96,15 +95,15 @@ Adapted&nbsp;from&nbsp;asyncio.__main__.<a href="#AsyncIOInteractiveConsole">Asy
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="AsyncIOInteractiveConsole-__init__"><strong>__init__</strong></a>(self, locals, loop=None)</dt><dd><tt>Constructor.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-__init__"><strong>__init__</strong></a>(self, locals, loop=None)</dt><dd><span class="code">Constructor.<br>
 &nbsp;<br>
 The&nbsp;optional&nbsp;locals&nbsp;argument&nbsp;will&nbsp;be&nbsp;passed&nbsp;to&nbsp;the<br>
 InteractiveInterpreter&nbsp;base&nbsp;class.<br>
 &nbsp;<br>
 The&nbsp;optional&nbsp;filename&nbsp;argument&nbsp;should&nbsp;specify&nbsp;the&nbsp;(file)name<br>
-of&nbsp;the&nbsp;input&nbsp;stream;&nbsp;it&nbsp;will&nbsp;show&nbsp;up&nbsp;in&nbsp;tracebacks.</tt></dd></dl>
+of&nbsp;the&nbsp;input&nbsp;stream;&nbsp;it&nbsp;will&nbsp;show&nbsp;up&nbsp;in&nbsp;tracebacks.</span></dd></dl>
 
-<dl><dt><a name="AsyncIOInteractiveConsole-runcode"><strong>runcode</strong></a>(self, code)</dt><dd><tt>Execute&nbsp;a&nbsp;code&nbsp;object.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-runcode"><strong>runcode</strong></a>(self, code)</dt><dd><span class="code">Execute&nbsp;a&nbsp;code&nbsp;object.<br>
 &nbsp;<br>
 When&nbsp;an&nbsp;exception&nbsp;occurs,&nbsp;self.<a href="#AsyncIOInteractiveConsole-showtraceback">showtraceback</a>()&nbsp;is&nbsp;called&nbsp;to<br>
 display&nbsp;a&nbsp;traceback.&nbsp;&nbsp;All&nbsp;exceptions&nbsp;are&nbsp;caught&nbsp;except<br>
@@ -112,11 +111,11 @@ SystemExit,&nbsp;which&nbsp;is&nbsp;reraised.<br>
 &nbsp;<br>
 A&nbsp;note&nbsp;about&nbsp;KeyboardInterrupt:&nbsp;this&nbsp;exception&nbsp;may&nbsp;occur<br>
 elsewhere&nbsp;in&nbsp;this&nbsp;code,&nbsp;and&nbsp;may&nbsp;not&nbsp;always&nbsp;be&nbsp;caught.&nbsp;&nbsp;The<br>
-caller&nbsp;should&nbsp;be&nbsp;prepared&nbsp;to&nbsp;deal&nbsp;with&nbsp;it.</tt></dd></dl>
+caller&nbsp;should&nbsp;be&nbsp;prepared&nbsp;to&nbsp;deal&nbsp;with&nbsp;it.</span></dd></dl>
 
 <hr>
 Methods inherited from <a href="https://docs.python.org/3/library/code.html#InteractiveConsole">code.InteractiveConsole</a>:<br>
-<dl><dt><a name="AsyncIOInteractiveConsole-interact"><strong>interact</strong></a>(self, banner=None, exitmsg=None)</dt><dd><tt>Closely&nbsp;emulate&nbsp;the&nbsp;interactive&nbsp;Python&nbsp;console.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-interact"><strong>interact</strong></a>(self, banner=None, exitmsg=None)</dt><dd><span class="code">Closely&nbsp;emulate&nbsp;the&nbsp;interactive&nbsp;Python&nbsp;console.<br>
 &nbsp;<br>
 The&nbsp;optional&nbsp;banner&nbsp;argument&nbsp;specifies&nbsp;the&nbsp;banner&nbsp;to&nbsp;print<br>
 before&nbsp;the&nbsp;first&nbsp;interaction;&nbsp;by&nbsp;default&nbsp;it&nbsp;prints&nbsp;a&nbsp;banner<br>
@@ -128,9 +127,9 @@ close!).<br>
 The&nbsp;optional&nbsp;exitmsg&nbsp;argument&nbsp;specifies&nbsp;the&nbsp;exit&nbsp;message<br>
 printed&nbsp;when&nbsp;exiting.&nbsp;Pass&nbsp;the&nbsp;empty&nbsp;string&nbsp;to&nbsp;suppress<br>
 printing&nbsp;an&nbsp;exit&nbsp;message.&nbsp;If&nbsp;exitmsg&nbsp;is&nbsp;not&nbsp;given&nbsp;or&nbsp;None,<br>
-a&nbsp;default&nbsp;message&nbsp;is&nbsp;printed.</tt></dd></dl>
+a&nbsp;default&nbsp;message&nbsp;is&nbsp;printed.</span></dd></dl>
 
-<dl><dt><a name="AsyncIOInteractiveConsole-push"><strong>push</strong></a>(self, line)</dt><dd><tt>Push&nbsp;a&nbsp;line&nbsp;to&nbsp;the&nbsp;interpreter.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-push"><strong>push</strong></a>(self, line, filename=None, _symbol='single')</dt><dd><span class="code">Push&nbsp;a&nbsp;line&nbsp;to&nbsp;the&nbsp;interpreter.<br>
 &nbsp;<br>
 The&nbsp;line&nbsp;should&nbsp;not&nbsp;have&nbsp;a&nbsp;trailing&nbsp;newline;&nbsp;it&nbsp;may&nbsp;have<br>
 internal&nbsp;newlines.&nbsp;&nbsp;The&nbsp;line&nbsp;is&nbsp;appended&nbsp;to&nbsp;a&nbsp;buffer&nbsp;and&nbsp;the<br>
@@ -140,22 +139,22 @@ indicates&nbsp;that&nbsp;the&nbsp;command&nbsp;was&nbsp;executed&nbsp;or&nbsp;in
 is&nbsp;reset;&nbsp;otherwise,&nbsp;the&nbsp;command&nbsp;is&nbsp;incomplete,&nbsp;and&nbsp;the&nbsp;buffer<br>
 is&nbsp;left&nbsp;as&nbsp;it&nbsp;was&nbsp;after&nbsp;the&nbsp;line&nbsp;was&nbsp;appended.&nbsp;&nbsp;The&nbsp;return<br>
 value&nbsp;is&nbsp;1&nbsp;if&nbsp;more&nbsp;input&nbsp;is&nbsp;required,&nbsp;0&nbsp;if&nbsp;the&nbsp;line&nbsp;was&nbsp;dealt<br>
-with&nbsp;in&nbsp;some&nbsp;way&nbsp;(this&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;<a href="#AsyncIOInteractiveConsole-runsource">runsource</a>()).</tt></dd></dl>
+with&nbsp;in&nbsp;some&nbsp;way&nbsp;(this&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;<a href="#AsyncIOInteractiveConsole-runsource">runsource</a>()).</span></dd></dl>
 
-<dl><dt><a name="AsyncIOInteractiveConsole-raw_input"><strong>raw_input</strong></a>(self, prompt='')</dt><dd><tt>Write&nbsp;a&nbsp;prompt&nbsp;and&nbsp;read&nbsp;a&nbsp;line.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-raw_input"><strong>raw_input</strong></a>(self, prompt='')</dt><dd><span class="code">Write&nbsp;a&nbsp;prompt&nbsp;and&nbsp;read&nbsp;a&nbsp;line.<br>
 &nbsp;<br>
 The&nbsp;returned&nbsp;line&nbsp;does&nbsp;not&nbsp;include&nbsp;the&nbsp;trailing&nbsp;newline.<br>
 When&nbsp;the&nbsp;user&nbsp;enters&nbsp;the&nbsp;EOF&nbsp;key&nbsp;sequence,&nbsp;EOFError&nbsp;is&nbsp;raised.<br>
 &nbsp;<br>
 The&nbsp;base&nbsp;implementation&nbsp;uses&nbsp;the&nbsp;built-in&nbsp;function<br>
 input();&nbsp;a&nbsp;subclass&nbsp;may&nbsp;replace&nbsp;this&nbsp;with&nbsp;a&nbsp;different<br>
-implementation.</tt></dd></dl>
+implementation.</span></dd></dl>
 
-<dl><dt><a name="AsyncIOInteractiveConsole-resetbuffer"><strong>resetbuffer</strong></a>(self)</dt><dd><tt>Reset&nbsp;the&nbsp;input&nbsp;buffer.</tt></dd></dl>
+<dl><dt><a name="AsyncIOInteractiveConsole-resetbuffer"><strong>resetbuffer</strong></a>(self)</dt><dd><span class="code">Reset&nbsp;the&nbsp;input&nbsp;buffer.</span></dd></dl>
 
 <hr>
 Methods inherited from <a href="https://docs.python.org/3/library/code.html#InteractiveInterpreter">code.InteractiveInterpreter</a>:<br>
-<dl><dt><a name="AsyncIOInteractiveConsole-runsource"><strong>runsource</strong></a>(self, source, filename='&lt;input&gt;', symbol='single')</dt><dd><tt>Compile&nbsp;and&nbsp;run&nbsp;some&nbsp;source&nbsp;in&nbsp;the&nbsp;interpreter.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-runsource"><strong>runsource</strong></a>(self, source, filename='&lt;input&gt;', symbol='single')</dt><dd><span class="code">Compile&nbsp;and&nbsp;run&nbsp;some&nbsp;source&nbsp;in&nbsp;the&nbsp;interpreter.<br>
 &nbsp;<br>
 Arguments&nbsp;are&nbsp;as&nbsp;for&nbsp;compile_command().<br>
 &nbsp;<br>
@@ -175,9 +174,9 @@ also&nbsp;handles&nbsp;run-time&nbsp;exceptions,&nbsp;except&nbsp;for&nbsp;Syste
 The&nbsp;return&nbsp;value&nbsp;is&nbsp;True&nbsp;in&nbsp;case&nbsp;2,&nbsp;False&nbsp;in&nbsp;the&nbsp;other&nbsp;cases&nbsp;(unless<br>
 an&nbsp;exception&nbsp;is&nbsp;raised).&nbsp;&nbsp;The&nbsp;return&nbsp;value&nbsp;can&nbsp;be&nbsp;used&nbsp;to<br>
 decide&nbsp;whether&nbsp;to&nbsp;use&nbsp;sys.ps1&nbsp;or&nbsp;sys.ps2&nbsp;to&nbsp;prompt&nbsp;the&nbsp;next<br>
-line.</tt></dd></dl>
+line.</span></dd></dl>
 
-<dl><dt><a name="AsyncIOInteractiveConsole-showsyntaxerror"><strong>showsyntaxerror</strong></a>(self, filename=None)</dt><dd><tt>Display&nbsp;the&nbsp;syntax&nbsp;error&nbsp;that&nbsp;just&nbsp;occurred.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-showsyntaxerror"><strong>showsyntaxerror</strong></a>(self, filename=None, **kwargs)</dt><dd><span class="code">Display&nbsp;the&nbsp;syntax&nbsp;error&nbsp;that&nbsp;just&nbsp;occurred.<br>
 &nbsp;<br>
 This&nbsp;doesn't&nbsp;display&nbsp;a&nbsp;stack&nbsp;trace&nbsp;because&nbsp;there&nbsp;isn't&nbsp;one.<br>
 &nbsp;<br>
@@ -185,46 +184,45 @@ If&nbsp;a&nbsp;filename&nbsp;is&nbsp;given,&nbsp;it&nbsp;is&nbsp;stuffed&nbsp;in
 of&nbsp;what&nbsp;was&nbsp;there&nbsp;before&nbsp;(because&nbsp;Python's&nbsp;parser&nbsp;always&nbsp;uses<br>
 "&lt;string&gt;"&nbsp;when&nbsp;reading&nbsp;from&nbsp;a&nbsp;string).<br>
 &nbsp;<br>
-The&nbsp;output&nbsp;is&nbsp;written&nbsp;by&nbsp;self.<a href="#AsyncIOInteractiveConsole-write">write</a>(),&nbsp;below.</tt></dd></dl>
+The&nbsp;output&nbsp;is&nbsp;written&nbsp;by&nbsp;self.<a href="#AsyncIOInteractiveConsole-write">write</a>(),&nbsp;below.</span></dd></dl>
 
-<dl><dt><a name="AsyncIOInteractiveConsole-showtraceback"><strong>showtraceback</strong></a>(self)</dt><dd><tt>Display&nbsp;the&nbsp;exception&nbsp;that&nbsp;just&nbsp;occurred.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-showtraceback"><strong>showtraceback</strong></a>(self)</dt><dd><span class="code">Display&nbsp;the&nbsp;exception&nbsp;that&nbsp;just&nbsp;occurred.<br>
 &nbsp;<br>
 We&nbsp;remove&nbsp;the&nbsp;first&nbsp;stack&nbsp;item&nbsp;because&nbsp;it&nbsp;is&nbsp;our&nbsp;own&nbsp;code.<br>
 &nbsp;<br>
-The&nbsp;output&nbsp;is&nbsp;written&nbsp;by&nbsp;self.<a href="#AsyncIOInteractiveConsole-write">write</a>(),&nbsp;below.</tt></dd></dl>
+The&nbsp;output&nbsp;is&nbsp;written&nbsp;by&nbsp;self.<a href="#AsyncIOInteractiveConsole-write">write</a>(),&nbsp;below.</span></dd></dl>
 
-<dl><dt><a name="AsyncIOInteractiveConsole-write"><strong>write</strong></a>(self, data)</dt><dd><tt>Write&nbsp;a&nbsp;string.<br>
+<dl><dt><a name="AsyncIOInteractiveConsole-write"><strong>write</strong></a>(self, data)</dt><dd><span class="code">Write&nbsp;a&nbsp;string.<br>
 &nbsp;<br>
 The&nbsp;base&nbsp;implementation&nbsp;writes&nbsp;to&nbsp;sys.stderr;&nbsp;a&nbsp;subclass&nbsp;may<br>
-replace&nbsp;this&nbsp;with&nbsp;a&nbsp;different&nbsp;implementation.</tt></dd></dl>
+replace&nbsp;this&nbsp;with&nbsp;a&nbsp;different&nbsp;implementation.</span></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="https://docs.python.org/3/library/code.html#InteractiveInterpreter">code.InteractiveInterpreter</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
 </dl>
 <dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
 </dl>
 </td></tr></table> <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="REPLThread">class <strong>REPLThread</strong></a>(<a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a>)</font></td></tr>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="REPLThread">class <strong>REPLThread</strong></a>(<a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a>)</td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#REPLThread">REPLThread</a>(console,&nbsp;preamble=(),&nbsp;loop=None)<br>
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#REPLThread">REPLThread</a>(console,&nbsp;preamble=(),&nbsp;loop=None)<br>
 &nbsp;<br>
-Adapted&nbsp;from&nbsp;asyncio.__main__.<a href="#REPLThread">REPLThread</a>,&nbsp;introducing&nbsp;a&nbsp;preamble&nbsp;for&nbsp;the&nbsp;asyncio&nbsp;REPL.<br>&nbsp;</tt></td></tr>
+Adapted&nbsp;from&nbsp;asyncio.__main__.<a href="#REPLThread">REPLThread</a>,&nbsp;introducing&nbsp;a&nbsp;preamble&nbsp;for&nbsp;the&nbsp;asyncio&nbsp;REPL.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%"><dl><dt>Method resolution order:</dt>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
 <dd><a href="mpyc.__main__.html#REPLThread">REPLThread</a></dd>
 <dd><a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a></dd>
 <dd><a href="https://docs.python.org/3/library/functions.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="REPLThread-__init__"><strong>__init__</strong></a>(self, console, preamble=(), loop=None)</dt><dd><tt>This&nbsp;constructor&nbsp;should&nbsp;always&nbsp;be&nbsp;called&nbsp;with&nbsp;keyword&nbsp;arguments.&nbsp;Arguments&nbsp;are:<br>
+<dl><dt><a name="REPLThread-__init__"><strong>__init__</strong></a>(self, console, preamble=(), loop=None)</dt><dd><span class="code">This&nbsp;constructor&nbsp;should&nbsp;always&nbsp;be&nbsp;called&nbsp;with&nbsp;keyword&nbsp;arguments.&nbsp;Arguments&nbsp;are:<br>
 &nbsp;<br>
 *group*&nbsp;should&nbsp;be&nbsp;None;&nbsp;reserved&nbsp;for&nbsp;future&nbsp;extension&nbsp;when&nbsp;a&nbsp;ThreadGroup<br>
 class&nbsp;is&nbsp;implemented.<br>
@@ -235,48 +233,56 @@ method.&nbsp;Defaults&nbsp;to&nbsp;None,&nbsp;meaning&nbsp;nothing&nbsp;is&nbsp;
 *name*&nbsp;is&nbsp;the&nbsp;thread&nbsp;name.&nbsp;By&nbsp;default,&nbsp;a&nbsp;unique&nbsp;name&nbsp;is&nbsp;constructed&nbsp;of<br>
 the&nbsp;form&nbsp;"<a href="https://docs.python.org/3/library/threading.html#Thread">Thread</a>-N"&nbsp;where&nbsp;N&nbsp;is&nbsp;a&nbsp;small&nbsp;decimal&nbsp;number.<br>
 &nbsp;<br>
-*args*&nbsp;is&nbsp;the&nbsp;argument&nbsp;tuple&nbsp;for&nbsp;the&nbsp;target&nbsp;invocation.&nbsp;Defaults&nbsp;to&nbsp;().<br>
+*args*&nbsp;is&nbsp;a&nbsp;list&nbsp;or&nbsp;tuple&nbsp;of&nbsp;arguments&nbsp;for&nbsp;the&nbsp;target&nbsp;invocation.&nbsp;Defaults&nbsp;to&nbsp;().<br>
 &nbsp;<br>
 *kwargs*&nbsp;is&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;keyword&nbsp;arguments&nbsp;for&nbsp;the&nbsp;target<br>
 invocation.&nbsp;Defaults&nbsp;to&nbsp;{}.<br>
 &nbsp;<br>
+*context*&nbsp;is&nbsp;the&nbsp;contextvars.Context&nbsp;value&nbsp;to&nbsp;use&nbsp;for&nbsp;the&nbsp;thread.<br>
+The&nbsp;default&nbsp;value&nbsp;is&nbsp;None,&nbsp;which&nbsp;means&nbsp;to&nbsp;check<br>
+sys.flags.thread_inherit_context.&nbsp;&nbsp;If&nbsp;that&nbsp;flag&nbsp;is&nbsp;true,&nbsp;use&nbsp;a&nbsp;copy<br>
+of&nbsp;the&nbsp;context&nbsp;of&nbsp;the&nbsp;caller.&nbsp;&nbsp;If&nbsp;false,&nbsp;use&nbsp;an&nbsp;empty&nbsp;context.&nbsp;&nbsp;To<br>
+explicitly&nbsp;start&nbsp;with&nbsp;an&nbsp;empty&nbsp;context,&nbsp;pass&nbsp;a&nbsp;new&nbsp;instance&nbsp;of<br>
+contextvars.Context().&nbsp;&nbsp;To&nbsp;explicitly&nbsp;start&nbsp;with&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;current<br>
+context,&nbsp;pass&nbsp;the&nbsp;value&nbsp;from&nbsp;contextvars.copy_context().<br>
+&nbsp;<br>
 If&nbsp;a&nbsp;subclass&nbsp;overrides&nbsp;the&nbsp;constructor,&nbsp;it&nbsp;must&nbsp;make&nbsp;sure&nbsp;to&nbsp;invoke<br>
 the&nbsp;base&nbsp;class&nbsp;constructor&nbsp;(<a href="https://docs.python.org/3/library/threading.html#Thread">Thread</a>.<a href="#REPLThread-__init__">__init__</a>())&nbsp;before&nbsp;doing&nbsp;anything<br>
-else&nbsp;to&nbsp;the&nbsp;thread.</tt></dd></dl>
+else&nbsp;to&nbsp;the&nbsp;thread.</span></dd></dl>
 
-<dl><dt><a name="REPLThread-run"><strong>run</strong></a>(self)</dt><dd><tt>Method&nbsp;representing&nbsp;the&nbsp;thread's&nbsp;activity.<br>
+<dl><dt><a name="REPLThread-run"><strong>run</strong></a>(self)</dt><dd><span class="code">Method&nbsp;representing&nbsp;the&nbsp;thread's&nbsp;activity.<br>
 &nbsp;<br>
 You&nbsp;may&nbsp;override&nbsp;this&nbsp;method&nbsp;in&nbsp;a&nbsp;subclass.&nbsp;The&nbsp;standard&nbsp;<a href="#REPLThread-run">run</a>()&nbsp;method<br>
 invokes&nbsp;the&nbsp;callable&nbsp;object&nbsp;passed&nbsp;to&nbsp;the&nbsp;object's&nbsp;constructor&nbsp;as&nbsp;the<br>
 target&nbsp;argument,&nbsp;if&nbsp;any,&nbsp;with&nbsp;sequential&nbsp;and&nbsp;keyword&nbsp;arguments&nbsp;taken<br>
-from&nbsp;the&nbsp;args&nbsp;and&nbsp;kwargs&nbsp;arguments,&nbsp;respectively.</tt></dd></dl>
+from&nbsp;the&nbsp;args&nbsp;and&nbsp;kwargs&nbsp;arguments,&nbsp;respectively.</span></dd></dl>
 
 <hr>
 Methods inherited from <a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a>:<br>
-<dl><dt><a name="REPLThread-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+<dl><dt><a name="REPLThread-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><span class="code">Return&nbsp;repr(self).</span></dd></dl>
 
-<dl><dt><a name="REPLThread-getName"><strong>getName</strong></a>(self)</dt><dd><tt>Return&nbsp;a&nbsp;string&nbsp;used&nbsp;for&nbsp;identification&nbsp;purposes&nbsp;only.<br>
+<dl><dt><a name="REPLThread-getName"><strong>getName</strong></a>(self)</dt><dd><span class="code">Return&nbsp;a&nbsp;string&nbsp;used&nbsp;for&nbsp;identification&nbsp;purposes&nbsp;only.<br>
 &nbsp;<br>
-This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;name&nbsp;attribute&nbsp;instead.</tt></dd></dl>
+This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;name&nbsp;attribute&nbsp;instead.</span></dd></dl>
 
-<dl><dt><a name="REPLThread-isDaemon"><strong>isDaemon</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;this&nbsp;thread&nbsp;is&nbsp;a&nbsp;daemon.<br>
+<dl><dt><a name="REPLThread-isDaemon"><strong>isDaemon</strong></a>(self)</dt><dd><span class="code">Return&nbsp;whether&nbsp;this&nbsp;thread&nbsp;is&nbsp;a&nbsp;daemon.<br>
 &nbsp;<br>
-This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;daemon&nbsp;attribute&nbsp;instead.</tt></dd></dl>
+This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;daemon&nbsp;attribute&nbsp;instead.</span></dd></dl>
 
-<dl><dt><a name="REPLThread-is_alive"><strong>is_alive</strong></a>(self)</dt><dd><tt>Return&nbsp;whether&nbsp;the&nbsp;thread&nbsp;is&nbsp;alive.<br>
+<dl><dt><a name="REPLThread-is_alive"><strong>is_alive</strong></a>(self)</dt><dd><span class="code">Return&nbsp;whether&nbsp;the&nbsp;thread&nbsp;is&nbsp;alive.<br>
 &nbsp;<br>
 This&nbsp;method&nbsp;returns&nbsp;True&nbsp;just&nbsp;before&nbsp;the&nbsp;<a href="#REPLThread-run">run</a>()&nbsp;method&nbsp;starts&nbsp;until&nbsp;just<br>
 after&nbsp;the&nbsp;<a href="#REPLThread-run">run</a>()&nbsp;method&nbsp;terminates.&nbsp;See&nbsp;also&nbsp;the&nbsp;module&nbsp;function<br>
-enumerate().</tt></dd></dl>
+enumerate().</span></dd></dl>
 
-<dl><dt><a name="REPLThread-join"><strong>join</strong></a>(self, timeout=None)</dt><dd><tt>Wait&nbsp;until&nbsp;the&nbsp;thread&nbsp;terminates.<br>
+<dl><dt><a name="REPLThread-join"><strong>join</strong></a>(self, timeout=None)</dt><dd><span class="code">Wait&nbsp;until&nbsp;the&nbsp;thread&nbsp;terminates.<br>
 &nbsp;<br>
 This&nbsp;blocks&nbsp;the&nbsp;calling&nbsp;thread&nbsp;until&nbsp;the&nbsp;thread&nbsp;whose&nbsp;<a href="#REPLThread-join">join</a>()&nbsp;method&nbsp;is<br>
 called&nbsp;terminates&nbsp;--&nbsp;either&nbsp;normally&nbsp;or&nbsp;through&nbsp;an&nbsp;unhandled&nbsp;exception<br>
 or&nbsp;until&nbsp;the&nbsp;optional&nbsp;timeout&nbsp;occurs.<br>
 &nbsp;<br>
 When&nbsp;the&nbsp;timeout&nbsp;argument&nbsp;is&nbsp;present&nbsp;and&nbsp;not&nbsp;None,&nbsp;it&nbsp;should&nbsp;be&nbsp;a<br>
-floating&nbsp;point&nbsp;number&nbsp;specifying&nbsp;a&nbsp;timeout&nbsp;for&nbsp;the&nbsp;operation&nbsp;in&nbsp;seconds<br>
+floating-point&nbsp;number&nbsp;specifying&nbsp;a&nbsp;timeout&nbsp;for&nbsp;the&nbsp;operation&nbsp;in&nbsp;seconds<br>
 (or&nbsp;fractions&nbsp;thereof).&nbsp;As&nbsp;<a href="#REPLThread-join">join</a>()&nbsp;always&nbsp;returns&nbsp;None,&nbsp;you&nbsp;must&nbsp;call<br>
 <a href="#REPLThread-is_alive">is_alive</a>()&nbsp;after&nbsp;<a href="#REPLThread-join">join</a>()&nbsp;to&nbsp;decide&nbsp;whether&nbsp;a&nbsp;timeout&nbsp;happened&nbsp;--&nbsp;if&nbsp;the<br>
 thread&nbsp;is&nbsp;still&nbsp;alive,&nbsp;the&nbsp;<a href="#REPLThread-join">join</a>()&nbsp;call&nbsp;timed&nbsp;out.<br>
@@ -289,70 +295,69 @@ A&nbsp;thread&nbsp;can&nbsp;be&nbsp;<a href="#REPLThread-join">join</a>()ed&nbsp
 <a href="#REPLThread-join">join</a>()&nbsp;raises&nbsp;a&nbsp;RuntimeError&nbsp;if&nbsp;an&nbsp;attempt&nbsp;is&nbsp;made&nbsp;to&nbsp;join&nbsp;the&nbsp;current<br>
 thread&nbsp;as&nbsp;that&nbsp;would&nbsp;cause&nbsp;a&nbsp;deadlock.&nbsp;It&nbsp;is&nbsp;also&nbsp;an&nbsp;error&nbsp;to&nbsp;<a href="#REPLThread-join">join</a>()&nbsp;a<br>
 thread&nbsp;before&nbsp;it&nbsp;has&nbsp;been&nbsp;started&nbsp;and&nbsp;attempts&nbsp;to&nbsp;do&nbsp;so&nbsp;raises&nbsp;the&nbsp;same<br>
-exception.</tt></dd></dl>
+exception.</span></dd></dl>
 
-<dl><dt><a name="REPLThread-setDaemon"><strong>setDaemon</strong></a>(self, daemonic)</dt><dd><tt>Set&nbsp;whether&nbsp;this&nbsp;thread&nbsp;is&nbsp;a&nbsp;daemon.<br>
+<dl><dt><a name="REPLThread-setDaemon"><strong>setDaemon</strong></a>(self, daemonic)</dt><dd><span class="code">Set&nbsp;whether&nbsp;this&nbsp;thread&nbsp;is&nbsp;a&nbsp;daemon.<br>
 &nbsp;<br>
-This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;.daemon&nbsp;property&nbsp;instead.</tt></dd></dl>
+This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;.daemon&nbsp;property&nbsp;instead.</span></dd></dl>
 
-<dl><dt><a name="REPLThread-setName"><strong>setName</strong></a>(self, name)</dt><dd><tt>Set&nbsp;the&nbsp;name&nbsp;string&nbsp;for&nbsp;this&nbsp;thread.<br>
+<dl><dt><a name="REPLThread-setName"><strong>setName</strong></a>(self, name)</dt><dd><span class="code">Set&nbsp;the&nbsp;name&nbsp;string&nbsp;for&nbsp;this&nbsp;thread.<br>
 &nbsp;<br>
-This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;name&nbsp;attribute&nbsp;instead.</tt></dd></dl>
+This&nbsp;method&nbsp;is&nbsp;deprecated,&nbsp;use&nbsp;the&nbsp;name&nbsp;attribute&nbsp;instead.</span></dd></dl>
 
-<dl><dt><a name="REPLThread-start"><strong>start</strong></a>(self)</dt><dd><tt>Start&nbsp;the&nbsp;thread's&nbsp;activity.<br>
+<dl><dt><a name="REPLThread-start"><strong>start</strong></a>(self)</dt><dd><span class="code">Start&nbsp;the&nbsp;thread's&nbsp;activity.<br>
 &nbsp;<br>
 It&nbsp;must&nbsp;be&nbsp;called&nbsp;at&nbsp;most&nbsp;once&nbsp;per&nbsp;thread&nbsp;object.&nbsp;It&nbsp;arranges&nbsp;for&nbsp;the<br>
 object's&nbsp;<a href="#REPLThread-run">run</a>()&nbsp;method&nbsp;to&nbsp;be&nbsp;invoked&nbsp;in&nbsp;a&nbsp;separate&nbsp;thread&nbsp;of&nbsp;control.<br>
 &nbsp;<br>
 This&nbsp;method&nbsp;will&nbsp;raise&nbsp;a&nbsp;RuntimeError&nbsp;if&nbsp;called&nbsp;more&nbsp;than&nbsp;once&nbsp;on&nbsp;the<br>
-same&nbsp;thread&nbsp;object.</tt></dd></dl>
+same&nbsp;thread&nbsp;object.</span></dd></dl>
 
 <hr>
 Readonly properties inherited from <a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a>:<br>
 <dl><dt><strong>ident</strong></dt>
-<dd><tt>Thread&nbsp;identifier&nbsp;of&nbsp;this&nbsp;thread&nbsp;or&nbsp;None&nbsp;if&nbsp;it&nbsp;has&nbsp;not&nbsp;been&nbsp;started.<br>
+<dd><span class="code">Thread&nbsp;identifier&nbsp;of&nbsp;this&nbsp;thread&nbsp;or&nbsp;None&nbsp;if&nbsp;it&nbsp;has&nbsp;not&nbsp;been&nbsp;started.<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;a&nbsp;nonzero&nbsp;integer.&nbsp;See&nbsp;the&nbsp;get_ident()&nbsp;function.&nbsp;Thread<br>
 identifiers&nbsp;may&nbsp;be&nbsp;recycled&nbsp;when&nbsp;a&nbsp;thread&nbsp;exits&nbsp;and&nbsp;another&nbsp;thread&nbsp;is<br>
-created.&nbsp;The&nbsp;identifier&nbsp;is&nbsp;available&nbsp;even&nbsp;after&nbsp;the&nbsp;thread&nbsp;has&nbsp;exited.</tt></dd>
+created.&nbsp;The&nbsp;identifier&nbsp;is&nbsp;available&nbsp;even&nbsp;after&nbsp;the&nbsp;thread&nbsp;has&nbsp;exited.</span></dd>
 </dl>
 <dl><dt><strong>native_id</strong></dt>
-<dd><tt>Native&nbsp;integral&nbsp;thread&nbsp;ID&nbsp;of&nbsp;this&nbsp;thread,&nbsp;or&nbsp;None&nbsp;if&nbsp;it&nbsp;has&nbsp;not&nbsp;been&nbsp;started.<br>
+<dd><span class="code">Native&nbsp;integral&nbsp;thread&nbsp;ID&nbsp;of&nbsp;this&nbsp;thread,&nbsp;or&nbsp;None&nbsp;if&nbsp;it&nbsp;has&nbsp;not&nbsp;been&nbsp;started.<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;a&nbsp;non-negative&nbsp;integer.&nbsp;See&nbsp;the&nbsp;get_native_id()&nbsp;function.<br>
-This&nbsp;represents&nbsp;the&nbsp;Thread&nbsp;ID&nbsp;as&nbsp;reported&nbsp;by&nbsp;the&nbsp;kernel.</tt></dd>
+This&nbsp;represents&nbsp;the&nbsp;Thread&nbsp;ID&nbsp;as&nbsp;reported&nbsp;by&nbsp;the&nbsp;kernel.</span></dd>
 </dl>
 <hr>
 Data descriptors inherited from <a href="https://docs.python.org/3/library/threading.html#Thread">threading.Thread</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
 </dl>
 <dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
 </dl>
 <dl><dt><strong>daemon</strong></dt>
-<dd><tt>A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;whether&nbsp;this&nbsp;thread&nbsp;is&nbsp;a&nbsp;daemon&nbsp;thread.<br>
+<dd><span class="code">A&nbsp;boolean&nbsp;value&nbsp;indicating&nbsp;whether&nbsp;this&nbsp;thread&nbsp;is&nbsp;a&nbsp;daemon&nbsp;thread.<br>
 &nbsp;<br>
 This&nbsp;must&nbsp;be&nbsp;set&nbsp;before&nbsp;start()&nbsp;is&nbsp;called,&nbsp;otherwise&nbsp;RuntimeError&nbsp;is<br>
 raised.&nbsp;Its&nbsp;initial&nbsp;value&nbsp;is&nbsp;inherited&nbsp;from&nbsp;the&nbsp;creating&nbsp;thread;&nbsp;the<br>
 main&nbsp;thread&nbsp;is&nbsp;not&nbsp;a&nbsp;daemon&nbsp;thread&nbsp;and&nbsp;therefore&nbsp;all&nbsp;threads&nbsp;created&nbsp;in<br>
 the&nbsp;main&nbsp;thread&nbsp;default&nbsp;to&nbsp;daemon&nbsp;=&nbsp;False.<br>
 &nbsp;<br>
-The&nbsp;entire&nbsp;Python&nbsp;program&nbsp;exits&nbsp;when&nbsp;only&nbsp;daemon&nbsp;threads&nbsp;are&nbsp;left.</tt></dd>
+The&nbsp;entire&nbsp;Python&nbsp;program&nbsp;exits&nbsp;when&nbsp;only&nbsp;daemon&nbsp;threads&nbsp;are&nbsp;left.</span></dd>
 </dl>
 <dl><dt><strong>name</strong></dt>
-<dd><tt>A&nbsp;string&nbsp;used&nbsp;for&nbsp;identification&nbsp;purposes&nbsp;only.<br>
+<dd><span class="code">A&nbsp;string&nbsp;used&nbsp;for&nbsp;identification&nbsp;purposes&nbsp;only.<br>
 &nbsp;<br>
 It&nbsp;has&nbsp;no&nbsp;semantics.&nbsp;Multiple&nbsp;threads&nbsp;may&nbsp;be&nbsp;given&nbsp;the&nbsp;same&nbsp;name.&nbsp;The<br>
-initial&nbsp;name&nbsp;is&nbsp;set&nbsp;by&nbsp;the&nbsp;constructor.</tt></dd>
+initial&nbsp;name&nbsp;is&nbsp;set&nbsp;by&nbsp;the&nbsp;constructor.</span></dd>
 </dl>
 </td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-main"><strong>main</strong></a>(preamble=())</dt><dd><tt>Adapted&nbsp;from&nbsp;the&nbsp;top-level&nbsp;code&nbsp;of&nbsp;the&nbsp;asyncio.__main__&nbsp;&nbsp;module,&nbsp;no&nbsp;essential&nbsp;changes.</tt></dd></dl>
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-main"><strong>main</strong></a>(preamble=())</dt><dd><span class="code">Adapted&nbsp;from&nbsp;the&nbsp;top-level&nbsp;code&nbsp;of&nbsp;the&nbsp;asyncio.__main__&nbsp;&nbsp;module,&nbsp;no&nbsp;essential&nbsp;changes.</span></dd></dl>
 </td></tr></table>
 </body></html>

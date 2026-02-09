@@ -88,6 +88,8 @@ class SecureNumber(SecureObject):
     __slots__ = ()
 
     bit_length = None
+    field: type  # NB: not necessarily present in subclasses (see, e.g., SecureFloat)
+    frac_length: int  # NB: not necessarily present in subclasses
 
     def if_else(self, x, y):
         """Use SecureNumber as condition for secure selection between x and y."""
@@ -648,11 +650,11 @@ def _SecFld(field):
     secarray.sectype = secfld
     if secfld.subfield:
         @classmethod
-        def out_conv(cls, a):  # field -> subfield
+        def out_conv_array(cls, a):  # field -> subfield
             assert np.all(np.vectorize(lambda _: _.degree())(a.value) <= 0)
             return secfld.subfield.array(np.vectorize(int)(a), check=False)
 
-        secarray._output_conversion = out_conv
+        secarray._output_conversion = out_conv_array
     globals()[name] = secarray  # TODO: check name dynamic type sufficiently unique
     secfld.array = secarray
     return secfld
@@ -1023,10 +1025,12 @@ class SecureArray(SecureObject):
 
     @property
     def ndim(self):
+        """Number of array dimensions."""
         return len(self.shape)
 
     @property
     def size(self):
+        """Number of elements in the array."""
         return math.prod(self.shape)
 
     def _coerce(self, other):
@@ -1074,15 +1078,15 @@ class SecureArray(SecureObject):
         return other
 
     def __neg__(self):
-        """Matrix negation."""
+        """Elementwise negation."""
         return runtime.np_negative(self)
 
     def __abs__(self):
-        """Matrix absolute value."""
+        """Elementwise absolute value."""
         return runtime.np_absolute(self)
 
     def __add__(self, other):
-        """Matrix addition."""
+        """Elementwise addition."""
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
@@ -1092,7 +1096,7 @@ class SecureArray(SecureObject):
     __radd__ = __add__
 
     def __sub__(self, other):
-        """Matrix subtraction."""
+        """Elementwise subtraction."""
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
@@ -1100,7 +1104,7 @@ class SecureArray(SecureObject):
         return runtime.np_subtract(self, other)
 
     def __rsub__(self, other):
-        """Matrix subtraction."""
+        """Elementwise subtraction (with reflected arguments)."""
         other = self._coerce(other)
         if other is NotImplemented:
             return NotImplemented
@@ -1108,7 +1112,7 @@ class SecureArray(SecureObject):
         return runtime.np_subtract(other, self)
 
     def __mul__(self, other):
-        """Multiplication."""
+        """Elementwise multiplication."""
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
@@ -1118,7 +1122,7 @@ class SecureArray(SecureObject):
     __rmul__ = __mul__
 
     def __truediv__(self, other):
-        """Division."""
+        """Elementwise division."""
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
@@ -1126,7 +1130,7 @@ class SecureArray(SecureObject):
         return runtime.np_divide(self, other)
 
     def __rtruediv__(self, other):
-        """Division (with reflected arguments)."""
+        """Elementwise division (with reflected arguments)."""
         other = self._coerce2(other)
         if other is NotImplemented:
             return NotImplemented
@@ -1185,10 +1189,12 @@ class SecureArray(SecureObject):
 
     @property
     def T(self):
+        """Transpose of array."""
         return self.transpose()
 
     @property
     def flat(self):
+        """1D iterator over array."""
         # via flatten(), no MPyC coroutine for generators yet
         yield from self.flatten()
 
@@ -1205,25 +1211,51 @@ class SecureArray(SecureObject):
     # TODO: __setitem__(self, i, x) or runtime.np_update(a, i, x) instead
 
     def flatten(self, order='C'):
+        """Return 1D copy of array.
+
+        Default 'C' for row-major order (C style).
+        Alternative 'F' for column-major order (Fortran style).
+        """
         return runtime.np_flatten(self, order=order)
 
     def tolist(self):
+        """Return copy as (nested) list of Python scalars.
+
+        Nested list is self.ndim levels deep (scalar if self.ndim is zero).
+        """
         return runtime.np_tolist(self)
 
     def reshape(self, *shape, order='C'):
+        """Return array with specified shape, containing same data."""
+        if len(shape) == 1 and isinstance(shape[0], tuple):
+            shape = shape[0]
         # NB: numpy.reshape only accepts a tuple (or a single int) as shape
         return runtime.np_reshape(self, shape, order=order)
 
     def copy(self, order='C'):
+        """Return copy of array."""
         return runtime.np_copy(self, order=order)
 
     def diagonal(self, offset=0, axis1=0, axis2=1):
+        """Return diagonals of 2D (sub)arrays specified by axis1 and axis2.
+
+        Default diagonal is offset=0.
+        Use offset>0 for diagonals above the main diagonal,
+        and offset<0 for diagonals below the main diagonal.
+        """
         return runtime.np_diagonal(self, offset=offset, axis1=axis1, axis2=axis2)
 
     def trace(self, offset=0, axis1=0, axis2=1):
+        """Return sums along diagonal of 2D (sub)arrays specified by axis1 and axis2.
+
+        Default diagonal is offset=0.
+        Use offset>0 for diagonals above the main diagonal,
+        and offset<0 for diagonals below the main diagonal.
+        """
         return runtime.np_trace(self, offset=offset, axis1=axis1, axis2=axis2)
 
     def transpose(self, *axes):
+        """Return array with axes transposed."""
         if axes == ():
             axes = None
         elif len(axes) == 1 and isinstance(axes[0], (list, tuple)):
@@ -1231,9 +1263,11 @@ class SecureArray(SecureObject):
         return runtime.np_transpose(self, axes=axes)
 
     def swapaxes(self, axis1, axis2):
+        """Array with axis1 and axis2 interchanged."""
         return runtime.np_swapaxes(self, axis1, axis2)
 
     def sum(self, *args, **kwargs):
+        """Return sum of array elements over the given axis."""
         return runtime.np_sum(self, *args, **kwargs)
 
     def sort(self, *args, **kwargs):

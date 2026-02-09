@@ -36,6 +36,7 @@ runtime = None
 
 
 class secpoly(SecureObject):
+    """Secure polynomials of secret degree and with secret coefficients."""
 
     __slots__ = ()
 
@@ -81,7 +82,7 @@ class secpoly(SecureObject):
         return other
 
     def __neg__(self):
-        return secpoly(-self.share)
+        return secpoly(runtime.np_negative(self.share))
 
     def __pos__(self):
         return secpoly(self.share)  # TODO: +self.share doesn't work, copy strategy ...
@@ -89,11 +90,11 @@ class secpoly(SecureObject):
     @staticmethod
     def _add(a, b):
         if len(a) == len(b):  # fast path
-            return a + b
+            return runtime.np_add(a, b)
 
         if len(a) < len(b):
             a, b = b, a
-        return np.concatenate((a[:len(b)] + b, a[len(b):]))
+        return runtime.np_concatenate((a[:len(b)] + b, a[len(b):]))
 
     def __add__(self, other):
         """Add polynomials of secret degree."""
@@ -112,12 +113,12 @@ class secpoly(SecureObject):
         m = len(a)
         n = len(b)
         if m == n:  # fast path
-            c = a - b
+            c = runtime.np_subtract(a, b)
         elif m > n:
-            c = np.concatenate((a[:n] - b, a[n:]))
+            c = runtime.np_concatenate((a[:n] - b, a[n:]))
         else:
-            b = -b
-            c = np.concatenate((a + b[:m], b[m:]))
+            b = runtime.np_negative(b)
+            c = runtime.np_concatenate((a + b[:m], b[m:]))
         return c
 
     def __sub__(self, other):
@@ -152,21 +153,42 @@ class secpoly(SecureObject):
         return secpoly(secpoly._mul(a.share, b.share))
 
     @staticmethod
+    def _if_else(c, a, b):
+        if len(a) == len(b):
+            # fast path
+            d = runtime.np_where(c, a, b)
+        else:
+            d = secpoly._add(c * secpoly._sub(a, b), b)
+        return d
+
+    @staticmethod
     def if_else(c, a, b):
         """Secure selection based on binary condition c between polynomials a and b.
 
         Condition c must be of a secure number type compatible with a and b
         and its value should be 0 or 1.
         """
-        # TODO: make this general
-        a = a.share
-        b = b.share
+        return secpoly(secpoly._if_else(c, a.share, b.share))
+
+    @staticmethod
+    def _if_swap(c, a, b):
         if len(a) == len(b):
             # fast path
-            d = np.where(c, a, b)
+            a, b = runtime.np_if_swap(c, a, b)
         else:
-            d = secpoly._add(c * secpoly._sub(a, b), b)
-        return secpoly(d)
+            d = c * secpoly._sub(a, b)
+            a, b = secpoly._sub(a, d), secpoly._add(b, d)
+        return a, b
+
+    @staticmethod
+    def if_swap(c, a, b):
+        """Secure swap between polynomials a and b based on binary condition c.
+
+        Condition c must be of a secure number type compatible with a and b
+        and its value should be 0 or 1.
+        """
+        a, b = secpoly._if_swap(c, a.share, b.share)
+        return secpoly(a), secpoly(b)
 
     @staticmethod
     def _powmod(a, n, modulus=None):
@@ -201,8 +223,7 @@ class secpoly(SecureObject):
 
     @staticmethod
     def _invert(a, b):
-        _, u, _ = secpoly._gcdext(a, b)
-        return u
+        return secpoly._gcdext(a, b)[1]
 
     @staticmethod
     def invert(a, b):
@@ -210,8 +231,7 @@ class secpoly(SecureObject):
 
         Inverse is assumed to exist.
         """
-        _, u, _ = secpoly.gcdext(a, b)
-        return u
+        return secpoly(secpoly._invert(a.share, b.share))
 
     def __getitem__(self, key):  # NB: no set_item to prevent mutability
         # TODO: more advanced indexing, see also mpyc.gfpx
@@ -223,7 +243,7 @@ class secpoly(SecureObject):
             raise IndexError('negative index not allowed for secure polynomials')
 
         try:
-            v = self.share[key]
+            v = runtime.np_getitem(self.share, key)  # self.share[key]
         except IndexError:
             v = self.sectype(0)
         return v
@@ -236,7 +256,7 @@ class secpoly(SecureObject):
         assert len(a) <= type(a).sectype.field.modulus  # NB: len(a) assumed sufficiently small
         # TODO: add use of alternative representation(s) for _degree(a)
         # (e.g., using a binary or unary encoding with bits of type sectype, or using a secint)
-        return len(a) - 1 - runtime.np_find(np.flip(a) == 0, 0, bits=True)
+        return len(a) - 1 - runtime.np_find(runtime.np_flip(a) == 0, 0, bits=True)
 
     def degree(self):
         """Degree of polynomial.
@@ -282,7 +302,7 @@ class secpoly(SecureObject):
                 raise ValueError('degree d must be at least -1')
 
             if d+1 < n:
-                a = runtime.np_getitem(a, slice(d+1))  # truncate
+                a = runtime.np_getitem(a, slice(d+1))  # truncate a[:d+1]
                 a = runtime.np_flip(a)
             elif d+1 > n:
                 a = runtime.np_flip(a)
@@ -302,7 +322,7 @@ class secpoly(SecureObject):
                 d = runtime.convert(d, type(a).sectype)
             x = runtime.unit_vector(d+1, n+1)[1:]   # 0 <= d+1 < n+1
             x = runtime.np_fromlist(x)
-            x = np.flip(np.cumsum(np.flip(x)))
+            x = runtime.np_flip(runtime.np_cumsum(runtime.np_flip(x)))
             a *= x  # truncate
 
         # TODO: check alternative using np.roll with secret offset:
@@ -310,7 +330,7 @@ class secpoly(SecureObject):
         x = runtime.unit_vector(d, n)  # NB: if d=-1, value for x irrelevant, as a=0 already
         x = runtime.np_fromlist(x)
         # rotate and flip in one go
-        return np.stack(tuple(np.roll(x, -i) for i in range(n))) @ a
+        return runtime.np_stack(tuple(runtime.np_roll(x, -i) for i in range(n))) @ a
 
     def reverse(self, d=None):
         """Reverse of polynomial by specified degree d.
@@ -328,7 +348,7 @@ class secpoly(SecureObject):
 
     def truncate(self, n):
         """Truncate polynomial modulo X^n, for nonnegative n."""
-        return secpoly(self.share[:n])
+        return secpoly(runtime.np_getitem(self.share, slice(n)))  # self.share[:n]
 
     @mpc_coro
     @staticmethod
@@ -345,9 +365,9 @@ class secpoly(SecureObject):
         poly = GFpX(field.modulus)
 
         degb = secpoly._degree(b)
-        a = np.flip(a)
-        b = np.flip(b)
-        b = np.roll(b, degb + 1)
+        a = runtime.np_flip(a)
+        b = runtime.np_flip(b)
+        b = runtime.np_roll(b, degb + 1)
 
         field_relative_size = field.order.bit_length() // runtime.options.sec_param
         if field_relative_size < 2:  # small and medium-sized fields
@@ -421,9 +441,9 @@ class secpoly(SecureObject):
     @staticmethod
     def _lshift(a, n):
         if not a:
-            a = np.copy(a)
+            a = runtime.np_copy(a)
         else:
-            a = np.concatenate((np.zeros(n, dtype=int), a))
+            a = runtime.np_concatenate((np.zeros(n, dtype=int), a))
         return a
 
     def __lshift__(self, n):
@@ -432,7 +452,7 @@ class secpoly(SecureObject):
 
     @staticmethod
     def _rshift(a, n):
-        return a[n:]
+        return runtime.np_getitem(a, slice(n, None))  # a[n:]
 
     def __rshift__(self, n):
         """Quotient of polynomial divided by X^n."""
@@ -457,13 +477,13 @@ class secpoly(SecureObject):
             return a
 
         if n > len(b):
-            b = np.concatenate((b, np.zeros(n - len(b), dtype=int)))
+            b = runtime.np_concatenate((b, np.zeros(n - len(b), dtype=int)))
         # len(a)=len(b)=n ensured
         e = secpoly._gcpx(a, b)
-        f = np.roll(a, n - e)
-        g = np.roll(b, n - e)  # TODO: combine rolls ?
+        f = runtime.np_roll(a, n - e)
+        g = runtime.np_roll(b, n - e)  # TODO: combine rolls ?
         c = f[0] == 0
-        f, g = np.where(c, g, f), np.where(c, f, g)  # TODO: combine wheres ?
+        f, g = runtime.np_if_swap(c, f, g)
         # f[0] != 0 ensured unless f=g=0
         stype = type(a)
         field = stype.sectype.field
@@ -477,9 +497,7 @@ class secpoly(SecureObject):
             _delta_gt0 = runtime.convert(delta_gt0, stype.sectype)
             g_0 = g[0] != 0
             _g_0 = runtime.convert(g_0, secint)
-            c = _delta_gt0 * g_0
-            d = c * secpoly._sub(g, f)
-            f, g = secpoly._add(f, d), secpoly._sub(g, d)
+            f, g = secpoly._if_swap(_delta_gt0 * g_0, f, g)
             delta *= (1 - 2 * delta_gt0 * _g_0)
             g = f[0]*g - g[0]*f  # ensure g[0]=0
             g = g[1:]
@@ -487,7 +505,7 @@ class secpoly(SecureObject):
             if not g:
                 break
         f = secpoly._monic(f)
-        f = np.roll(f, e)
+        f = runtime.np_roll(f, e)
         return f
 
     @staticmethod
@@ -511,12 +529,9 @@ class secpoly(SecureObject):
             g_0 = g[0] != 0
             _g_0 = runtime.convert(g_0, secint)
             c = _delta_gt0 * g_0
-            d = c * secpoly._sub(g, f)
-            f, g = secpoly._add(f, d), secpoly._sub(g, d)
-            d = c * secpoly._sub(q, u)
-            u, q = secpoly._add(u, d), secpoly._sub(q, d)
-            d = c * secpoly._sub(r, v)
-            v, r = secpoly._add(v, d), secpoly._sub(r, d)
+            f, g = secpoly._if_swap(c, f, g)
+            u, q = secpoly._if_swap(c, u, q)
+            v, r = secpoly._if_swap(c, v, r)
             delta *= (1 - 2 * delta_gt0 * _g_0)
             f0, g0 = f[0], g[0]
             g = f0*g - g0*f  # ensure g[0]=0
@@ -535,25 +550,23 @@ class secpoly(SecureObject):
     def _gcdext(a, b):
         m, n = len(a), len(b)
         if m < n:
-            a = np.concatenate((a, np.zeros(n - m, dtype=int)))
+            a = runtime.np_concatenate((a, np.zeros(n - m, dtype=int)))
         elif n < m:
-            b = np.concatenate((b, np.zeros(m - n, dtype=int)))
+            b = runtime.np_concatenate((b, np.zeros(m - n, dtype=int)))
         n = len(a)  # TODO: check case n=0, maybe return a if so
         # len(a)=len(b)=n ensured
         assert len(a) == len(b)
         e = secpoly._gcpx(a, b)
-        f = np.roll(a, n - e)
-        g = np.roll(b, n - e)  # TODO: combine rolls ?
+        f = runtime.np_roll(a, n - e)
+        g = runtime.np_roll(b, n - e)  # TODO: combine rolls ?
         c = f[0] == 0
-        f, g = np.where(c, g, f), np.where(c, f, g)  # TODO: combine wheres ?
+        f, g = runtime.np_if_swap(c, f, g)
         # f[0] != 0 ensured unless f=g=0
         d = n  # see secpoly._gcd()
-        delta, f, g, (u, v, _, _) = secpoly._divstepsx2(2*d-1, f, g)
+        _, f, g, (u, v, _, _) = secpoly._divstepsx2(2*d-1, f, g)
         f, lc1 = secpoly._monic(f, lc_pinv=True)
-        f = np.roll(f, e)
-        u = u * lc1
-        v = v * lc1
-        u, v = np.where(c, v, u), np.where(c, u, v)  # TODO: combine wheres ?
+        f = runtime.np_roll(f, e)
+        u, v = runtime.np_if_swap(c, u * lc1, v * lc1)
         return f, u, v
 
     @staticmethod
@@ -585,6 +598,7 @@ class secpoly(SecureObject):
         return (d != -1) * (d != 0) * (c == poly(1))
 
     def copy(self):
+        """Copy of polynomial."""
         return secpoly(self.share.copy())
 
     @staticmethod

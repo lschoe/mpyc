@@ -600,7 +600,7 @@ class Runtime:
         return y
 
     @asyncoro.mpc_coro
-    async def _reshare(self, x):
+    async def _reshare(self, x):  # a la [GRR98]
         x_is_list = isinstance(x, list)
         if not x_is_list:
             x = [x]
@@ -1083,11 +1083,11 @@ class Runtime:
             a = b = await self.gather(a)
         else:
             a, b = await self.gather(a, b)
-        c = a * b
+        c = a * b  # a la [BGW88]
         if f and (a_integral or b_integral) and z != f:
             c >>= f - z  # NB: in-place rshift
         if shb:
-            c = self._reshare(c)
+            c = self._reshare(c)  # a la [GRR98]
         if f and not (a_integral or b_integral) and z != f:
             c = self.trunc(stype(c), f=f - z)
         return c
@@ -2599,9 +2599,9 @@ class Runtime:
 
     @asyncoro.mpc_coro_no_pc
     async def np_tolist(self, a):
-        """Return array a as an nested list of Python scalars.
+        """Return array a as (nested) list of Python scalars.
 
-        The nested list is a.ndim levels deep (scalar if a.ndim is zero).
+        Nested list is a.ndim levels deep (scalar if a.ndim is zero).
         """
         stype = type(a).sectype
         if issubclass(stype, self.SecureFixedPoint):
@@ -2828,6 +2828,7 @@ class Runtime:
 
     @asyncoro.mpc_coro_no_pc
     async def np_copy(self, a, order='K'):
+        """Return copy of a."""
         # Note that numpy.copy() puts order='K', but ndarray.copy() puts order='C'.
         # Therefore, we put order='K' here and let SecureArray.copy() call np_copy() with order='C'.
         # TODO: a can be a scalar, should be wrapped in 0D array
@@ -3003,6 +3004,12 @@ class Runtime:
 
     @asyncoro.mpc_coro_no_pc
     async def np_vstack(self, tup):
+        """Stack arrays in sequence vertically (as rows).
+
+        This is equivalent to concatenation along the first axis
+        after 1D arrays of shape (N,) have been reshaped to (1,N).
+        Rebuilds arrays divided by vsplit.
+        """
         a = tup[0]
         stype = type(a)
         shape = list(a.shape) if a.ndim >= 2 else [1, a.shape[0]]
@@ -3019,11 +3026,11 @@ class Runtime:
 
     @asyncoro.mpc_coro_no_pc
     async def np_hstack(self, tup):
-        """Stack arrays in sequence horizontally (column wise).
+        """Stack arrays in sequence horizontally (as columns).
 
         This is equivalent to concatenation along the second axis,
-        except for 1D arrays where it concatenates along the first
-        axis. Rebuilds arrays divided by hsplit.
+        except for 1D arrays where it concatenates along the first axis.
+        Rebuilds arrays divided by hsplit.
         """
         i = 0
         while not isinstance(a := tup[i], self.SecureArray):
@@ -3067,6 +3074,10 @@ class Runtime:
 
     @asyncoro.mpc_coro_no_pc
     async def np_column_stack(self, tup):
+        """Stack 1D arrays as columns into a 2D array.
+
+        2D arrays are stacked as-is, just like with hstack.
+        """
         i = 0
         while not isinstance(a := tup[i], self.SecureArray):
             i += 1
@@ -3258,6 +3269,14 @@ class Runtime:
         The shapes of a, b, and c are broadcast together.
         """
         return c * (a - b) + b
+
+    def np_if_swap(self, c, a, b):
+        """Conditional swap of elements in a and b depending on condition c.
+
+        The shapes of a, b, and c are broadcast together.
+        """
+        d = c * (a - b)
+        return a - d, b + d
 
     def np_amin(self, a, axis=None, keepdims=False):
         """Secure minimum of array a, entirely or along the given axis (or axes).
@@ -4820,11 +4839,13 @@ class Runtime:
         return u
 
     def set_protocol(self, peer_pid, protocol):
+        """Register connection with given peer."""
         self.parties[peer_pid].protocol = protocol
         if all(p.protocol is not None for p in self.parties if p.pid != self.pid):
             self.parties[self.pid].protocol.set_result(None)
 
     def unset_protocol(self, peer_pid):
+        """Deregister connection with given peer."""
         self.parties[peer_pid].protocol = None
         if all(p.protocol is None for p in self.parties if p.pid != self.pid):
             self.parties[self.pid].protocol.set_result(None)

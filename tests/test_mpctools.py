@@ -55,6 +55,10 @@ class Arithmetic(unittest.TestCase):
                              [1, 10, 10**2, 10**3, 10**4, 10**5])
             self.assertRaises(TypeError, acc, None)
             self.assertEqual(mpc.run(mpc.output(list(acc([])))), [])
+        # NB: acc=mpyc.mpctools.accumulate
+        self.assertEqual(mpc.run(mpc.output(list(acc(x3, method='Brent-Kung')))),
+                         list(itertools.accumulate(r3)))
+        self.assertRaises(ValueError, acc, x3, method='BrentKung')
 
 
 if __name__ == "__main__":

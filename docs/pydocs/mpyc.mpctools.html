@@ -1,38 +1,37 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mpyc.mpctools</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mpyc.mpctools</title>
+<link rel="stylesheet" type="text/css" href="pydoc.css">
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mpyc.html"><font color="#ffffff">mpyc</font></a>.mpctools</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.10/mpyc/mpctools.py">github.com/lschoe/mpyc/blob/v0.10/mpyc/mpctools.py</a></font></td></tr></table>
-    <p><tt>This&nbsp;module&nbsp;currently&nbsp;provides&nbsp;alternative&nbsp;implementations&nbsp;for&nbsp;two<br>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mpyc.html" class="white">mpyc</a>.mpctools</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="https://github.com/lschoe/mpyc/blob/v0.11/mpyc/mpctools.py">github.com/lschoe/mpyc/blob/v0.11/mpyc/mpctools.py</a></td></tr></table>
+    <p><span class="code">This&nbsp;module&nbsp;currently&nbsp;provides&nbsp;alternative&nbsp;implementations&nbsp;for&nbsp;two<br>
 functions&nbsp;in&nbsp;Python's&nbsp;itertools&nbsp;and&nbsp;functools&nbsp;modules,&nbsp;respectively.<br>
 &nbsp;<br>
 The&nbsp;alternative&nbsp;implementations&nbsp;can&nbsp;be&nbsp;used&nbsp;as&nbsp;drop-in&nbsp;replacements,&nbsp;however,<br>
 potentially&nbsp;enhancing&nbsp;the&nbsp;performance&nbsp;when&nbsp;used&nbsp;in&nbsp;secure&nbsp;computations.&nbsp;More<br>
 specifically,&nbsp;these&nbsp;implementations&nbsp;are&nbsp;aimed&nbsp;at&nbsp;reducing&nbsp;the&nbsp;overall&nbsp;round<br>
-complexity,&nbsp;possible&nbsp;at&nbsp;the&nbsp;expense&nbsp;of&nbsp;increasing&nbsp;overall&nbsp;space&nbsp;complexity,<br>
-time&nbsp;complexity,&nbsp;and&nbsp;communication&nbsp;complexity.</tt></p>
+complexity,&nbsp;possibly&nbsp;at&nbsp;the&nbsp;expense&nbsp;of&nbsp;increasing&nbsp;overall&nbsp;space&nbsp;complexity,<br>
+time&nbsp;complexity,&nbsp;and&nbsp;communication&nbsp;complexity.</span></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="https://docs.python.org/3/library/operator.html">operator</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="https://docs.python.org/3/library/operator.html">operator</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-accumulate"><strong>accumulate</strong></a>(x, f=&lt;built-in function add&gt;, initial=&lt;no value&gt;)</dt><dd><tt>For&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments,&nbsp;make&nbsp;an&nbsp;iterator&nbsp;that&nbsp;returns<br>
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-accumulate"><strong>accumulate</strong></a>(x, f=&lt;built-in function add&gt;, initial=&lt;no value&gt;, method=None)</dt><dd><span class="code">For&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments,&nbsp;make&nbsp;an&nbsp;iterator&nbsp;that&nbsp;returns<br>
 the&nbsp;accumulated&nbsp;results&nbsp;over&nbsp;all&nbsp;(nonempty)&nbsp;prefixes&nbsp;of&nbsp;the&nbsp;given&nbsp;iterable&nbsp;x.<br>
 &nbsp;<br>
 The&nbsp;applications&nbsp;of&nbsp;f&nbsp;are&nbsp;arranged&nbsp;such&nbsp;that&nbsp;the&nbsp;maximum&nbsp;depth&nbsp;is&nbsp;logarithmic<br>
@@ -45,8 +44,13 @@ that&nbsp;f&nbsp;is&nbsp;associative&nbsp;(and&nbsp;that&nbsp;the&nbsp;arguments
 &nbsp;<br>
 If&nbsp;initial&nbsp;is&nbsp;provided&nbsp;(possibly&nbsp;equal&nbsp;to&nbsp;None),&nbsp;the&nbsp;accumulation&nbsp;leads&nbsp;off<br>
 with&nbsp;this&nbsp;initial&nbsp;value&nbsp;so&nbsp;that&nbsp;the&nbsp;output&nbsp;has&nbsp;one&nbsp;more&nbsp;element&nbsp;than&nbsp;the&nbsp;input<br>
-iterable.&nbsp;Otherwise,&nbsp;the&nbsp;number&nbsp;of&nbsp;elements&nbsp;output&nbsp;matches&nbsp;the&nbsp;input&nbsp;iterable&nbsp;x.</tt></dd></dl>
- <dl><dt><a name="-reduce"><strong>reduce</strong></a>(f, x, initial=&lt;no value&gt;)</dt><dd><tt>Apply&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments&nbsp;to&nbsp;the&nbsp;items&nbsp;of&nbsp;iterable&nbsp;x.<br>
+iterable.&nbsp;Otherwise,&nbsp;the&nbsp;number&nbsp;of&nbsp;elements&nbsp;output&nbsp;matches&nbsp;the&nbsp;input&nbsp;iterable&nbsp;x.<br>
+&nbsp;<br>
+If&nbsp;method&nbsp;is&nbsp;set&nbsp;to&nbsp;'Brent-Kung',&nbsp;the&nbsp;computational&nbsp;and&nbsp;communication&nbsp;complexity<br>
+measured&nbsp;as&nbsp;the&nbsp;number&nbsp;of&nbsp;applications&nbsp;of&nbsp;function,&nbsp;is&nbsp;minimized&nbsp;while&nbsp;ensuring<br>
+a&nbsp;logarithmic&nbsp;depth.&nbsp;Alternatively,&nbsp;if&nbsp;method&nbsp;is&nbsp;set&nbsp;to&nbsp;'Sklansky',&nbsp;the&nbsp;depth<br>
+is&nbsp;minimized.&nbsp;If&nbsp;method&nbsp;is&nbsp;not&nbsp;set,&nbsp;a&nbsp;default&nbsp;heuristic&nbsp;is&nbsp;followed.</span></dd></dl>
+ <dl><dt><a name="-reduce"><strong>reduce</strong></a>(f, x, initial=&lt;no value&gt;)</dt><dd><span class="code">Apply&nbsp;associative&nbsp;function&nbsp;f&nbsp;of&nbsp;two&nbsp;arguments&nbsp;to&nbsp;the&nbsp;items&nbsp;of&nbsp;iterable&nbsp;x.<br>
 &nbsp;<br>
 The&nbsp;applications&nbsp;of&nbsp;f&nbsp;are&nbsp;arranged&nbsp;in&nbsp;a&nbsp;binary&nbsp;tree&nbsp;of&nbsp;logarithmic&nbsp;depth,<br>
 thus&nbsp;limiting&nbsp;the&nbsp;overall&nbsp;round&nbsp;complexity&nbsp;of&nbsp;the&nbsp;secure&nbsp;computation.<br>
@@ -58,13 +62,12 @@ may&nbsp;even&nbsp;be&nbsp;of&nbsp;different&nbsp;types.<br>
 &nbsp;<br>
 If&nbsp;initial&nbsp;is&nbsp;provided&nbsp;(possibly&nbsp;equal&nbsp;to&nbsp;None),&nbsp;it&nbsp;is&nbsp;placed&nbsp;before&nbsp;the<br>
 items&nbsp;of&nbsp;x&nbsp;(hence&nbsp;effectively&nbsp;serves&nbsp;as&nbsp;a&nbsp;default&nbsp;when&nbsp;x&nbsp;is&nbsp;empty).&nbsp;If&nbsp;no<br>
-initial&nbsp;value&nbsp;is&nbsp;given&nbsp;and&nbsp;x&nbsp;contains&nbsp;only&nbsp;one&nbsp;item,&nbsp;that&nbsp;item&nbsp;is&nbsp;returned.</tt></dd></dl>
+initial&nbsp;value&nbsp;is&nbsp;given&nbsp;and&nbsp;x&nbsp;contains&nbsp;only&nbsp;one&nbsp;item,&nbsp;that&nbsp;item&nbsp;is&nbsp;returned.</span></dd></dl>
 </td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#55aa55">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
     
-<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>runtime</strong> = None</td></tr></table>
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>runtime</strong> = None</td></tr></table>
 </body></html>

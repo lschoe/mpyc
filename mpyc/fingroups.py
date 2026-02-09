@@ -235,6 +235,7 @@ class SymmetricGroupElement(FiniteGroupElement):
 
     @classmethod
     def inversion(cls, p, /):
+        """Inverse of permutation p."""
         n = len(p.value)
         q = [None] * n
         for i in range(n):
@@ -243,6 +244,7 @@ class SymmetricGroupElement(FiniteGroupElement):
 
     @classmethod
     def equality(cls, p, q, /):
+        """Test equality of permutations p and q."""
         return p.value == q.value
 
 
@@ -572,7 +574,7 @@ class EllipticCurvePoint(FiniteGroupElement):
         raise NotImplementedError
 
     def normalize(self):
-        """Convert to unique affine representation."""
+        """Convert to unique (affine) representation."""
         raise NotImplementedError
 
     @classmethod
@@ -599,6 +601,11 @@ class EllipticCurvePoint(FiniteGroupElement):
         """Decode message from given group elements."""
         gap = cls.gap
         return int((M.normalize()[0] - Z.normalize()[0]) / gap)
+
+    @classmethod
+    def equality(cls, pt1, pt2, /):
+        """Test equality of points pt1 and pt2."""
+        raise NotImplementedError
 
 
 class EdwardsCurvePoint(EllipticCurvePoint):
@@ -652,6 +659,7 @@ class EdwardsAffine(EdwardsCurvePoint):
 
     @classmethod
     def inversion(cls, pt, /):
+        """Invert Edwards point using affine coordinates."""
         x, y = pt
         return cls((-x, y), check=False)
 
@@ -689,6 +697,7 @@ class EdwardsProjective(EdwardsCurvePoint):
 
     @classmethod
     def inversion(cls, pt, /):
+        """Invert Edwards point with projective coordinates."""
         x, y, z = pt
         return cls((-x, y, z), check=False)
 
@@ -734,6 +743,7 @@ class EdwardsExtended(EdwardsCurvePoint):
 
     @classmethod
     def inversion(cls, pt, /):
+        """Invert (twisted a=-1) Edwards point in extended projective coordinates."""
         x, y, z, t = pt
         return cls((-x, y, z, -t), check=False)
 
@@ -820,6 +830,7 @@ class WeierstrassAffine(WeierstrassCurvePoint):
 
     @classmethod
     def inversion(cls, pt, /):
+        """Invert Weierstrass point with affine coordinates."""
         if pt == cls.identity:
             return pt
 
@@ -881,6 +892,7 @@ class WeierstrassProjective(WeierstrassCurvePoint):
 
     @classmethod
     def inversion(cls, pt, /):
+        """Invert Weierstrass point with projective coordinates."""
         x, y, z = pt
         return cls((x, -y, z), check=False)
 
@@ -951,6 +963,7 @@ class WeierstrassJacobian(WeierstrassCurvePoint):
 
     @classmethod
     def inversion(cls, pt, /):
+        """Invert Weierstrass point with Jacobian coordinates."""
         x, y, z = pt
         return cls((x, -y, z), check=False)
 
@@ -1168,7 +1181,7 @@ def _EllipticCurve(curvename, coordinates):
 class HyperellipticCurveDivisor(FiniteGroupElement):
     """Common base class for divisors in Jacobian of a hyperelliptic curve.
 
-    Arbitrary genus, using (affine) Mumford representation.and algorithms from Cantor's 1987 paper.
+    Arbitrary genus, using (affine) Mumford representation and algorithms from Cantor's 1987 paper.
     """
 
     __slots__ = ()
@@ -1348,6 +1361,7 @@ class HyperellipticCurveDivisor(FiniteGroupElement):
 
     @classmethod
     def operation(cls, D1, D2, /):
+        """Add divisor D1 to D2."""
         return cls(HyperellipticCurveDivisor._operation(cls.f, cls.genus, D1, D2), check=False)
 
     @staticmethod
@@ -1366,16 +1380,19 @@ class HyperellipticCurveDivisor(FiniteGroupElement):
 
     @classmethod
     def operation2(cls, D, /):
+        """Add divisor D to itself."""
         # formula (C5a) from Cantor's 1987 paper
         return cls(HyperellipticCurveDivisor._operation2(cls.f, cls.genus, D), check=False)
 
     @classmethod
     def inversion(cls, D, /):
+        """Inverse -D of divisor D."""
         u, v = D
         return cls((u, -v), check=False)  # (-v) % u = -v because deg v < deg u
 
     @classmethod
     def equality(cls, D1, D2, /):
+        """Test equality of (reduced) divisors D1 and D2."""
         return D1.value == D2.value
 
 
@@ -1383,10 +1400,10 @@ class HCDivisorCL(HyperellipticCurveDivisor):
     """Costello-Lauter formulas for genus 2.
 
     With one exception, only divisors (u,v) with u of full degree 2 are assumed.
-    Such divisors are represented as a 6-tuple (u1, u0, v1, v0, u1u1, u1u0),
+    Such divisors are represented by a 6-tuple (u1,u0,v1,v0,u1u1,u1u0),
     where u(x)=x^2+u1x+u0 and v(x)=v1x+v0.
 
-    The only exception is that the identity (1,0) is also considered,
+    The exception is that the identity (1,0) is also considered,
     represented by the 6-tuple (0,0,0,0,0,0).
 
     See "Group Law Computations on Jacobians of Hyperelliptic Curves" by Costello and Lauter.
@@ -1738,6 +1755,7 @@ class ClassGroupForm(FiniteGroupElement):
 
     @classmethod
     def operation(cls, f1, f2, /):  # Cohen: Algorithm 5.4.9 (NUCOMP)
+        """Compose (and reduce) form f1 with form f2."""
         if f1[0] < f2[0]:
             f1, f2 = f2, f1
         a1, b1, c1 = f1
@@ -1804,6 +1822,7 @@ class ClassGroupForm(FiniteGroupElement):
 
     @classmethod
     def operation2(cls, f, /):  # Cohen: Algorithm 5.4.8 (NUDUPL)
+        """Compose (and reduce) form f with itself."""
         a, b, c = f
         d1, u, _ = gcdext(b, a)
         assert d1 == 1  # because -discriminant is prime
@@ -1842,11 +1861,13 @@ class ClassGroupForm(FiniteGroupElement):
 
     @classmethod
     def inversion(cls, f, /):
+        """Inverse 1/f of form f."""
         a, b, c = f
         return cls(cls._reduce((a, -b, c)), check=False)
 
     @classmethod
     def equality(cls, f1, f2, /):
+        """"Test equality of (reduced) forms f1 and f2."""
         return f1.value == f2.value
 
     @classmethod

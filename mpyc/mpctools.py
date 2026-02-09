@@ -42,7 +42,7 @@ def reduce(f, x, initial=_no_value):
     return x[0]
 
 
-def accumulate(x, f=operator.add, initial=_no_value):
+def accumulate(x, f=operator.add, initial=_no_value, method=None):
     """For associative function f of two arguments, make an iterator that returns
     the accumulated results over all (nonempty) prefixes of the given iterable x.
 
@@ -57,12 +57,19 @@ def accumulate(x, f=operator.add, initial=_no_value):
     If initial is provided (possibly equal to None), the accumulation leads off
     with this initial value so that the output has one more element than the input
     iterable. Otherwise, the number of elements output matches the input iterable x.
+
+    If method is set to 'Brent-Kung', the computational and communication complexity
+    measured as the number of applications of function, is minimized while ensuring
+    a logarithmic depth. Alternatively, if method is set to 'Sklansky', the depth
+    is minimized. If method is not set, a default heuristic is followed.
     """
     x = list(x)
     if initial is not _no_value:
         x.insert(0, initial)
     n = len(x)
-    if runtime.options.no_prss and n >= 32:
+    if method is None:
+        method = 'Brent-Kung' if runtime.options.no_prss and n >= 32 else 'Sklansky'
+    if method == 'Brent-Kung':
         # Minimize f-complexity of acc(0, n) a la Brent-Kung.
         # For n=2^k, k>=0: f-complexity=2n-2-k calls, f-depth=max(2k-2, k) rounds.
         def acc(i, j):
@@ -74,7 +81,7 @@ def accumulate(x, f=operator.add, initial=_no_value):
                     x[h-1] = f(x[i-1], a)
                 acc(h, j)
                 x[j-1] = f(a, x[j-1])
-    else:
+    elif method == 'Sklansky':
         # Minimize f-depth of acc(0, n) a la Sklansky.
         # For n=2^k, k>=0: f-complexity=(n/2)k calls, f-depth=k rounds.
         def acc(i, j):
@@ -84,6 +91,8 @@ def accumulate(x, f=operator.add, initial=_no_value):
                 a = x[h-1]
                 acc(h, j)
                 x[h:j] = (f(a, b) for b in x[h:j])
+    else:
+        raise ValueError('invalid method')
 
     acc(0, n)
     return iter(x)
