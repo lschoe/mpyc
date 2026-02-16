@@ -21,7 +21,7 @@ combined with asynchronous evaluation of the associated protocols.
 See `demos` for Python programs and Jupyter notebooks with lots of example code. Click the "launch binder" badge above to view the entire
 repository and try out the Jupyter notebooks from the `demos` directory in the cloud, without any install.
 
-The [MPyC homepage](https://www.win.tue.nl/~berry/mpyc/) has some more info and background.
+The [MPyC homepage](https://berry.win.tue.nl/mpyc/) has some more info and background.
 
 ## Installation
 

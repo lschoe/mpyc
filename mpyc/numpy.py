@@ -163,6 +163,27 @@ try:
 
     if np.lib.NumpyVersion(np.__version__) < '1.24.0':
         logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.24+.')
+
+    if np.lib.NumpyVersion(np.__version__) < '2.0.0':
+        np.concat = np.concatenate
+        np.pow = np.power
+
+    if np.lib.NumpyVersion(np.__version__) < '2.1.0':
+        def _(x, /, *, axis=None, dtype=None, out=None, include_initial=False):
+            if include_initial:
+                x = np.insert(x, 0, 0, axis=axis)  # TODO: insert for secure arrays
+            return np.cumsum(x, axis=axis, dtype=dtype, out=out)
+
+        np.cumulative_sum = _
+
+        def _(x, /, *, axis=None, dtype=None, out=None, include_initial=False):
+            if include_initial:
+                x = np.insert(x, 0, 1, axis=axis)  # TODO: insert for secure arrays
+            return np.cumprod(x, axis=axis, dtype=dtype, out=out)
+
+        np.cumulative_prod = _
+
+
 except ImportError:
     del _matmul_shape
     del _item_shape
