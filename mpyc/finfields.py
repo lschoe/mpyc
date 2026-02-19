@@ -712,9 +712,10 @@ class FiniteFieldArray:
 
     field: type  # finite field of the array
     _mix_types: type  # or tuple of types
+    np_version_2_0p = np.lib.NumpyVersion(np.__version__) >= '2.0.0b1'  # expensive 5 microsec check
 
     def __init__(self, value, check=True, copy=False):
-        if np.lib.NumpyVersion(np.__version__) >= '2.0.0b1':
+        if self.np_version_2_0p:
             if copy is False:
                 copy = None
         value = np.array(value, dtype=object, copy=copy)
