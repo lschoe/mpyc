@@ -260,7 +260,7 @@ class SecureNumber(SecureObject):
         if not isinstance(other, int):
             return NotImplemented
 
-        return runtime.mul(self, 1<<other)
+        return runtime.lshift(self, other)
 
     def __rlshift__(self, other):
         """Left shift (with reflected arguments)."""
@@ -1136,6 +1136,20 @@ class SecureArray(SecureObject):
             return NotImplemented
 
         return runtime.np_divide(other, self)
+
+    def __lshift__(self, other):
+        """Elementwise left shift."""
+        # TODO: extend to secret offset
+        if not isinstance(other, (int, np.integer)):
+            if not isinstance(other, np.ndarray):
+                return NotImplemented
+        # TODO: check other.dtype (if array), also for rshift etc.
+
+        return runtime.np_left_shift(self, other)
+
+    def __rlshift__(self, other):
+        """Elementwise left shift (with reflected arguments)."""
+        return NotImplemented
 
     def __pow__(self, other):
         """Exponentiation for public integral exponent."""

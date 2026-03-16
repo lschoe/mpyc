@@ -128,10 +128,12 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(c * c)), a * a)
         a *= 2
         c *= 2
+        a <<= 1
+        c <<= 1
         np.assertEqual(mpc.run(mpc.output(c)), a)
         np.assertEqual(mpc.run(mpc.output(mpc.np_lsb(c))), a.value % 2)
-        a /= 2
-        c /= 2
+        a /= 4
+        c /= 4
         np.assertEqual(mpc.run(mpc.output(c)), a)
         np.assertEqual(mpc.run(mpc.output(c @ c)), a @ a)
         np.assertEqual(mpc.run(mpc.output(c @ a)), a @ a)
@@ -435,6 +437,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.add(c2, c2).integral, True)
         self.assertEqual((c1 * c2).integral, False)
         self.assertEqual(np.multiply(c2, c2).integral, True)
+        self.assertEqual(np.left_shift(c1, 2).integral, False)
+        self.assertEqual(np.left_shift(c1, f).integral, True)
+        self.assertEqual((c2 << 2).integral, True)
         self.assertEqual(np.matmul(c1, c1).integral, False)
         self.assertEqual(np.matmul(c1, c2).integral, False)
         self.assertEqual((c2 @ c2).integral, True)

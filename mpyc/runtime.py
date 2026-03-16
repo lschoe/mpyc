@@ -1139,6 +1139,33 @@ class Runtime:
             c = self.np_trunc(stype(c, shape=shape), f=f - z)
         return c
 
+    @asyncoro.mpc_coro_no_pc
+    async def lshift(self, a, b):
+        """Secure left shift of a for public nonnegative integer b."""
+        stype = type(a)
+        f = stype.frac_length
+        if not f:
+            await self.returnType(stype)
+        else:
+            await self.returnType((stype, a.integral or (b >= f)))
+        a = await self.gather(a)
+        return a << b
+
+    @asyncoro.mpc_coro_no_pc
+    async def np_left_shift(self, a, b):
+        """Secure left shift of a for public nonnegative integer b, elementwise with broadcast."""
+        stype = type(a)
+        a_shape = getattr(a, 'shape', (1,))
+        b_shape = getattr(b, 'shape', (1,))
+        shape = np.broadcast_shapes(a_shape, b_shape)
+        f = stype.frac_length
+        if not f:
+            await self.returnType((stype, shape))
+        else:
+            await self.returnType((stype, a.integral or bool(np.all(b >= f)), shape))
+        a = await self.gather(a)
+        return a << b
+
     def div(self, a, b):
         """Secure division of a by b, for nonzero b."""
         b_is_SecureObject = isinstance(b, self.SecureObject)
@@ -4627,7 +4654,7 @@ class Runtime:
             s = 1 - x[..., -1]  # inverted sign bits
             x = x[..., :-1]
             x = np.flip(x, axis=-1)
-            nf = self.np_find(x, s, cs_f=lambda b, i: (b+1) * 2**i)  # TODO: << i for secure arrays
+            nf = self.np_find(x, s, cs_f=lambda b, i: (b+1) << i)
             return (s*2 - 1) * nf * (2**(f - (l-1)))  # NB: f <= l
 
         l = type(a).bit_length
