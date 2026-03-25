@@ -5,6 +5,7 @@ from mpyc import gmpy
 class Arithmetic(unittest.TestCase):
 
     def test_basic(self):
+        self.assertIsInstance(gmpy.version(), str)
         self.assertFalse(gmpy.is_prime(1))
         self.assertTrue(gmpy.is_prime(2))
         self.assertTrue(gmpy.is_prime(101))
@@ -21,6 +22,8 @@ class Arithmetic(unittest.TestCase):
         self.assertRaises(ValueError, gmpy.prev_prime, 2)
 
         self.assertEqual(gmpy.powmod(3, 256, 257), 1)
+        self.assertEqual(gmpy.powmod_base_list([3, 5], 256, 257), [1, 1])
+        self.assertEqual(gmpy.powmod_exp_list(9, [128, 256], 257), [1, 1])
 
         self.assertEqual(gmpy.gcdext(3, 257), (1, 86, -1))
         self.assertEqual(gmpy.gcdext(1234, 257), (1, -126, 605))

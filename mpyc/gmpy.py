@@ -103,13 +103,17 @@ try:
     if os.getenv('MPYC_NOGMPY') == '1':
         raise ImportError  # stubs will be loaded
 
-    from gmpy2 import (version, mpz, is_prime, next_prime, powmod, gcdext, invert,
-                       legendre, jacobi, kronecker, is_square, isqrt, iroot)
+    from gmpy2 import (version, mpz, is_prime, next_prime, powmod, gcdext, invert, legendre, jacobi,
+                       kronecker, is_square, isqrt, iroot, powmod_base_list, powmod_exp_list)
     logging.debug(f'Load gmpy2 version {version()}')
 except ImportError:
     # load stubs, if MPYC_NOGMPY is set, or if gmpy2 import fails
     logging.debug('Load pure Python stubs for gmpy2')
     import random
+
+    def version():
+        """Return string mentioning use of stubs."""
+        return 'MPyC stubs'
 
     def mpz(x):
         """Return Python int(x) as stub for gmpy2's mpz(x)."""
@@ -276,3 +280,11 @@ except ImportError:
             if z**n <= x:
                 y = z
         return y, x == y**n
+
+    def powmod_base_list(base_lst, exp, mod, /):
+        """Return list of x**exp modulo mod for x in base_lst."""
+        return list(pow(x, exp, mod) for x in base_lst)
+
+    def powmod_exp_list(base, exp_lst, mod, /):
+        """Return list of base**y modulo mod for y in exp_lst."""
+        return list(pow(base, y, mod) for y in exp_lst)

@@ -1326,6 +1326,9 @@ class Runtime:
     def np_pow(self, a, b):
         """Secure elementwise exponentiation a raised to the power of b, for public integer b."""
         # TODO: extend to non-scalar b
+        if b == 2:  # fast path
+            return self.np_multiply(a, a)
+
         if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
             d = a
             c = self.np_multiply(d, d)

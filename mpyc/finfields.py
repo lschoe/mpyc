@@ -1436,28 +1436,25 @@ class PrimeFieldArray(FiniteFieldArray):
                 p4 = (p*3 - 5) >> 2  # a**p4 == a**(-1/2) == 1/sqrt(a) mod p
             else:
                 p4 = (p+1) >> 2
-            p = gmpy2.mpz(p)
-            p4 = gmpy2.mpz(p4)
-
             W = int(os.getenv('MPYC_MAXWORKERS'))
             if W == 0:
-                powmod = gmpy2.powmod
-                return np.vectorize(lambda a: int(powmod(a, p4, p)), otypes='O')(a)
-
-            # Experimental use of W worker threads.
-            # Using gmpy2's new function powmod_base_list(), which releases the GIL.
-            # Example: "python np_lpsolver.py -i6 -M3 -W2" about 1.4x faster than for W=0.
-            from gmpy2 import powmod_base_list  # NB: requires gmpy2 >= 2.1.3
-            import concurrent.futures
-            n = a.size
-            s = a.flat
-            with concurrent.futures.ThreadPoolExecutor(max_workers=W) as executor:
-                tasks = {executor.submit(powmod_base_list, s[i*n//W:(i+1)*n//W], p4, p): i
-                         for i in range(W)}
-            s = np.empty(n, dtype='O')
-            for task in concurrent.futures.as_completed(tasks):
-                i = tasks[task]
-                s[i*n//W:(i+1)*n//W] = task.result()
+                s = gmpy2.powmod_base_list(a.reshape(-1), p4, p)
+            else:
+                # Experimental use of W worker threads.
+                # Using gmpy2's function powmod_base_list(), which releases the GIL.
+                # Example: "python np_lpsolver.py -i6 -M3 -W2" about 1.4x faster than for W=0.
+                import concurrent.futures
+                n = a.size
+                s = a.flat
+                p = gmpy2.mpz(p)
+                p4 = gmpy2.mpz(p4)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=W) as executor:
+                    tasks = {executor.submit(gmpy2.powmod_base_list, s[i*n//W:(i+1)*n//W], p4, p): i
+                             for i in range(W)}
+                s = np.empty(n, dtype='O')
+                for task in concurrent.futures.as_completed(tasks):
+                    i = tasks[task]
+                    s[i*n//W:(i+1)*n//W] = task.result()
             return np.vectorize(int, otypes='O')(s).reshape(a.shape)
 
         _sqrt = cls.field._sqrt
