@@ -396,6 +396,10 @@ class Arithmetic(unittest.TestCase):
                            np.cumulative_sum(a, axis=1, include_initial=True))
         self.assertEqual(np.prod(c, axis=(-2, 1)).integral, False)
         np.assertEqual(mpc.run(mpc.output(np.prod(c, axis=(-2, 1)))), np.prod(a, axis=(-2, 1)))
+        np.assertAlmostEqual(mpc.run(mpc.output(np.log(np.abs(c)))), np.log(np.abs(a)))
+        np.assertAlmostEqual(mpc.run(mpc.output(np.log2(np.abs(c[0])))), np.log2(np.abs(a[0])))
+        np.assertAlmostEqual(mpc.run(mpc.output(np.log10(c[0, 1]))), np.log10(a[0, 1]))
+
         a = a.flatten()[:3]
         c = c.flatten()[:3]
         np.assertEqual(mpc.run(mpc.output(np.amin(c))), np.amin(a))

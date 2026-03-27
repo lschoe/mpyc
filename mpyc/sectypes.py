@@ -64,12 +64,19 @@ if np:
         if op := unary_ops.get(ufunc):
             return op(inputs[0])
 
+        if ufunc.__name__ in ('log', 'log2', 'log10'):
+            if wrapped := not isinstance(inputs[0], SecureArray):
+                # wrap into 1D array
+                inputs = [runtime.np_fromlist(inputs)]
         try:
             func = eval(f'runtime.np_{ufunc.__name__}')
         except AttributeError:
             raise TypeError(f'np.{ufunc.__name__} not supported for {type(self).__name__}')
 
-        return func(*inputs, **kwargs)
+        out = func(*inputs, **kwargs)
+        if ufunc.__name__ in ('log', 'log2', 'log10') and wrapped:
+            out = out[0]
+        return out
 
     def __array_function__(self, func, types, args, kwargs):
         """Redirect __array_function__ call to array class, if any.

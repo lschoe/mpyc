@@ -4784,6 +4784,54 @@ class Runtime:
         s, c = self.sincos(a)
         return s / c
 
+    @staticmethod
+    @functools.cache
+    def _taylor_log_degree(f):
+        """Required degree of Taylor polynomial for log x as a function of f."""
+        # Degree k s.t. maximum error 1/(k+1) w^-(k+1) <= 2^-f,
+        # that is, log2(k+1) + (k+1)log2(w) >= f, where w = 1/(sqrt(2) - 1).
+        w = 1 / (math.sqrt(2) - 1)
+        k = f - 1  # invariant: log2(k+1) + (k+1)log2(w) >= f
+        while math.log2(k) + k * math.log2(w) >= f:
+            k -= 1
+        return k
+
+    def np_log(self, a):
+        """Secure elementwise natural logarithm of fixed-point array a.
+
+        From survival analysis project with Noah van der Meer (github.com/noahmr).
+        """
+        shape = a.shape
+        if len(shape) != 1:
+            a = self.np_reshape(a, -1)
+        f = a.frac_length
+        l = a.sectype.bit_length
+        x = self.np_to_bits(a, l=l-1)  # low to high bits, ignore sign bit
+        x = self.np_flip(x, axis=-1)
+        k, v = self.np_find(x, 1, cs_f=lambda b, i: (i+1+b, (b+1) << i))
+        v *= 2**(f - (l-1))  # NB: f <= l
+        b = a * v  # 1/2 <= b < 1
+
+        # Evaluate Taylor polynomial at b around 1/sqrt(2):
+        theta = self._taylor_log_degree(f)
+        alpha = 0.5 * math.sqrt(2)
+        y = b - alpha
+        ys = self.np_vander(y, theta + 1, increasing=True)[:, 1:]  # [y^1 y^2 ... y^theta]
+        i = np.arange(1, theta + 1)  # [1 2 ... theta]
+        c = math.log(alpha) + ys @ (-1 / (i * (-alpha)**i))
+        c -= (k - f) * math.log(2)
+        if len(shape) != 1:
+            c = self.np_reshape(c, shape)
+        return c
+
+    def np_log2(self, a):
+        """Secure elementwise base 2 logarithm of fixed-point array a."""
+        return self.np_log(a) * math.log2(math.e)
+
+    def np_log10(self, a):
+        """Secure elementwise base 10 logarithm of fixed-point array a."""
+        return self.np_log(a) * math.log10(math.e)
+
     def np_vander(self, a, N=None, increasing=False):
         """Securely generate Vandermonde matrix for given 1D array a.
 
