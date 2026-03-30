@@ -21,6 +21,7 @@ from dataclasses import dataclass
 import pickle
 import asyncio
 from mpyc.numpy import np
+from mpyc import gmpy as gmpy2
 from mpyc import finfields
 from mpyc import thresha
 from mpyc import asyncoro
@@ -1293,7 +1294,7 @@ class Runtime:
         return b
 
     def pow(self, a, b):
-        """Secure exponentiation a raised to the power of b, for public integer b."""
+        """Secure exponentiation a to the power of b, for public integer b."""
         if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
             d = a
             c = self.mul(d, d)
@@ -1311,7 +1312,11 @@ class Runtime:
             return type(a)(1)
 
         if b < 0:
-            a = self.reciprocal(a)
+            # NB: generalization of self.div(1, a)=1/a=a**-1, which equals a**b for b=-1
+            if a.frac_length:
+                a = self._rec(a)
+            else:
+                a = self.reciprocal(a)
             b = -b
         d = a
         c = 1
@@ -1324,11 +1329,25 @@ class Runtime:
         return c
 
     def np_pow(self, a, b):
-        """Secure elementwise exponentiation a raised to the power of b, for public integer b."""
-        # TODO: extend to non-scalar b
-        if b == 2:  # fast path
+        """Secure elementwise exponentiation a to the power of b,
+        where either a is a public number or b is a public integer.
+        """
+        # TODO: extend to a and b both nonscalar.
+
+        if isinstance(b, int) and b == 2:  # fast path
             return self.np_multiply(a, a)
 
+        if isinstance(a, (int, float)):
+            if isinstance(a, int):
+                if isinstance(b, self.SecureIntegerArray) or \
+                   isinstance(b, self.SecureFixedPointArray) and b.integral:
+                    return self._np_pow_public_int_base_secret_integral_exponent(a, b)
+
+            if a != 2:
+                b *= math.log2(a)  # convert to base 2, using a^b = 2^(b log_2 a)
+            return self.np_exp2(b)
+
+        assert isinstance(b, int)
         if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
             d = a
             c = self.np_multiply(d, d)
@@ -1346,7 +1365,11 @@ class Runtime:
             return type(a)(np.ones(a.shape, dtype='O'))
 
         if b < 0:
-            a = self.np_reciprocal(a)
+            # NB: generalization of self.np_divide(1, a)=1/a=a**-1, which equals a**b for b=-1
+            if a.frac_length:
+                a = self._rec(a)
+            else:
+                a = self.np_reciprocal(a)
             b = -b
         d = a
         c = 1
@@ -1357,6 +1380,44 @@ class Runtime:
             d = d * d
         c = c * d
         return c
+
+    @asyncoro.mpc_coro
+    async def _np_pow_public_int_base_secret_integral_exponent(self, a, b):
+        """Compute a^b for public int base a and secret-shared nonnegative integral exponents b.
+
+        Similar to mpyc.secgroups.repeat_public_base_secret_output().
+        """
+        await self.returnType((type(b), True, b.shape))
+
+        p = b.sectype.field.modulus
+        m = len(self.parties)
+        t = self.threshold
+        uci = self._program_counter[0] % m
+        senders = tuple((uci + i) % m for i in range(t+1))  # NB: simple load balancing
+        if self.pid in senders:
+            # All senders locally generate random numbers r_i and compute a^(-r_i).
+            l = b.sectype.bit_length
+            k = self.options.sec_param
+            bound = 1<<(l + k) // (t+1)
+            r = np.array([secrets.randbelow(bound) for _ in range(b.size)], dtype=object)  # r_i
+            a_r = np.vectorize(int, otypes='O')(gmpy2.powmod_exp_list(a, -r, p))  # a^(-r_i)
+            r_1 = type(b)(np.vstack((r, a_r)))
+            del r, a_r
+        else:
+            r_1 = type(b)(shape=(2, b.size), integral=True)
+        r_1 = np.stack(self.input(r_1, senders=senders))
+        r = np.sum(r_1[:, 0], axis=0)
+        a_r = np.prod(r_1[:, 1], axis=0)  # a^-r
+        del r_1
+
+        f = b.sectype.frac_length
+        b, r = await self.gather(b, r)
+        c = await self.output(b.reshape(-1) + r)
+        c = c.value >> f
+        c = np.vectorize(int, otypes='O')(gmpy2.powmod_exp_list(a, c, p))  # a^(b+r)
+        c *= a_r
+        c <<= f  # a^b
+        return c.reshape(b.shape)
 
     def and_(self, a, b):
         """Secure bitwise and of a and b."""
@@ -4787,7 +4848,7 @@ class Runtime:
     @staticmethod
     @functools.cache
     def _taylor_log_degree(f):
-        """Required degree of Taylor polynomial for log x as a function of f."""
+        """Required degree of Taylor polynomial for log x as function of f."""
         # Degree k s.t. maximum error 1/(k+1) w^-(k+1) <= 2^-f,
         # that is, log2(k+1) + (k+1)log2(w) >= f, where w = 1/(sqrt(2) - 1).
         w = 1 / (math.sqrt(2) - 1)
@@ -4831,6 +4892,52 @@ class Runtime:
     def np_log10(self, a):
         """Secure elementwise base 10 logarithm of fixed-point array a."""
         return self.np_log(a) * math.log10(math.e)
+
+    @staticmethod
+    @functools.cache
+    def _taylor_exp2_degree(f):
+        """Required degree of Taylor polynomial for 2^x as function of f."""
+        log2ln2 = math.log2(math.log(2))
+        k = 1
+        log2factorial = 1  # invariant: log2factorial = log2 (k+1)!
+        while log2factorial - (k+1) * log2ln2 < f+1:
+            k += 1
+            log2factorial += math.log2(k + 1)
+        return k
+
+    def np_exp2(self, a):
+        """Compute 2^a, given secure fixed-point exponents a.
+
+        From survival analysis project with Noah van der Meer (github.com/noahmr).
+        """
+        shape = a.shape
+        if len(shape) != 1:
+            a = self.np_reshape(a, -1)
+        l = a.sectype.bit_length
+        f = a.sectype.frac_length
+        max_a_bit_length = f + (l-1 - f).bit_length() + 1  # 2^a <= 2^(l-1-f)
+        a_int = self.np_trunc(a, l=max_a_bit_length, f=f) << f  # integral part of a
+        a_int.integral = True
+        a_frac = a - a_int
+
+        # Taylor approximation of 2^a_frac using |a_frac|<1:
+        theta = self._taylor_exp2_degree(f)
+        y = a_frac * math.log(2)  # 2^a = exp(a log 2)
+        ys = np.vander(y, theta + 1, increasing=True)  # [y^0 y^1 ... y^theta]
+        i = np.arange(1, theta + 1)
+        coefficients = 1 / np.cumulative_prod(i, include_initial=True)  # [1/0! 1/1! ... 1/theta!]
+        c = ys @ coefficients  # 2^a_frac
+
+        a_int += 2**(l-1-f)  # ensure nonnegative a_int
+        c *= self.np_pow(2, a_int)  # * 2^a_int
+        c /= a.sectype.field(2)**(1<<(l-1-f))
+        if len(shape) != 1:
+            c = self.np_reshape(c, shape)
+        return c  # 2^a
+
+    def np_exp(self, a):
+        """Secure elementwise (natural) exponential function of a."""
+        return self.np_exp2(a * math.log2(math.e))
 
     def np_vander(self, a, N=None, increasing=False):
         """Securely generate Vandermonde matrix for given 1D array a.

@@ -59,12 +59,15 @@ if np:
             if op == operator.truediv:
                 return inputs[1].__rtruediv__(inputs[0])
 
+            if op == operator.pow:
+                return inputs[1].__rpow__(inputs[0])
+
             return op(inputs[1], inputs[0])
 
         if op := unary_ops.get(ufunc):
             return op(inputs[0])
 
-        if ufunc.__name__ in ('log', 'log2', 'log10'):
+        if ufunc.__name__ in ('log', 'log2', 'log10', 'exp', 'exp2'):
             if wrapped := not isinstance(inputs[0], SecureArray):
                 # wrap into 1D array
                 inputs = [runtime.np_fromlist(inputs)]
@@ -74,7 +77,7 @@ if np:
             raise TypeError(f'np.{ufunc.__name__} not supported for {type(self).__name__}')
 
         out = func(*inputs, **kwargs)
-        if ufunc.__name__ in ('log', 'log2', 'log10') and wrapped:
+        if ufunc.__name__ in ('log', 'log2', 'log10', 'exp', 'exp2') and wrapped:
             out = out[0]
         return out
 
@@ -1165,6 +1168,13 @@ class SecureArray(SecureObject):
             return NotImplemented
 
         return runtime.np_pow(self, other)
+
+    def __rpow__(self, other):
+        """Exponentiation (with reflected arguments) for secret exponent."""
+        if not isinstance(other, (int, float)):
+            return NotImplemented
+
+        return runtime.np_pow(other, self)
 
     def __matmul__(self, other):
         """Matrix multiplication."""
