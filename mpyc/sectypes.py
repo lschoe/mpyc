@@ -1162,15 +1162,15 @@ class SecureArray(SecureObject):
         return NotImplemented
 
     def __pow__(self, other):
-        """Exponentiation for public integral exponent."""
+        """Exponentiation for public exponent."""
         # TODO: extend to secret exponent
-        if not isinstance(other, int):  # TODO: extend to np.array
+        if not isinstance(other, (int, float)):  # TODO: extend to np.array
             return NotImplemented
 
         return runtime.np_pow(self, other)
 
     def __rpow__(self, other):
-        """Exponentiation (with reflected arguments) for secret exponent."""
+        """Exponentiation (with reflected arguments) for public base."""
         if not isinstance(other, (int, float)):
             return NotImplemented
 

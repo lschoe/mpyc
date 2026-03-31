@@ -402,6 +402,8 @@ class Arithmetic(unittest.TestCase):
         np.assertAlmostEqual(mpc.run(mpc.output(np.exp(c))), np.exp(a))
         np.assertAlmostEqual(mpc.run(mpc.output(np.exp2(c[0, 1]))), np.exp2(a[0, 1]))
         np.assertAlmostEqual(mpc.run(mpc.output(np.pow(10, c[0]))), np.pow(10, a[0]))
+        np.assertAlmostEqual(mpc.run(mpc.output(np.pow(abs(c), 0.5))), np.pow(abs(a), 0.5))
+        np.assertAlmostEqual(mpc.run(mpc.output(np.pow(abs(c), -4/3))), np.pow(abs(a), -4/3))
         np.assertAlmostEqual(mpc.run(mpc.output(np.power(1.2, c[1]))), np.power(1.2, a[1]))
 
         a = a.flatten()[:3]

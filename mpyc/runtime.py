@@ -1330,7 +1330,7 @@ class Runtime:
 
     def np_pow(self, a, b):
         """Secure elementwise exponentiation a to the power of b,
-        where either a is a public number or b is a public integer.
+        where either a or b is a public number.
         """
         # TODO: extend to a and b both nonscalar.
 
@@ -1347,7 +1347,12 @@ class Runtime:
                 b *= math.log2(a)  # convert to base 2, using a^b = 2^(b log_2 a)
             return self.np_exp2(b)
 
-        assert isinstance(b, int)
+        if isinstance(b, float):
+            if b.is_integer():
+                b = int(b)
+            else:
+                return self.np_exp2(self.np_log2(a) * b)  # NB: requires a>0
+
         if b == 254:  # addition chain for AES S-Box (11 multiplications in 9 rounds)
             d = a
             c = self.np_multiply(d, d)
