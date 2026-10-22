@@ -922,7 +922,7 @@ class FiniteFieldArray:
         modulus = field.modulus  # int or gfpx.Polynomial(0)
         if a.ndim < 2 or a.shape[-2] != a.shape[-1]:
             # Let Numpy generate error message by calling det[a] for dummy array a of given shape:
-            return np.linalg.det(np.empty(a.shape))
+            return np.linalg.det(np._dummy(a.shape))
 
         n = a.shape[-1]
         d = np.empty(a.size // n**2, dtype='O')
@@ -1024,7 +1024,7 @@ class FiniteFieldArray:
             np.broadcast_to(value, shape)  # raises if there is a mismatch
         except Exception:
             # Let Numpy generate error message using dummy arrays of given shapes:
-            np.empty(self.value.shape)[key] = np.empty(value.shape)
+            np._dummy(self.value.shape)[key] = np._dummy(value.shape)
 
         self.value.__setitem__(key, value)
 

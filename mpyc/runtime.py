@@ -1811,10 +1811,10 @@ class Runtime:
         a, b = await self.gather(a, b)
         if f:
             b >>= f
-        r = self._np_randoms(Zp, a.size, 1 << (l + k - 1)).reshape(*a.shape)
+        r = self._np_randoms(Zp, a.size, 1 << (l + k - 1))
         if self.options.no_prss:
-            r = (await r)[0]
-        r = r.value
+            r = await r
+        r = r.value.reshape(*a.shape)
         c = await self.output(a + ((1<<l) + (r << 1) + b.value))
         x = np.where(c.value & 1, 1 - b, b)  # xor
         if f:
@@ -2760,7 +2760,7 @@ class Runtime:
         except Exception as exc:  # IndexError
             logging.debug(f'Exception "{exc}" in Runtime.np_expand_dims for {a.shape=} {axis=}')
             # Let Numpy generate error message using dummy array:
-            np.expand_dims(np.empty(a.shape), axis)
+            np.expand_dims(np._dummy(a.shape), axis)
 
         if isinstance(a, self.SecureFixedPointArray):
             assert a.integral is not None
@@ -2861,7 +2861,7 @@ class Runtime:
             logging.debug(f'Exception "{exc}" in Runtime.np_diagonal for {a.shape=}'
                           '{offset=} {axis1=} {axis2=}')
             # Let Numpy generate error message using dummy array:
-            np.diagonal(np.empty(a.shape), offset=offset, axis1=axis1, axis2=axis2)
+            np.diagonal(np._dummy(a.shape), offset=offset, axis1=axis1, axis2=axis2)
 
         # Count all i, j with 0<=i<m, 0<=j<n, j=i+k, hence -k<=i<n-k with k=offset
         shape.append(max(min(m, n-offset) - max(0, -offset), 0))
@@ -2904,7 +2904,7 @@ class Runtime:
             logging.debug(f'Exception "{exc}" in Runtime.np_diagonal for {a.shape=}'
                           '{offset=} {axis1=} {axis2=}')
             # Let Numpy generate error message using dummy array:
-            np.trace(np.empty(a.shape), offset=offset, axis1=axis1, axis2=axis2)
+            np.trace(np._dummy(a.shape), offset=offset, axis1=axis1, axis2=axis2)
 
         # Count all i, j with 0<=i<m, 0<=j<n, j=i+k, hence -k<=i<n-k with k=offset
         shape = tuple(shape)
@@ -3022,7 +3022,9 @@ class Runtime:
         while not isinstance(a := arrays[i], self.SecureArray):
             i += 1
         shape = list(a.shape)
+        shape.append(None)  # needed if axis<0
         shape.insert(axis, len(arrays))
+        shape.pop()
         shape = tuple(shape)
         stype = type(a)
         if issubclass(stype, self.SecureFixedPointArray):
@@ -3156,6 +3158,7 @@ class Runtime:
         to (1,N,1). Rebuilds arrays divided by dsplit.
         """
         a = tup[0]
+        stype = type(a)
         if a.ndim == 1:
             shape = (1, a.shape[0], len(tup))
         elif a.ndim == 2:
@@ -3164,7 +3167,11 @@ class Runtime:
             shape = list(a.shape)
             shape[2] = sum(a.shape[2] for a in tup)
             shape = tuple(shape)
-        await self.returnType((type(a), shape))
+        if issubclass(stype, self.SecureFixedPointArray):
+            integral = all(a.integral if isinstance(a, stype) else stype(a).integral for a in tup)
+            await self.returnType((stype, integral, shape))
+        else:
+            await self.returnType((stype, shape))
         tup = await self.gather(tup)
         return np.dstack(tup)
 
@@ -3297,8 +3304,7 @@ class Runtime:
             rettype = (stype, a.shape)
         await self.returnType(rettype)
 
-        if not isinstance(shift, int):
-            assert isinstance(shift, stype.sectype)
+        if isinstance(shift, stype.sectype):
             assert a.ndim == 1
 
             @asyncoro.mpc_coro  # NB: with pc for _reshare() call
@@ -3333,7 +3339,8 @@ class Runtime:
 
         stype = type(a)
         shape = list(a.shape)
-        shape[axes[0]], shape[axes[1]] = shape[axes[1]], shape[axes[0]]
+        if k%2:
+            shape[axes[0]], shape[axes[1]] = shape[axes[1]], shape[axes[0]]
         shape = tuple(shape)
         if issubclass(stype, self.SecureFixedPointArray):
             rettype = (stype, a.integral, shape)

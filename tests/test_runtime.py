@@ -44,6 +44,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.concatenate((c, c, c)))), np.concatenate((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.concatenate((c, a, c), axis=None))),
                        np.concatenate((a, a, a), axis=None))
+        np.assertEqual(mpc.run(mpc.output(np.concatenate((c, a, c), axis=-2))),
+                       np.concatenate((a, a, a), axis=-2))
         np.assertEqual(mpc.run(mpc.output(np.concatenate((a, c)))), np.concatenate((a, a)))
         b = np.stack((a, a, a))
         d = np.stack((c, c, c))
@@ -59,7 +61,7 @@ class Arithmetic(unittest.TestCase):
                        np.convolve(a[0][0], (1, 2, 3)))
         np.assertEqual(mpc.run(mpc.output(np.convolve(c[0][0], range(5)))),
                        np.convolve(a[0][0], range(5)))
-        np.assertEqual(mpc.run(mpc.output(np.stack((c, c), axis=1))), np.stack((a, a), axis=1))
+        np.assertEqual(mpc.run(mpc.output(np.stack((c, c), axis=-3))), np.stack((a, a), axis=-3))
         np.assertEqual(mpc.run(mpc.output(np.block([[c, c], [c, c]]))), np.block([[a, a], [a, a]]))
         np.assertEqual(mpc.run(mpc.output(np.block([[secint(9), -1]]))), np.block([[9, -1]]))
         np.assertEqual(mpc.run(mpc.output(np.vstack((c, c, c)))), np.vstack((a, a, a)))
@@ -68,7 +70,8 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.dstack((c, c, c)))), np.dstack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.dstack((c[0], c[0])))), np.dstack((a[0], a[0])))
         np.assertEqual(mpc.run(mpc.output(np.dstack((c[0, 0],)))), np.dstack((a[0, 0],)))
-        np.assertEqual(mpc.run(mpc.output(np.column_stack((c, c, c)))), np.column_stack((a, a, a)))
+        np.assertEqual(mpc.run(mpc.output(np.column_stack((c[0], c[0])))),
+                       np.column_stack((a[0], a[0])))
         if np.lib.NumpyVersion(np.__version__) < '2.0.0b1':
             np.assertEqual(mpc.run(mpc.output(np.row_stack((c, c, c)))), np.row_stack((a, a, a)))
         np.assertEqual(mpc.run(mpc.output(np.split(c, 2, 1)[0])), np.split(a, 2, 1)[0])
@@ -103,7 +106,9 @@ class Arithmetic(unittest.TestCase):
         np.assertEqual(mpc.run(mpc.output(np.flipud(c))), np.flipud(a))
         np.assertEqual(mpc.run(mpc.output(np.rot90(c))), np.rot90(a))
         np.assertEqual(mpc.run(mpc.output(np.rot90(d))), np.rot90(b))
+        np.assertEqual(mpc.run(mpc.output(np.rot90(d, 2))), np.rot90(b, 2))
         self.assertEqual(np.rot90(d).shape, np.rot90(b).shape)
+        self.assertEqual(np.rot90(d, 2).shape, np.rot90(b, 2).shape)
         a1, a2 = a[:, :, 1], a[:, 0, :].reshape(2, 1)
         np.assertEqual(mpc.run(mpc.output(np.add(secint.array(a1), secint.array(a2)))), a1 + a2)
         np.assertEqual(mpc.run(mpc.output(a1 + secint.array(a[:, 0, :]).reshape(2, 1))), a1 + a2)
@@ -480,6 +485,9 @@ class Arithmetic(unittest.TestCase):
         self.assertEqual(np.vstack((c1, a2)).integral, False)
         self.assertEqual(np.vstack((c1, c1)).integral, False)
         self.assertEqual(np.vstack((c2, c2)).integral, True)
+        self.assertEqual(np.dstack((c1, a2)).integral, False)
+        self.assertEqual(np.dstack((c1, c1)).integral, False)
+        self.assertEqual(np.dstack((c2, c2)).integral, True)
         self.assertEqual(np.block([c1, c1]).integral, False)
         self.assertEqual(np.block([c2, c2]).integral, True)
         self.assertEqual(np.block([c1, c2]).integral, False)
@@ -640,6 +648,7 @@ class Arithmetic(unittest.TestCase):
             np.assertEqual(mpc.run(mpc.output(np.cumulative_sum(c, axis=0, include_initial=True))),
                            np.cumulative_sum(a, axis=0, include_initial=True))
         np.assertEqual(mpc.run(mpc.output(np.roll(c, 1))), np.roll(a, 1))
+        np.assertEqual(mpc.run(mpc.output(np.roll(c, (1, 2), (0, 1)))), np.roll(a, (1, 2), (0, 1)))
         self.assertEqual(len(c), 1)
         self.assertEqual(len(c.T), 2)
         self.assertTrue(bool(c))
@@ -651,6 +660,7 @@ class Arithmetic(unittest.TestCase):
     def test_np_errors(self):
         secfld = mpc.SecFld(2)
         c = secfld.array(np.array([[1, 1], [0, 0]]))
+        self.assertRaises(ValueError, np.matmul, c, c[:1])
         self.assertRaises(ValueError, c.reshape, -1, -1)
         self.assertRaises(ValueError, c.reshape, 3, -1)
         self.assertRaises(ValueError, np.rot90, c, 1, (1,))

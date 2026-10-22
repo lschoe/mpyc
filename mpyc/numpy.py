@@ -20,14 +20,23 @@ def _matmul_shape(shapeA, shapeB):
     None is returned for the shape if A and B are both 1D arrays,
     as A @ B is a scalar in this case, which has no shape.
 
-    Note that A @ B does not allow A and/or B to be 0-D arrays.
-    Incidentally, A @ B will never be a 0-D array either.
+    Note that A @ B does not allow A and/or B to be 0D arrays.
+    Incidentally, A @ B will never be a 0D array either.
     """
     if prepend1_A := len(shapeA) == 1:
         shapeA = (1,) + shapeA
     if append1_B := len(shapeB) == 1:
         shapeB = shapeB + (1,)
-    assert shapeA[-1] == shapeB[-2]
+    if shapeA[-1] != shapeB[-2]:
+        # restore original shapes
+        if prepend1_A:
+            shapeA = shapeA[1:]
+        if append1_B:
+            shapeB = shapeB[:1]
+        logging.debug(f'Exception in mpyc.numpy._matmul_shape for {shapeA=} and {shapeB=}')
+        # Let Numpy generate error message from matrix multiplication of dummy arrays:
+        _dummy(shapeA) @ _dummy(shapeB)
+
     shapeC = np.broadcast_shapes(shapeA[:-2], shapeB[:-2])
     if not prepend1_A:
         shapeC += (shapeA[-2],)
@@ -149,7 +158,15 @@ def _item_shape(shape, key):
     except Exception as exc:  # IndexError, ValueError, or other
         logging.debug(f'Exception "{exc}" in mpyc.numpy._item_shape for {shape=} {key=}')
         # Let Numpy generate error message by calling a[key] for dummy array a of given shape:
-        np.empty(shape)[key]
+        _dummy(shape)[key]
+
+
+def _dummy(shape):
+    """Return empty array of given shape.
+
+    Each entry contains one uninitialized byte.
+    """
+    return np.empty(shape, dtype=np.uint8)
 
 
 try:
@@ -160,6 +177,7 @@ try:
     logging.debug(f'Load NumPy version {np.__version__}')
     np._matmul_shape = _matmul_shape
     np._item_shape = _item_shape
+    np._dummy = _dummy
 
     if np.lib.NumpyVersion(np.__version__) < '1.24.0':
         logging.warning(f'NumPy {np.__version__} not (fully) supported. Upgrade to NumPy 1.24+.')
@@ -187,4 +205,5 @@ try:
 except ImportError:
     del _matmul_shape
     del _item_shape
+    del _dummy
     np = None
