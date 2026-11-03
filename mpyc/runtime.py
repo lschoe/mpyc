@@ -887,17 +887,17 @@ class Runtime:
             field = sftype.field
         else:
             field = sftype
-        field_relative_size = field.order.bit_length() // self.options.sec_param
+        field_relative_size = field.order.bit_length() // max(30, self.options.sec_param)
         if field_relative_size == 0 and self.options.no_prss:
             threshold = self.threshold  # will suffice due to reshare below
         else:
             threshold = 2 * self.threshold
 
-        if field_relative_size >= 2:  # large fields
+        if field_relative_size >= 1:  # large fields
             r = self._random(field)  # nonzero r with high probability
             if self.options.no_prss:
                 r = (await r)[0]
-        else:  # small and medium-sized fields
+        else:  # small fields
             while True:
                 r_s = self._randoms(field, 2)
                 if self.options.no_prss:
@@ -936,18 +936,18 @@ class Runtime:
             field = sftype.sectype.field
         else:
             field = sftype
-        field_relative_size = field.order.bit_length() // self.options.sec_param
+        field_relative_size = field.order.bit_length() // max(30, self.options.sec_param)
         if field_relative_size == 0 and self.options.no_prss:
             threshold = self.threshold  # will suffice due to reshare below
         else:
             threshold = 2 * self.threshold
 
         n = a.size
-        if field_relative_size >= 2:  # large fields
+        if field_relative_size >= 1:  # large fields
             r = self._np_randoms(field, n)  # nonzero r with high probability
             if self.options.no_prss:
                 r = await r
-        else:  # small and medium-sized fields
+        else:  # small fields
             while True:
                 r = self._np_randoms(field, n)
                 s = self._np_randoms(field, n)
