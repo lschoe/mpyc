@@ -887,13 +887,14 @@ class Runtime:
             field = sftype.field
         else:
             field = sftype
-        field_relative_size = field.order.bit_length() // max(30, self.options.sec_param)
-        if field_relative_size == 0 and self.options.no_prss:
+        if self.options.no_prss:
             threshold = self.threshold  # will suffice due to reshare below
         else:
+            m = len(self.parties)
+            prfs = self.prfs(field.order)
             threshold = 2 * self.threshold
 
-        if field_relative_size >= 1:  # large fields
+        if field.order.bit_length() >= max(30, self.options.sec_param):  # large fields
             r = self._random(field)  # nonzero r with high probability
             if self.options.no_prss:
                 r = (await r)[0]
@@ -904,27 +905,21 @@ class Runtime:
                     r_s = await r_s
                 r, s = r_s
                 rs = r * s
-                if field_relative_size == 0:  # small fields
-                    if self.options.no_prss:
-                        rs = await self._reshare(rs)
-                    else:
-                        m = len(self.parties)
-                        prfs = self.prfs(field.order)
-                        z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs,
-                                                            self._prss_uci(), 1)
-                        rs += z[0]
+                if self.options.no_prss:
+                    rs = await self._reshare(rs)
+                else:
+                    rs += thresha.pseudorandom_share_zero(field, m, self.pid, prfs,
+                                                          self._prss_uci(), 1)[0]
                 if await self.output(rs, threshold=threshold):
                     break  # nonzero r ensured because rs is nonzero
 
         if issubclass(sftype, self.SecureObject):
             a = await self.gather(a)
         b = a * r
-        if field_relative_size == 0:  # small fields
-            if self.options.no_prss:
-                b = await self._reshare(b)
-            else:
-                z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)
-                b += z[0]
+        if self.options.no_prss:
+            b = await self._reshare(b)
+        else:
+            b += thresha.pseudorandom_share_zero(field, m, self.pid, prfs, self._prss_uci(), 1)[0]
         c = await self.output(b, threshold=threshold)
         return c == 0
 
@@ -936,14 +931,15 @@ class Runtime:
             field = sftype.sectype.field
         else:
             field = sftype
-        field_relative_size = field.order.bit_length() // max(30, self.options.sec_param)
-        if field_relative_size == 0 and self.options.no_prss:
+        if self.options.no_prss:
             threshold = self.threshold  # will suffice due to reshare below
         else:
+            m = len(self.parties)
+            prfs = self.prfs(field.order)
             threshold = 2 * self.threshold
 
         n = a.size
-        if field_relative_size >= 1:  # large fields
+        if field.order.bit_length() >= max(30, self.options.sec_param):  # large fields
             r = self._np_randoms(field, n)  # nonzero r with high probability
             if self.options.no_prss:
                 r = await r
@@ -954,14 +950,11 @@ class Runtime:
                 if self.options.no_prss:
                     r, s = await self.gather(r, s)
                 rs = r * s
-                if field_relative_size == 0:  # small fields
-                    if self.options.no_prss:
-                        rs = await self._reshare(rs)
-                    else:
-                        m = len(self.parties)
-                        prfs = self.prfs(field.order)
-                        rs += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs,
-                                                              self._prss_uci(), n)
+                if self.options.no_prss:
+                    rs = await self._reshare(rs)
+                else:
+                    rs += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs,
+                                                          self._prss_uci(), n)
                 if np.all(await self.output(rs, threshold=threshold)):
                     break  # nonzero r ensured because rs is nonzero
                     # TODO: handle cases with low success probability (considering alternatives
@@ -975,11 +968,10 @@ class Runtime:
         if len(shape) > 1:
             a = a.reshape(-1)
         b = a * r
-        if field_relative_size == 0:  # small fields
-            if self.options.no_prss:
-                b = await self._reshare(b)
-            else:
-                b += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
+        if self.options.no_prss:
+            b = await self._reshare(b)
+        else:
+            b += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
         c = await self.output(b, threshold=threshold)
         if len(shape) > 1:
             c = c.reshape(shape)
@@ -1230,17 +1222,15 @@ class Runtime:
             if self.options.no_prss:
                 r = (await r)[0]
             ar = await self.gather(a) * r
-            threshold = 2 * self.threshold
-            if field.order.bit_length() < self.options.sec_param:  # TODO: use separate parameter
-                if self.options.no_prss:
-                    ar = await self._reshare(ar)
-                    threshold //= 2  # suffices due to reshare
-                else:
-                    m = len(self.parties)
-                    prfs = self.prfs(field.order)
-                    z = thresha.pseudorandom_share_zero(field, m, self.pid, prfs,
-                                                        self._prss_uci(), 1)
-                    ar += z[0]
+            if self.options.no_prss:
+                ar = await self._reshare(ar)
+                threshold = self.threshold
+            else:
+                m = len(self.parties)
+                prfs = self.prfs(field.order)
+                ar += thresha.pseudorandom_share_zero(field, m, self.pid, prfs,
+                                                      self._prss_uci(), 1)[0]
+                threshold = 2 * self.threshold
             ar = await self.output(ar, threshold=threshold)
             if ar:  # happens with probability 1 - 1/field.order, which is usually close to 1
                 break
@@ -1269,15 +1259,14 @@ class Runtime:
             a = await self.gather(a)
             a = a.reshape(-1)
         ar = a * r
-        threshold = 2 * self.threshold
-        if field.order.bit_length() < self.options.sec_param:  # TODO: use separate parameter
-            if self.options.no_prss:
-                ar = await self._reshare(ar)
-                threshold //= 2  # suffices due to reshare
-            else:
-                m = len(self.parties)
-                prfs = self.prfs(field.order)
-                ar += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
+        if self.options.no_prss:
+            ar = await self._reshare(ar)
+            threshold = self.threshold
+        else:
+            m = len(self.parties)
+            prfs = self.prfs(field.order)
+            ar += thresha.np_pseudorandom_share_0(field, m, self.pid, prfs, self._prss_uci(), n)
+            threshold = 2 * self.threshold
         ar = await self.output(ar, threshold=threshold)
         if np.count_nonzero(ar.value) < n:
             b = np.empty(n, dtype='O')
@@ -1488,7 +1477,17 @@ class Runtime:
         # -1 is nonsquare for Blum p, u[i] !=0 w.v.h.p.
         # If a == 0, c[i] is square mod p iff z[i] == 0.
         # If a != 0, c[i] is square mod p independent of z[i].
-        c = await self.output(c, threshold=2*self.threshold)
+        if self.options.no_prss:
+            c = await self._reshare(c)
+            threshold = self.threshold
+        else:
+            m = len(self.parties)
+            prfs = self.prfs(Zp.order)
+            s = thresha.pseudorandom_share_zero(Zp, m, self.pid, prfs, self._prss_uci(), k)
+            for i in range(k):
+                c[i] += s[i]
+            threshold = 2 * self.threshold
+        c = await self.output(c, threshold=threshold)
         for i in range(k):
             if c[i] == 0:
                 c[i] = Zp(1)
@@ -3617,7 +3616,16 @@ class Runtime:
         # -1 is nonsquare for Blum p, u2[i,j] !=0 w.v.h.p.
         # If a[j] == 0, c[i,j] is square mod p iff z[i,j] == 0.
         # If a[j] != 0, c[i,j] is square mod p independent of z[i,j].
-        c = await self.output(c, threshold=2*self.threshold)
+        if self.options.no_prss:
+            c = await self._reshare(c)
+            threshold = self.threshold
+        else:
+            m = len(self.parties)
+            prfs = self.prfs(Zp.order)
+            s = thresha.np_pseudorandom_share_0(Zp, m, self.pid, prfs, self._prss_uci(), k * n)
+            c += s.value.reshape((k, n))
+            threshold = 2 * self.threshold
+        c = await self.output(c, threshold=threshold)
         z = np.where(c.value == 0, 0, z)
         c = np.where(c.is_sqr(), 1 - z, z)
         del z

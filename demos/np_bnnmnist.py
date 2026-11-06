@@ -70,7 +70,8 @@ async def bsgn_0(a):
     y = await mpc._reshare(y)
     a = await mpc.gather(a)
     y = y * (2*a + 1).reshape(n)
-    y = await mpc.output(y, threshold=2*mpc.threshold)
+    y = await mpc._reshare(y)
+    y = await mpc.output(y)
     return (s * legendre_p(y.value)).reshape(a.shape)
 
 
@@ -108,7 +109,8 @@ async def bsgn_1(a):
     y = y + np.array([[-2], [0], [2]])  # y.shape = (3, n)
     y = np.append(y, [s[2]], axis=0)
     y = z * y
-    y = await mpc.output(y, threshold=2*mpc.threshold)
+    y = await mpc._reshare(y)
+    y = await mpc.output(y)
     y = y.value
     h = legendre_p(y[:3])
     t = (s[:3] * h).value
@@ -150,7 +152,7 @@ async def bsgn_2(a):
     y = y * z[:5]
     y = await mpc._reshare(y)
     y = np.append(y, [z[5]], axis=0)
-    y = await mpc.output(y, threshold=2*mpc.threshold)
+    y = await mpc.output(y)
     t = np.sum(s[:5] * legendre_p(y[:5].value), axis=0)
     t = await mpc.output(t * y[5])
     return (s[5] * legendre_p(t.value)).reshape(a.shape)
