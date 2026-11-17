@@ -641,7 +641,7 @@ class SecureHCDivisorCL(SecureFiniteGroup):
     def __init__(self, value=None):
         """Ensure all coefficients are secure polynomials.
 
-        Enforce value is a tuple.
+        Enforce value is a 6-tuple.
         """
         if value is None:
             value = (None,) * 6
@@ -685,8 +685,7 @@ class SecureHCDivisorCL(SecureFiniteGroup):
     @classmethod
     def decode(cls, M, Z):
         """Decode message from given group elements."""
-        gap = cls.group.gap
-        return (M[0] - Z[0]) / (2*gap)
+        return M[0]  # coefficient u1 contains message
 
 
 @asyncoro.mpc_coro

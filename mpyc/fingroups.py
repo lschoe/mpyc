@@ -1241,7 +1241,7 @@ class HyperellipticCurveDivisor(FiniteGroupElement):
         for i in range(gap):
             x_0 = field(i)
             ysquared_0 = cls.ysquared(-x_0)
-            if legendre(int(ysquared_0), modulus) == 1:
+            if legendre(int(ysquared_0), modulus) == 1:  # TODO: consider caching
                 x_m = field(m * gap + i)
                 ysquared_m = cls.ysquared(-x_m)
                 if legendre(int(ysquared_m), modulus) == 1:
@@ -1427,10 +1427,10 @@ class HCDivisorCL(HyperellipticCurveDivisor):
             if value[0]**2 != value[4] or value[0] * value[1] != value[5]:
                 raise ValueError('incorrect extended coordinates')
 
+        self.value = tuple(value)
+        if check:
             if (self.f - self.v**2) % self.u:
                 raise ValueError('value not in Jacobian')
-
-        self.value = tuple(value)
 
     @property
     def u(self):
@@ -1457,29 +1457,35 @@ class HCDivisorCL(HyperellipticCurveDivisor):
     def encode(cls, m):
         """Encode message m in terms of monic polynomial of divisor.
 
-        Divisor (u,v) with deg u=2, u(x)=(x+m)^2=x^2+2mx+m^2=0
-        and deg v=0, v(x)=y, where x=-m and y^2=f(x).
-        Hence, u[2]=1, u[1]=2m=-2x, u[0]=m^2, v[0]=yfor rational point (x,y).
+        Divisor (u,v) with deg u=2 and deg v=1.
+        Polynomial u(x)=(x+m+i)(x-i)=x^2+mx-i(m+i).
+        Polynomial v(x) through rational points (-m-i,sqrt(f(-m-i)) and (i,sqrt(f(i))).
+        Hence, u[2]=1, u[1]=m, u[0]=-i(m+i),
+        and v[1]=sqrt(f(-m-i)-sqrt(f(i)))/(-m-2i), v[0]=-v[1] i + sqrt(f(i)).
         """
         field = cls.field  # TODO: extend this to non-prime fields
         gap = cls.gap
         modulus = field.modulus
-        for i in range(gap):
+        for i in range(1, gap):
             x_0 = field(i)
-            ysquared_0 = cls.ysquared(-x_0)
-            if legendre(int(ysquared_0), modulus) == 1:
-                x_m = field(m * gap + i)
-                ysquared_m = cls.ysquared(-x_m)
+            ysquared_0 = cls.ysquared(x_0)
+            if legendre(int(ysquared_0), modulus) == 1:  # TODO: consider caching
+                x_m = field(-(m + i))
+                ysquared_m = cls.ysquared(x_m)
                 if legendre(int(ysquared_m), modulus) == 1:
-                    M = cls((2*x_m, x_m**2, field(0), ysquared_m.sqrt()), check=False)
-                    Z = cls((2*x_0, x_0**2, field(0), ysquared_0.sqrt()), check=False)
+                    u1 = field(m)
+                    u0 = x_m * x_0
+                    ysquared_0_sqrt = ysquared_0.sqrt()
+                    v1 = (ysquared_m.sqrt() - ysquared_0_sqrt) / (x_m - x_0)
+                    v0 = -v1 * x_0 + ysquared_0_sqrt
+                    M = cls((u1, u0, v1, v0), check=False)
+                    Z = cls.generator  # dummy value
                     return M, Z
 
     @classmethod
     def decode(cls, M, Z):
         """Decode message from given group elements."""
-        gap = cls.gap
-        return int((M.u[1] - Z.u[1]) / (2*gap))
+        return int(M.u[1])  # coefficient u1 contains message
 
     @classmethod
     def operation(cls, D1, D2, /):

@@ -154,10 +154,10 @@ async def main():
         secgrp = mpc.SecEllipticCurve('secp256k1', 'projective')
     elif args.group == 2:
         if args.no_public_output:
+            secgrp = mpc.SecHyperellipticCurve('kummer1271')
+        else:
             random.seed(a=1234, version=2)
             secgrp = mpc.SecHyperellipticCurve('DGS', l=32)
-        else:
-            secgrp = mpc.SecHyperellipticCurve('kummer1271')
     elif args.group == 3:
         secgrp = mpc.SecSchnorrGroup(l=1024)
     elif args.group == 4:

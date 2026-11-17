@@ -30,7 +30,7 @@ with log round complexity), random (securely mimicking Python’s random module)
 and statistics (securely mimicking Python’s statistics module).
 """
 
-__version__ = '0.11.3'
+__version__ = '0.11.4'
 
 import os
 import sys
